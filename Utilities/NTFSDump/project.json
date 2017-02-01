@@ -6,10 +6,10 @@
 
   "dependencies": {
     "DiscUtils.Common": "1.0.0-*",
-    "LordMike.DiscUtils": "0.12.1-alpha",
-    "LordMike.DiscUtils.Containers": "0.12.1-alpha",
-    "LordMike.DiscUtils.Ntfs": "0.12.1-alpha",
-    "LordMike.DiscUtils.Transports": "0.12.1-alpha"
+    "DiscUtils.Core": "0.12.1-alpha",
+    "DiscUtils.Containers": "0.12.1-alpha",
+    "DiscUtils.Ntfs": "0.12.1-alpha",
+    "DiscUtils.Transports": "0.12.1-alpha"
   },
 
   "frameworks": {

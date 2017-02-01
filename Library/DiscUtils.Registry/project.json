@@ -1,0 +1,46 @@
+﻿{
+  "version": "0.12.1-alpha",
+
+  "title": "DiscUtils.Registry",
+  "description": "DiscUtils Registry",
+  "authors": [ "Kenneth Bell", "LordMike" ],
+
+  "packOptions": {
+    "owners": [ "LordMike" ],
+    "tags": [ "DiscUtils", "Registry" ],
+    "projectUrl": "https://github.com/lordmike/discutils",
+    "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lordmike/discutils"
+    }
+  },
+
+  "dependencies": {
+    "DiscUtils.Core": "0.12.1-alpha"
+  },
+
+  "buildOptions": {
+    "publicSign": true,
+    "keyFile": "../../SigningKey.snk"
+  },
+
+  "frameworks": {
+    "netstandard1.5": {
+      "dependencies": {
+        "Microsoft.Win32.Registry": "4.0.0",
+        "Microsoft.Win32.Registry.AccessControl": "4.0.0"
+      },
+      "buildOptions": {
+        "define": [ "NETCORE" ]
+      }
+    },
+    "net20": {
+      "buildOptions": {
+        "define": [ "NET20" ]
+      }
+    },
+    "net40": {},
+    "net45": {}
+  }
+}

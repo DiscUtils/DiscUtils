@@ -1,0 +1,48 @@
+{
+  "version": "0.12.1-alpha",
+
+  "title": "DiscUtils.FileSystems",
+  "description": "DiscUtils, meta-package with filesystems",
+  "authors": [ "Kenneth Bell", "LordMike" ],
+
+  "packOptions": {
+    "owners": [ "LordMike" ],
+    "tags": [ "DiscUtils", "Filesystem", "NTFS", "ext", "Hfs+", "HfsPlus", "FAT" ],
+    "projectUrl": "https://github.com/lordmike/discutils",
+    "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lordmike/discutils"
+    }
+  },
+
+  "dependencies": {
+    "DiscUtils.Core": "0.12.1-alpha",
+    "DiscUtils.Ext": "0.12.1-alpha",
+    "DiscUtils.Fat": "0.12.1-alpha",
+    "DiscUtils.HfsPlus": "0.12.1-alpha",
+    "DiscUtils.Ntfs": "0.12.1-alpha",
+    "DiscUtils.OpticalDisk": "0.12.1-alpha",
+    "DiscUtils.SquashFs": "0.12.1-alpha"
+  },
+
+  "buildOptions": {
+    "publicSign": true,
+    "keyFile": "../../SigningKey.snk"
+  },
+
+  "frameworks": {
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [ "NETCORE" ]
+      }
+    },
+    "net20": {
+      "buildOptions": {
+        "define": [ "NET20" ]
+      }
+    },
+    "net40": {},
+    "net45": {}
+  }
+}

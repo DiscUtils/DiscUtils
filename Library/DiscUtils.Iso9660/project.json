@@ -1,0 +1,53 @@
+{
+  "version": "0.12.1-alpha",
+
+  "title": "DiscUtils.Iso9660",
+  "description": "DiscUtils Iso9660",
+  "authors": [ "Kenneth Bell", "LordMike" ],
+
+  "packOptions": {
+    "owners": [ "LordMike" ],
+    "tags": [ "DiscUtils", "Optical", "Iso9660" ],
+    "projectUrl": "https://github.com/lordmike/discutils",
+    "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lordmike/discutils"
+    }
+  },
+
+  "dependencies": {
+    "DiscUtils.Core": "0.12.1-alpha"
+  },
+
+  "buildOptions": {
+    "publicSign": true,
+    "keyFile": "../../SigningKey.snk"
+  },
+
+  "frameworks": {
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [ "NETCORE" ]
+      }
+    },
+    "net20": {
+      "frameworkAssemblies": {
+        "System.Xml": "2.0.0.0"
+      },
+      "buildOptions": {
+        "define": [ "NET20" ]
+      }
+    },
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Xml": "4.0.0.0"
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Xml": "4.0.0.0"
+      }
+    }
+  }
+}

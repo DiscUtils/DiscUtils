@@ -6,8 +6,8 @@
 
   "dependencies": {
     "DiscUtils.Common": "1.0.0-*",
-    "LordMike.DiscUtils": "0.12.1-alpha",
-    "LordMike.DiscUtils.Vhd": "0.12.1-alpha"
+    "DiscUtils.Core": "0.12.1-alpha",
+    "DiscUtils.Vhd": "0.12.1-alpha"
   },
 
   "frameworks": {

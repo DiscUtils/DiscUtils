@@ -1,0 +1,43 @@
+{
+  "version": "0.12.1-alpha",
+
+  "title": "DiscUtils.Udf",
+  "description": "DiscUtils UDF filesystem parser.",
+  "authors": [ "Kenneth Bell", "LordMike" ],
+
+  "packOptions": {
+    "owners": [ "LordMike" ],
+    "tags": [ "DiscUtils", "Filesystem", "UDF" ],
+    "projectUrl": "https://github.com/lordmike/discutils",
+    "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lordmike/discutils"
+    }
+  },
+
+  "dependencies": {
+    "DiscUtils.Core": "0.12.1-alpha",
+    "DiscUtils.Iso9660": "0.12.1-alpha"
+  },
+
+  "buildOptions": {
+    "publicSign": true,
+    "keyFile": "../../SigningKey.snk"
+  },
+
+  "frameworks": {
+    "netstandard1.5": {
+      "buildOptions": {
+        "define": [ "NETCORE" ]
+      }
+    },
+    "net20": {
+      "buildOptions": {
+        "define": [ "NET20" ]
+      }
+    },
+    "net40": {},
+    "net45": {}
+  }
+}

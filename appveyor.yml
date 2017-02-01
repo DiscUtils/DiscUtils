@@ -1,6 +1,6 @@
 build_script:
 - ps: >-
-    $version = (Get-Content .\Library\LordMike.DiscUtils\project.json | ConvertFrom-Json).version
+    $version = (Get-Content .\Library\DiscUtils.Core\project.json | ConvertFrom-Json).version
 
     Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
 - ps: >-
@@ -10,59 +10,59 @@ build_script:
 - ps: >-
     # Library
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.BootConfig
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.BootConfig
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Complete
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Core
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Containers
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Containers
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Dmg
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Dmg
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Ext
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ext
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Fat
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Fat
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.FileSystems
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.FileSystems
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.HfsPlus
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.HfsPlus
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Iscsi
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iscsi
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Iso9660
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iso9660
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Net
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Net
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Nfs
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Nfs
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Ntfs
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ntfs
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.OpticalDiscSharing
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDiscSharing
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.OpticalDisk
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDisk
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Registry
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Registry
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Sdi
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Sdi
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.SquashFs
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.SquashFs
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Transports
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Transports
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Udf
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Udf
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Vdi
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vdi
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Vhd
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhd
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Vhdx
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhdx
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Vmdk
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vmdk
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Wim
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Wim
 
-    dotnet pack -c Release -o Nuget\ Library\LordMike.DiscUtils.Xva
+    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Xva
 - ps: >-
     # Utilities
 

@@ -6,11 +6,11 @@
 
   "dependencies": {
     "DiscUtils.Common": "1.0.0-*",
-    "LordMike.DiscUtils": "0.12.1-alpha",
-    "LordMike.DiscUtils.BootConfig": "0.12.1-alpha",
-    "LordMike.DiscUtils.Ntfs": "0.12.1-alpha",
-    "LordMike.DiscUtils.Registry": "0.12.1-alpha",
-    "LordMike.DiscUtils.Vhd": "0.12.1-alpha"
+    "DiscUtils.Core": "0.12.1-alpha",
+    "DiscUtils.BootConfig": "0.12.1-alpha",
+    "DiscUtils.Ntfs": "0.12.1-alpha",
+    "DiscUtils.Registry": "0.12.1-alpha",
+    "DiscUtils.Vhd": "0.12.1-alpha"
   },
 
   "frameworks": {
