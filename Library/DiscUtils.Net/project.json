@@ -6,13 +6,13 @@
   "authors": [ "Kenneth Bell", "LordMike" ],
 
   "packOptions": {
-    "owners": [ "LordMike" ],
+    "owners": [ "LordMike", "qmfrederik" ],
     "tags": [ "DiscUtils", "NET", "DNS" ],
-    "projectUrl": "https://github.com/lordmike/discutils",
-    "licenseUrl": "https://github.com/lordmike/discutils/blob/master/LICENSE.txt",
+    "projectUrl": "https://github.com/DiscUtils/DiscUtils",
+    "licenseUrl": "https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt",
     "repository": {
       "type": "git",
-      "url": "https://github.com/lordmike/discutils"
+      "url": "https://github.com/DiscUtils/DiscUtils"
     }
   },
 
