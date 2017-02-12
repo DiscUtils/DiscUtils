@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "0.12.1-alpha",
 
   "title": "DiscUtils.Containers",
@@ -19,6 +19,7 @@
   "dependencies": {
     "DiscUtils.Core": "0.12.1-alpha",
     "DiscUtils.Dmg": "0.12.1-alpha",
+    "DiscUtils.Ewf": "0.12.1-alpha",
     "DiscUtils.Iso9660": "0.12.1-alpha",
     "DiscUtils.Vhd": "0.12.1-alpha",
     "DiscUtils.Vhdx": "0.12.1-alpha",
