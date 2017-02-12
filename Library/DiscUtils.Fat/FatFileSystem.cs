@@ -1414,7 +1414,7 @@ namespace DiscUtils.Fat
         {
             uint numClusters = sectors / sectorsPerCluster;
             uint fatBytes = numClusters * (ushort)fatType / 8;
-            return (fatBytes + Utilities.SectorSize - 1) / Utilities.SectorSize;
+            return (fatBytes + Sizes.Sector - 1) / Sizes.Sector;
         }
 
         private static void WriteBS(byte[] bootSector, int offset, bool isFloppy, uint volId, string label,
@@ -1708,7 +1708,7 @@ namespace DiscUtils.Fat
 
             // Write both FAT copies
             uint fatSize = CalcFatSize(sectors, FatType.Fat12, 1);
-            byte[] fat = new byte[fatSize * Utilities.SectorSize];
+            byte[] fat = new byte[fatSize * Sizes.Sector];
             FatBuffer fatBuffer = new FatBuffer(FatType.Fat12, fat);
             fatBuffer.SetNext(0, 0xFFFFFFF0);
             fatBuffer.SetEndOfChain(1);
@@ -1716,13 +1716,13 @@ namespace DiscUtils.Fat
             stream.Write(fat, 0, fat.Length);
 
             // Write the (empty) root directory
-            uint rootDirSectors = (224 * 32 + Utilities.SectorSize - 1) / Utilities.SectorSize;
-            byte[] rootDir = new byte[rootDirSectors * Utilities.SectorSize];
+            uint rootDirSectors = (224 * 32 + Sizes.Sector - 1) / Sizes.Sector;
+            byte[] rootDir = new byte[rootDirSectors * Sizes.Sector];
             stream.Write(rootDir, 0, rootDir.Length);
 
             // Write a single byte at the end of the disk to ensure the stream is at least as big
             // as needed for this disk image.
-            stream.Position = pos + sectors * Utilities.SectorSize - 1;
+            stream.Position = pos + sectors * Sizes.Sector - 1;
             stream.WriteByte(0);
 
             // Give the caller access to the new file system
@@ -1852,13 +1852,13 @@ namespace DiscUtils.Fat
              * Skip the reserved sectors
              */
 
-            stream.Position = pos + (ushort)reservedSectors * Utilities.SectorSize;
+            stream.Position = pos + (ushort)reservedSectors * Sizes.Sector;
 
             /*
              * Write both FAT copies
              */
 
-            byte[] fat = new byte[CalcFatSize((uint)sectorCount, fatType, sectorsPerCluster) * Utilities.SectorSize];
+            byte[] fat = new byte[CalcFatSize((uint)sectorCount, fatType, sectorsPerCluster) * Sizes.Sector];
             FatBuffer fatBuffer = new FatBuffer(fatType, fat);
             fatBuffer.SetNext(0, 0xFFFFFFF8);
             fatBuffer.SetEndOfChain(1);
@@ -1879,23 +1879,23 @@ namespace DiscUtils.Fat
             uint rootDirSectors;
             if (fatType < FatType.Fat32)
             {
-                rootDirSectors = (uint)((maxRootEntries * 32 + Utilities.SectorSize - 1) / Utilities.SectorSize);
+                rootDirSectors = (uint)((maxRootEntries * 32 + Sizes.Sector - 1) / Sizes.Sector);
             }
             else
             {
                 rootDirSectors = sectorsPerCluster;
             }
 
-            byte[] rootDir = new byte[rootDirSectors * Utilities.SectorSize];
+            byte[] rootDir = new byte[rootDirSectors * Sizes.Sector];
             stream.Write(rootDir, 0, rootDir.Length);
 
             /*
              * Make sure the stream is at least as large as the partition requires.
              */
 
-            if (stream.Length < pos + sectorCount * Utilities.SectorSize)
+            if (stream.Length < pos + sectorCount * Sizes.Sector)
             {
-                stream.SetLength(pos + sectorCount * Utilities.SectorSize);
+                stream.SetLength(pos + sectorCount * Sizes.Sector);
             }
 
             /*

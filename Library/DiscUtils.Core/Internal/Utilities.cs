@@ -31,11 +31,6 @@ namespace DiscUtils.Internal
     internal static class Utilities
     {
         /// <summary>
-        /// The number of bytes in a standard disk sector (512).
-        /// </summary>
-        internal const int SectorSize = Sizes.Sector;
-
-        /// <summary>
         /// The Epoch common to most (all?) Unix systems.
         /// </summary>
         internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1);
@@ -910,7 +905,7 @@ namespace DiscUtils.Internal
         /// <returns>The sector data as a byte array.</returns>
         public static byte[] ReadSector(Stream stream)
         {
-            return ReadFully(stream, SectorSize);
+            return ReadFully(stream, Sizes.Sector);
         }
 
         /// <summary>
