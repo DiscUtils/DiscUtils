@@ -20,6 +20,7 @@
     "DiscUtils.Core": "0.12.1-alpha",
     "DiscUtils.BootConfig": "0.12.1-alpha",
     "DiscUtils.Dmg": "0.12.1-alpha",
+	"DiscUtils.Ewf": "0.12.1-alpha",
     "DiscUtils.Ext": "0.12.1-alpha",
     "DiscUtils.Fat": "0.12.1-alpha",
     "DiscUtils.HfsPlus": "0.12.1-alpha",
