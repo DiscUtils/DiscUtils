@@ -529,7 +529,7 @@ namespace DiscUtils.Vfs
 
             TDirEntry dirEntry = GetDirectoryEntry(path);
 
-            if (dirEntry.IsSymlink)
+            if (dirEntry != null && dirEntry.IsSymlink)
             {
                 dirEntry = ResolveSymlink(dirEntry, path);
             }
