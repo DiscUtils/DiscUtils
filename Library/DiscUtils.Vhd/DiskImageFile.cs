@@ -487,9 +487,9 @@ namespace DiscUtils.Vhd
             Footer footer = new Footer(geometry, capacity, FileType.Fixed);
             footer.UpdateChecksum();
 
-            byte[] sector = new byte[Utilities.SectorSize];
+            byte[] sector = new byte[Sizes.Sector];
             footer.ToBytes(sector, 0);
-            stream.Position = Utilities.RoundUp(capacity, Utilities.SectorSize);
+            stream.Position = Utilities.RoundUp(capacity, Sizes.Sector);
             stream.Write(sector, 0, sector.Length);
             stream.SetLength(stream.Position);
 
@@ -519,8 +519,8 @@ namespace DiscUtils.Vhd
             byte[] dynamicHeaderBlock = new byte[1024];
             dynamicHeader.ToBytes(dynamicHeaderBlock, 0);
 
-            int batSize = (dynamicHeader.MaxTableEntries * 4 + Utilities.SectorSize - 1) / Utilities.SectorSize *
-                          Utilities.SectorSize;
+            int batSize = (dynamicHeader.MaxTableEntries * 4 + Sizes.Sector - 1) / Sizes.Sector *
+                          Sizes.Sector;
             byte[] bat = new byte[batSize];
             for (int i = 0; i < bat.Length; ++i)
             {
@@ -551,8 +551,8 @@ namespace DiscUtils.Vhd
                 : parent._dynamicHeader.BlockSize;
 
             DynamicHeader dynamicHeader = new DynamicHeader(-1, tableOffset, blockSize, footer.CurrentSize);
-            int batSize = (dynamicHeader.MaxTableEntries * 4 + Utilities.SectorSize - 1) / Utilities.SectorSize *
-                          Utilities.SectorSize;
+            int batSize = (dynamicHeader.MaxTableEntries * 4 + Sizes.Sector - 1) / Sizes.Sector *
+                          Sizes.Sector;
             dynamicHeader.ParentUniqueId = parent.UniqueId;
             dynamicHeader.ParentTimestamp = parentModificationTimeUtc;
             dynamicHeader.ParentUnicodeName = Utilities.GetFileFromPath(parentAbsolutePath);
@@ -644,8 +644,8 @@ namespace DiscUtils.Vhd
 
         private void ReadFooter(bool fallbackToFront)
         {
-            _fileStream.Position = _fileStream.Length - Utilities.SectorSize;
-            byte[] sector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+            _fileStream.Position = _fileStream.Length - Sizes.Sector;
+            byte[] sector = Utilities.ReadFully(_fileStream, Sizes.Sector);
 
             _footer = Footer.FromBytes(sector, 0);
 
@@ -657,7 +657,7 @@ namespace DiscUtils.Vhd
                 }
 
                 _fileStream.Position = 0;
-                Utilities.ReadFully(_fileStream, sector, 0, Utilities.SectorSize);
+                Utilities.ReadFully(_fileStream, sector, 0, Sizes.Sector);
 
                 _footer = Footer.FromBytes(sector, 0);
                 if (!_footer.IsValid())

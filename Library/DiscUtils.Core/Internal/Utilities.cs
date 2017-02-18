@@ -31,11 +31,6 @@ namespace DiscUtils.Internal
     internal static class Utilities
     {
         /// <summary>
-        /// The number of bytes in a standard disk sector (512).
-        /// </summary>
-        internal const int SectorSize = Sizes.Sector;
-
-        /// <summary>
         /// The Epoch common to most (all?) Unix systems.
         /// </summary>
         internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1);
@@ -307,9 +302,19 @@ namespace DiscUtils.Internal
                 return false;
             }
 
-            for (int i = 0; i < a.Length; ++i)
+            return Utilities.AreEqual(a, 0, b, 0, a.Length);
+        }
+
+        public static bool AreEqual(byte[] aBytes, int aStartIndex, byte[] bBytes, int bStartIndex, int length)
+        {
+            if (aStartIndex + length > aBytes.Length || bStartIndex + length > bBytes.Length)
             {
-                if (a[i] != b[i])
+                return false;
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                if (aBytes[i + aStartIndex] != bBytes[i + bStartIndex])
                 {
                     return false;
                 }
@@ -910,7 +915,7 @@ namespace DiscUtils.Internal
         /// <returns>The sector data as a byte array.</returns>
         public static byte[] ReadSector(Stream stream)
         {
-            return ReadFully(stream, SectorSize);
+            return ReadFully(stream, Sizes.Sector);
         }
 
         /// <summary>
