@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace DiscUtils.Ewf
@@ -31,26 +30,6 @@ namespace DiscUtils.Ewf
     /// </summary>
     public static class Utils
     {
-        /// <summary>
-        /// Helper method to see if two byte arrays (or parts thereof) are the same.
-        /// </summary>
-        /// <param name="one">The first byte array.</param>
-        /// <param name="oneStartIndex">The offset in the first array from where comparison will start.</param>
-        /// <param name="two">The second byte array.</param>
-        /// <param name="twoStartIndex">The offset in the second array from where comparison will start.</param>
-        /// <param name="length">The number of bytes to compare.</param>
-        /// <returns>trur if the arrays (or specified parts) contain the same values.</returns>
-        public static bool CompareByteArrays(byte[] one, int oneStartIndex, byte[] two, int twoStartIndex, int length)
-        {
-            for (int i = oneStartIndex; i < length; i++)
-            {
-                if (one[i] != two[i + twoStartIndex])
-                    return false;
-            }
-
-            return true;
-        }
-
         /// <summary>
         /// Calculates what the next segment file name after current.
         /// </summary>
@@ -84,7 +63,7 @@ namespace DiscUtils.Ewf
                     {
                         if (ext[0] == 'Z')
                         {
-                            throw new ArgumentException("cannot calculate filename after .ZZZ");
+                            throw new ArgumentException("Cannot calculate filename after .ZZZ");
                         }
                         else
                         {
@@ -128,17 +107,24 @@ namespace DiscUtils.Ewf
         public static string ByteArrayToByteString(byte[] bytes, int offset, int length, bool incSpace)
         {
             StringBuilder sb = new StringBuilder();
+
             if (incSpace)
             {
                 for (int i = 0; i < length; i++)
+                {
                     sb.AppendFormat("{0:X2} ", bytes[offset + i]);
+                }
+
                 sb.Remove(sb.Length - 1, 1);
             }
             else
             {
                 for (int i = 0; i < length; i++)
+                {
                     sb.AppendFormat("{0:X2}", bytes[offset + i]);
+                }
             }
+
             return sb.ToString();
         }
     }

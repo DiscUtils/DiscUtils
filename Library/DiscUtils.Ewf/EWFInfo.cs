@@ -63,32 +63,32 @@ namespace DiscUtils.Ewf
 
                 while (fs.Position < fs.Length)
                 {
-                    buff = new byte[76];
-                    fs.Read(buff, 0, 76);
-                    SectionDescriptor sd = new SectionDescriptor(buff, fs.Position - 76);
+                    buff = new byte[SectionDescriptor.SECTION_DESCRIPTOR_SIZE];
+                    fs.Read(buff, 0, SectionDescriptor.SECTION_DESCRIPTOR_SIZE);
+                    SectionDescriptor sd = new SectionDescriptor(buff, fs.Position - SectionDescriptor.SECTION_DESCRIPTOR_SIZE);
 
                     switch (sd.SectionType)
                     {
-                        case SECTION_TYPE.header:
-                        case SECTION_TYPE.header2:
+                        case SectionType.Header:
+                        case SectionType.Header2:
                             // Save the header
                             buff = new byte[sd.NextSectionOffset - fs.Position];
                             fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
                             HeaderSection = new Section.Header2(buff);
                             break;
 
-                        case SECTION_TYPE.volume:
-                        case SECTION_TYPE.disk:
-                        case SECTION_TYPE.data:
+                        case SectionType.Volume:
+                        case SectionType.Disk:
+                        case SectionType.Data:
                             // Save the volume
                             buff = new byte[sd.NextSectionOffset - fs.Position];
                             fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
                             VolumeSection = new Section.Volume(buff);
                             break;
 
-                        case SECTION_TYPE.next:
-                        case SECTION_TYPE.done:
-                            fs.Seek(76, SeekOrigin.Current);
+                        case SectionType.Next:
+                        case SectionType.Done:
+                            fs.Seek(SectionDescriptor.SECTION_DESCRIPTOR_SIZE, SeekOrigin.Current);
                             break;
 
                         default:
@@ -97,12 +97,16 @@ namespace DiscUtils.Ewf
                     }
 
                     if (HeaderSection != null && VolumeSection != null)
+                    {
                         break;
+                    }
                 }
             }
 
             if (HeaderSection == null || VolumeSection == null)
-                throw new Exception("file missing header or volume section");
+            {
+                throw new Exception("File missing header or volume section");
+            }
         }
     }
 }

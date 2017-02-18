@@ -302,9 +302,19 @@ namespace DiscUtils.Internal
                 return false;
             }
 
-            for (int i = 0; i < a.Length; ++i)
+            return Utilities.AreEqual(a, 0, b, 0, a.Length);
+        }
+
+        public static bool AreEqual(byte[] aBytes, int aStartIndex, byte[] bBytes, int bStartIndex, int length)
+        {
+            if (aStartIndex + length > aBytes.Length || bStartIndex + length > bBytes.Length)
             {
-                if (a[i] != b[i])
+                return false;
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                if (aBytes[i + aStartIndex] != bBytes[i + bStartIndex])
                 {
                     return false;
                 }

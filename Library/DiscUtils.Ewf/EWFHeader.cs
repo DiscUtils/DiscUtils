@@ -21,6 +21,7 @@
 //
 
 using System;
+using DiscUtils.Internal;
 
 namespace DiscUtils.Ewf
 {
@@ -76,23 +77,33 @@ namespace DiscUtils.Ewf
         public EWFHeader(byte[] bytes)
         {
             if (bytes.Length != HEADER_SIZE)
-                throw new ArgumentException("number of bytes in header must be " + HEADER_SIZE, "byte");
+            {
+                throw new ArgumentException("Number of bytes in header must be " + HEADER_SIZE, "byte");
+            }
 
-            ValidCookie = Utils.CompareByteArrays(bytes, 0, COOKIE, 0, 8);
+            ValidCookie = Utilities.AreEqual(bytes, 0, COOKIE, 0, 8);
             if (!ValidCookie)
-                throw new ArgumentException("invalid EWF signature");
+            {
+                throw new ArgumentException("Invalid EWF signature");
+            }
 
             ValidSOF = (bytes[8] == SOF);
             if (!ValidSOF)
-                throw new ArgumentException("invalid StartOfFields marker");
+            {
+                throw new ArgumentException("Invalid StartOfFields marker");
+            }
 
             SegmentNumber = BitConverter.ToInt16(bytes, 9);
             if (SegmentNumber < 1)
-                throw new ArgumentException("invalid segment number, cannot be less that 1");
+            {
+                throw new ArgumentException("Invalid segment number, cannot be less that 1");
+            }
 
             ValidEOF = (BitConverter.ToInt16(bytes, 11) == EOF);
             if (!ValidEOF)
-                throw new ArgumentException("invalid EndOfFields marker");
+            {
+                throw new ArgumentException("Invalid EndOfFields marker");
+            }
         }
     }
 }

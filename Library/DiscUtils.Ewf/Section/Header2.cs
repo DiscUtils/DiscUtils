@@ -22,6 +22,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Ewf.Section
@@ -47,19 +49,20 @@ namespace DiscUtils.Ewf.Section
             #region Decompress zlib'd data
             {
                 byte[] buff = new byte[1024];
-                using (System.IO.MemoryStream ms = new System.IO.MemoryStream(bytes))
+                using (MemoryStream ms = new MemoryStream(bytes))
                 {
-                    using (Compression.ZlibStream zs = new Compression.ZlibStream(ms, System.IO.Compression.CompressionMode.Decompress, false))
+                    using (DiscUtils.Compression.ZlibStream zs = new DiscUtils.Compression.ZlibStream(ms, System.IO.Compression.CompressionMode.Decompress, false))
                     {
-                        using (System.IO.MemoryStream decomp = new System.IO.MemoryStream())
+                        using (MemoryStream decomp = new MemoryStream())
                         {
                             int n;
                             while ((n = zs.Read(buff, 0, buff.Length)) != 0)
                             {
                                 decomp.Write(buff, 0, n);
                             }
-                            decomp.Seek(0, System.IO.SeekOrigin.Begin);
-                            System.IO.StreamReader sr = new System.IO.StreamReader(decomp, System.Text.Encoding.UTF8);
+
+                            decomp.Seek(0, SeekOrigin.Begin);
+                            StreamReader sr = new StreamReader(decomp, Encoding.UTF8);
                             header = sr.ReadToEnd();
                         }
                     }
@@ -75,28 +78,43 @@ namespace DiscUtils.Ewf.Section
             if (catsCount == 1) // EnCase 4
             {
                 for (int i = 0; i < parts.Length; i++) // Header seems to have 0x0A on the end
+                {
                     parts[i] = parts[i].TrimEnd('\r');
+                }
+
                 if (parts[1] != "main")
+                {
                     throw new ArgumentException(string.Format("unexpected category: {0}", parts[1]));
+                }
+
                 Categories.Add(new Header2Category("main", parts[2], parts[3]));
             }
             else if (catsCount == 3) // EnCase 5-7
             {
                 if (parts[1] != "main")
-                    throw new ArgumentException(string.Format("unexpected category: {0}", parts[1]));
+                {
+                    throw new ArgumentException(string.Format("Unexpected category: {0}", parts[1]));
+                }
+
                 Categories.Add(new Header2Category("main", parts[2], parts[3]));
 
                 if (parts[5] != "srce")
-                    throw new ArgumentException(string.Format("unexpected category: {0}", parts[5]));
+                {
+                    throw new ArgumentException(string.Format("Unexpected category: {0}", parts[5]));
+                }
+
                 Categories.Add(new Header2Category("srce", parts[7], parts[9]));
 
                 if (parts[11] != "sub")
-                    throw new ArgumentException(string.Format("unexpected category: {0}", parts[13]));
+                {
+                    throw new ArgumentException(string.Format("Unexpected category: {0}", parts[13]));
+                }
+
                 Categories.Add(new Header2Category("sub", parts[13], parts[15]));
             }
             else
             {
-                throw new ArgumentException(string.Format("unknown category layout ({0} categories)", catsCount));
+                throw new ArgumentException(string.Format("Unknown category layout ({0} categories)", catsCount));
             }
         }
 
@@ -131,7 +149,7 @@ namespace DiscUtils.Ewf.Section
                 for (int i = 0; i < ids.Length; i++)
                 {
                     bool isDate;
-                    string lookup = headerCodeLookup(ids[i], out isDate);
+                    string lookup = HeaderCodeLookup(ids[i], out isDate);
                     string val = values[i];
 
                     if (isDate)
@@ -149,7 +167,10 @@ namespace DiscUtils.Ewf.Section
                                 {
                                     int[] intParts = new int[6];
                                     for (int ip = 0; ip < 6; ip++)
+                                    {
                                         intParts[ip] = int.Parse(dateParts[ip]);
+                                    }
+
                                     val = new DateTime(intParts[0], intParts[1], intParts[2], intParts[3], intParts[4], intParts[5]).ToString();
                                 }
                             }
@@ -162,7 +183,7 @@ namespace DiscUtils.Ewf.Section
                 }
             }
 
-            private string headerCodeLookup(string code, out bool isDate)
+            private string HeaderCodeLookup(string code, out bool isDate)
             {
                 isDate = false;
                 string result = code;

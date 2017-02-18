@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Compression;
 
 namespace DiscUtils.Ewf
 {
@@ -41,7 +42,7 @@ namespace DiscUtils.Ewf
         public EWFStream(string fileName)
         {
             DiskType = VirtualDiskClass.None; // Set a default
-            Sections = new Dictionary<string, object>();
+            Sections = new Dictionary<SectionType, object>();
             Files = new List<string>();
 
             Files.Add(fileName);
@@ -49,10 +50,10 @@ namespace DiscUtils.Ewf
             ResolveFileChain();
             PopulateChunkInfo();
 
-            _currentChunk = getChunk(0, out _currentChunkIndex);
+            _currentChunk = GetChunk(0, out _currentChunkIndex);
         }
 
-        private Dictionary<string, object> Sections { get; set; }
+        private Dictionary<SectionType, object> Sections { get; set; }
 
         /// <summary>
         /// Gets the specified section as read from the E01 file.
@@ -61,7 +62,8 @@ namespace DiscUtils.Ewf
         /// <returns>The section object or null if section not found.</returns>
         public object GetSection(string SectionName)
         {
-            return Sections.ContainsKey(SectionName) ? Sections[SectionName] : null;
+            SectionType section = (SectionType)Enum.Parse(typeof(SectionType), SectionName, true);
+            return Sections.ContainsKey(section) ? Sections[section] : null;
         }
 
         /// <summary>
@@ -70,6 +72,8 @@ namespace DiscUtils.Ewf
         public List<string> Files { get; private set; }
 
         public string MD5 { get; private set; }
+
+        public string SHA1 { get; private set; }
 
         public VirtualDiskClass DiskType { get; private set; }
 
@@ -140,9 +144,9 @@ namespace DiscUtils.Ewf
         /// <param name="start">The position in the stream for which bytes are wanted.</param>
         /// <param name="currentChunkIndex">Stores the index of the chunk.</param>
         /// <returns>byte array containing the bytes of the chunk.</returns>
-        private byte[] getChunk(long start, out int currentChunkIndex)
+        private byte[] GetChunk(long start, out int currentChunkIndex)
         {
-            currentChunkIndex = mapRequestToChunkInfo(start, out _currentChunkPointer);
+            currentChunkIndex = MapRequestToChunkInfo(start, out _currentChunkPointer);
 
             byte[] buff = new byte[_chunkInfos[currentChunkIndex].BytesInChunk];
             byte[] emulatedBytes = new byte[_bytesPerChunk];
@@ -156,7 +160,7 @@ namespace DiscUtils.Ewf
                 {
                     using (MemoryStream ms = new MemoryStream(buff, false)) // ...decompress...
                     {
-                        DiscUtils.Compression.ZlibStream zlib = new Compression.ZlibStream(ms, System.IO.Compression.CompressionMode.Decompress, true);
+                        ZlibStream zlib = new ZlibStream(ms, System.IO.Compression.CompressionMode.Decompress, true);
                         zlib.Read(emulatedBytes, 0, _bytesPerChunk);
                     }
                 }
@@ -172,13 +176,19 @@ namespace DiscUtils.Ewf
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (count == 0 || Position == _length)
+            {
                 return 0;
+            }
 
             if (count < 0)
-                throw new ArgumentException("requested bytes cannot be less than 0");
+            {
+                throw new ArgumentException("Requested bytes cannot be less than 0");
+            }
 
             if (offset + count > buffer.Length)
-                throw new ArgumentException("buffer is not big enough for the requested bytes");
+            {
+                throw new ArgumentException("Buffer is not big enough for the requested bytes");
+            }
 
             int read = 0;
             int bytesLeft = count;
@@ -189,7 +199,9 @@ namespace DiscUtils.Ewf
                 long end = _chunkInfos[_currentChunkIndex].Start + _chunkInfos[_currentChunkIndex].Length;
                 long start = _chunkInfos[_currentChunkIndex].Start;
                 if (!(Position >= start && Position < end))
-                    _currentChunk = getChunk(Position, out _currentChunkIndex); // If not, get it
+                {
+                    _currentChunk = GetChunk(Position, out _currentChunkIndex); // If not, get it
+                }
 
                 int toCopy = _currentChunk.Length - _currentChunkPointer; // bytes left in chunk
                 if (toCopy > bytesLeft) toCopy = bytesLeft; // adjust so it's not more than was actually requested
@@ -242,13 +254,14 @@ namespace DiscUtils.Ewf
             throw new NotImplementedException();
         }
 
-        private int mapRequestToChunkInfo(long start, out int currentChunkStartFrom)
+        private int MapRequestToChunkInfo(long start, out int currentChunkStartFrom)
         {
             if (start < 0)
-                throw new IOException("attempt to read before start of stream");
+            {
+                throw new IOException("Attempt to read before start of stream");
+            }
 
             int result = -1;
-
             int i = Array.BinarySearch<long>(_chunkStarts, start);
 
             if (i < 0)
@@ -277,39 +290,43 @@ namespace DiscUtils.Ewf
                 {
                     try
                     {
-                        byte[] buff = new byte[13];
-                        fs.Read(buff, 0, 13);
+                        byte[] buff = new byte[EWFHeader.HEADER_SIZE];
+                        fs.Read(buff, 0, EWFHeader.HEADER_SIZE);
+
                         EWFHeader header = new EWFHeader(buff);
                         if (header.SegmentNumber != i + 1)
-                            throw new ArgumentException(string.Format("invalid segment order: got {0}, should be {1}", header.SegmentNumber, i + 1));
+                        {
+                            throw new ArgumentException(string.Format("Invalid segment order: got {0}, should be {1}", header.SegmentNumber, i + 1));
+                        }
 
-                        buff = new byte[76];
-                        fs.Seek(-76, SeekOrigin.End);
-                        fs.Read(buff, 0, 76);
-                        SectionDescriptor secDescriptor = new SectionDescriptor(buff, fs.Length - 76);
-                        if (secDescriptor.SectionType == SECTION_TYPE.next)
+                        buff = new byte[SectionDescriptor.SECTION_DESCRIPTOR_SIZE];
+                        fs.Seek(-SectionDescriptor.SECTION_DESCRIPTOR_SIZE, SeekOrigin.End);
+                        fs.Read(buff, 0, SectionDescriptor.SECTION_DESCRIPTOR_SIZE);
+
+                        SectionDescriptor secDescriptor = new SectionDescriptor(buff, fs.Length - SectionDescriptor.SECTION_DESCRIPTOR_SIZE);
+                        if (secDescriptor.SectionType == SectionType.Next)
                         {
                             Files.Add(Utils.CalcNextFilename(Files[i]));
                             i++;
                         }
-                        else if (secDescriptor.SectionType == SECTION_TYPE.done)
+                        else if (secDescriptor.SectionType == SectionType.Done)
                         {
                             gotDone = true;
                         }
                         else
                         {
-                            throw new Exception(string.Format("unexpected final section: {0}", secDescriptor.SectionType));
+                            throw new Exception(string.Format("Unexpected final section: {0}", secDescriptor.SectionType));
                         }
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception(string.Format("error whilst processing {0}", Files[i]), ex);
+                        throw new Exception(string.Format("Error whilst processing {0}", Files[i]), ex);
                     }
                 }
             } while (!gotDone);
         }
 
-        private byte[] readSection(SectionDescriptor sd, FileStream fs)
+        private byte[] ReadSection(SectionDescriptor sd, FileStream fs)
         {
             byte[] buff = new byte[sd.NextSectionOffset - (int)fs.Position];
             fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
@@ -328,16 +345,17 @@ namespace DiscUtils.Ewf
                     gotTable = gotHeader = gotHeader2 = false;
                     int endOfSectors = -1;
 
-                    fs.Seek(13, SeekOrigin.Begin); // Skip file header
+                    fs.Seek(EWFHeader.HEADER_SIZE, SeekOrigin.Begin); // Skip file header
 
                     while (fs.Position < fs.Length)
                     {
-                        byte[] buff = new byte[76];
-                        fs.Read(buff, 0, 76);
+                        byte[] buff = new byte[SectionDescriptor.SECTION_DESCRIPTOR_SIZE];
+                        fs.Read(buff, 0, SectionDescriptor.SECTION_DESCRIPTOR_SIZE);
+
                         SectionDescriptor sd;
                         try
                         {
-                            sd = new SectionDescriptor(buff, fs.Position - 76);
+                            sd = new SectionDescriptor(buff, fs.Position - SectionDescriptor.SECTION_DESCRIPTOR_SIZE);
                         }
                         catch (Exception ex)
                         {
@@ -346,70 +364,41 @@ namespace DiscUtils.Ewf
 
                         switch (sd.SectionType)
                         {
-                            case SECTION_TYPE.header:
-                                break;
-                            case SECTION_TYPE.header2:
-                                break;
-                            case SECTION_TYPE.ltypes:
-                                break;
-                            case SECTION_TYPE.ltree:
-                                break;
-                            case SECTION_TYPE.session:
-                                break;
-                            case SECTION_TYPE.error2:
-                                break;
-                            case SECTION_TYPE.incomplete:
-                                break;
-                            case SECTION_TYPE.disk:
-                                break;
-                            case SECTION_TYPE.volume:
-                                break;
-                            case SECTION_TYPE.sectors:
-                                break;
-                            case SECTION_TYPE.table:
-                                break;
-                            case SECTION_TYPE.table2:
-                                break;
-                            case SECTION_TYPE.next:
-                                break;
-                            case SECTION_TYPE.data:
-                                break;
-                            case SECTION_TYPE.digest:
-                                break;
-                            case SECTION_TYPE.hash:
-                                break;
-                            case SECTION_TYPE.done:
-                                break;
-                            default:
-                                break;
-                        }
+                            case SectionType.Header:
+                            case SectionType.Header2:
+                                if (!Sections.ContainsKey(sd.SectionType))
+                                {
+                                    Sections.Add(sd.SectionType, new Section.Header2(ReadSection(sd, fs)));
+                                }
+                                else
+                                {
+                                    // Sometime the "header" section is defined twice within the file and contain the same information.
+                                    // TODO : Implement compare "header" section
+                                    new Section.Header2(ReadSection(sd, fs));
+                                    //if (Sections[sd.SectionType)] != new Section.Header2(ReadSection(sd, fs)))
+                                    //{
+                                    //    throw new Exception("Header section are not identical.");
+                                    //}
+                                }
 
-                        switch (sd.SectionType)
-                        {
-                            case SECTION_TYPE.header:
-                                Sections.Add("header", new Section.Header2(readSection(sd, fs)));
                                 break;
 
-                            case SECTION_TYPE.header2:
-                                Sections.Add("header2", new Section.Header2(readSection(sd, fs)));
-                                break;
-
-                            case SECTION_TYPE.disk:
-                            case SECTION_TYPE.data:
-                            case SECTION_TYPE.volume:
+                            case SectionType.Disk:
+                            //case SectionType.Data:
+                            case SectionType.Volume:
                                 // Calculate bytes per chunk
                                 buff = new byte[sd.NextSectionOffset - (int)fs.Position];
                                 fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
                                 Section.Volume VolumeSection = new Section.Volume(buff);
-                                Sections.Add("volume", VolumeSection);
+                                Sections.Add(SectionType.Volume, VolumeSection);
                                 _bytesPerChunk = VolumeSection.SectorsPerChunk * VolumeSection.BytesPerSector;
 
                                 switch (VolumeSection.MediaType)
                                 {
-                                    case MEDIA_TYPE.Disc:
+                                    case MediaType.Disc:
                                         DiskType = VirtualDiskClass.OpticalDisk;
                                         break;
-                                    case MEDIA_TYPE.Fixed:
+                                    case MediaType.Fixed:
                                         DiskType = VirtualDiskClass.HardDisk;
                                         break;
                                     default:
@@ -418,12 +407,14 @@ namespace DiscUtils.Ewf
                                 }
 
                                 if (_length < 0)
+                                {
                                     _length = (long)VolumeSection.BytesPerSector * (long)VolumeSection.SectorCount;
+                                }
 
                                 break;
 
-                            case SECTION_TYPE.table:
-                            case SECTION_TYPE.table2:
+                            case SectionType.Table:
+                            case SectionType.Table2:
                                 // Calculate the chunks
                                 if (gotTable) // Don't read both versions of the table...
                                 { // ...so skip the bytes
@@ -432,19 +423,25 @@ namespace DiscUtils.Ewf
                                 else
                                 {
                                     if (_bytesPerChunk < 0)
-                                        throw new Exception(string.Format("table/table2 section before disk/data/volume, in {0}", Files[fileCount]));
+                                    {
+                                        throw new Exception(string.Format("Table/Table2 section before disk/data/volume, in {0}", Files[fileCount]));
+                                    }
 
-                                    bool volumeCompression = ((Section.Volume)GetSection("volume")).Compression != COMPRESSION.None;
+                                    bool volumeCompression = ((Section.Volume)GetSection("volume")).Compression != Compression.None;
 
                                     buff = new byte[sd.NextSectionOffset - fs.Position];
                                     fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
                                     Section.Table table = new Section.Table(buff);
-                                    Sections.Add("table", table);
+                                    Sections.Add(SectionType.Table, table);
+
                                     for (int i = 0; i < table.Entries.Count; i++)
                                     {
                                         Section.Table.TableEntry entry = table.Entries[i];
-                                        if (_chunkInfos.Count == 261)
-                                            Console.WriteLine("!!!");
+                                        //if (_chunkInfos.Count == 261)
+                                        //{
+                                        //    Console.WriteLine("!!!");
+                                        //}
+
                                         int bytesInChunk = i == table.Entries.Count - 1 ? endOfSectors - entry.Offset : table.Entries[i + 1].Offset - entry.Offset;
                                         _chunkInfos.Add(new ChunkInfo(
                                             fileCount,
@@ -458,38 +455,39 @@ namespace DiscUtils.Ewf
                                 gotTable = !gotTable;
                                 break;
 
-                            case SECTION_TYPE.next:
-                            case SECTION_TYPE.done:
-                                fs.Seek(76, SeekOrigin.Current);
+                            case SectionType.Next:
+                            case SectionType.Done:
+                                fs.Seek(SectionDescriptor.SECTION_DESCRIPTOR_SIZE, SeekOrigin.Current);
                                 break;
 
-                            case SECTION_TYPE.sectors:
+                            case SectionType.Sectors:
                                 endOfSectors = sd.NextSectionOffset;
                                 fs.Seek(sd.NextSectionOffset - (int)fs.Position, SeekOrigin.Current);
                                 break;
 
-                            case SECTION_TYPE.digest:
-                                if (MD5 == null)
+                            case SectionType.Digest:
+                            case SectionType.Hash:
+                                if (MD5 == null && SHA1 == null)
                                 {
                                     buff = new byte[sd.NextSectionOffset - fs.Position];
                                     fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
-                                    Section.Digest digest = new Section.Digest(buff);
-                                    MD5 = digest.MD5;
-                                }
-                                else
-                                    fs.Seek(sd.NextSectionOffset - (int)fs.Position, SeekOrigin.Current);
-                                break;
 
-                            case SECTION_TYPE.hash:
-                                if (MD5 == null)
-                                {
-                                    buff = new byte[sd.NextSectionOffset - fs.Position];
-                                    fs.Read(buff, 0, sd.NextSectionOffset - (int)fs.Position);
-                                    Section.Hash hash = new Section.Hash(buff);
-                                    MD5 = hash.MD5;
+                                    if (sd.SectionType == SectionType.Digest)
+                                    {
+                                        Section.Digest digest = new Section.Digest(buff);
+                                        MD5 = digest.MD5;
+                                        SHA1 = digest.SHA1;
+                                    }
+                                    else
+                                    {
+                                        Section.Hash hash = new Section.Hash(buff);
+                                        MD5 = hash.MD5;
+                                    }
                                 }
                                 else
+                                {
                                     fs.Seek(sd.NextSectionOffset - (int)fs.Position, SeekOrigin.Current);
+                                }
                                 break;
 
                             default: // Don't care about any other sections
@@ -504,6 +502,7 @@ namespace DiscUtils.Ewf
             {
                 _chunkStarts = new long[_chunkInfos.Count];
                 int i = 0;
+
                 foreach (ChunkInfo ci in _chunkInfos)
                 {
                     _chunkStarts[i++] = ci.Start;

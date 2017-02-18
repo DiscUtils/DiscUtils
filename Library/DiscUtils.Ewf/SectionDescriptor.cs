@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using DiscUtils.Compression;
 
@@ -41,7 +40,7 @@ namespace DiscUtils.Ewf
         /// <summary>
         /// The kind of Section that is about to follow.
         /// </summary>
-        public SECTION_TYPE SectionType { get; set; }
+        public SectionType SectionType { get; set; }
 
         /// <summary>
         /// The offset, from the beginning of the EWF, of the next section.
@@ -62,28 +61,40 @@ namespace DiscUtils.Ewf
         /// <param name="fileOffset">The offset within the EWF file where this section starts.</param>
         public SectionDescriptor(byte[] bytes, long fileOffset)
         {
-            if (bytes.Length != SECTION_DESCRIPTOR_SIZE)
-                throw new ArgumentException("number of bytes in section descriptor must be " + SECTION_DESCRIPTOR_SIZE, "byte");
+            if (bytes.Length != SectionDescriptor.SECTION_DESCRIPTOR_SIZE)
+            {
+                throw new ArgumentException("Number of bytes in section descriptor must be " + SectionDescriptor.SECTION_DESCRIPTOR_SIZE, "bytes");
+            }
 
-            string sectionType = Encoding.ASCII.GetString(bytes, 0, 16).Trim(new char[] { (char)0x00 }); ;
-            if (Enum.IsDefined(typeof(SECTION_TYPE), sectionType))
-                SectionType = (SECTION_TYPE)Enum.Parse(typeof(SECTION_TYPE), sectionType, true);
-            else
-                throw new ArgumentException("unknown section type: " + sectionType);
+            string sectionType = Encoding.ASCII.GetString(bytes, 0, 16).Trim(new char[] { (char)0x00 });
+            try
+            {
+                SectionType = (SectionType) Enum.Parse(typeof(SectionType), sectionType, true);
+            }
+            catch(Exception)
+            {
+                throw new ArgumentException("Unknown section type: " + sectionType);
+            }               
 
             NextSectionOffset = (int)BitConverter.ToInt64(bytes, 16);
             if (NextSectionOffset < fileOffset)
-                throw new ArgumentException("next section cannot be before current section");
+            {
+                throw new ArgumentException("Next section cannot be before current section");
+            }
 
             SectionSize = (int)BitConverter.ToInt64(bytes, 24);
-            if (SectionType != SECTION_TYPE.next && SectionType != SECTION_TYPE.done && SectionSize < 1)
-                throw new ArgumentException("section size cannot be less than 1");
+            if (SectionType != SectionType.Next && SectionType != SectionType.Done && SectionSize < 1)
+            {
+                throw new ArgumentException("Section size cannot be less than 1");
+            }
 
             Adler32 checksum = new Adler32();
             checksum.Process(bytes, 0, 72);
             uint adler32 = (uint)checksum.Value;
             if (adler32 != BitConverter.ToUInt32(bytes, 72))
-                throw new ArgumentException("bad Adler32 checksum");
+            {
+                throw new ArgumentException("Bad Adler32 checksum");
+            }
         }
     }    
 }

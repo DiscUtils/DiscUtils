@@ -63,13 +63,19 @@ namespace DiscUtils.Ewf
         public ChunkInfo(int fileIndex, long fileOffset, long start, long length, bool isCompressed, int bytesInChunk)
         {
             if (fileOffset < 89)
-                throw new ArgumentException("fileoffset for chunk cannot be less than 89");
+            {
+                throw new ArgumentException("Fileoffset for chunk cannot be less than 89");
+            }
 
             if (start < 0)
-                throw new ArgumentException("start of chunk cannot be negative");
+            {
+                throw new ArgumentException("Start of chunk cannot be negative");
+            }
 
             if (length < 0)
-                throw new ArgumentException("chunk length cannot be negative");
+            {
+                throw new ArgumentException("Chunk length cannot be negative");
+            }
 
             _fileIndex = fileIndex;
             _fileOffset = fileOffset;

@@ -34,7 +34,7 @@ namespace DiscUtils.Ewf.Section
         /// <summary>
         /// Value indicating what kind of media is represented by the EWF.
         /// </summary>
-        public MEDIA_TYPE MediaType { get; set; }
+        public MediaType MediaType { get; set; }
 
         /// <summary>
         /// Value indicating the total number of chunks stored across the EWF files.
@@ -75,7 +75,7 @@ namespace DiscUtils.Ewf.Section
         /// <summary>
         /// Value indicating various information about the source media.
         /// </summary>
-        public MEDIA_FLAG MediaFlag { get; set; }
+        public MediaFlags MediaFlag { get; set; }
 
         /// <summary>
         /// ???
@@ -90,7 +90,7 @@ namespace DiscUtils.Ewf.Section
         /// <summary>
         /// Value indicating the level of compression used: EWF-wide.
         /// </summary>
-        public COMPRESSION Compression { get; set; }
+        public Compression Compression { get; set; }
 
         /// <summary>
         /// Value indicating how many bytes were ignored when an error occurred reading the source media.
@@ -108,7 +108,7 @@ namespace DiscUtils.Ewf.Section
         /// <param name="bytes">The bytes from which to make the object.</param>
         public Volume(byte[] bytes)
         {
-            MediaType = (MEDIA_TYPE)bytes[0];
+            MediaType = (MediaType)bytes[0];
 
             ChunkCount = BitConverter.ToInt32(bytes, 4);
             SectorsPerChunk = BitConverter.ToInt32(bytes, 8);
@@ -119,12 +119,12 @@ namespace DiscUtils.Ewf.Section
             Heads = BitConverter.ToInt32(bytes, 28);
             Sectors = BitConverter.ToInt32(bytes, 32);
 
-            MediaFlag = (MEDIA_FLAG)bytes[36];
+            MediaFlag = (MediaFlags)bytes[36];
 
             PALMVolumeStart = BitConverter.ToInt32(bytes, 40);
             SMARTLogsStartSector = BitConverter.ToInt32(bytes, 48);
 
-            Compression = (COMPRESSION)bytes[52];
+            Compression = (Compression)bytes[52];
 
             ErrorBlockSize = BitConverter.ToInt32(bytes, 56);
 
@@ -132,12 +132,13 @@ namespace DiscUtils.Ewf.Section
             Array.Copy(bytes, 64, guidBytes, 0, 16);
             SetGUID = new Guid(guidBytes);
 
-
             Adler32 checksum = new Adler32();
             checksum.Process(bytes, 0, 1048);
             uint adler32 = (uint)checksum.Value;
             if (adler32 != BitConverter.ToUInt32(bytes, 1048))
-                throw new ArgumentException("bad Adler32 checksum");
+            {
+                throw new ArgumentException("Bad Adler32 checksum");
+            }
         }
     }
 }

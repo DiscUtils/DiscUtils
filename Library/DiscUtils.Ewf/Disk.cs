@@ -166,7 +166,6 @@ namespace DiscUtils.Ewf
 
                     if (_file != null)
                     {
-
                         if (_file.Item2 == Ownership.Dispose)
                         {
                             _file.Item1.Dispose();
@@ -210,6 +209,18 @@ namespace DiscUtils.Ewf
             {
                 EWFStream es = (EWFStream)Content;
                 return es.MD5;
+            }
+        }
+
+        /// <summary>
+        /// Gets the SHA1 checksum as stored in the EWF file.
+        /// </summary>
+        public string SHA1
+        {
+            get
+            {
+                EWFStream es = (EWFStream)Content;
+                return es.SHA1;
             }
         }
     }
