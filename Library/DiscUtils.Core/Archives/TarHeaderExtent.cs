@@ -47,7 +47,7 @@ namespace DiscUtils.Archives
         }
 
         public TarHeaderExtent(long start, string fileName, long fileLength)
-            : this(start, fileName, fileLength, 0, 0, 0, Utilities.UnixEpoch) {}
+            : this(start, fileName, fileLength, 0, 0, 0, DateTimeOffsetExtensions.UnixEpoch) {}
 
         protected override byte[] GetBuffer()
         {

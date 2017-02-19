@@ -36,11 +36,6 @@ namespace DiscUtils.Internal
         internal const int SectorSize = Sizes.Sector;
 
         /// <summary>
-        /// The Epoch common to most (all?) Unix systems.
-        /// </summary>
-        internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1);
-
-        /// <summary>
         /// Round up a value to a multiple of a unit size.
         /// </summary>
         /// <param name="value">The value to round up.</param>
@@ -1054,17 +1049,6 @@ namespace DiscUtils.Internal
 
             string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", "[^.]") + "$";
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        }
-
-        public static DateTime DateTimeFromUnix(uint fileTime)
-        {
-            long ticks = fileTime * (long)10 * 1000 * 1000;
-            return new DateTime(ticks + UnixEpoch.Ticks);
-        }
-
-        public static uint DateTimeToUnix(DateTime time)
-        {
-            return (uint)((time.Ticks - UnixEpoch.Ticks) / (10 * 1000 * 1000));
         }
 
         public static FileAttributes FileAttributesFromUnixFileType(UnixFileType fileType)
