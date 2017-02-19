@@ -26,14 +26,9 @@ namespace DiscUtils.Iso9660
     {
         public byte SelectedExtension;
 
-        public ExtensionSelectSystemUseEntry(byte[] data, int offset)
+        public ExtensionSelectSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
-
-            Name = "ES";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 5, 1);
+            CheckAndSetCommonProperties(name, length, version, 5, 1);
 
             SelectedExtension = data[offset + 4];
         }

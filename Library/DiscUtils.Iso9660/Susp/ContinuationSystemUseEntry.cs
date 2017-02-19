@@ -28,14 +28,9 @@ namespace DiscUtils.Iso9660
         public uint BlockOffset;
         public uint Length;
 
-        public ContinuationSystemUseEntry(byte[] data, int offset)
+        public ContinuationSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
-
-            Name = "CE";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 28, 1);
+            CheckAndSetCommonProperties(name, length, version, 28, 1);
 
             Block = IsoUtilities.ToUInt32FromBoth(data, offset + 4);
             BlockOffset = IsoUtilities.ToUInt32FromBoth(data, offset + 12);

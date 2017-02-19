@@ -24,14 +24,9 @@ namespace DiscUtils.Iso9660
 {
     internal sealed class PaddingSystemUseEntry : SystemUseEntry
     {
-        public PaddingSystemUseEntry(byte[] data, int offset)
+        public PaddingSystemUseEntry(string name, byte length, byte version)
         {
-            byte len = data[offset + 2];
-
-            Name = "PD";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 4, 1);
+            CheckAndSetCommonProperties(name, length, version, 4, 1);
         }
     }
 }
