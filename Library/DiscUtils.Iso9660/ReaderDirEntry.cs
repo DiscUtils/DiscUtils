@@ -41,12 +41,14 @@ namespace DiscUtils.Iso9660
             _record = dirRecord;
             _fileName = _record.FileIdentifier;
 
+            bool rockRidge = !string.IsNullOrEmpty(_context.RockRidgeIdentifier);
+
             if (context.SuspDetected && _record.SystemUseData != null)
             {
                 SuspRecords = new SuspRecords(_context, _record.SystemUseData, 0);
             }
 
-            if (!string.IsNullOrEmpty(_context.RockRidgeIdentifier))
+            if (rockRidge && SuspRecords != null)
             {
                 // The full name is taken from this record, even if it's a child-link record
                 List<SystemUseEntry> nameEntries = SuspRecords.GetEntries(_context.RockRidgeIdentifier, "NM");
@@ -83,24 +85,27 @@ namespace DiscUtils.Iso9660
             LastWriteTimeUtc = _record.RecordingDateAndTime;
             CreationTimeUtc = _record.RecordingDateAndTime;
 
-            if (!string.IsNullOrEmpty(_context.RockRidgeIdentifier))
+            if (rockRidge && SuspRecords != null)
             {
                 FileTimeSystemUseEntry tfEntry =
                     SuspRecords.GetEntry<FileTimeSystemUseEntry>(_context.RockRidgeIdentifier, "TF");
 
-                if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Access) != 0)
+                if (tfEntry != null)
                 {
-                    LastAccessTimeUtc = tfEntry.AccessTime;
-                }
+                    if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Access) != 0)
+                    {
+                        LastAccessTimeUtc = tfEntry.AccessTime;
+                    }
 
-                if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Modify) != 0)
-                {
-                    LastWriteTimeUtc = tfEntry.ModifyTime;
-                }
+                    if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Modify) != 0)
+                    {
+                        LastWriteTimeUtc = tfEntry.ModifyTime;
+                    }
 
-                if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Creation) != 0)
-                {
-                    CreationTimeUtc = tfEntry.CreationTime;
+                    if ((tfEntry.TimestampsPresent & FileTimeSystemUseEntry.Timestamps.Creation) != 0)
+                    {
+                        CreationTimeUtc = tfEntry.CreationTime;
+                    }
                 }
             }
         }
