@@ -245,7 +245,7 @@ namespace DiscUtils
         /// (aka Physical) geometry of the disk, not necessarily the geometry used by the BIOS.</remarks>
         public static Geometry FromCapacity(long capacity)
         {
-            return FromCapacity(capacity, Utilities.SectorSize);
+            return FromCapacity(capacity, Sizes.Sector);
         }
 
         /// <summary>
