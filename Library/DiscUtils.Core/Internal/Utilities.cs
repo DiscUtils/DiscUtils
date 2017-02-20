@@ -31,16 +31,6 @@ namespace DiscUtils.Internal
     internal static class Utilities
     {
         /// <summary>
-        /// The number of bytes in a standard disk sector (512).
-        /// </summary>
-        internal const int SectorSize = Sizes.Sector;
-
-        /// <summary>
-        /// The Epoch common to most (all?) Unix systems.
-        /// </summary>
-        internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1);
-
-        /// <summary>
         /// Round up a value to a multiple of a unit size.
         /// </summary>
         /// <param name="value">The value to round up.</param>
@@ -910,7 +900,7 @@ namespace DiscUtils.Internal
         /// <returns>The sector data as a byte array.</returns>
         public static byte[] ReadSector(Stream stream)
         {
-            return ReadFully(stream, SectorSize);
+            return ReadFully(stream, Sizes.Sector);
         }
 
         /// <summary>
@@ -1054,17 +1044,6 @@ namespace DiscUtils.Internal
 
             string query = "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", "[^.]") + "$";
             return new Regex(query, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        }
-
-        public static DateTime DateTimeFromUnix(uint fileTime)
-        {
-            long ticks = fileTime * (long)10 * 1000 * 1000;
-            return new DateTime(ticks + UnixEpoch.Ticks);
-        }
-
-        public static uint DateTimeToUnix(DateTime time)
-        {
-            return (uint)((time.Ticks - UnixEpoch.Ticks) / (10 * 1000 * 1000));
         }
 
         public static FileAttributes FileAttributesFromUnixFileType(UnixFileType fileType)

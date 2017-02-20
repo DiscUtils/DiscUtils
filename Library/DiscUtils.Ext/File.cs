@@ -46,21 +46,21 @@ namespace DiscUtils.Ext
 
         public DateTime LastAccessTimeUtc
         {
-            get { return Utilities.DateTimeFromUnix(Inode.AccessTime); }
+            get { return ((long)Inode.AccessTime).FromUnixTimeSeconds().DateTime; }
 
             set { throw new NotImplementedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get { return Utilities.DateTimeFromUnix(Inode.ModificationTime); }
+            get { return ((long) Inode.ModificationTime).FromUnixTimeSeconds().DateTime; }
 
             set { throw new NotImplementedException(); }
         }
 
         public DateTime CreationTimeUtc
         {
-            get { return Utilities.DateTimeFromUnix(Inode.CreationTime); }
+            get { return ((long) Inode.CreationTime).FromUnixTimeSeconds().DateTime; }
 
             set { throw new NotImplementedException(); }
         }

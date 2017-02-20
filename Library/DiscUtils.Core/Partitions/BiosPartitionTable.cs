@@ -111,10 +111,10 @@ namespace DiscUtils.Partitions
         /// <returns>The detected geometry.</returns>
         public static Geometry DetectGeometry(Stream disk)
         {
-            if (disk.Length >= Utilities.SectorSize)
+            if (disk.Length >= Sizes.Sector)
             {
                 disk.Position = 0;
-                byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+                byte[] bootSector = Utilities.ReadFully(disk, Sizes.Sector);
                 if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
                 {
                     byte maxHead = 0;
@@ -143,13 +143,13 @@ namespace DiscUtils.Partitions
         /// <returns><c>true</c> if the partition table is valid, else <c>false</c>.</returns>
         public static bool IsValid(Stream disk)
         {
-            if (disk.Length < Utilities.SectorSize)
+            if (disk.Length < Sizes.Sector)
             {
                 return false;
             }
 
             disk.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(disk, Utilities.SectorSize);
+            byte[] bootSector = Utilities.ReadFully(disk, Sizes.Sector);
 
             // Check for the 'bootable sector' marker
             if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
@@ -218,14 +218,14 @@ namespace DiscUtils.Partitions
             Stream data = disk;
 
             byte[] bootSector;
-            if (data.Length >= Utilities.SectorSize)
+            if (data.Length >= Sizes.Sector)
             {
                 data.Position = 0;
-                bootSector = Utilities.ReadFully(data, Utilities.SectorSize);
+                bootSector = Utilities.ReadFully(data, Sizes.Sector);
             }
             else
             {
-                bootSector = new byte[Utilities.SectorSize];
+                bootSector = new byte[Sizes.Sector];
             }
 
             // Wipe all four 16-byte partition table entries
@@ -261,7 +261,7 @@ namespace DiscUtils.Partitions
             long lastLba = allocationGeometry.ToLogicalBlockAddress(last);
 
             return CreatePrimaryByCylinder(0, allocationGeometry.Cylinders - 1,
-                ConvertType(type, (lastLba - startLba) * Utilities.SectorSize), active);
+                ConvertType(type, (lastLba - startLba) * Sizes.Sector), active);
         }
 
         /// <summary>
@@ -347,7 +347,7 @@ namespace DiscUtils.Partitions
             long start = FindGap(size / _diskGeometry.BytesPerSector, alignment / _diskGeometry.BytesPerSector);
 
             return CreatePrimaryBySector(start, start + sectorLength - 1,
-                ConvertType(type, sectorLength * Utilities.SectorSize), active);
+                ConvertType(type, sectorLength * Sizes.Sector), active);
         }
 
         /// <summary>
@@ -513,7 +513,7 @@ namespace DiscUtils.Partitions
         public void UpdateBiosGeometry(Geometry geometry)
         {
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
 
             BiosPartitionRecord[] records = ReadPrimaryRecords(bootSector);
             for (int i = 0; i < records.Length; ++i)
@@ -626,7 +626,7 @@ namespace DiscUtils.Partitions
         private BiosPartitionRecord[] GetPrimaryRecords()
         {
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
 
             return ReadPrimaryRecords(bootSector);
         }
@@ -639,7 +639,7 @@ namespace DiscUtils.Partitions
         private void WriteRecord(int i, BiosPartitionRecord newRecord)
         {
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
             newRecord.WriteTo(bootSector, 0x01BE + i * 16);
             _diskData.Position = 0;
             _diskData.Write(bootSector, 0, bootSector.Length);
@@ -723,7 +723,7 @@ namespace DiscUtils.Partitions
             _diskGeometry = diskGeometry;
 
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Utilities.SectorSize);
+            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
             if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
             {
                 throw new IOException("Invalid boot sector - no magic number 0xAA55");

@@ -50,7 +50,7 @@ namespace DiscUtils.SquashFs
             Mode = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
             UidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
             GidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            ModificationTime = Utilities.DateTimeFromUnix(Utilities.ToUInt32LittleEndian(buffer, offset + 8));
+            ModificationTime = ((long) Utilities.ToUInt32LittleEndian(buffer, offset + 8)).FromUnixTimeSeconds().DateTime;
             InodeNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
             return 16;
         }
@@ -61,7 +61,7 @@ namespace DiscUtils.SquashFs
             Utilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
             Utilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
             Utilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);
-            Utilities.WriteBytesLittleEndian(Utilities.DateTimeToUnix(ModificationTime), buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(Convert.ToUInt32((new DateTimeOffset(ModificationTime)).ToUnixTimeSeconds()), buffer, offset + 8);
             Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 12);
         }
 

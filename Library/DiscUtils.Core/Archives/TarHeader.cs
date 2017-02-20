@@ -43,8 +43,7 @@ namespace DiscUtils.Archives
             OwnerId = (int)OctalToLong(ReadNullTerminatedString(buffer, offset + 108, 8));
             GroupId = (int)OctalToLong(ReadNullTerminatedString(buffer, offset + 116, 8));
             FileLength = OctalToLong(ReadNullTerminatedString(buffer, offset + 124, 12));
-            ModificationTime =
-                Utilities.DateTimeFromUnix((uint)OctalToLong(ReadNullTerminatedString(buffer, offset + 136, 12)));
+            ModificationTime = OctalToLong(ReadNullTerminatedString(buffer, offset + 136, 12)).FromUnixTimeSeconds().DateTime;
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -56,8 +55,7 @@ namespace DiscUtils.Archives
             Utilities.StringToBytes(LongToOctal(OwnerId, 7), buffer, offset + 108, 7);
             Utilities.StringToBytes(LongToOctal(GroupId, 7), buffer, offset + 116, 7);
             Utilities.StringToBytes(LongToOctal(FileLength, 11), buffer, offset + 124, 11);
-            Utilities.StringToBytes(LongToOctal(Utilities.DateTimeToUnix(ModificationTime), 11), buffer, offset + 136,
-                11);
+            Utilities.StringToBytes(LongToOctal(Convert.ToUInt32((new DateTimeOffset(ModificationTime)).ToUnixTimeSeconds()), 11), buffer, offset + 136, 11);
 
             // Checksum
             Utilities.StringToBytes(new string(' ', 8), buffer, offset + 148, 8);

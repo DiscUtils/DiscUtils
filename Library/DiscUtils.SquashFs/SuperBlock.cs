@@ -58,7 +58,7 @@ namespace DiscUtils.SquashFs
         {
             Magic = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
             InodesCount = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            CreationTime = Utilities.DateTimeFromUnix(Utilities.ToUInt32LittleEndian(buffer, offset + 8));
+            CreationTime = ((long) Utilities.ToUInt32LittleEndian(buffer, offset + 8)).FromUnixTimeSeconds().DateTime;
             BlockSize = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
             FragmentsCount = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
             Compression = Utilities.ToUInt16LittleEndian(buffer, offset + 20);
@@ -83,7 +83,7 @@ namespace DiscUtils.SquashFs
         {
             Utilities.WriteBytesLittleEndian(Magic, buffer, offset + 0);
             Utilities.WriteBytesLittleEndian(InodesCount, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian(Utilities.DateTimeToUnix(CreationTime), buffer, offset + 8);
+            Utilities.WriteBytesLittleEndian(Convert.ToUInt32((new DateTimeOffset(CreationTime)).ToUnixTimeSeconds()), buffer, offset + 8);
             Utilities.WriteBytesLittleEndian(BlockSize, buffer, offset + 12);
             Utilities.WriteBytesLittleEndian(FragmentsCount, buffer, offset + 16);
             Utilities.WriteBytesLittleEndian(Compression, buffer, offset + 20);

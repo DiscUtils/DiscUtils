@@ -116,7 +116,7 @@ namespace DiscUtils.Vhd
 
         private void CheckBat()
         {
-            int batSize = Utilities.RoundUp(_dynamicHeader.MaxTableEntries * 4, Utilities.SectorSize);
+            int batSize = Utilities.RoundUp(_dynamicHeader.MaxTableEntries * 4, Sizes.Sector);
             if (_dynamicHeader.TableOffset > _fileStream.Length - batSize)
             {
                 ReportError("BAT: BAT extends beyond end of file");
@@ -153,9 +153,9 @@ namespace DiscUtils.Vhd
                 return;
             }
 
-            long dataStart = (long)dataStartSector * Utilities.SectorSize;
+            long dataStart = (long)dataStartSector * Sizes.Sector;
             uint blockBitmapSize =
-                (uint)Utilities.RoundUp(_dynamicHeader.BlockSize / Utilities.SectorSize / 8, Utilities.SectorSize);
+                (uint)Utilities.RoundUp(_dynamicHeader.BlockSize / Sizes.Sector / 8, Sizes.Sector);
             uint storedBlockSize = _dynamicHeader.BlockSize + blockBitmapSize;
 
             bool[] seenBlocks = new bool[_dynamicHeader.MaxTableEntries];
@@ -163,7 +163,7 @@ namespace DiscUtils.Vhd
             {
                 if (bat[i] != uint.MaxValue)
                 {
-                    long absPos = (long)bat[i] * Utilities.SectorSize;
+                    long absPos = (long)bat[i] * Sizes.Sector;
 
                     if (absPos + storedBlockSize > _fileStream.Length)
                     {
@@ -356,8 +356,8 @@ namespace DiscUtils.Vhd
 
         private void CheckFooter()
         {
-            _fileStream.Position = _fileStream.Length - Utilities.SectorSize;
-            byte[] sector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+            _fileStream.Position = _fileStream.Length - Sizes.Sector;
+            byte[] sector = Utilities.ReadFully(_fileStream, Sizes.Sector);
 
             _footer = Footer.FromBytes(sector, 0);
             if (!_footer.IsValid())
@@ -369,7 +369,7 @@ namespace DiscUtils.Vhd
         private void CheckHeader()
         {
             _fileStream.Position = 0;
-            byte[] headerSector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+            byte[] headerSector = Utilities.ReadFully(_fileStream, Sizes.Sector);
 
             Footer header = Footer.FromBytes(headerSector, 0);
             if (!header.IsValid())
@@ -377,8 +377,8 @@ namespace DiscUtils.Vhd
                 ReportError("Invalid VHD footer at start of file");
             }
 
-            _fileStream.Position = _fileStream.Length - Utilities.SectorSize;
-            byte[] footerSector = Utilities.ReadFully(_fileStream, Utilities.SectorSize);
+            _fileStream.Position = _fileStream.Length - Sizes.Sector;
+            byte[] footerSector = Utilities.ReadFully(_fileStream, Sizes.Sector);
 
             if (!Utilities.AreEqual(footerSector, headerSector))
             {

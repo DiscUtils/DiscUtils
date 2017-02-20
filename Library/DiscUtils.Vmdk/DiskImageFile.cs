@@ -957,7 +957,7 @@ namespace DiscUtils.Vmdk
                         Ownership.Dispose);
 
                 case ExtentType.Zero:
-                    return new ZeroStream(extent.SizeInSectors * Utilities.SectorSize);
+                    return new ZeroStream(extent.SizeInSectors * Sizes.Sector);
 
                 case ExtentType.Sparse:
                     return new HostedSparseExtentStream(
