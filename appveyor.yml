@@ -1,123 +1,63 @@
 build_script:
-- ps: >-
-    $version = (Get-Content .\Library\DiscUtils.Core\project.json | ConvertFrom-Json).version
-
-    Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
-- ps: >-
-    # Core
-
-    dotnet restore
-- ps: >-
-    # Library
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.BootConfig
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Core
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Containers
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Dmg
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ext
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Fat
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.FileSystems
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.HfsPlus
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iscsi
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iso9660
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Net
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Nfs
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ntfs
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDiscSharing
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDisk
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Registry
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Sdi
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.SquashFs
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Transports
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Udf
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vdi
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhd
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhdx
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vmdk
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Wim
-
-    dotnet pack -c Release -o Nuget\ Library\DiscUtils.Xva
-- ps: >-
-    # Utilities
-
-    dotnet build -c Release Utilities\BCDDump
-
-    dotnet build -c Release Utilities\DiscUtils.Common
-
-    dotnet build -c Release Utilities\DiscUtils.Diagnostics
-
-    dotnet build -c Release Utilities\DiscUtils.PowerShell
-
-    dotnet build -c Release Utilities\DiskClone
-
-    dotnet build -c Release Utilities\DiskDump
-
-    dotnet build -c Release Utilities\DmgExtract
-
-    dotnet build -c Release Utilities\ExternalFileSystem
-
-    dotnet build -c Release Utilities\FileExtract
-
-    dotnet build -c Release Utilities\FileRecover
-
-    dotnet build -c Release Utilities\iSCSIBrowse
-
-    dotnet build -c Release Utilities\ISOCreate
-
-    dotnet build -c Release Utilities\MSBuildTask
-
-    dotnet build -c Release Utilities\NTFSDump
-
-    dotnet build -c Release Utilities\ODSBrowse
-
-    dotnet build -c Release Utilities\OSClone
-
-    dotnet build -c Release Utilities\VHDCreate
-
-    dotnet build -c Release Utilities\VHDDump
-
-    dotnet build -c Release Utilities\VHDXDump
-
-    dotnet build -c Release Utilities\VirtualDiskConvert
-
-    dotnet build -c Release Utilities\VolInfo
-- ps: >-
-    # Tests
-
-    dotnet build -c Release Tests\LibraryTests
+- ps: $version = (Get-Content .\Library\DiscUtils.Core\project.json | ConvertFrom-Json).version
+- ps: Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
+- cmd: REM Library
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.BootConfig
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Core
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Dmg
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ext
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Fat
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.HfsPlus
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iscsi
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Iso9660
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Net
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Nfs
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Ntfs
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDiscSharing
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.OpticalDisk
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Registry
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Sdi
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.SquashFs
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Udf
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vdi
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhd
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vhdx
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Vmdk
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Wim
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Xva
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Transports
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.Containers
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils.FileSystems
+- cmd: dotnet pack -c Release -o Nuget\ Library\DiscUtils
+- cmd: REM Utilities
+- cmd: dotnet build -c Release Utilities\BCDDump
+- cmd: dotnet build -c Release Utilities\DiscUtils.Common
+- cmd: dotnet build -c Release Utilities\DiscUtils.Diagnostics
+- cmd: dotnet build -c Release Utilities\DiscUtils.PowerShell
+- cmd: dotnet build -c Release Utilities\DiskClone
+- cmd: dotnet build -c Release Utilities\DiskDump
+- cmd: dotnet build -c Release Utilities\DmgExtract
+- cmd: dotnet build -c Release Utilities\ExternalFileSystem
+- cmd: dotnet build -c Release Utilities\FileExtract
+- cmd: dotnet build -c Release Utilities\FileRecover
+- cmd: dotnet build -c Release Utilities\iSCSIBrowse
+- cmd: dotnet build -c Release Utilities\ISOCreate
+- cmd: dotnet build -c Release Utilities\MSBuildTask
+- cmd: dotnet build -c Release Utilities\NTFSDump
+- cmd: dotnet build -c Release Utilities\ODSBrowse
+- cmd: dotnet build -c Release Utilities\OSClone
+- cmd: dotnet build -c Release Utilities\VHDCreate
+- cmd: dotnet build -c Release Utilities\VHDDump
+- cmd: dotnet build -c Release Utilities\VHDXDump
+- cmd: dotnet build -c Release Utilities\VirtualDiskConvert
+- cmd: dotnet build -c Release Utilities\VolInfo
+- cmd: REM Tests
+- cmd: dotnet build -c Release Tests\LibraryTests
 test_script:
-- ps: >-
-    dotnet build -c Release Tests\LibraryTests
-
-    cd Tests\LibraryTests\bin\Debug\net451\
-
-    dotnet test ..\..\..\
+- cmd: cd Tests\LibraryTests\bin\Release\net451\
+- cmd: dotnet test -c Release ..\..\..\
+install:
+- dotnet restore
 artifacts:
 - path: Nuget\*.nupkg
 deploy:
