@@ -117,24 +117,21 @@ namespace DiscUtils.Iso9660
             int pos = offset;
             while (data.Length - pos > 4)
             {
-                int len;
+                byte len;
                 SystemUseEntry entry = SystemUseEntry.Parse(data, pos, context.VolumeDescriptor.CharacterEncoding,
                     extension, out len);
                 pos += len;
 
                 if (entry == null)
                 {
-                    // Skip if unknown
-                    continue;
+                    // A null entry indicates SUSP parsing must terminate.
+                    // This will occur if a termination record is found,
+                    // or if there is a problem with the SUSP data.
+                    return contEntry;
                 }
 
                 switch (entry.Name)
                 {
-                    case "ST":
-
-                        // Abort
-                        return contEntry;
-
                     case "CE":
                         contEntry = (ContinuationSystemUseEntry)entry;
                         break;
