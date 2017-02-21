@@ -11,3 +11,4 @@
 *.sln        text eol=crlf
 *.csproj     text eol=crlf
 *.xproj      test eol=crlf
+*.zip filter=lfs diff=lfs merge=lfs -text
