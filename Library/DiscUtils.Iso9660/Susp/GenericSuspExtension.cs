@@ -33,9 +33,9 @@ namespace DiscUtils.Iso9660
 
         public override string Identifier { get; }
 
-        public override SystemUseEntry Parse(string name, byte[] data, int offset, int length, Encoding encoding)
+        public override SystemUseEntry Parse(string name, byte length, byte version, byte[] data, int offset, Encoding encoding)
         {
-            return new GenericSystemUseEntry(data, offset);
+            return new GenericSystemUseEntry(name, length, version, data, offset);
         }
     }
 }

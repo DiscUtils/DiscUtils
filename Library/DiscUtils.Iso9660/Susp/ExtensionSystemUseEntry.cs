@@ -32,14 +32,9 @@ namespace DiscUtils.Iso9660
         public string ExtensionSource;
         public byte ExtensionVersion;
 
-        public ExtensionSystemUseEntry(byte[] data, int offset, Encoding encoding)
+        public ExtensionSystemUseEntry(string name, byte length, byte version, byte[] data, int offset, Encoding encoding)
         {
-            byte len = data[offset + 2];
-
-            Name = "ER";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 8, 1);
+            CheckAndSetCommonProperties(name, length, version, 8, 1);
 
             int lenId = data[offset + 4];
             int lenDescriptor = data[offset + 5];
@@ -47,9 +42,9 @@ namespace DiscUtils.Iso9660
 
             ExtensionVersion = data[offset + 7];
 
-            if (len < 8 + lenId + lenDescriptor + lenSource)
+            if (length < 8 + lenId + lenDescriptor + lenSource)
             {
-                throw new InvalidDataException("Invalid SUSP ER entry - too short, only " + len + " bytes - expected: " +
+                throw new InvalidDataException("Invalid SUSP ER entry - too short, only " + length + " bytes - expected: " +
                                                (8 + lenId + lenDescriptor + lenSource));
             }
 

@@ -21,7 +21,6 @@
 //
 
 using System;
-using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
@@ -29,17 +28,12 @@ namespace DiscUtils.Iso9660
     {
         public byte[] Data;
 
-        public GenericSystemUseEntry(byte[] data, int offset)
+        public GenericSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
+            CheckAndSetCommonProperties(name, length, version, 4, 0xFF);
 
-            Name = Utilities.BytesToString(data, offset, 2);
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 4, 1);
-
-            Data = new byte[len - 4];
-            Array.Copy(data, offset + 4, Data, 0, len - 4);
+            Data = new byte[length - 4];
+            Array.Copy(data, offset + 4, Data, 0, length - 4);
         }
     }
 }

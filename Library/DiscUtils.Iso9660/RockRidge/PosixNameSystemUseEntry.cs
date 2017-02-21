@@ -29,17 +29,12 @@ namespace DiscUtils.Iso9660
         public byte Flags;
         public string NameData;
 
-        public PosixNameSystemUseEntry(byte[] data, int offset)
+        public PosixNameSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
-
-            Name = "NM";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 5, 1);
+            CheckAndSetCommonProperties(name, length, version, 5, 1);
 
             Flags = data[offset + 4];
-            NameData = Utilities.BytesToString(data, offset + 5, len - 5);
+            NameData = Utilities.BytesToString(data, offset + 5, length - 5);
         }
     }
 }

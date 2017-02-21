@@ -28,14 +28,9 @@ namespace DiscUtils.Iso9660
     {
         public byte SystemAreaSkip;
 
-        public SharingProtocolSystemUseEntry(byte[] data, int offset)
+        public SharingProtocolSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
-
-            Name = "SP";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 7, 1);
+            CheckAndSetCommonProperties(name, length, version, 7, 1);
 
             if (data[offset + 4] != 0xBE || data[offset + 5] != 0xEF)
             {

@@ -48,14 +48,9 @@ namespace DiscUtils.Iso9660
         public DateTime ModifyTime;
         public Timestamps TimestampsPresent = Timestamps.None;
 
-        public FileTimeSystemUseEntry(byte[] data, int offset)
+        public FileTimeSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
-
-            Name = "TF";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 5, 1);
+            CheckAndSetCommonProperties(name, length, version, 5, 1);
 
             byte flags = data[offset + 4];
 

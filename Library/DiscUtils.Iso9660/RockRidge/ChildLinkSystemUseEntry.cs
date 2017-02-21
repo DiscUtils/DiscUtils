@@ -26,14 +26,9 @@ namespace DiscUtils.Iso9660
     {
         public uint ChildDirLocation;
 
-        public ChildLinkSystemUseEntry(byte[] data, int offset)
+        public ChildLinkSystemUseEntry(string name, byte length, byte version, byte[] data, int offset)
         {
-            byte len = data[offset + 2];
-
-            Name = "CL";
-            Version = data[offset + 3];
-
-            CheckLengthAndVersion(len, 12, 1);
+            CheckAndSetCommonProperties(name, length, version, 12, 1);
 
             ChildDirLocation = IsoUtilities.ToUInt32FromBoth(data, offset + 4);
         }

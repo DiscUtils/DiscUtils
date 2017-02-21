@@ -28,6 +28,6 @@ namespace DiscUtils.Iso9660
     {
         public abstract string Identifier { get; }
 
-        public abstract SystemUseEntry Parse(string name, byte[] data, int offset, int length, Encoding encoding);
+        public abstract SystemUseEntry Parse(string name, byte length, byte version, byte[] data, int offset, Encoding encoding);
     }
 }
