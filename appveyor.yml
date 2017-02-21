@@ -112,7 +112,12 @@ build_script:
 
     dotnet build -c Release Tests\LibraryTests
 test_script:
-- cmd: dotnet test -c Release Tests\LibraryTests
+- ps: >-
+    dotnet build -c Release Tests\LibraryTests
+
+    cd Tests\LibraryTests\bin\Debug\net451\
+
+    dotnet test ..\..\..\
 artifacts:
 - path: Nuget\*.nupkg
 deploy:
