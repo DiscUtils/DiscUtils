@@ -27,27 +27,23 @@ namespace DiscUtils.Iso9660
 {
     internal class BaseVolumeDescriptor
     {
-        private const string Iso9660StandardIdentifier = "CD001";
+        public const string Iso9660StandardIdentifier = "CD001";
 
+        public readonly string StandardIdentifier;
         public readonly VolumeDescriptorType VolumeDescriptorType;
         public readonly byte VolumeDescriptorVersion;
 
         public BaseVolumeDescriptor(VolumeDescriptorType type, byte version)
         {
             VolumeDescriptorType = type;
+            StandardIdentifier = "CD001";
             VolumeDescriptorVersion = version;
         }
 
         public BaseVolumeDescriptor(byte[] src, int offset)
         {
-            string identifier = Encoding.ASCII.GetString(src, offset + 1, 5);
-
-            if (identifier != Iso9660StandardIdentifier)
-            {
-                throw new InvalidFileSystemException("Volume is not ISO-9660");
-            }
-
             VolumeDescriptorType = (VolumeDescriptorType)src[offset + 0];
+            StandardIdentifier = Encoding.ASCII.GetString(src, offset + 1, 5);
             VolumeDescriptorVersion = src[offset + 6];
         }
 
@@ -57,11 +53,6 @@ namespace DiscUtils.Iso9660
             buffer[offset] = (byte)VolumeDescriptorType;
             IsoUtilities.WriteAChars(buffer, offset + 1, 5, StandardIdentifier);
             buffer[offset + 6] = VolumeDescriptorVersion;
-        }
-
-        public string StandardIdentifier
-        {
-            get { return Iso9660StandardIdentifier; }
         }
     }
 }
