@@ -92,6 +92,12 @@ namespace DiscUtils.Iso9660
                 }
 
                 bvd = new BaseVolumeDescriptor(buffer, 0);
+
+                if (bvd.StandardIdentifier != BaseVolumeDescriptor.Iso9660StandardIdentifier)
+                {
+                    throw new InvalidFileSystemException("Volume is not ISO-9660");
+                }
+
                 switch (bvd.VolumeDescriptorType)
                 {
                     case VolumeDescriptorType.Boot:

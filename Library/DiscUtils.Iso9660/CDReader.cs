@@ -191,7 +191,8 @@ namespace DiscUtils.Iso9660
             }
 
             BaseVolumeDescriptor bvd = new BaseVolumeDescriptor(buffer, 0);
-            return bvd.StandardIdentifier == "CD001";
+
+            return bvd.StandardIdentifier == BaseVolumeDescriptor.Iso9660StandardIdentifier;
         }
 
         /// <summary>
