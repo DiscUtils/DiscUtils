@@ -25,7 +25,7 @@ using System.Text;
 namespace DiscUtils.Ext
 {
     /// <summary>
-    /// FAT file system options.
+    /// EXT file system options.
     /// </summary>
     public sealed class ExtFileSystemOptions : DiscFileSystemOptions
     {
