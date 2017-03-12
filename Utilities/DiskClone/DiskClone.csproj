@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net40</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>DiskClone</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>DiskClone</PackageId>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiscUtils.Common\DiscUtils.Common.csproj" />
+    <ProjectReference Include="..\..\Library\DiscUtils.Core\DiscUtils.Core.csproj" />
+    <ProjectReference Include="..\..\Library\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>
