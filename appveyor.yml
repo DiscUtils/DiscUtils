@@ -85,9 +85,9 @@ build_script:
 - cmd: msbuild /t:Build /p:Configuration=Release Utilities\VolInfo
 - cmd: REM Tests
 - cmd: msbuild /t:Build /p:Configuration=Release Tests\LibraryTests
-#test_script:
-#- cmd: cd Tests\LibraryTests\bin\Release\net451\
-#- cmd: dotnet test -c Release ..\..\..\ --logger:trx
+test_script:
+- cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
+- cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --logger:trx
 install:
 - msbuild /t:Restore
 artifacts:
