@@ -21,23 +21,22 @@
 //
 
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     public class GeometryTest
     {
-        [Test]
+        [Fact]
         public void Create()
         {
             Geometry g = new Geometry(100, 16, 63);
-            Assert.AreEqual(100, g.Cylinders);
-            Assert.AreEqual(16, g.HeadsPerCylinder);
-            Assert.AreEqual(63, g.SectorsPerTrack);
+            Assert.Equal(100, g.Cylinders);
+            Assert.Equal(16, g.HeadsPerCylinder);
+            Assert.Equal(63, g.SectorsPerTrack);
         }
 
-        [Test]
+        [Fact]
         public void LBARoundTrip()
         {
             Geometry g = new Geometry(100, 16, 63);
@@ -49,50 +48,50 @@ namespace LibraryTests
             long lba = g.ToLogicalBlockAddress(TestCylinder, TestHead, TestSector);
             ChsAddress chs = g.ToChsAddress(lba);
 
-            Assert.AreEqual(TestCylinder, chs.Cylinder);
-            Assert.AreEqual(TestHead, chs.Head);
-            Assert.AreEqual(TestSector, chs.Sector);
+            Assert.Equal(TestCylinder, chs.Cylinder);
+            Assert.Equal(TestHead, chs.Head);
+            Assert.Equal(TestSector, chs.Sector);
         }
 
-        [Test]
+        [Fact]
         public void TotalSectors()
         {
             Geometry g = new Geometry(333, 22, 11);
-            Assert.AreEqual(333 * 22 * 11, g.TotalSectorsLong);
+            Assert.Equal(333 * 22 * 11, g.TotalSectorsLong);
         }
 
-        [Test]
+        [Fact]
         public void Capacity()
         {
             Geometry g = new Geometry(333, 22, 11);
-            Assert.AreEqual(333 * 22 * 11 * 512, g.Capacity);
+            Assert.Equal(333 * 22 * 11 * 512, g.Capacity);
         }
 
-        [Test]
+        [Fact]
         public void FromCapacity()
         {
             // Check the capacity calculated is no greater than requested, and off by no more than 10%
             const long ThreeTwentyMB = 1024 * 1024 * 320;
             Geometry g = Geometry.FromCapacity(ThreeTwentyMB);
-            Assert.That(g.Capacity <= ThreeTwentyMB && g.Capacity > ThreeTwentyMB * 0.9);
+            Assert.True(g.Capacity <= ThreeTwentyMB && g.Capacity > ThreeTwentyMB * 0.9);
 
             // Check exact sizes are maintained - do one pass to allow for finding a geometry that matches
             // the algorithm - then expect identical results each time.
             Geometry startGeometry = new Geometry(333,22,11);
             Geometry trip1 = Geometry.FromCapacity(startGeometry.Capacity);
-            Assert.AreEqual(trip1, Geometry.FromCapacity(trip1.Capacity));
+            Assert.Equal(trip1, Geometry.FromCapacity(trip1.Capacity));
         }
 
-        [Test]
+        [Fact]
         public void Equals()
         {
-            Assert.AreEqual(Geometry.FromCapacity(1024 * 1024 * 32), Geometry.FromCapacity(1024 * 1024 * 32));
+            Assert.Equal(Geometry.FromCapacity(1024 * 1024 * 32), Geometry.FromCapacity(1024 * 1024 * 32));
         }
 
-        [Test]
+        [Fact]
         public void TestToString()
         {
-            Assert.AreEqual("(333/22/11)", new Geometry(333, 22, 11).ToString());
+            Assert.Equal("(333/22/11)", new Geometry(333, 22, 11).ToString());
         }
     }
 }

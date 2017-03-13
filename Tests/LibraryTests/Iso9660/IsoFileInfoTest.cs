@@ -24,14 +24,13 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Iso9660;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Iso9660
 {
-    [TestFixture]
     public class IsoFileInfoTest
     {
-        [Test]
+        [Fact]
         public void Length()
         {
             CDBuilder builder = new CDBuilder();
@@ -41,15 +40,15 @@ namespace LibraryTests.Iso9660
             builder.AddFile(@"FILE3.TXT;2", new byte[132]);
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual(0, fs.GetFileInfo("FILE.txt").Length);
-            Assert.AreEqual(1, fs.GetFileInfo("FILE2.txt").Length);
-            Assert.AreEqual(10032, fs.GetFileInfo("FILE3.txt;1").Length);
-            Assert.AreEqual(132, fs.GetFileInfo("FILE3.txt;2").Length);
-            Assert.AreEqual(132, fs.GetFileInfo("FILE3.txt").Length);
+            Assert.Equal(0, fs.GetFileInfo("FILE.txt").Length);
+            Assert.Equal(1, fs.GetFileInfo("FILE2.txt").Length);
+            Assert.Equal(10032, fs.GetFileInfo("FILE3.txt;1").Length);
+            Assert.Equal(132, fs.GetFileInfo("FILE3.txt;2").Length);
+            Assert.Equal(132, fs.GetFileInfo("FILE3.txt").Length);
         }
 
-        [Test]
-        [Category("ThrowsException")]
+        [Fact]
+        [Trait("Category", "ThrowsException")]
         public void Open_FileNotFound()
         {
             CDBuilder builder = new CDBuilder();
@@ -64,7 +63,7 @@ namespace LibraryTests.Iso9660
             });
         }
 
-        [Test]
+        [Fact]
         public void Open_Read()
         {
             CDBuilder builder = new CDBuilder();
@@ -74,25 +73,25 @@ namespace LibraryTests.Iso9660
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
             using (Stream s = di.Open(FileMode.Open, FileAccess.Read))
             {
-                Assert.IsFalse(s.CanWrite);
-                Assert.IsTrue(s.CanRead);
+                Assert.False(s.CanWrite);
+                Assert.True(s.CanRead);
 
-                Assert.AreEqual(1, s.ReadByte());
+                Assert.Equal(1, s.ReadByte());
             }
         }
 
-        [Test]
+        [Fact]
         public void Name()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual("foo.txt", fs.GetFileInfo("foo.txt").Name);
-            Assert.AreEqual("foo.txt", fs.GetFileInfo(@"path\foo.txt").Name);
-            Assert.AreEqual("foo.txt", fs.GetFileInfo(@"\foo.txt").Name);
+            Assert.Equal("foo.txt", fs.GetFileInfo("foo.txt").Name);
+            Assert.Equal("foo.txt", fs.GetFileInfo(@"path\foo.txt").Name);
+            Assert.Equal("foo.txt", fs.GetFileInfo(@"\foo.txt").Name);
         }
 
-        [Test]
+        [Fact]
         public void Attributes()
         {
             CDBuilder builder = new CDBuilder();
@@ -102,42 +101,42 @@ namespace LibraryTests.Iso9660
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
 
             // Check default attributes
-            Assert.AreEqual(FileAttributes.ReadOnly, fi.Attributes);
+            Assert.Equal(FileAttributes.ReadOnly, fi.Attributes);
         }
 
-        [Test]
+        [Fact]
         public void Exists()
         {
             CDBuilder builder = new CDBuilder();
             builder.AddFile(@"dir\foo.txt", new byte[] { 1 });
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.IsFalse(fs.GetFileInfo("unknown.txt").Exists);
-            Assert.IsTrue(fs.GetFileInfo(@"dir\foo.txt").Exists);
-            Assert.IsFalse(fs.GetFileInfo(@"dir").Exists);
+            Assert.False(fs.GetFileInfo("unknown.txt").Exists);
+            Assert.True(fs.GetFileInfo(@"dir\foo.txt").Exists);
+            Assert.False(fs.GetFileInfo(@"dir").Exists);
         }
 
-        [Test]
+        [Fact]
         public void CreationTimeUtc()
         {
             CDBuilder builder = new CDBuilder();
             builder.AddFile(@"foo.txt", new byte[] { 1 });
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.GreaterOrEqual(DateTime.UtcNow, fs.GetFileInfo("foo.txt").CreationTimeUtc);
-            Assert.LessOrEqual(DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(10)), fs.GetFileInfo("foo.txt").CreationTimeUtc);
+            Assert.True(DateTime.UtcNow >= fs.GetFileInfo("foo.txt").CreationTimeUtc);
+            Assert.True(DateTime.UtcNow.Subtract(TimeSpan.FromSeconds(10)) <= fs.GetFileInfo("foo.txt").CreationTimeUtc);
         }
 
-        [Test]
+        [Fact]
         public void Equals()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual(fs.GetFileInfo("foo.txt"), fs.GetFileInfo("foo.txt"));
+            Assert.Equal(fs.GetFileInfo("foo.txt"), fs.GetFileInfo("foo.txt"));
         }
 
-        [Test]
+        [Fact]
         public void Parent()
         {
             CDBuilder builder = new CDBuilder();
@@ -145,8 +144,8 @@ namespace LibraryTests.Iso9660
             CDReader fs = new CDReader(builder.Build(), false);
 
             DiscFileInfo fi = fs.GetFileInfo(@"SOMEDIR\ADIR\FILE.TXT");
-            Assert.AreEqual(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Parent);
-            Assert.AreEqual(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Directory);
+            Assert.Equal(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Parent);
+            Assert.Equal(fs.GetDirectoryInfo(@"SOMEDIR\ADIR"), fi.Directory);
         }
     }
 }

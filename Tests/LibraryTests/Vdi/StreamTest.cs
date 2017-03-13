@@ -24,27 +24,26 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Vdi;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vdi
 {
-    [TestFixture]
     public class StreamTest
     {
-        [Test]
+        [Fact]
         public void Attributes()
         {
             MemoryStream stream = new MemoryStream();
             using (Disk disk = Disk.InitializeDynamic(stream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
                 Stream s = disk.Content;
-                Assert.IsTrue(s.CanRead);
-                Assert.IsTrue(s.CanWrite);
-                Assert.IsTrue(s.CanSeek);
+                Assert.True(s.CanRead);
+                Assert.True(s.CanWrite);
+                Assert.True(s.CanSeek);
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteSmall()
         {
             MemoryStream stream = new MemoryStream();
@@ -58,21 +57,21 @@ namespace LibraryTests.Vdi
 
                 Stream s = disk.Content;
                 s.Write(content, 10, 40);
-                Assert.AreEqual(40, s.Position);
+                Assert.Equal(40, s.Position);
                 s.Write(content, 50, 50);
-                Assert.AreEqual(90, s.Position);
+                Assert.Equal(90, s.Position);
                 s.Position = 0;
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 60);
-                Assert.AreEqual(60, s.Position);
+                Assert.Equal(60, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 60; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
 
@@ -83,19 +82,19 @@ namespace LibraryTests.Vdi
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 20);
-                Assert.AreEqual(20, s.Position);
+                Assert.Equal(20, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 20; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteLarge()
         {
             MemoryStream stream = new MemoryStream();
@@ -119,13 +118,13 @@ namespace LibraryTests.Vdi
                 {
                     if (buffer[i] != content[i])
                     {
-                        Assert.Fail("Corrupt stream contents");
+                        Assert.True(false, "Corrupt stream contents");
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void DisposeTest()
         {
             Stream contentStream;
@@ -139,12 +138,12 @@ namespace LibraryTests.Vdi
             try
             {
                 contentStream.Position = 0;
-                Assert.Fail("Able to use stream after disposed");
+                Assert.True(false, "Able to use stream after disposed");
             }
             catch(ObjectDisposedException) { }
         }
 
-        [Test]
+        [Fact]
         public void ReadNotPresent()
         {
             MemoryStream stream = new MemoryStream();
@@ -158,7 +157,7 @@ namespace LibraryTests.Vdi
                 {
                     if (buffer[i] != 0)
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }

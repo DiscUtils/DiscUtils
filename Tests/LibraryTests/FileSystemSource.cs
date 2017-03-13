@@ -22,8 +22,9 @@
 
 using System.Collections.Generic;
 using DiscUtils;
+using DiscUtils.Fat;
 using DiscUtils.Ntfs;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
@@ -31,26 +32,24 @@ namespace LibraryTests
 
     public static class FileSystemSource
     {
-        public static IEnumerable<TestCaseData> ReadWriteFileSystems
+        public static IEnumerable<object[]> ReadWriteFileSystems
         {
             get
             {
-                yield return new TestCaseData(
-                    new NewFileSystemDelegate(FatFileSystem)).SetName("FAT");
+                yield return new object[] { new NewFileSystemDelegate(FatFileSystem) };
 
                 // TODO: When format code complete, format a vanilla partition rather than relying on file on disk
-                yield return new TestCaseData(
-                    new NewFileSystemDelegate(DiagnosticNtfsFileSystem)).SetName("NTFS");
+                yield return new object[] { new NewFileSystemDelegate(DiagnosticNtfsFileSystem) };
             }
         }
 
 
-        public static IEnumerable<TestCaseData> QuickReadWriteFileSystems
+        public static IEnumerable<object[]> QuickReadWriteFileSystems
         {
             get
             {
-                yield return new TestCaseData(new NewFileSystemDelegate(FatFileSystem)).SetName("FAT");
-                yield return new TestCaseData(new NewFileSystemDelegate(NtfsFileSystem)).SetName("NTFS");
+                yield return new object[] { new NewFileSystemDelegate(FatFileSystem) };
+                yield return new object[] { new NewFileSystemDelegate(NtfsFileSystem) };
             }
         }
 

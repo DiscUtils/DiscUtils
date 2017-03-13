@@ -25,21 +25,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     public class ThreadSafeStreamTest
     {
-        [Test]
+        [Fact]
         public void OpenView()
         {
             ThreadSafeStream tss = new ThreadSafeStream(SparseStream.FromStream(Stream.Null, Ownership.None));
             SparseStream view = tss.OpenView();
         }
 
-        [Test]
+        [Fact]
         public void ViewIO()
         {
             SparseMemoryStream memStream = new SparseMemoryStream();
@@ -51,40 +50,40 @@ namespace LibraryTests
 
             // Check positions are independant
             tss.Position = 100;
-            Assert.AreEqual(0, altView.Position);
-            Assert.AreEqual(100, tss.Position);
+            Assert.Equal(0, altView.Position);
+            Assert.Equal(100, tss.Position);
 
             // Check I/O is synchronous
             byte[] buffer = new byte[200];
             tss.WriteByte(99);
             altView.Read(buffer, 0, 200);
-            Assert.AreEqual(99, buffer[100]);
+            Assert.Equal(99, buffer[100]);
 
             // Check positions are updated correctly
-            Assert.AreEqual(200, altView.Position);
-            Assert.AreEqual(101, tss.Position);
+            Assert.Equal(200, altView.Position);
+            Assert.Equal(101, tss.Position);
         }
 
-        [Test]
+        [Fact]
         public void ChangeLengthFails()
         {
             SparseMemoryStream memStream = new SparseMemoryStream();
             memStream.SetLength(2);
 
             ThreadSafeStream tss = new ThreadSafeStream(memStream);
-            Assert.AreEqual(2, tss.Length);
+            Assert.Equal(2, tss.Length);
 
             try
             {
                 tss.SetLength(10);
-                Assert.Fail("SetLength should fail");
+                Assert.True(false, "SetLength should fail");
             }
             catch (NotSupportedException)
             {
             }
         }
 
-        [Test]
+        [Fact]
         public void Extents()
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
@@ -98,17 +97,17 @@ namespace LibraryTests
             tss.WriteByte(99);
 
             List<StreamExtent> extents = new List<StreamExtent>(altView.Extents);
-            Assert.AreEqual(1, extents.Count);
-            Assert.AreEqual(100, extents[0].Start);
-            Assert.AreEqual(1, extents[0].Length);
+            Assert.Equal(1, extents.Count);
+            Assert.Equal(100, extents[0].Start);
+            Assert.Equal(1, extents[0].Length);
 
             extents = new List<StreamExtent>(altView.GetExtentsInRange(10, 300));
-            Assert.AreEqual(1, extents.Count);
-            Assert.AreEqual(100, extents[0].Start);
-            Assert.AreEqual(1, extents[0].Length);
+            Assert.Equal(1, extents.Count);
+            Assert.Equal(100, extents[0].Start);
+            Assert.Equal(1, extents[0].Length);
         }
 
-        [Test]
+        [Fact]
         public void DisposeView()
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
@@ -125,7 +124,7 @@ namespace LibraryTests
             altView2.ReadByte();
         }
 
-        [Test]
+        [Fact]
         public void Dispose_StopsView()
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
@@ -139,14 +138,14 @@ namespace LibraryTests
             try
             {
                 altView.ReadByte();
-                Assert.Fail("Disposed stream didn't stop view");
+                Assert.True(false, "Disposed stream didn't stop view");
             }
             catch (ObjectDisposedException)
             {
             }
         }
 
-        [Test]
+        [Fact]
         public void Seek()
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
@@ -155,37 +154,37 @@ namespace LibraryTests
             ThreadSafeStream tss = new ThreadSafeStream(memStream);
 
             tss.Seek(10, SeekOrigin.Begin);
-            Assert.AreEqual(10, tss.Position);
+            Assert.Equal(10, tss.Position);
 
             tss.Seek(10, SeekOrigin.Current);
-            Assert.AreEqual(20, tss.Position);
+            Assert.Equal(20, tss.Position);
 
             tss.Seek(-10, SeekOrigin.End);
-            Assert.AreEqual(1014, tss.Position);
+            Assert.Equal(1014, tss.Position);
         }
 
-        [Test]
+        [Fact]
         public void CanWrite()
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
             ThreadSafeStream tss = new ThreadSafeStream(memStream);
-            Assert.AreEqual(true, tss.CanWrite);
+            Assert.Equal(true, tss.CanWrite);
 
             memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.Read);
             tss = new ThreadSafeStream(memStream);
-            Assert.AreEqual(false, tss.CanWrite);
+            Assert.Equal(false, tss.CanWrite);
         }
 
-        [Test]
+        [Fact]
         public void CanRead()
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
             ThreadSafeStream tss = new ThreadSafeStream(memStream);
-            Assert.AreEqual(true, tss.CanRead);
+            Assert.Equal(true, tss.CanRead);
 
             memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.Write);
             tss = new ThreadSafeStream(memStream);
-            Assert.AreEqual(false, tss.CanRead);
+            Assert.Equal(false, tss.CanRead);
         }
     }
 }

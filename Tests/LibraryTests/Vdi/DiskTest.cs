@@ -24,22 +24,21 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Vdi;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vdi
 {
-    [TestFixture]
     public class DiskTest
     {
-        [Test]
+        [Fact]
         public void InitializeFixed()
         {
             MemoryStream ms = new MemoryStream();
             using (Disk disk = Disk.InitializeFixed(ms, Ownership.None, 8 * 1024 * 1024))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity < 8 * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity <= disk.Content.Length);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity < 8 * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity <= disk.Content.Length);
             }
 
             // Check the stream is still valid
@@ -47,7 +46,7 @@ namespace LibraryTests.Vdi
             ms.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void InitializeFixedOwnStream()
         {
             MemoryStream ms = new MemoryStream();
@@ -57,27 +56,27 @@ namespace LibraryTests.Vdi
             Assert.Throws<ObjectDisposedException>(() => ms.ReadByte());
         }
 
-        [Test]
+        [Fact]
         public void InitializeDynamic()
         {
             MemoryStream ms = new MemoryStream();
             using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity <= disk.Content.Length);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity <= disk.Content.Length);
             }
 
-            Assert.Greater(1 * 1024 * 1024, ms.Length);
+            Assert.True(1 * 1024 * 1024 > ms.Length);
 
             using (Disk disk = new Disk(ms))
             {
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity <= disk.Content.Length);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity <= disk.Content.Length);
             }
         }
 
-        [Test]
+        [Fact]
         public void ConstructorDynamic()
         {
             Geometry geometry;
@@ -88,13 +87,13 @@ namespace LibraryTests.Vdi
             }
             using (Disk disk = new Disk(ms))
             {
-                Assert.AreEqual(geometry, disk.Geometry);
-                Assert.IsNotNull(disk.Content);
+                Assert.Equal(geometry, disk.Geometry);
+                Assert.NotNull(disk.Content);
             }
             using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
-                Assert.AreEqual(geometry, disk.Geometry);
-                Assert.IsNotNull(disk.Content);
+                Assert.Equal(geometry, disk.Geometry);
+                Assert.NotNull(disk.Content);
             }
         }
     }

@@ -25,14 +25,13 @@ using DiscUtils;
 using DiscUtils.Fat;
 using DiscUtils.Partitions;
 using DiscUtils.Vhd;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Combined
 {
-    [TestFixture]
     public class CombinedTest
     {
-        [Test]
+        [Fact]
         public void SimpleVhdFat()
         {
             using (Disk disk = Disk.InitializeDynamic(new MemoryStream(), Ownership.Dispose, 16 * 1024 * 1024))
@@ -45,7 +44,7 @@ namespace LibraryTests.Combined
             }
         }
 
-        [Test]
+        [Fact]
         public void FormatSecondFatPartition()
         {
             MemoryStream ms = new MemoryStream();
@@ -58,7 +57,7 @@ namespace LibraryTests.Combined
 
             FatFileSystem fileSystem = FatFileSystem.FormatPartition(disk, 1, null);
             long fileSystemSize = fileSystem.TotalSectors * fileSystem.BytesPerSector;
-            Assert.IsTrue(fileSystemSize > (5 * 1024 * 1024) * 0.9);
+            Assert.True(fileSystemSize > (5 * 1024 * 1024) * 0.9);
         }
 
     }

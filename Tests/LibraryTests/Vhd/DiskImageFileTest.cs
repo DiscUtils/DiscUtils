@@ -24,14 +24,13 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Vhd;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vhd
 {
-    [TestFixture]
     public class DiskImageFileTest
     {
-        [Test]
+        [Fact]
         public void InitializeDifferencing()
         {
             MemoryStream baseStream = new MemoryStream();
@@ -40,16 +39,16 @@ namespace LibraryTests.Vhd
             {
                 using (DiskImageFile diffFile = DiskImageFile.InitializeDifferencing(diffStream, Ownership.None, baseFile, @"C:\TEMP\Base.vhd", @".\Base.vhd", new DateTime(2007, 12, 31)))
                 {
-                    Assert.IsNotNull(diffFile);
-                    Assert.That(diffFile.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && diffFile.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                    Assert.IsTrue(diffFile.IsSparse);
-                    Assert.AreNotEqual(diffFile.CreationTimestamp, new DateTime(2007, 12, 31));
+                    Assert.NotNull(diffFile);
+                    Assert.True(diffFile.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && diffFile.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                    Assert.True(diffFile.IsSparse);
+                    Assert.NotEqual(diffFile.CreationTimestamp, new DateTime(2007, 12, 31));
                 }
             }
-            Assert.Greater(1 * 1024 * 1024, diffStream.Length);
+            Assert.True(1 * 1024 * 1024 > diffStream.Length);
         }
 
-        [Test]
+        [Fact]
         public void GetParentLocations()
         {
             MemoryStream baseStream = new MemoryStream();
@@ -70,22 +69,22 @@ namespace LibraryTests.Vhd
 #pragma warning disable 618
                 string[] locations = diffFile.GetParentLocations(@"E:\FOO\");
 #pragma warning restore 618
-                Assert.AreEqual(2, locations.Length);
-                Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
-                Assert.AreEqual(@"E:\FOO\Base.vhd", locations[1]);
+                Assert.Equal(2, locations.Length);
+                Assert.Equal(@"C:\TEMP\Base.vhd", locations[0]);
+                Assert.Equal(@"E:\FOO\Base.vhd", locations[1]);
             }
 
             using (DiskImageFile diffFile = new DiskImageFile(diffStream))
             {
                 // Testing the new method - note relative path because diff file initialized without a path
                 string[] locations = diffFile.GetParentLocations();
-                Assert.AreEqual(2, locations.Length);
-                Assert.AreEqual(@"C:\TEMP\Base.vhd", locations[0]);
-                Assert.AreEqual(@".\Base.vhd", locations[1]);
+                Assert.Equal(2, locations.Length);
+                Assert.Equal(@"C:\TEMP\Base.vhd", locations[0]);
+                Assert.Equal(@".\Base.vhd", locations[1]);
             }
         }
 
-        [Test]
+        [Fact]
         public void FooterMissing()
         {
             //
@@ -104,7 +103,7 @@ namespace LibraryTests.Vhd
 
             using (DiskImageFile file = new DiskImageFile(stream))
             {
-                Assert.AreEqual(geometry, file.Geometry);
+                Assert.Equal(geometry, file.Geometry);
             }
         }
     }

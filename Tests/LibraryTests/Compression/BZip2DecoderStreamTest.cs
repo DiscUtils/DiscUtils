@@ -24,11 +24,10 @@ using System.IO;
 using System.Text;
 using DiscUtils;
 using DiscUtils.Compression;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Compression
 {
-    [TestFixture]
     public class BZip2DecoderStreamTest
     {
         private readonly byte[] ValidData =
@@ -58,20 +57,20 @@ namespace LibraryTests.Compression
                 0xA2, 0xEE, 0x48, 0xA7, 0x0A, 0x12, 0x1E, 0xE7, 0x88, 0xCF, 0xC0
             };
 
-        [Test]
+        [Fact]
         public void TestValidStream()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(ValidData), Ownership.Dispose);
 
             byte[] buffer = new byte[1024];
             int numRead = decoder.Read(buffer, 0, 1024);
-            Assert.AreEqual(21, numRead);
+            Assert.Equal(21, numRead);
 
             string s = Encoding.ASCII.GetString(buffer, 0, numRead);
-            Assert.AreEqual("This is a test string", s);
+            Assert.Equal("This is a test string", s);
         }
 
-        [Test]
+        [Fact]
         public void TestInvalidBlockCrcStream()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(InvalidBlockCrcData), Ownership.Dispose);
@@ -80,7 +79,7 @@ namespace LibraryTests.Compression
             Assert.Throws<InvalidDataException>(() => decoder.Read(buffer, 0, 1024));
         }
 
-        [Test]
+        [Fact]
         public void TestCombinedCrcStream()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(InvalidCombinedCrcData), Ownership.Dispose);
@@ -89,7 +88,7 @@ namespace LibraryTests.Compression
             Assert.Throws<InvalidDataException>(() => decoder.Read(buffer, 0, 1024));
         }
 
-        [Test]
+        [Fact]
         public void TestCombinedCrcStream_ExactLengthRead()
         {
             BZip2DecoderStream decoder = new BZip2DecoderStream(new MemoryStream(InvalidCombinedCrcData), Ownership.Dispose);

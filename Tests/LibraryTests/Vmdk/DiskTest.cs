@@ -25,78 +25,76 @@ using System.IO;
 using DiscUtils;
 using DiscUtils.Complete;
 using DiscUtils.Vmdk;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vmdk
 {
-    [TestFixture]
     public class DiskTest
     {
-        [OneTimeSetUp]
-        public static void RunBeforeAnyTests()
+        public DiskTest()
         {
             SetupHelper.SetupComplete();
         }
 
-        [Test]
+        [Fact]
         public void InitializeFixed()
         {
             using (Disk disk = Disk.Initialize(new InMemoryFileSystem(), "a.vmdk", 8 * 1024 * 1024, DiskCreateType.MonolithicFlat))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 7.9 * 1024 * 1024 && disk.Geometry.Capacity < 8.1 * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 7.9 * 1024 * 1024 && disk.Geometry.Capacity < 8.1 * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity == disk.Content.Length);
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.AreEqual(1, paths.Count);
-                Assert.AreEqual("a-flat.vmdk", paths[0]);
+                Assert.Equal(1, paths.Count);
+                Assert.Equal("a-flat.vmdk", paths[0]);
             }
         }
 
-        [Test]
+        [Fact]
         public void InitializeFixedIDE()
         {
             using (Disk disk = Disk.Initialize(new InMemoryFileSystem(), "a.vmdk", 8 * 1024 * 1024, DiskCreateType.MonolithicFlat, DiskAdapterType.Ide))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 7.9 * 1024 * 1024 && disk.Geometry.Capacity < 8.1 * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == disk.Content.Length);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 7.9 * 1024 * 1024 && disk.Geometry.Capacity < 8.1 * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity == disk.Content.Length);
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.AreEqual(1, paths.Count);
-                Assert.AreEqual("a-flat.vmdk", paths[0]);
+                Assert.Equal(1, paths.Count);
+                Assert.Equal("a-flat.vmdk", paths[0]);
             }
         }
 
-        [Test]
+        [Fact]
         public void InitializeDynamic()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
             using (Disk disk = Disk.Initialize(fs, "a.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.MonolithicSparse))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Content.Length == 16 * 1024L * 1024 * 1024);
             }
 
-            Assert.Greater(fs.GetFileLength("a.vmdk"), 2 * 1024 * 1024);
-            Assert.Less(fs.GetFileLength("a.vmdk"), 4 * 1024 * 1024);
+            Assert.True(fs.GetFileLength("a.vmdk") > 2 * 1024 * 1024);
+            Assert.True(fs.GetFileLength("a.vmdk") < 4 * 1024 * 1024);
 
             using (Disk disk = new Disk(fs, "a.vmdk", FileAccess.Read))
             {
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Content.Length == 16 * 1024L * 1024 * 1024);
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.AreEqual(1, paths.Count);
-                Assert.AreEqual("a.vmdk", paths[0]);
+                Assert.Equal(1, paths.Count);
+                Assert.Equal("a.vmdk", paths[0]);
             }
         }
 
-        [Test]
+        [Fact]
         public void InitializeDifferencing()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -104,23 +102,23 @@ namespace LibraryTests.Vmdk
             DiskImageFile baseFile = DiskImageFile.Initialize(fs, @"\base\base.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.MonolithicSparse);
             using (Disk disk = Disk.InitializeDifferencing(fs, @"\diff\diff.vmdk", DiskCreateType.MonolithicSparse, @"\base\base.vmdk"))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
-                Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Content.Length == 16 * 1024L * 1024 * 1024);
+                Assert.Equal(2, new List<VirtualDiskLayer>(disk.Layers).Count);
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
-                Assert.AreEqual(2, links.Count);
+                Assert.Equal(2, links.Count);
 
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.AreEqual(1, paths.Count);
-                Assert.AreEqual("diff.vmdk", paths[0]);
+                Assert.Equal(1, paths.Count);
+                Assert.Equal("diff.vmdk", paths[0]);
             }
-            Assert.Greater(fs.GetFileLength(@"\diff\diff.vmdk"), 2 * 1024 * 1024);
-            Assert.Less(fs.GetFileLength(@"\diff\diff.vmdk"), 4 * 1024 * 1024);
+            Assert.True(fs.GetFileLength(@"\diff\diff.vmdk") > 2 * 1024 * 1024);
+            Assert.True(fs.GetFileLength(@"\diff\diff.vmdk") < 4 * 1024 * 1024);
         }
 
-        [Test]
+        [Fact]
         public void InitializeDifferencingRelPath()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -128,16 +126,16 @@ namespace LibraryTests.Vmdk
             DiskImageFile baseFile = DiskImageFile.Initialize(fs, @"\dir\subdir\base.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.MonolithicSparse);
             using (Disk disk = Disk.InitializeDifferencing(fs, @"\dir\diff.vmdk", DiskCreateType.MonolithicSparse, @"subdir\base.vmdk"))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Content.Length == 16 * 1024L * 1024 * 1024);
-                Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity < 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Content.Length == 16 * 1024L * 1024 * 1024);
+                Assert.Equal(2, new List<VirtualDiskLayer>(disk.Layers).Count);
             }
-            Assert.Greater(fs.GetFileLength(@"\dir\diff.vmdk"), 2 * 1024 * 1024);
-            Assert.Less(fs.GetFileLength(@"\dir\diff.vmdk"), 4 * 1024 * 1024);
+            Assert.True(fs.GetFileLength(@"\dir\diff.vmdk") > 2 * 1024 * 1024);
+            Assert.True(fs.GetFileLength(@"\dir\diff.vmdk") < 4 * 1024 * 1024);
         }
 
-        [Test]
+        [Fact]
         public void ReadOnlyHosted()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -146,7 +144,7 @@ namespace LibraryTests.Vmdk
             }
 
             Disk d2 = new Disk(fs, "a.vmdk", FileAccess.Read);
-            Assert.IsFalse(d2.Content.CanWrite);
+            Assert.False(d2.Content.CanWrite);
         }
     }
 }

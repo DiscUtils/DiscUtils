@@ -24,14 +24,13 @@ using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Xva;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Xva
 {
-    [TestFixture]
     public class VirtualMachineBuilderTest
     {
-        [Test]
+        [Fact]
         public void TestEmpty()
         {
             MemoryStream xvaStream = new MemoryStream();
@@ -39,15 +38,15 @@ namespace LibraryTests.Xva
             vmb.AddDisk("Foo", new MemoryStream(), Ownership.Dispose);
             vmb.Build(xvaStream);
 
-            Assert.AreNotEqual(0, xvaStream.Length);
+            Assert.NotEqual(0, xvaStream.Length);
 
             VirtualMachine vm = new VirtualMachine(xvaStream);
             List<Disk> disks = new List<Disk>(vm.Disks);
-            Assert.AreEqual(1, disks.Count);
-            Assert.AreEqual(0, disks[0].Capacity);
+            Assert.Equal(1, disks.Count);
+            Assert.Equal(0, disks[0].Capacity);
         }
 
-        [Test]
+        [Fact]
         public void TestNotEmpty()
         {
             MemoryStream xvaStream = new MemoryStream();
@@ -63,12 +62,12 @@ namespace LibraryTests.Xva
             vmb.AddDisk("Foo", ms, Ownership.Dispose);
             vmb.Build(xvaStream);
 
-            Assert.AreNotEqual(0, xvaStream.Length);
+            Assert.NotEqual(0, xvaStream.Length);
 
             VirtualMachine vm = new VirtualMachine(xvaStream);
             List<Disk> disks = new List<Disk>(vm.Disks);
-            Assert.AreEqual(1, disks.Count);
-            Assert.AreEqual(10 * 1024 * 1024, disks[0].Capacity);
+            Assert.Equal(1, disks.Count);
+            Assert.Equal(10 * 1024 * 1024, disks[0].Capacity);
 
             Stream diskContent = disks[0].Content;
             for (int i = 0; i < 1024 * 1024; ++i)
@@ -76,7 +75,7 @@ namespace LibraryTests.Xva
                 diskContent.Position = i * 10;
                 if ((byte)(i ^ (i >> 8) ^ (i >> 16) ^ (i >> 24)) != diskContent.ReadByte())
                 {
-                    Assert.Fail("Mismatch at offset " + i);
+                    Assert.True(false, "Mismatch at offset " + i);
                 }
             }
         }

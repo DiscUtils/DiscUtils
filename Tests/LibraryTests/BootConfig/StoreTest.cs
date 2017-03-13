@@ -24,14 +24,13 @@ using System;
 using System.IO;
 using DiscUtils.BootConfig;
 using DiscUtils.Registry;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.BootConfig
 {
-    [TestFixture]
     public class StoreTest
     {
-        [Test]
+        [Fact]
         public void Initialize()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -43,58 +42,58 @@ namespace LibraryTests.BootConfig
             {
                 ++i;
             }
-            Assert.AreEqual(0, i);
+            Assert.Equal(0, i);
         }
 
-        [Test]
+        [Fact]
         public void CreateApplication()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
             Store s = Store.Initialize(hive.Root);
 
             BcdObject obj = s.CreateApplication(ApplicationImageType.WindowsBoot, ApplicationType.BootManager);
-            Assert.AreNotEqual(Guid.Empty, obj.Identity);
+            Assert.NotEqual(Guid.Empty, obj.Identity);
 
-            Assert.AreEqual(ObjectType.Application, obj.ObjectType);
+            Assert.Equal(ObjectType.Application, obj.ObjectType);
 
             BcdObject reGet = s.GetObject(obj.Identity);
-            Assert.AreEqual(obj.Identity, reGet.Identity);
+            Assert.Equal(obj.Identity, reGet.Identity);
         }
 
-        [Test]
+        [Fact]
         public void CreateDevice()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
             Store s = Store.Initialize(hive.Root);
 
             BcdObject obj = s.CreateDevice();
-            Assert.AreNotEqual(Guid.Empty, obj.Identity);
+            Assert.NotEqual(Guid.Empty, obj.Identity);
 
-            Assert.AreEqual(ObjectType.Device, obj.ObjectType);
+            Assert.Equal(ObjectType.Device, obj.ObjectType);
 
             BcdObject reGet = s.GetObject(obj.Identity);
-            Assert.AreEqual(obj.Identity, reGet.Identity);
+            Assert.Equal(obj.Identity, reGet.Identity);
         }
 
-        [Test]
+        [Fact]
         public void CreateInherit()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
             Store s = Store.Initialize(hive.Root);
 
             BcdObject obj = s.CreateInherit(InheritType.ApplicationObjects);
-            Assert.AreNotEqual(Guid.Empty, obj.Identity);
+            Assert.NotEqual(Guid.Empty, obj.Identity);
 
-            Assert.AreEqual(ObjectType.Inherit, obj.ObjectType);
+            Assert.Equal(ObjectType.Inherit, obj.ObjectType);
 
-            Assert.IsTrue(obj.IsInheritableBy(ObjectType.Application));
-            Assert.IsFalse(obj.IsInheritableBy(ObjectType.Device));
+            Assert.True(obj.IsInheritableBy(ObjectType.Application));
+            Assert.False(obj.IsInheritableBy(ObjectType.Device));
 
             BcdObject reGet = s.GetObject(obj.Identity);
-            Assert.AreEqual(obj.Identity, reGet.Identity);
+            Assert.Equal(obj.Identity, reGet.Identity);
         }
 
-        [Test]
+        [Fact]
         public void RemoveObject()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -104,7 +103,7 @@ namespace LibraryTests.BootConfig
             s.RemoveObject(obj.Identity);
         }
 
-        [Test]
+        [Fact]
         public void RemoveObject_NonExistent()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());

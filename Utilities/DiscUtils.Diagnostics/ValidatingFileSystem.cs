@@ -613,14 +613,25 @@ namespace DiscUtils.Diagnostics
         {
             try
             {
+#if NET40
                 return (TFileSystem)typeof(TFileSystem).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#else
+                return (TFileSystem)typeof(TFileSystem).GetTypeInfo().GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#endif
             }
             catch (TargetInvocationException tie)
             {
+#if NET40
                 FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
                 remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
 
+                throw tie.InnerException;
+#else
+                FieldInfo remoteStackTraceString = typeof(Exception).GetTypeInfo().GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+                remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
+
                 throw tie.InnerException; 
+#endif
             }
         }
 
@@ -628,14 +639,25 @@ namespace DiscUtils.Diagnostics
         {
             try
             {
+#if NET40
                 return (TChecker)typeof(TChecker).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#else
+                return (TChecker)typeof(TChecker).GetTypeInfo().GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#endif
             }
             catch (TargetInvocationException tie)
             {
+#if NET40
                 FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
                 remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
 
                 throw tie.InnerException;
+#else
+                FieldInfo remoteStackTraceString = typeof(Exception).GetTypeInfo().GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+                remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
+
+                throw tie.InnerException;
+#endif
             }
         }
 
@@ -680,8 +702,13 @@ namespace DiscUtils.Diagnostics
         {
             get
             {
+#if NET40
                 ConstructorInfo ctor = typeof(DiscDirectoryInfo).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(DiscFileSystem), typeof(string) }, null);
                 return (DiscDirectoryInfo)ctor.Invoke(new object[] { this, @"" });
+#else
+                ConstructorInfo ctor = typeof(DiscDirectoryInfo).GetTypeInfo().GetConstructor(new Type[] { typeof(DiscFileSystem), typeof(string) });
+                return (DiscDirectoryInfo)ctor.Invoke(new object[] { this, @"" });
+#endif
             }
         }
 

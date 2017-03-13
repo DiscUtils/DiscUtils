@@ -25,14 +25,13 @@ using System.IO;
 using System.Security.AccessControl;
 using DiscUtils;
 using DiscUtils.Ntfs;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Ntfs
 {
-    [TestFixture]
     public class NtfsFileSystemTest
     {
-        [Test]
+        [Fact]
         public void AclInheritance()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -45,15 +44,15 @@ namespace LibraryTests.Ntfs
             RawSecurityDescriptor inheritedSd = ntfs.GetSecurity(@"dir\subdir");
 
             Assert.NotNull(inheritedSd);
-            Assert.AreEqual("O:BAG:BAD:(A;ID;GA;;;BA)", inheritedSd.GetSddlForm(AccessControlSections.All));
+            Assert.Equal("O:BAG:BAD:(A;ID;GA;;;BA)", inheritedSd.GetSddlForm(AccessControlSections.All));
 
             using (ntfs.OpenFile(@"dir\subdir\file", FileMode.Create, FileAccess.ReadWrite)) { }
             inheritedSd = ntfs.GetSecurity(@"dir\subdir\file");
             Assert.NotNull(inheritedSd);
-            Assert.AreEqual("O:BAG:BAD:", inheritedSd.GetSddlForm(AccessControlSections.All));
+            Assert.Equal("O:BAG:BAD:", inheritedSd.GetSddlForm(AccessControlSections.All));
         }
 
-        [Test]
+        [Fact]
         public void ReparsePoints_Empty()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -63,12 +62,12 @@ namespace LibraryTests.Ntfs
 
             ReparsePoint rp = ntfs.GetReparsePoint("dir");
 
-            Assert.AreEqual(12345, rp.Tag);
-            Assert.IsNotNull(rp.Content);
-            Assert.AreEqual(0, rp.Content.Length);
+            Assert.Equal(12345, rp.Tag);
+            Assert.NotNull(rp.Content);
+            Assert.Equal(0, rp.Content.Length);
         }
 
-        [Test]
+        [Fact]
         public void ReparsePoints_NonEmpty()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -78,12 +77,12 @@ namespace LibraryTests.Ntfs
 
             ReparsePoint rp = ntfs.GetReparsePoint("dir");
 
-            Assert.AreEqual(123, rp.Tag);
-            Assert.IsNotNull(rp.Content);
-            Assert.AreEqual(3, rp.Content.Length);
+            Assert.Equal(123, rp.Tag);
+            Assert.NotNull(rp.Content);
+            Assert.Equal(3, rp.Content.Length);
         }
 
-        [Test]
+        [Fact]
         public void Format_SmallDisk()
         {
             long size = 8 * 1024 * 1024;
@@ -95,7 +94,7 @@ namespace LibraryTests.Ntfs
             ntfs.Dump(TextWriter.Null, "");
         }
 
-        [Test]
+        [Fact]
         public void Format_LargeDisk()
         {
             long size = 1024L * 1024 * 1024L * 1024; // 1 TB
@@ -106,7 +105,7 @@ namespace LibraryTests.Ntfs
             ntfs.Dump(TextWriter.Null, "");
         }
 
-        [Test]
+        [Fact]
         public void ClusterInfo()
         {
             // 'Big' files have clusters
@@ -117,8 +116,8 @@ namespace LibraryTests.Ntfs
             }
 
             var ranges = ntfs.PathToClusters("file");
-            Assert.AreEqual(1, ranges.Length);
-            Assert.AreEqual(1, ranges[0].Count);
+            Assert.Equal(1, ranges.Length);
+            Assert.Equal(1, ranges[0].Count);
 
 
             // Short files have no clusters (stored in MFT)
@@ -127,10 +126,10 @@ namespace LibraryTests.Ntfs
                 s.WriteByte(1);
             }
             ranges = ntfs.PathToClusters("file2");
-            Assert.AreEqual(0, ranges.Length);
+            Assert.Equal(0, ranges.Length);
         }
 
-        [Test]
+        [Fact]
         public void ExtentInfo()
         {
             using (SparseMemoryStream ms = new SparseMemoryStream())
@@ -149,13 +148,13 @@ namespace LibraryTests.Ntfs
                 }
 
                 var extents = ntfs.PathToExtents("file");
-                Assert.AreEqual(1, extents.Length);
-                Assert.AreEqual(ntfs.ClusterSize, extents[0].Length);
+                Assert.Equal(1, extents.Length);
+                Assert.Equal(ntfs.ClusterSize, extents[0].Length);
 
                 ms.Position = extents[0].Start;
-                Assert.AreEqual(0xAE, ms.ReadByte());
-                Assert.AreEqual(0x3F, ms.ReadByte());
-                Assert.AreEqual(0x8D, ms.ReadByte());
+                Assert.Equal(0xAE, ms.ReadByte());
+                Assert.Equal(0x3F, ms.ReadByte());
+                Assert.Equal(0x8D, ms.ReadByte());
 
 
                 // Check resident attribute
@@ -166,20 +165,20 @@ namespace LibraryTests.Ntfs
                     s.WriteByte(0x2C);
                 }
                 extents = ntfs.PathToExtents("file2");
-                Assert.AreEqual(1, extents.Length);
-                Assert.AreEqual(3, extents[0].Length);
+                Assert.Equal(1, extents.Length);
+                Assert.Equal(3, extents[0].Length);
 
                 byte[] read = new byte[100];
                 ms.Position = extents[0].Start;
                 ms.Read(read, 0, 100);
 
-                Assert.AreEqual(0xBA, read[0]);
-                Assert.AreEqual(0x82, read[1]);
-                Assert.AreEqual(0x2C, read[2]);
+                Assert.Equal(0xBA, read[0]);
+                Assert.Equal(0x82, read[1]);
+                Assert.Equal(0x2C, read[2]);
             }
         }
 
-        [Test]
+        [Fact]
         public void ManyAttributes()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -195,14 +194,14 @@ namespace LibraryTests.Ntfs
 
             using (Stream s = ntfs.OpenFile("hl35", FileMode.Open, FileAccess.ReadWrite))
             {
-                Assert.AreEqual(32, s.ReadByte());
+                Assert.Equal(32, s.ReadByte());
                 s.Position = 0;
                 s.WriteByte(12);
             }
 
             using (Stream s = ntfs.OpenFile("hl5", FileMode.Open, FileAccess.ReadWrite))
             {
-                Assert.AreEqual(12, s.ReadByte());
+                Assert.Equal(12, s.ReadByte());
             }
 
             for (int i = 0; i < 50; ++i)
@@ -210,14 +209,14 @@ namespace LibraryTests.Ntfs
                 ntfs.DeleteFile("hl" + i);
             }
 
-            Assert.AreEqual(1, ntfs.GetFiles(@"\").Length);
+            Assert.Equal(1, ntfs.GetFiles(@"\").Length);
 
             ntfs.DeleteFile("file");
 
-            Assert.AreEqual(0, ntfs.GetFiles(@"\").Length);
+            Assert.Equal(0, ntfs.GetFiles(@"\").Length);
         }
 
-        [Test]
+        [Fact]
         public void ShortNames()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -225,89 +224,89 @@ namespace LibraryTests.Ntfs
             // Check we can find a short name in the same directory
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) {}
             ntfs.SetShortName("ALongFileName.txt", "ALONG~01.TXT");
-            Assert.AreEqual("ALONG~01.TXT", ntfs.GetShortName("ALongFileName.txt"));
-            Assert.IsTrue(ntfs.FileExists("ALONG~01.TXT"));
+            Assert.Equal("ALONG~01.TXT", ntfs.GetShortName("ALongFileName.txt"));
+            Assert.True(ntfs.FileExists("ALONG~01.TXT"));
 
             // Check path handling
             ntfs.CreateDirectory("DIR");
             using (Stream s = ntfs.OpenFile(@"DIR\ALongFileName2.txt", FileMode.CreateNew)) { }
             ntfs.SetShortName(@"DIR\ALongFileName2.txt", "ALONG~02.TXT");
-            Assert.AreEqual("ALONG~02.TXT", ntfs.GetShortName(@"DIR\ALongFileName2.txt"));
-            Assert.IsTrue(ntfs.FileExists(@"DIR\ALONG~02.TXT"));
+            Assert.Equal("ALONG~02.TXT", ntfs.GetShortName(@"DIR\ALongFileName2.txt"));
+            Assert.True(ntfs.FileExists(@"DIR\ALONG~02.TXT"));
 
             // Check we can open a file by the short name
             using (Stream s = ntfs.OpenFile("ALONG~01.TXT", FileMode.Open)) { }
 
             // Delete the long name, and make sure the file is gone
             ntfs.DeleteFile("ALONG~01.TXT");
-            Assert.IsFalse(ntfs.FileExists("ALONG~01.TXT"));
+            Assert.False(ntfs.FileExists("ALONG~01.TXT"));
 
             // Delete the short name, and make sure the file is gone
             ntfs.DeleteFile(@"DIR\ALONG~02.TXT");
-            Assert.IsFalse(ntfs.FileExists(@"DIR\ALongFileName2.txt"));
+            Assert.False(ntfs.FileExists(@"DIR\ALongFileName2.txt"));
         }
 
-        [Test]
+        [Fact]
         public void HardLinkCount()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
-            Assert.AreEqual(1, ntfs.GetHardLinkCount("ALongFileName.txt"));
+            Assert.Equal(1, ntfs.GetHardLinkCount("ALongFileName.txt"));
 
             ntfs.CreateHardLink("ALongFileName.txt", "AHardLink.TXT");
-            Assert.AreEqual(2, ntfs.GetHardLinkCount("ALongFileName.txt"));
+            Assert.Equal(2, ntfs.GetHardLinkCount("ALongFileName.txt"));
 
             ntfs.CreateDirectory("DIR");
             ntfs.CreateHardLink(@"ALongFileName.txt", @"DIR\SHORTLNK.TXT");
-            Assert.AreEqual(3, ntfs.GetHardLinkCount("ALongFileName.txt"));
+            Assert.Equal(3, ntfs.GetHardLinkCount("ALongFileName.txt"));
 
             // If we enumerate short names, then the initial long name results in two 'hardlinks'
             ntfs.NtfsOptions.HideDosFileNames = false;
-            Assert.AreEqual(4, ntfs.GetHardLinkCount("ALongFileName.txt"));
+            Assert.Equal(4, ntfs.GetHardLinkCount("ALongFileName.txt"));
         }
 
-        [Test]
+        [Fact]
         public void HasHardLink()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
-            Assert.IsFalse(ntfs.HasHardLinks("ALongFileName.txt"));
+            Assert.False(ntfs.HasHardLinks("ALongFileName.txt"));
 
             ntfs.CreateHardLink("ALongFileName.txt", "AHardLink.TXT");
-            Assert.IsTrue(ntfs.HasHardLinks("ALongFileName.txt"));
+            Assert.True(ntfs.HasHardLinks("ALongFileName.txt"));
 
             using (Stream s = ntfs.OpenFile("ALongFileName2.txt", FileMode.CreateNew)) { }
 
             // If we enumerate short names, then the initial long name results in two 'hardlinks'
             ntfs.NtfsOptions.HideDosFileNames = false;
-            Assert.IsTrue(ntfs.HasHardLinks("ALongFileName2.txt"));
+            Assert.True(ntfs.HasHardLinks("ALongFileName2.txt"));
         }
 
-        [Test]
+        [Fact]
         public void MoveLongName()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             using (Stream s = ntfs.OpenFile("ALongFileName.txt", FileMode.CreateNew)) { }
 
-            Assert.IsTrue(ntfs.FileExists("ALONGF~1.TXT"));
+            Assert.True(ntfs.FileExists("ALONGF~1.TXT"));
 
             ntfs.MoveFile("ALongFileName.txt", "ADifferentLongFileName.txt");
 
-            Assert.IsFalse(ntfs.FileExists("ALONGF~1.TXT"));
-            Assert.IsTrue(ntfs.FileExists("ADIFFE~1.TXT"));
+            Assert.False(ntfs.FileExists("ALONGF~1.TXT"));
+            Assert.True(ntfs.FileExists("ADIFFE~1.TXT"));
 
             ntfs.CreateDirectory("ALongDirectoryName");
-            Assert.IsTrue(ntfs.DirectoryExists("ALONGD~1"));
+            Assert.True(ntfs.DirectoryExists("ALONGD~1"));
 
             ntfs.MoveDirectory("ALongDirectoryName", "ADifferentLongDirectoryName");
-            Assert.IsFalse(ntfs.DirectoryExists("ALONGD~1"));
-            Assert.IsTrue(ntfs.DirectoryExists("ADIFFE~1"));
+            Assert.False(ntfs.DirectoryExists("ALONGD~1"));
+            Assert.True(ntfs.DirectoryExists("ADIFFE~1"));
         }
 
-        [Test]
+        [Fact]
         public void OpenRawStream()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -317,34 +316,34 @@ namespace LibraryTests.Ntfs
 #pragma warning restore 618
         }
 
-        [Test]
+        [Fact]
         public void GetAlternateDataStreams()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
-            ntfs.OpenFile("AFILE.TXT", FileMode.Create).Close();
-            Assert.AreEqual(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            ntfs.OpenFile("AFILE.TXT", FileMode.Create).Dispose();
+            Assert.Equal(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
 
-            ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Close();
-            Assert.AreEqual(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
-            Assert.AreEqual("ALTSTREAM", ntfs.GetAlternateDataStreams("AFILE.TXT")[0]);
+            ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Dispose();
+            Assert.Equal(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.Equal("ALTSTREAM", ntfs.GetAlternateDataStreams("AFILE.TXT")[0]);
         }
 
-        [Test]
+        [Fact]
         public void DeleteAlternateDataStreams()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
-            ntfs.OpenFile("AFILE.TXT", FileMode.Create).Close();
-            ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Close();
-            Assert.AreEqual(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            ntfs.OpenFile("AFILE.TXT", FileMode.Create).Dispose();
+            ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Dispose();
+            Assert.Equal(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
 
             ntfs.DeleteFile("AFILE.TXT:ALTSTREAM");
-            Assert.AreEqual(1, ntfs.GetFileSystemEntries("").Length);
-            Assert.AreEqual(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.Equal(1, ntfs.GetFileSystemEntries("").Length);
+            Assert.Equal(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
         }
 
-        [Test]
+        [Fact]
         public void DeleteShortNameDir()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -352,33 +351,33 @@ namespace LibraryTests.Ntfs
             ntfs.CreateDirectory(@"\TestLongName1\TestLongName2");
             ntfs.SetShortName(@"\TestLongName1\TestLongName2", "TESTLO~1");
 
-            Assert.IsTrue(ntfs.DirectoryExists(@"\TestLongName1\TESTLO~1"));
-            Assert.IsTrue(ntfs.DirectoryExists(@"\TestLongName1\TestLongName2"));
+            Assert.True(ntfs.DirectoryExists(@"\TestLongName1\TESTLO~1"));
+            Assert.True(ntfs.DirectoryExists(@"\TestLongName1\TestLongName2"));
 
             ntfs.DeleteDirectory(@"\TestLongName1", true);
 
-            Assert.IsFalse(ntfs.DirectoryExists(@"\TestLongName1"));
+            Assert.False(ntfs.DirectoryExists(@"\TestLongName1"));
         }
 
-        [Test]
+        [Fact]
         public void GetFileLength()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
-            ntfs.OpenFile(@"AFILE.TXT", FileMode.Create).Close();
-            Assert.AreEqual(0, ntfs.GetFileLength("AFILE.TXT"));
+            ntfs.OpenFile(@"AFILE.TXT", FileMode.Create).Dispose();
+            Assert.Equal(0, ntfs.GetFileLength("AFILE.TXT"));
 
             using (var stream = ntfs.OpenFile(@"AFILE.TXT", FileMode.Open))
             {
                 stream.Write(new byte[14325], 0, 14325);
             }
-            Assert.AreEqual(14325, ntfs.GetFileLength("AFILE.TXT"));
+            Assert.Equal(14325, ntfs.GetFileLength("AFILE.TXT"));
 
             using (var attrStream = ntfs.OpenFile(@"AFILE.TXT:altstream", FileMode.Create))
             {
                 attrStream.Write(new byte[122], 0, 122);
             }
-            Assert.AreEqual(122, ntfs.GetFileLength("AFILE.TXT:altstream"));
+            Assert.Equal(122, ntfs.GetFileLength("AFILE.TXT:altstream"));
 
 
             // Test NTFS options for hardlink behaviour
@@ -389,15 +388,15 @@ namespace LibraryTests.Ntfs
             {
                 stream.SetLength(50);
             }
-            Assert.AreEqual(50, ntfs.GetFileLength("AFILE.TXT"));
-            Assert.AreEqual(14325, ntfs.GetFileLength(@"Dir\OtherLink.txt"));
+            Assert.Equal(50, ntfs.GetFileLength("AFILE.TXT"));
+            Assert.Equal(14325, ntfs.GetFileLength(@"Dir\OtherLink.txt"));
 
             ntfs.NtfsOptions.FileLengthFromDirectoryEntries = false;
 
-            Assert.AreEqual(50, ntfs.GetFileLength(@"Dir\OtherLink.txt"));
+            Assert.Equal(50, ntfs.GetFileLength(@"Dir\OtherLink.txt"));
         }
 
-        [Test]
+        [Fact]
         public void Fragmented()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -453,10 +452,10 @@ namespace LibraryTests.Ntfs
                 stream.Read(largeReadBuffer, 0, largeReadBuffer.Length);
             }
 
-            Assert.AreEqual(largeWriteBuffer, largeReadBuffer);
+            Assert.Equal(largeWriteBuffer, largeReadBuffer);
         }
 
-        [Test]
+        [Fact]
         public void Sparse()
         {
             int fileSize = 1 * 1024 * 1024;
@@ -483,15 +482,15 @@ namespace LibraryTests.Ntfs
 
             using (SparseStream s = ntfs.OpenFile("file.bin", FileMode.Open))
             {
-                Assert.AreEqual(fileSize + 64 * 1024, s.Length);
+                Assert.Equal(fileSize + 64 * 1024, s.Length);
 
                 List<StreamExtent> extents = new List<StreamExtent>(s.Extents);
 
-                Assert.AreEqual(2, extents.Count);
-                Assert.AreEqual(0, extents[0].Start);
-                Assert.AreEqual(64 * 1024, extents[0].Length);
-                Assert.AreEqual((64 + 128) * 1024, extents[1].Start);
-                Assert.AreEqual(fileSize - (64 * 1024) - ((64 + 128) * 1024), extents[1].Length);
+                Assert.Equal(2, extents.Count);
+                Assert.Equal(0, extents[0].Start);
+                Assert.Equal(64 * 1024, extents[0].Length);
+                Assert.Equal((64 + 128) * 1024, extents[1].Start);
+                Assert.Equal(fileSize - (64 * 1024) - ((64 + 128) * 1024), extents[1].Length);
 
 
                 s.Position = 72 * 1024;
@@ -511,7 +510,7 @@ namespace LibraryTests.Ntfs
                 }
                 data[72 * 1024] = 99;
 
-                Assert.AreEqual(data, readBuffer);
+                Assert.Equal(data, readBuffer);
             }
         }
     }

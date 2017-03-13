@@ -23,14 +23,13 @@
 using System.IO;
 using DiscUtils;
 using DiscUtils.Partitions;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Partitions
 {
-    [TestFixture]
     public class BiosPartitionedDiskBuilderTest
     {
-        [Test]
+        [Fact]
         public void Basic()
         {
             long capacity = 10 * 1024 * 1024;
@@ -47,12 +46,12 @@ namespace LibraryTests.Partitions
             SparseStream constructedStream = builder.Build();
 
             BiosPartitionTable bpt = new BiosPartitionTable(constructedStream, geometry);
-            Assert.AreEqual(1, bpt.Count);
+            Assert.Equal(1, bpt.Count);
 
             using(Stream builtPartitionStream = bpt.Partitions[0].Open())
             {
                 builtPartitionStream.Position = 4053;
-                Assert.AreEqual(0xAf, builtPartitionStream.ReadByte());
+                Assert.Equal(0xAf, builtPartitionStream.ReadByte());
             }
 
         }
