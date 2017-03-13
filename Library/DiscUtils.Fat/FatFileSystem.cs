@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Fat
@@ -1496,6 +1497,8 @@ namespace DiscUtils.Fat
 
         private void Initialize(Stream data)
         {
+            EncodingHelper.RegisterEncodings();
+
             _data = data;
             _data.Position = 0;
             _bootSector = Utilities.ReadSector(_data);
@@ -1665,7 +1668,7 @@ namespace DiscUtils.Fat
 
         private delegate void EntryUpdateAction(DirectoryEntry entry);
 
-        #region Disk Formatting
+#region Disk Formatting
 
         /// <summary>
         /// Creates a formatted floppy disk image in a stream.
@@ -1906,6 +1909,6 @@ namespace DiscUtils.Fat
             return new FatFileSystem(stream);
         }
 
-        #endregion
+#endregion
     }
 }
