@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>DiscUtils, complete meta-package</Description>
+    <AssemblyTitle>DiscUtils</AssemblyTitle>
+    <VersionPrefix>0.12.1-alpha</VersionPrefix>
+    <Authors>Kenneth Bell;LordMike</Authors>
+    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
+    <PublicSign>true</PublicSign>
+    <AssemblyName>DiscUtils</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PackageId>DiscUtils</PackageId>
+    <PackageTags>DiscUtils</PackageTags>
+    <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
+    <ProjectReference Include="..\DiscUtils.BootConfig\DiscUtils.BootConfig.csproj" />
+    <ProjectReference Include="..\DiscUtils.Dmg\DiscUtils.Dmg.csproj" />
+    <ProjectReference Include="..\DiscUtils.Ext\DiscUtils.Ext.csproj" />
+    <ProjectReference Include="..\DiscUtils.Fat\DiscUtils.Fat.csproj" />
+    <ProjectReference Include="..\DiscUtils.HfsPlus\DiscUtils.HfsPlus.csproj" />
+    <ProjectReference Include="..\DiscUtils.Iscsi\DiscUtils.Iscsi.csproj" />
+    <ProjectReference Include="..\DiscUtils.Iso9660\DiscUtils.Iso9660.csproj" />
+    <ProjectReference Include="..\DiscUtils.Nfs\DiscUtils.Nfs.csproj" />
+    <ProjectReference Include="..\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
+    <ProjectReference Include="..\DiscUtils.OpticalDisk\DiscUtils.OpticalDisk.csproj" />
+    <ProjectReference Include="..\DiscUtils.Registry\DiscUtils.Registry.csproj" />
+    <ProjectReference Include="..\DiscUtils.Sdi\DiscUtils.Sdi.csproj" />
+    <ProjectReference Include="..\DiscUtils.SquashFs\DiscUtils.SquashFs.csproj" />
+    <ProjectReference Include="..\DiscUtils.Udf\DiscUtils.Udf.csproj" />
+    <ProjectReference Include="..\DiscUtils.Vdi\DiscUtils.Vdi.csproj" />
+    <ProjectReference Include="..\DiscUtils.Vhd\DiscUtils.Vhd.csproj" />
+    <ProjectReference Include="..\DiscUtils.Vhdx\DiscUtils.Vhdx.csproj" />
+    <ProjectReference Include="..\DiscUtils.Vmdk\DiscUtils.Vmdk.csproj" />
+    <ProjectReference Include="..\DiscUtils.Wim\DiscUtils.Wim.csproj" />
+    <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
+    <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
+    <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
+    <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
+    <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net20' ">
+    <DefineConstants>$(DefineConstants);NET20</DefineConstants>
+  </PropertyGroup>
+
+</Project>

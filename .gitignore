@@ -1,13 +1,14 @@
+/.vs/
+/packages/
+/Backup/
+
 bin/
 obj/
+Nuget/
 
 *.suo
 *.user
 *.lock.json
-
-.vs/
-Nuget/
-packages/
 
 # Tests
 TestResult.xml
