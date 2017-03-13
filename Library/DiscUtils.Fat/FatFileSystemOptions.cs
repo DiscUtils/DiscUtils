@@ -22,6 +22,7 @@
 
 using System;
 using System.Text;
+using DiscUtils.CoreCompat;
 
 namespace DiscUtils.Fat
 {
@@ -31,6 +32,11 @@ namespace DiscUtils.Fat
     public sealed class FatFileSystemOptions : DiscFileSystemOptions
     {
         private Encoding _encoding;
+
+        static FatFileSystemOptions()
+        {
+            EncodingHelper.RegisterEncodings();
+        }
 
         internal FatFileSystemOptions()
         {

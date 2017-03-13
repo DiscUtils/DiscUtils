@@ -1497,8 +1497,6 @@ namespace DiscUtils.Fat
 
         private void Initialize(Stream data)
         {
-            EncodingHelper.RegisterEncodings();
-
             _data = data;
             _data.Position = 0;
             _bootSector = Utilities.ReadSector(_data);
