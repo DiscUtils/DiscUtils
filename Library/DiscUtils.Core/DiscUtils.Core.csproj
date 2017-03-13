@@ -25,19 +25,8 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <PackageReference Include="System.Collections" Version="4.0.11" />
-    <PackageReference Include="System.IO" Version="4.1.0" />
-    <PackageReference Include="System.IO.Compression" Version="4.1.0" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.0.1" />
-    <PackageReference Include="System.Reflection.Extensions" Version="4.0.1" />
-    <PackageReference Include="System.Resources.ResourceManager" Version="4.0.1" />
-    <PackageReference Include="System.Runtime" Version="4.1.0" />
-    <PackageReference Include="System.Runtime.Extensions" Version="4.1.0" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.1.0" />
-    <PackageReference Include="System.Security.AccessControl" Version="4.0.0" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.1.0" />
-    <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
-    <PackageReference Include="System.Threading" Version="4.0.11" />
+    <PackageReference Include="System.Security.AccessControl" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">

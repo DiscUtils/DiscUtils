@@ -26,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.2.0" />
-    <PackageReference Include="System.Xml.XmlDocument" Version="4.0.1" />
-    <PackageReference Include="System.Xml.XPath" Version="4.0.1" />
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
