@@ -30,9 +30,8 @@ namespace LibraryTests
     public class DiscFileSystemFileTest
     {
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void CreateFile(object[] input)
+        public void CreateFile(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite))
@@ -54,9 +53,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void CreateFileInvalid_Long(object[] input)
+        public void CreateFileInvalid_Long(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             Assert.Throws<IOException>(() =>
@@ -70,9 +68,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void CreateFileInvalid_Characters(object[] input)
+        public void CreateFileInvalid_Characters(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             Assert.Throws<IOException>(() =>
@@ -85,9 +82,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void DeleteFile(object[] input)
+        public void DeleteFile(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite)) { }
@@ -102,9 +98,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Length(object[] input)
+        public void Length(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.GetFileInfo("foo.txt").Open(FileMode.Create, FileAccess.ReadWrite))
@@ -163,9 +158,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Open_FileNotFound(object[] input)
+        public void Open_FileNotFound(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -181,9 +175,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Open_FileExists(object[] input)
+        public void Open_FileExists(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -201,9 +194,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Open_DirExists(object[] input)
+        public void Open_DirExists(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             fs.CreateDirectory("FOO.TXT");
@@ -213,9 +205,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Open_Read(object[] input)
+        public void Open_Read(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -236,9 +227,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Open_Read_Fail(object[] input)
+        public void Open_Read_Fail(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -249,9 +239,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Open_Write(object[] input)
+        public void Open_Write(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -265,9 +254,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Open_Write_Fail(object[] input)
+        public void Open_Write_Fail(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo di = fs.GetFileInfo("foo.txt");
@@ -286,9 +274,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Name(object[] input)
+        public void Name(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             Assert.Equal("foo.txt", fs.GetFileInfo("foo.txt").Name);
@@ -297,9 +284,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Attributes(object[] input)
+        public void Attributes(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
@@ -319,9 +305,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Attributes_ChangeType(object[] input)
+        public void Attributes_ChangeType(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
@@ -331,9 +316,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Exists(object[] input)
+        public void Exists(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
@@ -348,9 +332,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void CreationTimeUtc(object[] input)
+        public void CreationTimeUtc(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
@@ -360,9 +343,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void CreationTime(object[] input)
+        public void CreationTime(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
@@ -372,9 +354,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void LastAccessTime(object[] input)
+        public void LastAccessTime(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
@@ -389,9 +370,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void LastWriteTime(object[] input)
+        public void LastWriteTime(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
@@ -406,9 +386,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Delete(object[] input)
+        public void Delete(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             using (Stream s = fs.OpenFile("foo.txt", FileMode.Create)) { }
@@ -419,9 +398,8 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Delete_Dir(object[] input)
+        public void Delete_Dir(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             fs.CreateDirectory("foo.txt");
@@ -431,18 +409,16 @@ namespace LibraryTests
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
         [Trait("Category", "ThrowsException")]
-        public void Delete_NoFile(object[] input)
+        public void Delete_NoFile(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             Assert.Throws<FileNotFoundException>(() => fs.GetFileInfo("foo.txt").Delete());
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void CopyFile(object[] input)
+        public void CopyFile(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
@@ -477,9 +453,8 @@ namespace LibraryTests
 
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void MoveFile(object[] input)
+        public void MoveFile(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
@@ -505,9 +480,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void MoveFile_Overwrite(object[] input)
+        public void MoveFile_Overwrite(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             DiscFileInfo fi = fs.GetFileInfo("foo.txt");
@@ -529,18 +503,16 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Equals(object[] input)
+        public void Equals(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             Assert.Equal(fs.GetFileInfo("foo.txt"), fs.GetFileInfo("foo.txt"));
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Parent(object[] input)
+        public void Parent(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             fs.CreateDirectory(@"SOMEDIR\ADIR");
@@ -552,9 +524,8 @@ namespace LibraryTests
         }
 
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void VolumeLabel(object[] input)
+        public void VolumeLabel(NewFileSystemDelegate fsFactory)
         {
-            NewFileSystemDelegate fsFactory = (NewFileSystemDelegate)input[0];
             DiscFileSystem fs = fsFactory();
 
             string volLabel = fs.VolumeLabel;

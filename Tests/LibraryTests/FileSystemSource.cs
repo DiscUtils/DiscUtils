@@ -22,9 +22,7 @@
 
 using System.Collections.Generic;
 using DiscUtils;
-using DiscUtils.Fat;
 using DiscUtils.Ntfs;
-using Xunit;
 
 namespace LibraryTests
 {
