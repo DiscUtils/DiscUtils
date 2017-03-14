@@ -6,57 +6,8 @@ build_script:
     $version = $doc.Project.PropertyGroup.VersionPrefix
 
     Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
-- cmd: REM Build library
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.BootConfig
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Core
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Dmg
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Ext
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Fat
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.HfsPlus
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Iscsi
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Iso9660
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Net
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Nfs
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Ntfs
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.OpticalDiscSharing
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.OpticalDisk
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Registry
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Sdi
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.SquashFs
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Udf
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Vdi
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Vhd
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Vhdx
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Vmdk
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Wim
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Xva
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Transports
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Containers
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.FileSystems
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils
-- cmd: REM Utilities
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\BCDDump
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DiscUtils.Common
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DiscUtils.Diagnostics
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DiscUtils.PowerShell
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DiskClone
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DiskDump
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DmgExtract
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\ExternalFileSystem
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\FileExtract
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\FileRecover
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\iSCSIBrowse
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\ISOCreate
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\NTFSDump
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\ODSBrowse
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\OSClone
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\VHDCreate
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\VHDDump
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\VHDXDump
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\VirtualDiskConvert
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\VolInfo
-- cmd: REM Tests
-- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Tests\LibraryTests
+- cmd: REM Build
+- cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal 
 test_script:
 - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
 - cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx
