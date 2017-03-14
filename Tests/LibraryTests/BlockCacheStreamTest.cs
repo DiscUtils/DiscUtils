@@ -22,14 +22,13 @@
 
 using System.IO;
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     internal sealed class BlockCacheStreamTest
     {
-        [Test]
+        [Fact]
         public void Bug5203_IncreaseSize()
         {
             MemoryStream ms = new MemoryStream();

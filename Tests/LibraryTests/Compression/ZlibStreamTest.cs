@@ -24,14 +24,13 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using DiscUtils.Compression;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Compression
 {
-    [TestFixture]
     public class ZlibStreamTest
     {
-        [Test]
+        [Fact]
         public void TestRoundtrip()
         {
             byte[] testData = Encoding.ASCII.GetBytes("This is a test string");
@@ -48,14 +47,14 @@ namespace LibraryTests.Compression
             {
                 byte[] outData = new byte[testData.Length];
                 uzs.Read(outData, 0, outData.Length);
-                Assert.AreEqual(testData, outData);
+                Assert.Equal(testData, outData);
 
                 // Should be end of stream
-                Assert.AreEqual(-1, uzs.ReadByte());
+                Assert.Equal(-1, uzs.ReadByte());
             }
         }
 
-        [Test]
+        [Fact]
         public void TestInvalidChecksum()
         {
             byte[] testData = Encoding.ASCII.GetBytes("This is a test string");
@@ -77,10 +76,10 @@ namespace LibraryTests.Compression
                 {
                     byte[] outData = new byte[testData.Length];
                     uzs.Read(outData, 0, outData.Length);
-                    Assert.AreEqual(testData, outData);
+                    Assert.Equal(testData, outData);
 
                     // Should be end of stream
-                    Assert.AreEqual(-1, uzs.ReadByte());
+                    Assert.Equal(-1, uzs.ReadByte());
                 }
             });
         }

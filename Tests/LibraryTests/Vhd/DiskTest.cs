@@ -25,21 +25,20 @@ using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Vhd;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vhd
 {
-    [TestFixture]
     public class DiskTest
     {
-        [Test]
+        [Fact]
         public void InitializeFixed()
         {
             MemoryStream ms = new MemoryStream();
             using (Disk disk = Disk.InitializeFixed(ms, Ownership.None, 8 * 1024 * 1024))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity <= 8 * 1024 * 1024);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 7.5 * 1024 * 1024 && disk.Geometry.Capacity <= 8 * 1024 * 1024);
             }
 
             // Check the stream is still valid
@@ -47,7 +46,7 @@ namespace LibraryTests.Vhd
             ms.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void InitializeFixedOwnStream()
         {
             MemoryStream ms = new MemoryStream();
@@ -58,25 +57,25 @@ namespace LibraryTests.Vhd
             Assert.Throws<ObjectDisposedException>(() => ms.ReadByte());
         }
 
-        [Test]
+        [Fact]
         public void InitializeDynamic()
         {
             MemoryStream ms = new MemoryStream();
             using (Disk disk = Disk.InitializeDynamic(ms, Ownership.None, 16 * 1024L * 1024 * 1024))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
             }
 
-            Assert.Greater(1 * 1024 * 1024, ms.Length);
+            Assert.True(1 * 1024 * 1024 > ms.Length);
 
             using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
             }
         }
 
-        [Test]
+        [Fact]
         public void InitializeDifferencing()
         {
             MemoryStream baseStream = new MemoryStream();
@@ -84,16 +83,16 @@ namespace LibraryTests.Vhd
             DiskImageFile baseFile = DiskImageFile.InitializeDynamic(baseStream, Ownership.Dispose, 16 * 1024L * 1024 * 1024);
             using (Disk disk = Disk.InitializeDifferencing(diffStream, Ownership.None, baseFile, Ownership.Dispose, @"C:\TEMP\Base.vhd", @".\Base.vhd", DateTime.UtcNow))
             {
-                Assert.IsNotNull(disk);
-                Assert.That(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
-                Assert.That(disk.Geometry.Capacity == baseFile.Geometry.Capacity);
-                Assert.AreEqual(2, new List<VirtualDiskLayer>(disk.Layers).Count);
+                Assert.NotNull(disk);
+                Assert.True(disk.Geometry.Capacity > 15.8 * 1024L * 1024 * 1024 && disk.Geometry.Capacity <= 16 * 1024L * 1024 * 1024);
+                Assert.True(disk.Geometry.Capacity == baseFile.Geometry.Capacity);
+                Assert.Equal(2, new List<VirtualDiskLayer>(disk.Layers).Count);
             }
-            Assert.Greater(1 * 1024 * 1024, diffStream.Length);
+            Assert.True(1 * 1024 * 1024 > diffStream.Length);
             diffStream.Dispose();
         }
 
-        [Test]
+        [Fact]
         public void ConstructorDynamic()
         {
             Geometry geometry;
@@ -104,17 +103,17 @@ namespace LibraryTests.Vhd
             }
             using (Disk disk = new Disk(ms, Ownership.None))
             {
-                Assert.AreEqual(geometry, disk.Geometry);
-                Assert.IsNotNull(disk.Content);
+                Assert.Equal(geometry, disk.Geometry);
+                Assert.NotNull(disk.Content);
             }
             using (Disk disk = new Disk(ms, Ownership.Dispose))
             {
-                Assert.AreEqual(geometry, disk.Geometry);
-                Assert.IsNotNull(disk.Content);
+                Assert.Equal(geometry, disk.Geometry);
+                Assert.NotNull(disk.Content);
             }
         }
 
-        [Test]
+        [Fact]
         public void ConstructorFromFiles()
         {
             MemoryStream baseStream = new MemoryStream();
@@ -128,11 +127,11 @@ namespace LibraryTests.Vhd
 
             using (Disk disk = new Disk(new DiskImageFile[] { grandChildFile, childFile, baseFile }, Ownership.Dispose))
             {
-                Assert.IsNotNull(disk.Content);
+                Assert.NotNull(disk.Content);
             }
         }
 
-        [Test]
+        [Fact]
         public void UndisposedChangedDynamic()
         {
             byte[] firstSector = new byte[512];
@@ -151,7 +150,7 @@ namespace LibraryTests.Vhd
                 ms.Read(firstSector, 0, 512);
                 ms.Seek(-512, SeekOrigin.End);
                 ms.Read(lastSector, 0, 512);
-                Assert.AreEqual(firstSector, lastSector);
+                Assert.Equal(firstSector, lastSector);
             }
 
             // Check disabling AutoCommit really doesn't do the commit
@@ -165,7 +164,7 @@ namespace LibraryTests.Vhd
                 ms.Read(firstSector, 0, 512);
                 ms.Seek(-512, SeekOrigin.End);
                 ms.Read(lastSector, 0, 512);
-                Assert.AreNotEqual(firstSector, lastSector);
+                Assert.NotEqual(firstSector, lastSector);
             }
 
             // Also check that after disposing, the commit happens
@@ -173,7 +172,7 @@ namespace LibraryTests.Vhd
             ms.Read(firstSector, 0, 512);
             ms.Seek(-512, SeekOrigin.End);
             ms.Read(lastSector, 0, 512);
-            Assert.AreEqual(firstSector, lastSector);
+            Assert.Equal(firstSector, lastSector);
 
 
             // Finally, check default value for AutoCommit lines up with behaviour

@@ -21,14 +21,12 @@
 //
 
 using System;
-using System.Runtime.Serialization;
 
 namespace DiscUtils.Diagnostics
 {
     /// <summary>
     /// Exception thrown when file system corruption is detected during verification.
     /// </summary>
-    [Serializable]
     public sealed class ValidatingFileSystemException : Exception
     {
         /// <summary>
@@ -54,11 +52,6 @@ namespace DiscUtils.Diagnostics
         /// <param name="innerException">The inner exception</param>
         public ValidatingFileSystemException(string message, Exception innerException)
             :base(message, innerException)
-        {
-        }
-
-        private ValidatingFileSystemException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
 

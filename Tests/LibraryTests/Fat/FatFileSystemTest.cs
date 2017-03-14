@@ -22,29 +22,33 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using DiscUtils;
 using DiscUtils.Fat;
 using DiscUtils.Setup;
-using NUnit.Framework;
+using Xunit;
 using FileSystemInfo = DiscUtils.FileSystemInfo;
 
 namespace LibraryTests.Fat
 {
-    [TestFixture]
     public class FatFileSystemTest
     {
-        [Test]
+        [Fact]
         public void FormatFloppy()
         {
             MemoryStream ms = new MemoryStream();
             FatFileSystem fs = FatFileSystem.FormatFloppy(ms, FloppyDiskType.HighDensity, "KBFLOPPY   ");
         }
 
-        [Test]
+        [Fact]
         public void Cyrillic()
         {
+#if NET40
             SetupHelper.RegisterAssembly(typeof(FatFileSystem).Assembly);
+#else
+            SetupHelper.RegisterAssembly(typeof(FatFileSystem).GetTypeInfo().Assembly);
+#endif
 
             string lowerDE = "\x0434";
             string upperDE = "\x0414";
@@ -58,17 +62,17 @@ namespace LibraryTests.Fat
                 fs.CreateDirectory(name);
 
                 string[] dirs = fs.GetDirectories("");
-                Assert.AreEqual(1, dirs.Length);
-                Assert.AreEqual(upperDE, dirs[0]); // Uppercase
+                Assert.Equal(1, dirs.Length);
+                Assert.Equal(upperDE, dirs[0]); // Uppercase
 
-                Assert.IsTrue(fs.DirectoryExists(lowerDE));
-                Assert.IsTrue(fs.DirectoryExists(upperDE));
+                Assert.True(fs.DirectoryExists(lowerDE));
+                Assert.True(fs.DirectoryExists(upperDE));
 
                 fs.CreateDirectory(lowerDE + lowerDE + lowerDE);
-                Assert.AreEqual(2, fs.GetDirectories("").Length);
+                Assert.Equal(2, fs.GetDirectories("").Length);
 
                 fs.DeleteDirectory(lowerDE + lowerDE + lowerDE);
-                Assert.AreEqual(1, fs.GetDirectories("").Length);
+                Assert.Equal(1, fs.GetDirectories("").Length);
             }
 
             FileSystemInfo[] detectDefaultFileSystems = FileSystemManager.DetectFileSystems(ms);
@@ -77,12 +81,12 @@ namespace LibraryTests.Fat
                 ms,
                 new FileSystemParameters { FileNameEncoding = Encoding.GetEncoding(855) });
 
-            Assert.IsTrue(fs2.DirectoryExists(lowerDE));
-            Assert.IsTrue(fs2.DirectoryExists(upperDE));
-            Assert.AreEqual(1, fs2.GetDirectories("").Length);
+            Assert.True(fs2.DirectoryExists(lowerDE));
+            Assert.True(fs2.DirectoryExists(upperDE));
+            Assert.Equal(1, fs2.GetDirectories("").Length);
         }
 
-        [Test]
+        [Fact]
         public void DefaultCodepage()
         {
             string graphicChar = "\x255D";
@@ -95,13 +99,13 @@ namespace LibraryTests.Fat
             fs.CreateDirectory(name);
 
             string[] dirs = fs.GetDirectories("");
-            Assert.AreEqual(1, dirs.Length);
-            Assert.AreEqual(graphicChar, dirs[0]); // Uppercase
+            Assert.Equal(1, dirs.Length);
+            Assert.Equal(graphicChar, dirs[0]); // Uppercase
 
-            Assert.IsTrue(fs.DirectoryExists(graphicChar));
+            Assert.True(fs.DirectoryExists(graphicChar));
         }
 
-        [Test]
+        [Fact]
         public void FormatPartition()
         {
             MemoryStream ms = new MemoryStream();
@@ -112,78 +116,78 @@ namespace LibraryTests.Fat
             fs.CreateDirectory(@"DIRB\DIRC");
 
             FatFileSystem fs2 = new FatFileSystem(ms);
-            Assert.AreEqual(1, fs2.Root.GetDirectories().Length);
+            Assert.Equal(1, fs2.Root.GetDirectories().Length);
         }
 
-        [Test]
+        [Fact]
         public void CreateDirectory()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
 
             fs.CreateDirectory(@"UnItTeSt");
-            Assert.AreEqual("UNITTEST", fs.Root.GetDirectories("UNITTEST")[0].Name);
+            Assert.Equal("UNITTEST", fs.Root.GetDirectories("UNITTEST")[0].Name);
 
             fs.CreateDirectory(@"folder\subflder");
-            Assert.AreEqual("FOLDER", fs.Root.GetDirectories("FOLDER")[0].Name);
+            Assert.Equal("FOLDER", fs.Root.GetDirectories("FOLDER")[0].Name);
 
             fs.CreateDirectory(@"folder\subflder");
-            Assert.AreEqual("SUBFLDER", fs.Root.GetDirectories("FOLDER")[0].GetDirectories("SUBFLDER")[0].Name);
+            Assert.Equal("SUBFLDER", fs.Root.GetDirectories("FOLDER")[0].GetDirectories("SUBFLDER")[0].Name);
 
         }
 
-        [Test]
+        [Fact]
         public void CanWrite()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.AreEqual(true, fs.CanWrite);
+            Assert.Equal(true, fs.CanWrite);
         }
 
-        [Test]
+        [Fact]
         public void Label()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.AreEqual("FLOPPY_IMG ", fs.VolumeLabel);
+            Assert.Equal("FLOPPY_IMG ", fs.VolumeLabel);
 
             fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, null);
-            Assert.AreEqual("NO NAME    ", fs.VolumeLabel);
+            Assert.Equal("NO NAME    ", fs.VolumeLabel);
         }
 
-        [Test]
+        [Fact]
         public void FileInfo()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
             DiscFileInfo fi = fs.GetFileInfo(@"SOMEDIR\SOMEFILE.TXT");
-            Assert.IsNotNull(fi);
+            Assert.NotNull(fi);
         }
 
-        [Test]
+        [Fact]
         public void DirectoryInfo()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
             DiscDirectoryInfo fi = fs.GetDirectoryInfo(@"SOMEDIR");
-            Assert.IsNotNull(fi);
+            Assert.NotNull(fi);
         }
 
-        [Test]
+        [Fact]
         public void FileSystemInfo()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
             DiscFileSystemInfo fi = fs.GetFileSystemInfo(@"SOMEDIR\SOMEFILE");
-            Assert.IsNotNull(fi);
+            Assert.NotNull(fi);
         }
 
-        [Test]
+        [Fact]
         public void Root()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.IsNotNull(fs.Root);
-            Assert.IsTrue(fs.Root.Exists);
-            Assert.IsEmpty(fs.Root.Name);
-            Assert.IsNull(fs.Root.Parent);
+            Assert.NotNull(fs.Root);
+            Assert.True(fs.Root.Exists);
+            Assert.Empty(fs.Root.Name);
+            Assert.Null(fs.Root.Parent);
         }
 
-        [Test]
-        [Category("ThrowsException")]
+        [Fact]
+        [Trait("Category", "ThrowsException")]
         public void OpenFileAsDir()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
@@ -198,7 +202,7 @@ namespace LibraryTests.Fat
             Assert.Throws<DirectoryNotFoundException>(() => fs.GetFiles("FOO.TXT"));
         }
 
-        [Test]
+        [Fact]
         public void HonoursReadOnly()
         {
             SparseMemoryStream diskStream = new SparseMemoryStream();

@@ -10,4 +10,4 @@ Nuget/
 packages/
 
 # Tests
-TestResult.xml
+Tests/LibraryTests/TestResults/

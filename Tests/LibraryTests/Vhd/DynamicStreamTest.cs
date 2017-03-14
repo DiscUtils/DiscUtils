@@ -25,27 +25,26 @@ using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Vhd;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vhd
 {
-    [TestFixture]
     public class DynamicStreamTest
     {
-        [Test]
+        [Fact]
         public void Attributes()
         {
             MemoryStream stream = new MemoryStream();
             using (Disk disk = Disk.InitializeDynamic(stream, Ownership.Dispose, 16 * 1024L * 1024 * 1024))
             {
                 Stream s = disk.Content;
-                Assert.IsTrue(s.CanRead);
-                Assert.IsTrue(s.CanWrite);
-                Assert.IsTrue(s.CanSeek);
+                Assert.True(s.CanRead);
+                Assert.True(s.CanWrite);
+                Assert.True(s.CanSeek);
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteSmall()
         {
             MemoryStream stream = new MemoryStream();
@@ -59,21 +58,21 @@ namespace LibraryTests.Vhd
 
                 Stream s = disk.Content;
                 s.Write(content, 10, 40);
-                Assert.AreEqual(40, s.Position);
+                Assert.Equal(40, s.Position);
                 s.Write(content, 50, 50);
-                Assert.AreEqual(90, s.Position);
+                Assert.Equal(90, s.Position);
                 s.Position = 0;
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 60);
-                Assert.AreEqual(60, s.Position);
+                Assert.Equal(60, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 60; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
 
@@ -84,19 +83,19 @@ namespace LibraryTests.Vhd
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 20);
-                Assert.AreEqual(20, s.Position);
+                Assert.Equal(20, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 20; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteLarge()
         {
             MemoryStream stream = new MemoryStream();
@@ -120,13 +119,13 @@ namespace LibraryTests.Vhd
                 {
                     if (buffer[i] != content[i])
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void DisposeTest()
         {
             Stream contentStream;
@@ -140,12 +139,12 @@ namespace LibraryTests.Vhd
             try
             {
                 contentStream.Position = 0;
-                Assert.Fail();
+                Assert.True(false);
             }
             catch(ObjectDisposedException) { }
         }
 
-        [Test]
+        [Fact]
         public void ReadNotPresent()
         {
             MemoryStream stream = new MemoryStream();
@@ -159,13 +158,13 @@ namespace LibraryTests.Vhd
                 {
                     if (buffer[i] != 0)
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void Extents()
         {
             MemoryStream stream = new MemoryStream();
@@ -176,25 +175,25 @@ namespace LibraryTests.Vhd
 
                 // Starts before first extent, ends before end of extent
                 List<StreamExtent> extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(0, 21 * 512));
-                Assert.AreEqual(1, extents.Count);
-                Assert.AreEqual(20 * 512, extents[0].Start);
-                Assert.AreEqual(1 * 512, extents[0].Length);
+                Assert.Equal(1, extents.Count);
+                Assert.Equal(20 * 512, extents[0].Start);
+                Assert.Equal(1 * 512, extents[0].Length);
 
                 // Limit to disk content length
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * 512, 20 * 512));
-                Assert.AreEqual(1, extents.Count);
-                Assert.AreEqual(21 * 512, extents[0].Start);
-                Assert.AreEqual(3 * 512, extents[0].Length);
+                Assert.Equal(1, extents.Count);
+                Assert.Equal(21 * 512, extents[0].Start);
+                Assert.Equal(3 * 512, extents[0].Length);
 
                 // Out of range
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(25 * 512, 4 * 512));
-                Assert.AreEqual(0, extents.Count);
+                Assert.Equal(0, extents.Count);
 
                 // Non-sector multiples
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * 512 + 10, 20 * 512));
-                Assert.AreEqual(1, extents.Count);
-                Assert.AreEqual(21 * 512 + 10, extents[0].Start);
-                Assert.AreEqual(3 * 512 - 10, extents[0].Length);
+                Assert.Equal(1, extents.Count);
+                Assert.Equal(21 * 512 + 10, extents[0].Start);
+                Assert.Equal(3 * 512 - 10, extents[0].Length);
             }
         }
     }

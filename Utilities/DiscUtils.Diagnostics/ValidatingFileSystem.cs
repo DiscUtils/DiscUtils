@@ -587,7 +587,7 @@ namespace DiscUtils.Diagnostics
 
                 _lastCheckpointReport = writer.GetStringBuilder().ToString();
 
-                if(!passed)
+                if (!passed)
                 {
                     throw new ValidatingFileSystemException("File system failed verification", _failureException);
                 }
@@ -613,14 +613,25 @@ namespace DiscUtils.Diagnostics
         {
             try
             {
+#if NET40
                 return (TFileSystem)typeof(TFileSystem).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#else
+                return (TFileSystem)typeof(TFileSystem).GetTypeInfo().GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#endif
             }
             catch (TargetInvocationException tie)
             {
+#if NET40
                 FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
                 remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
 
+                throw tie.InnerException;
+#else
+                FieldInfo remoteStackTraceString = typeof(Exception).GetTypeInfo().GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+                remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
+
                 throw tie.InnerException; 
+#endif
             }
         }
 
@@ -628,14 +639,25 @@ namespace DiscUtils.Diagnostics
         {
             try
             {
+#if NET40
                 return (TChecker)typeof(TChecker).GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#else
+                return (TChecker)typeof(TChecker).GetTypeInfo().GetConstructor(new Type[] { typeof(Stream) }).Invoke(new object[] { stream });
+#endif
             }
             catch (TargetInvocationException tie)
             {
+#if NET40
                 FieldInfo remoteStackTraceString = typeof(Exception).GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
                 remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
 
                 throw tie.InnerException;
+#else
+                FieldInfo remoteStackTraceString = typeof(Exception).GetTypeInfo().GetField("_remoteStackTraceString", BindingFlags.Instance | BindingFlags.NonPublic);
+                remoteStackTraceString.SetValue(tie.InnerException, tie.InnerException.StackTrace + Environment.NewLine);
+
+                throw tie.InnerException;
+#endif
             }
         }
 
@@ -647,7 +669,7 @@ namespace DiscUtils.Diagnostics
         {
             get
             {
-                Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+                Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
                 {
                     return fs.FriendlyName;
                 };
@@ -664,7 +686,7 @@ namespace DiscUtils.Diagnostics
         {
             get
             {
-                Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+                Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
                 {
                     return fs.CanWrite;
                 };
@@ -680,8 +702,7 @@ namespace DiscUtils.Diagnostics
         {
             get
             {
-                ConstructorInfo ctor = typeof(DiscDirectoryInfo).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(DiscFileSystem), typeof(string) }, null);
-                return (DiscDirectoryInfo)ctor.Invoke(new object[] { this, @"" });
+                return new DiscDirectoryInfo(this, "");
             }
         }
 
@@ -692,7 +713,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="destinationFile">The destination file</param>
         public override void CopyFile(string sourceFile, string destinationFile)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.CopyFile(sourceFile, destinationFile);
                 return null;
@@ -709,7 +730,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="overwrite">Whether to permit over-writing of an existing file.</param>
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.CopyFile(sourceFile, destinationFile, overwrite);
                 return null;
@@ -724,7 +745,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The path of the new directory</param>
         public override void CreateDirectory(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.CreateDirectory(path);
                 return 0;
@@ -739,7 +760,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The path of the directory to delete.</param>
         public override void DeleteDirectory(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.DeleteDirectory(path);
                 return null;
@@ -754,7 +775,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="path">The path of the file to delete.</param>
         public override void DeleteFile(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.DeleteFile(path);
                 return null;
@@ -770,7 +791,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the directory exists</returns>
         public override bool DirectoryExists(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.DirectoryExists(path);
             };
@@ -785,7 +806,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the file exists</returns>
         public override bool FileExists(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.FileExists(path);
             };
@@ -800,7 +821,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>true if the file or directory exists</returns>
         public override bool Exists(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.Exists(path);
             };
@@ -815,7 +836,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of directories.</returns>
         public override string[] GetDirectories(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetDirectories(path);
             };
@@ -832,7 +853,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetDirectories(path, searchPattern);
             };
@@ -850,7 +871,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of directories matching the search pattern.</returns>
         public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetDirectories(path, searchPattern, searchOption);
             };
@@ -865,7 +886,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files.</returns>
         public override string[] GetFiles(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFiles(path);
             };
@@ -881,7 +902,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFiles(path, searchPattern);
             };
@@ -899,7 +920,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files matching the search pattern.</returns>
         public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFiles(path, searchPattern, searchOption);
             };
@@ -914,7 +935,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFileSystemEntries(path);
             };
@@ -931,7 +952,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>Array of files and subdirectories matching the search pattern.</returns>
         public override string[] GetFileSystemEntries(string path, string searchPattern)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFileSystemEntries(path, searchPattern);
             };
@@ -946,7 +967,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="destinationDirectoryName">The target directory name.</param>
         public override void MoveDirectory(string sourceDirectoryName, string destinationDirectoryName)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.MoveDirectory(sourceDirectoryName, destinationDirectoryName);
                 return null;
@@ -962,7 +983,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="destinationName">The target file name.</param>
         public override void MoveFile(string sourceName, string destinationName)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.MoveFile(sourceName, destinationName);
                 return null;
@@ -979,7 +1000,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="overwrite">Whether to permit a destination file to be overwritten</param>
         public override void MoveFile(string sourceName, string destinationName, bool overwrite)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.MoveFile(sourceName, destinationName, overwrite);
                 return null;
@@ -997,14 +1018,14 @@ namespace DiscUtils.Diagnostics
         public override SparseStream OpenFile(string path, FileMode mode)
         {
             // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
-            StreamOpenFn reopenFn = delegate(TFileSystem fs)
+            StreamOpenFn reopenFn = delegate (TFileSystem fs)
             {
                 return fs.OpenFile(path, mode);
             };
 
             ValidatingFileSystemWrapperStream<TFileSystem, TChecker> wrapper = new ValidatingFileSystemWrapperStream<TFileSystem, TChecker>(this, reopenFn);
 
-            Activity<TFileSystem> activity = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> activity = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 SparseStream s = fs.OpenFile(path, mode);
                 wrapper.SetNativeStream(context, s);
@@ -1026,14 +1047,14 @@ namespace DiscUtils.Diagnostics
         public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
         {
             // This delegate can be used at any time the wrapper needs it, if it's in a 'replay' but the real file open isn't.
-            StreamOpenFn reopenFn = delegate(TFileSystem fs)
+            StreamOpenFn reopenFn = delegate (TFileSystem fs)
             {
                 return fs.OpenFile(path, mode, access);
             };
 
             ValidatingFileSystemWrapperStream<TFileSystem, TChecker> wrapper = new ValidatingFileSystemWrapperStream<TFileSystem, TChecker>(this, reopenFn);
 
-            Activity<TFileSystem> activity = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> activity = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 Stream s = fs.OpenFile(path, mode, access);
                 wrapper.SetNativeStream(context, s);
@@ -1052,7 +1073,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The attributes of the file or directory</returns>
         public override FileAttributes GetAttributes(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetAttributes(path);
             };
@@ -1067,7 +1088,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newValue">The new attributes of the file or directory</param>
         public override void SetAttributes(string path, FileAttributes newValue)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetAttributes(path, newValue);
                 return null;
@@ -1083,7 +1104,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTime(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetCreationTime(path);
             };
@@ -1098,7 +1119,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTime(string path, DateTime newTime)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetCreationTime(path, newTime);
                 return null;
@@ -1114,7 +1135,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The creation time.</returns>
         public override DateTime GetCreationTimeUtc(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetCreationTimeUtc(path);
             };
@@ -1129,7 +1150,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetCreationTimeUtc(string path, DateTime newTime)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetCreationTimeUtc(path, newTime);
                 return null;
@@ -1145,7 +1166,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTime(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetLastAccessTime(path);
             };
@@ -1160,7 +1181,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTime(string path, DateTime newTime)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetLastAccessTime(path, newTime);
                 return null;
@@ -1176,7 +1197,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last access time</returns>
         public override DateTime GetLastAccessTimeUtc(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetLastAccessTimeUtc(path);
             };
@@ -1191,7 +1212,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastAccessTimeUtc(string path, DateTime newTime)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetLastAccessTimeUtc(path, newTime);
                 return null;
@@ -1207,7 +1228,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTime(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetLastWriteTime(path);
             };
@@ -1222,7 +1243,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTime(string path, DateTime newTime)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetLastWriteTime(path, newTime);
                 return null;
@@ -1238,7 +1259,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The last write time</returns>
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetLastWriteTime(path);
             };
@@ -1253,7 +1274,7 @@ namespace DiscUtils.Diagnostics
         /// <param name="newTime">The new time to set.</param>
         public override void SetLastWriteTimeUtc(string path, DateTime newTime)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 fs.SetLastWriteTimeUtc(path, newTime);
                 return null;
@@ -1269,7 +1290,7 @@ namespace DiscUtils.Diagnostics
         /// <returns>The length in bytes</returns>
         public override long GetFileLength(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFileLength(path);
             };
@@ -1285,7 +1306,7 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The file does not need to exist</remarks>
         public override DiscFileInfo GetFileInfo(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFileInfo(path);
             };
@@ -1301,7 +1322,7 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The directory does not need to exist</remarks>
         public override DiscDirectoryInfo GetDirectoryInfo(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetDirectoryInfo(path);
             };
@@ -1317,7 +1338,7 @@ namespace DiscUtils.Diagnostics
         /// <remarks>The file system object does not need to exist</remarks>
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
-            Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+            Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
             {
                 return fs.GetFileSystemInfo(path);
             };
@@ -1332,7 +1353,7 @@ namespace DiscUtils.Diagnostics
         {
             get
             {
-                Activity<TFileSystem> fn = delegate(TFileSystem fs, Dictionary<string, object> context)
+                Activity<TFileSystem> fn = delegate (TFileSystem fs, Dictionary<string, object> context)
                 {
                     return fs.VolumeLabel;
                 };

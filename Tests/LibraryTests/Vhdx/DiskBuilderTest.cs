@@ -22,17 +22,16 @@
 
 using DiscUtils;
 using DiscUtils.Vhdx;
-using NUnit.Framework;
+using Xunit;
+using Xunit.Sdk;
 
 namespace LibraryTests.Vhdx
 {
-    [TestFixture]
     public class DiskBuilderTest
     {
         private SparseStream diskContent;
 
-        [SetUp]
-        public void Setup()
+        public DiskBuilderTest()
         {
             SparseMemoryStream sourceStream = new SparseMemoryStream();
             sourceStream.SetLength(160 * 1024L * 1024);
@@ -48,8 +47,7 @@ namespace LibraryTests.Vhdx
             diskContent = sourceStream;
         }
 
-        [Test]
-        [Ignore("Ported from DiscUtils")]
+        [Fact(Skip = "Ported from DiscUtils")]
         public void BuildFixed()
         {
             DiskBuilder builder = new DiskBuilder();
@@ -58,23 +56,23 @@ namespace LibraryTests.Vhdx
 
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
-            Assert.AreEqual(1, fileSpecs.Length);
-            Assert.AreEqual("foo.vhdx", fileSpecs[0].Name);
+            Assert.Equal(1, fileSpecs.Length);
+            Assert.Equal("foo.vhdx", fileSpecs[0].Name);
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
             {
                 for (int i = 0; i < 8; ++i)
                 {
                     disk.Content.Position = i * 1024L * 1024;
-                    Assert.AreEqual(i, disk.Content.ReadByte());
+                    Assert.Equal(i, disk.Content.ReadByte());
                 }
 
                 disk.Content.Position = 150 * 1024 * 1024;
-                Assert.AreEqual(0xFF, disk.Content.ReadByte());
+                Assert.Equal(0xFF, disk.Content.ReadByte());
             }
         }
 
-        [Test]
+        [Fact]
         public void BuildEmptyDynamic()
         {
             DiskBuilder builder = new DiskBuilder();
@@ -83,16 +81,16 @@ namespace LibraryTests.Vhdx
 
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
-            Assert.AreEqual(1, fileSpecs.Length);
-            Assert.AreEqual("foo.vhdx", fileSpecs[0].Name);
+            Assert.Equal(1, fileSpecs.Length);
+            Assert.Equal("foo.vhdx", fileSpecs[0].Name);
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
             {
-                Assert.AreEqual(0, disk.Content.Length);
+                Assert.Equal(0, disk.Content.Length);
             }
         }
 
-        [Test]
+        [Fact]
         public void BuildDynamic()
         {
             DiskBuilder builder = new DiskBuilder();
@@ -100,19 +98,19 @@ namespace LibraryTests.Vhdx
             builder.Content = diskContent;
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
-            Assert.AreEqual(1, fileSpecs.Length);
-            Assert.AreEqual("foo.vhdx", fileSpecs[0].Name);
+            Assert.Equal(1, fileSpecs.Length);
+            Assert.Equal("foo.vhdx", fileSpecs[0].Name);
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
             {
                 for (int i = 0; i < 8; ++i)
                 {
                     disk.Content.Position = i * 1024L * 1024;
-                    Assert.AreEqual(i, disk.Content.ReadByte());
+                    Assert.Equal(i, disk.Content.ReadByte());
                 }
 
                 disk.Content.Position = 150 * 1024 * 1024;
-                Assert.AreEqual(0xFF, disk.Content.ReadByte());
+                Assert.Equal(0xFF, disk.Content.ReadByte());
             }
         }
     }

@@ -24,28 +24,27 @@ using System;
 using System.IO;
 using DiscUtils.BootConfig;
 using DiscUtils.Registry;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.BootConfig
 {
-    [TestFixture]
     public class BcdObjectTest
     {
-        [Test]
+        [Fact]
         public void AddElement()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
             Store s = Store.Initialize(hive.Root);
             BcdObject obj = s.CreateInherit(InheritType.AnyObject);
 
-            Assert.IsFalse(obj.HasElement(WellKnownElement.LibraryApplicationPath));
+            Assert.False(obj.HasElement(WellKnownElement.LibraryApplicationPath));
             obj.AddElement(WellKnownElement.LibraryApplicationPath, ElementValue.ForString(@"\a\path\to\nowhere"));
-            Assert.IsTrue(obj.HasElement(WellKnownElement.LibraryApplicationPath));
+            Assert.True(obj.HasElement(WellKnownElement.LibraryApplicationPath));
 
-            Assert.AreEqual(@"\a\path\to\nowhere", obj.GetElement(WellKnownElement.LibraryApplicationPath).Value.ToString());
+            Assert.Equal(@"\a\path\to\nowhere", obj.GetElement(WellKnownElement.LibraryApplicationPath).Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void AddElement_WrongType()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -55,7 +54,7 @@ namespace LibraryTests.BootConfig
             Assert.Throws<ArgumentException>(() => obj.AddElement(WellKnownElement.LibraryApplicationDevice, ElementValue.ForString(@"\a\path\to\nowhere")));
         }
 
-        [Test]
+        [Fact]
         public void RemoveElement()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -65,10 +64,10 @@ namespace LibraryTests.BootConfig
             obj.AddElement(WellKnownElement.LibraryApplicationPath, ElementValue.ForString(@"\a\path\to\nowhere"));
             obj.RemoveElement(WellKnownElement.LibraryApplicationPath);
 
-            Assert.IsFalse(obj.HasElement(WellKnownElement.LibraryApplicationPath));
+            Assert.False(obj.HasElement(WellKnownElement.LibraryApplicationPath));
         }
 
-        [Test]
+        [Fact]
         public void RemoveElement_NonExistent()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -78,14 +77,14 @@ namespace LibraryTests.BootConfig
             obj.RemoveElement(WellKnownElement.LibraryApplicationPath);
         }
 
-        [Test]
+        [Fact]
         public void FriendlyName()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
             Store s = Store.Initialize(hive.Root);
             BcdObject obj = s.CreateInherit(InheritType.AnyObject);
 
-            Assert.AreEqual(obj.Identity.ToString("B"), obj.FriendlyName);
+            Assert.Equal(obj.Identity.ToString("B"), obj.FriendlyName);
         }
     }
 }

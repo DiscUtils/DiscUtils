@@ -23,14 +23,13 @@
 using System.IO;
 using DiscUtils;
 using DiscUtils.SquashFs;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.SquashFs
 {
-    [TestFixture]
     internal sealed class SquashFileSystemBuilderTest
     {
-        [Test]
+        [Fact]
         public void SingleFile()
         {
             MemoryStream fsImage = new MemoryStream();
@@ -40,14 +39,14 @@ namespace LibraryTests.SquashFs
             builder.Build(fsImage);
 
             SquashFileSystemReader reader = new SquashFileSystemReader(fsImage);
-            Assert.AreEqual(1, reader.GetFileSystemEntries("\\").Length);
-            Assert.AreEqual(4, reader.GetFileLength("file"));
-            Assert.IsTrue(reader.FileExists("file"));
-            Assert.IsFalse(reader.DirectoryExists("file"));
-            Assert.IsFalse(reader.FileExists("otherfile"));
+            Assert.Equal(1, reader.GetFileSystemEntries("\\").Length);
+            Assert.Equal(4, reader.GetFileLength("file"));
+            Assert.True(reader.FileExists("file"));
+            Assert.False(reader.DirectoryExists("file"));
+            Assert.False(reader.FileExists("otherfile"));
         }
 
-        [Test]
+        [Fact]
         public void CreateDirs()
         {
             MemoryStream fsImage = new MemoryStream();
@@ -57,12 +56,12 @@ namespace LibraryTests.SquashFs
             builder.Build(fsImage);
 
             SquashFileSystemReader reader = new SquashFileSystemReader(fsImage);
-            Assert.IsTrue(reader.DirectoryExists(@"adir"));
-            Assert.IsTrue(reader.DirectoryExists(@"adir\anotherdir"));
-            Assert.IsTrue(reader.FileExists(@"adir\anotherdir\file"));
+            Assert.True(reader.DirectoryExists(@"adir"));
+            Assert.True(reader.DirectoryExists(@"adir\anotherdir"));
+            Assert.True(reader.FileExists(@"adir\anotherdir\file"));
         }
 
-        [Test]
+        [Fact]
         public void Defaults()
         {
             MemoryStream fsImage = new MemoryStream();
@@ -83,24 +82,24 @@ namespace LibraryTests.SquashFs
 
             SquashFileSystemReader reader = new SquashFileSystemReader(fsImage);
 
-            Assert.AreEqual(0, reader.GetUnixFileInfo("file").UserId);
-            Assert.AreEqual(0, reader.GetUnixFileInfo("file").GroupId);
-            Assert.AreEqual(UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite, reader.GetUnixFileInfo("file").Permissions);
+            Assert.Equal(0, reader.GetUnixFileInfo("file").UserId);
+            Assert.Equal(0, reader.GetUnixFileInfo("file").GroupId);
+            Assert.Equal(UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupWrite, reader.GetUnixFileInfo("file").Permissions);
 
-            Assert.AreEqual(0, reader.GetUnixFileInfo("dir").UserId);
-            Assert.AreEqual(0, reader.GetUnixFileInfo("dir").GroupId);
-            Assert.AreEqual(UnixFilePermissions.OwnerAll | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupExecute | UnixFilePermissions.OthersRead | UnixFilePermissions.OthersExecute, reader.GetUnixFileInfo("dir").Permissions);
+            Assert.Equal(0, reader.GetUnixFileInfo("dir").UserId);
+            Assert.Equal(0, reader.GetUnixFileInfo("dir").GroupId);
+            Assert.Equal(UnixFilePermissions.OwnerAll | UnixFilePermissions.GroupRead | UnixFilePermissions.GroupExecute | UnixFilePermissions.OthersRead | UnixFilePermissions.OthersExecute, reader.GetUnixFileInfo("dir").Permissions);
 
-            Assert.AreEqual(1000, reader.GetUnixFileInfo("file2").UserId);
-            Assert.AreEqual(1234, reader.GetUnixFileInfo("file2").GroupId);
-            Assert.AreEqual(UnixFilePermissions.OwnerAll, reader.GetUnixFileInfo("file2").Permissions);
+            Assert.Equal(1000, reader.GetUnixFileInfo("file2").UserId);
+            Assert.Equal(1234, reader.GetUnixFileInfo("file2").GroupId);
+            Assert.Equal(UnixFilePermissions.OwnerAll, reader.GetUnixFileInfo("file2").Permissions);
 
-            Assert.AreEqual(1000, reader.GetUnixFileInfo("dir2").UserId);
-            Assert.AreEqual(1234, reader.GetUnixFileInfo("dir2").GroupId);
-            Assert.AreEqual(UnixFilePermissions.GroupAll, reader.GetUnixFileInfo("dir2").Permissions);
+            Assert.Equal(1000, reader.GetUnixFileInfo("dir2").UserId);
+            Assert.Equal(1234, reader.GetUnixFileInfo("dir2").GroupId);
+            Assert.Equal(UnixFilePermissions.GroupAll, reader.GetUnixFileInfo("dir2").Permissions);
         }
 
-        [Test]
+        [Fact]
         public void FragmentData()
         {
             MemoryStream fsImage = new MemoryStream();
@@ -116,15 +115,15 @@ namespace LibraryTests.SquashFs
                 byte[] buffer = new byte[100];
                 int numRead = fs.Read(buffer, 0, 100);
 
-                Assert.AreEqual(4, numRead);
-                Assert.AreEqual(1, buffer[0]);
-                Assert.AreEqual(2, buffer[1]);
-                Assert.AreEqual(3, buffer[2]);
-                Assert.AreEqual(4, buffer[3]);
+                Assert.Equal(4, numRead);
+                Assert.Equal(1, buffer[0]);
+                Assert.Equal(2, buffer[1]);
+                Assert.Equal(3, buffer[2]);
+                Assert.Equal(4, buffer[3]);
             }
         }
 
-        [Test]
+        [Fact]
         public void BlockData()
         {
             byte[] testData = new byte[(512 * 1024) + 21];
@@ -146,10 +145,10 @@ namespace LibraryTests.SquashFs
                 byte[] buffer = new byte[(512 * 1024) + 1024];
                 int numRead = fs.Read(buffer, 0, buffer.Length);
 
-                Assert.AreEqual(testData.Length, numRead);
+                Assert.Equal(testData.Length, numRead);
                 for (int i = 0; i < testData.Length; ++i)
                 {
-                    Assert.AreEqual(testData[i], buffer[i], "Data differs at index " + i);
+                    Assert.Equal(testData[i], buffer[i] /*, "Data differs at index " + i*/);
                 }
             }
         }

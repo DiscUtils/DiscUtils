@@ -23,14 +23,13 @@
 using System;
 using System.IO;
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     public class BlockCacheTest
     {
-        [Test]
+        [Fact]
         public void Dispose()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -41,7 +40,7 @@ namespace LibraryTests
             {
                 cacheStream.Position = 0;
                 cacheStream.ReadByte();
-                Assert.Fail("Cache stream should have failed - disposed");
+                Assert.True(false, "Cache stream should have failed - disposed");
             }
             catch (ObjectDisposedException)
             {
@@ -51,14 +50,14 @@ namespace LibraryTests
             {
                 ms.Position = 0;
                 ms.ReadByte();
-                Assert.Fail("Cache stream should have failed - disposed");
+                Assert.True(false, "Cache stream should have failed - disposed");
             }
             catch (ObjectDisposedException)
             {
             }
         }
 
-        [Test]
+        [Fact]
         public void LargeRead()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -70,12 +69,12 @@ namespace LibraryTests
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 0);
-            Assert.AreEqual(1, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(1, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
         }
 
-        [Test]
+        [Fact]
         public void ReadThrough()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -87,12 +86,12 @@ namespace LibraryTests
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 0);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
         }
 
-        [Test]
+        [Fact]
         public void CachedRead()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -104,21 +103,21 @@ namespace LibraryTests
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 0);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
 
             buffer = new byte[buffer.Length];
             cacheStream.Position = 0;
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 0);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(1, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(2, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(1, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(2, cacheStream.Statistics.TotalReadsIn);
         }
 
-        [Test]
+        [Fact]
         public void UnalignedRead()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -130,12 +129,12 @@ namespace LibraryTests
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 3);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
         }
 
-        [Test]
+        [Fact]
         public void UnalignedCachedRead()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -147,22 +146,22 @@ namespace LibraryTests
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 3);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
 
             buffer = new byte[buffer.Length];
             cacheStream.Position = 3;
             cacheStream.Read(buffer, 0, buffer.Length);
 
             AssertSequenced(buffer, 3);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(1, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(2, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(1, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(2, cacheStream.Statistics.TotalReadsIn);
         }
 
 
-        [Test]
+        [Fact]
         public void Overread()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -173,15 +172,15 @@ namespace LibraryTests
             cacheStream.Position = 90;
             int numRead = cacheStream.Read(buffer, 0, buffer.Length);
 
-            Assert.AreEqual(10, numRead);
+            Assert.Equal(10, numRead);
             AssertSequenced(buffer, 0, 10, 90);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
         }
 
 
-        [Test]
+        [Fact]
         public void CachedOverread()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -192,24 +191,24 @@ namespace LibraryTests
             cacheStream.Position = 90;
             int numRead = cacheStream.Read(buffer, 0, buffer.Length);
 
-            Assert.AreEqual(10, numRead);
+            Assert.Equal(10, numRead);
             AssertSequenced(buffer, 0, 10, 90);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
 
             buffer = new byte[buffer.Length];
             cacheStream.Position = 90;
             numRead = cacheStream.Read(buffer, 0, buffer.Length);
 
-            Assert.AreEqual(10, numRead);
+            Assert.Equal(10, numRead);
             AssertSequenced(buffer, 0, 10, 90);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(1, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(2, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(1, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(2, cacheStream.Statistics.TotalReadsIn);
         }
 
-        [Test]
+        [Fact]
         public void CacheBlockRecycle()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -220,24 +219,24 @@ namespace LibraryTests
             cacheStream.Position = 10;
             int numRead = cacheStream.Read(buffer, 0, buffer.Length);
 
-            Assert.AreEqual(50, numRead);
+            Assert.Equal(50, numRead);
             AssertSequenced(buffer, 10);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(0, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(1, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(1, cacheStream.Statistics.TotalReadsIn);
 
             buffer = new byte[40];
             cacheStream.Position = 50;
             numRead = cacheStream.Read(buffer, 0, buffer.Length);
 
-            Assert.AreEqual(40, numRead);
+            Assert.Equal(40, numRead);
             AssertSequenced(buffer, 50);
-            Assert.AreEqual(0, cacheStream.Statistics.LargeReadsIn);
-            Assert.AreEqual(1, cacheStream.Statistics.ReadCacheHits);
-            Assert.AreEqual(2, cacheStream.Statistics.TotalReadsIn);
+            Assert.Equal(0, cacheStream.Statistics.LargeReadsIn);
+            Assert.Equal(1, cacheStream.Statistics.ReadCacheHits);
+            Assert.Equal(2, cacheStream.Statistics.TotalReadsIn);
         }
 
-        [Test]
+        [Fact]
         public void Write()
         {
             MemoryStream ms = CreateSequencedMemStream(100, true);
@@ -252,7 +251,7 @@ namespace LibraryTests
 
             cacheStream.Position = 20;
             cacheStream.Write(new byte[10], 0, 10);
-            Assert.AreEqual(30, cacheStream.Position);
+            Assert.Equal(30, cacheStream.Position);
 
             cacheStream.Position = 10;
             buffer = new byte[30];
@@ -260,11 +259,11 @@ namespace LibraryTests
 
             AssertSequenced(buffer, 0, 10, 10);
             AssertSequenced(buffer, 20, 10, 30);
-            Assert.AreEqual(0, buffer[10]);
-            Assert.AreEqual(0, buffer[19]);
+            Assert.Equal(0, buffer[10]);
+            Assert.Equal(0, buffer[19]);
         }
 
-        [Test]
+        [Fact]
         public void FailWrite()
         {
             MemoryStream ms = CreateSequencedMemStream(100, false);
@@ -286,7 +285,7 @@ namespace LibraryTests
             }
             catch(NotSupportedException)
             {
-                Assert.AreEqual(freeBefore + 2, cacheStream.Statistics.FreeReadBlocks);
+                Assert.Equal(freeBefore + 2, cacheStream.Statistics.FreeReadBlocks);
             }
         }
 
@@ -312,7 +311,7 @@ namespace LibraryTests
             {
                 if (buffer[i + offset] != (byte)(i + seqOffset))
                 {
-                    Assert.Fail("Expected {0} at index {1}, was {2}", (byte)(i + seqOffset), i + offset, buffer[i + offset]);
+                    Assert.True(false, string.Format("Expected {0} at index {1}, was {2}", (byte)(i + seqOffset), i + offset, buffer[i + offset]));
                 }
             }
         }

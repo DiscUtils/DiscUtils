@@ -26,14 +26,13 @@ using DiscUtils;
 using DiscUtils.BootConfig;
 using DiscUtils.Partitions;
 using DiscUtils.Registry;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.BootConfig
 {
-    [TestFixture]
     public class ElementValueTest
     {
-        [Test]
+        [Fact]
         public void StringValue()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -44,10 +43,10 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationPath);
 
-            Assert.AreEqual(@"a\path\to\nowhere", el.Value.ToString());
+            Assert.Equal(@"a\path\to\nowhere", el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BooleanValue()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -58,10 +57,10 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryAutoRecoveryEnabled);
 
-            Assert.AreEqual(true.ToString(), el.Value.ToString());
+            Assert.Equal(true.ToString(), el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void DeviceValue_Gpt()
         {
             SparseMemoryStream ms = new SparseMemoryStream();
@@ -78,11 +77,11 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationDevice);
 
-            Assert.IsNotNull(el.Value.ToString());
-            Assert.IsNotEmpty(el.Value.ToString());
+            Assert.NotNull(el.Value.ToString());
+            Assert.NotEmpty(el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void DeviceValue_Mbr()
         {
             SparseMemoryStream ms = new SparseMemoryStream();
@@ -99,11 +98,11 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationDevice);
 
-            Assert.IsNotNull(el.Value.ToString());
-            Assert.IsNotEmpty(el.Value.ToString());
+            Assert.NotNull(el.Value.ToString());
+            Assert.NotEmpty(el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void DeviceValue_BootDevice()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -114,11 +113,11 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryApplicationDevice);
 
-            Assert.IsNotNull(el.Value.ToString());
-            Assert.IsNotEmpty(el.Value.ToString());
+            Assert.NotNull(el.Value.ToString());
+            Assert.NotEmpty(el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void GuidValue()
         {
             Guid testGuid = Guid.NewGuid();
@@ -131,10 +130,10 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.BootMgrDefaultObject);
 
-            Assert.AreEqual(testGuid.ToString("B"), el.Value.ToString());
+            Assert.Equal(testGuid.ToString("B"), el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void GuidListValue()
         {
             Guid testGuid1 = Guid.NewGuid();
@@ -148,10 +147,10 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.BootMgrDisplayOrder);
 
-            Assert.AreEqual(testGuid1.ToString("B") + "," + testGuid2.ToString("B"), el.Value.ToString());
+            Assert.Equal(testGuid1.ToString("B") + "," + testGuid2.ToString("B"), el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void IntegerValue()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -162,10 +161,10 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryTruncatePhysicalMemory);
 
-            Assert.AreEqual("1234", el.Value.ToString());
+            Assert.Equal("1234", el.Value.ToString());
         }
 
-        [Test]
+        [Fact]
         public void IntegerListValue()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -176,8 +175,8 @@ namespace LibraryTests.BootConfig
 
             el = obj.GetElement(WellKnownElement.LibraryBadMemoryList);
 
-            Assert.IsNotNull(el.Value.ToString());
-            Assert.IsNotEmpty(el.Value.ToString());
+            Assert.NotNull(el.Value.ToString());
+            Assert.NotEmpty(el.Value.ToString());
         }
     }
 }
