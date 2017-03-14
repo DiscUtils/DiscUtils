@@ -23,26 +23,25 @@
 using System;
 using System.IO;
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     public class VirtualDiskTest
     {
-        [Test]
+        [Fact]
         public void TestSignature()
         {
             MemoryStream ms = new MemoryStream();
             ms.SetLength(1024 * 1024);
 
             DiscUtils.Raw.Disk rawDisk = new DiscUtils.Raw.Disk(ms, Ownership.Dispose);
-            Assert.AreEqual(0, rawDisk.Signature);
+            Assert.Equal(0, rawDisk.Signature);
             rawDisk.Signature = unchecked((int)0xDEADBEEF);
-            Assert.AreEqual(unchecked((int)0xDEADBEEF), rawDisk.Signature);
+            Assert.Equal(unchecked((int)0xDEADBEEF), rawDisk.Signature);
         }
 
-        [Test]
+        [Fact]
         public void TestMbr()
         {
             MemoryStream ms = new MemoryStream();
@@ -58,19 +57,19 @@ namespace LibraryTests
             rawDisk.SetMasterBootRecord(newMbr);
 
             byte[] readMbr = rawDisk.GetMasterBootRecord();
-            Assert.AreEqual(512, readMbr.Length);
+            Assert.Equal(512, readMbr.Length);
 
             for (int i = 0; i < 512; i++)
             {
                 if (readMbr[i] != (byte)i)
                 {
-                    Assert.Fail("Mismatch on byte {0}, expected {1} was {2}", i, (byte)i, readMbr[i]);
+                    Assert.True(false, string.Format("Mismatch on byte {0}, expected {1} was {2}", i, (byte)i, readMbr[i]));
                 }
             }
         }
 
 
-        [Test]
+        [Fact]
         public void TestMbr_Null()
         {
             MemoryStream ms = new MemoryStream();
@@ -80,7 +79,7 @@ namespace LibraryTests
             Assert.Throws<ArgumentNullException>(() => rawDisk.SetMasterBootRecord(null));
         }
 
-        [Test]
+        [Fact]
         public void TestMbr_WrongSize()
         {
             MemoryStream ms = new MemoryStream();

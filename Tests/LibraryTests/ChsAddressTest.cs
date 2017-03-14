@@ -21,32 +21,31 @@
 //
 
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     public class ChsAddressTest
     {
-        [Test]
+        [Fact]
         public void Create()
         {
             ChsAddress g = new ChsAddress(100, 16, 63);
-            Assert.AreEqual(100, g.Cylinder);
-            Assert.AreEqual(16, g.Head);
-            Assert.AreEqual(63, g.Sector);
+            Assert.Equal(100, g.Cylinder);
+            Assert.Equal(16, g.Head);
+            Assert.Equal(63, g.Sector);
         }
 
-        [Test]
+        [Fact]
         public void Equals()
         {
-            Assert.AreEqual(new ChsAddress(333, 22, 11), new ChsAddress(333, 22, 11));
+            Assert.Equal(new ChsAddress(333, 22, 11), new ChsAddress(333, 22, 11));
         }
 
-        [Test]
+        [Fact]
         public void TestToString()
         {
-            Assert.AreEqual("(333/22/11)", new ChsAddress(333, 22, 11).ToString());
+            Assert.Equal("(333/22/11)", new ChsAddress(333, 22, 11).ToString());
         }
     }
 }

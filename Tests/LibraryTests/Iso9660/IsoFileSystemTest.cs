@@ -23,60 +23,59 @@
 using System.IO;
 using DiscUtils;
 using DiscUtils.Iso9660;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Iso9660
 {
-    [TestFixture]
     public class IsoFileSystemTest
     {
-        [Test]
+        [Fact]
         public void CanWrite()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
-            Assert.IsFalse(fs.CanWrite);
+            Assert.False(fs.CanWrite);
         }
 
-        [Test]
+        [Fact]
         public void FileInfo()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
             DiscFileInfo fi = fs.GetFileInfo(@"SOMEDIR\SOMEFILE.TXT");
-            Assert.IsNotNull(fi);
+            Assert.NotNull(fi);
         }
 
-        [Test]
+        [Fact]
         public void DirectoryInfo()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
             DiscDirectoryInfo fi = fs.GetDirectoryInfo(@"SOMEDIR");
-            Assert.IsNotNull(fi);
+            Assert.NotNull(fi);
         }
 
-        [Test]
+        [Fact]
         public void FileSystemInfo()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
             DiscFileSystemInfo fi = fs.GetFileSystemInfo(@"SOMEDIR\SOMEFILE");
-            Assert.IsNotNull(fi);
+            Assert.NotNull(fi);
         }
 
-        [Test]
+        [Fact]
         public void Root()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
-            Assert.IsNotNull(fs.Root);
-            Assert.IsTrue(fs.Root.Exists);
-            Assert.IsEmpty(fs.Root.Name);
-            Assert.IsNull(fs.Root.Parent);
+            Assert.NotNull(fs.Root);
+            Assert.True(fs.Root.Exists);
+            Assert.Empty(fs.Root.Name);
+            Assert.Null(fs.Root.Parent);
         }
 
-        [Test]
+        [Fact]
         public void LargeDirectory()
         {
             CDBuilder builder = new CDBuilder();
@@ -89,10 +88,10 @@ namespace LibraryTests.Iso9660
 
             CDReader reader = new CDReader(builder.Build(), true);
 
-            Assert.AreEqual(3000, reader.Root.GetFiles().Length);
+            Assert.Equal(3000, reader.Root.GetFiles().Length);
         }
 
-        [Test]
+        [Fact]
         public void HideVersions()
         {
             CDBuilder builder = new CDBuilder();
@@ -103,12 +102,12 @@ namespace LibraryTests.Iso9660
             SparseStream.Pump(builder.Build(), ms);
 
             CDReader reader = new CDReader(ms, true, false);
-            Assert.AreEqual("\\FILE.TXT;1", reader.GetFiles("")[0]);
-            Assert.AreEqual("\\FILE.TXT;1", reader.GetFileSystemEntries("")[0]);
+            Assert.Equal("\\FILE.TXT;1", reader.GetFiles("")[0]);
+            Assert.Equal("\\FILE.TXT;1", reader.GetFileSystemEntries("")[0]);
 
             reader = new CDReader(ms, true, true);
-            Assert.AreEqual("\\FILE.TXT", reader.GetFiles("")[0]);
-            Assert.AreEqual("\\FILE.TXT", reader.GetFileSystemEntries("")[0]);
+            Assert.Equal("\\FILE.TXT", reader.GetFiles("")[0]);
+            Assert.Equal("\\FILE.TXT", reader.GetFileSystemEntries("")[0]);
         }
     }
 }

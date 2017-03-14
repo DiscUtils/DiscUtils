@@ -25,27 +25,26 @@ using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Vmdk;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Vmdk
 {
-    [TestFixture]
     public class DynamicStreamTest
     {
-        [Test]
+        [Fact]
         public void Attributes()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
             using (Disk disk = Disk.Initialize(fs, "a.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.MonolithicSparse))
             {
                 Stream s = disk.Content;
-                Assert.IsTrue(s.CanRead);
-                Assert.IsTrue(s.CanWrite);
-                Assert.IsTrue(s.CanSeek);
+                Assert.True(s.CanRead);
+                Assert.True(s.CanWrite);
+                Assert.True(s.CanSeek);
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteSmall()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -59,21 +58,21 @@ namespace LibraryTests.Vmdk
 
                 Stream s = disk.Content;
                 s.Write(content, 10, 40);
-                Assert.AreEqual(40, s.Position);
+                Assert.Equal(40, s.Position);
                 s.Write(content, 50, 50);
-                Assert.AreEqual(90, s.Position);
+                Assert.Equal(90, s.Position);
                 s.Position = 0;
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 60);
-                Assert.AreEqual(60, s.Position);
+                Assert.Equal(60, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 60; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
 
@@ -84,19 +83,19 @@ namespace LibraryTests.Vmdk
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 20);
-                Assert.AreEqual(20, s.Position);
+                Assert.Equal(20, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 20; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteLarge()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -123,13 +122,13 @@ namespace LibraryTests.Vmdk
                 {
                     if (buffer[i] != content[i])
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void DisposeTest()
         {
             Stream contentStream;
@@ -143,12 +142,12 @@ namespace LibraryTests.Vmdk
             try
             {
                 contentStream.Position = 0;
-                Assert.Fail();
+                Assert.True(false);
             }
             catch(ObjectDisposedException) { }
         }
 
-        [Test]
+        [Fact]
         public void DisposeTestMonolithicSparse()
         {
             Stream contentStream;
@@ -162,12 +161,12 @@ namespace LibraryTests.Vmdk
             try
             {
                 contentStream.Position = 0;
-                Assert.Fail();
+                Assert.True(false);
             }
             catch (ObjectDisposedException) { }
         }
 
-        [Test]
+        [Fact]
         public void ReadNotPresent()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -181,26 +180,26 @@ namespace LibraryTests.Vmdk
                 {
                     if (buffer[i] != 0)
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void AttributesVmfs()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
             using (Disk disk = Disk.Initialize(fs, "a.vmdk", 16 * 1024L * 1024 * 1024, DiskCreateType.VmfsSparse))
             {
                 Stream s = disk.Content;
-                Assert.IsTrue(s.CanRead);
-                Assert.IsTrue(s.CanWrite);
-                Assert.IsTrue(s.CanSeek);
+                Assert.True(s.CanRead);
+                Assert.True(s.CanWrite);
+                Assert.True(s.CanSeek);
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteSmallVmfs()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -214,21 +213,21 @@ namespace LibraryTests.Vmdk
 
                 Stream s = disk.Content;
                 s.Write(content, 10, 40);
-                Assert.AreEqual(40, s.Position);
+                Assert.Equal(40, s.Position);
                 s.Write(content, 50, 50);
-                Assert.AreEqual(90, s.Position);
+                Assert.Equal(90, s.Position);
                 s.Position = 0;
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 60);
-                Assert.AreEqual(60, s.Position);
+                Assert.Equal(60, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 60; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
 
@@ -239,19 +238,19 @@ namespace LibraryTests.Vmdk
 
                 byte[] buffer = new byte[100];
                 s.Read(buffer, 10, 20);
-                Assert.AreEqual(20, s.Position);
+                Assert.Equal(20, s.Position);
                 for (int i = 0; i < 10; ++i)
                 {
-                    Assert.AreEqual(0, buffer[i]);
+                    Assert.Equal(0, buffer[i]);
                 }
                 for (int i = 10; i < 20; ++i)
                 {
-                    Assert.AreEqual(i, buffer[i]);
+                    Assert.Equal(i, buffer[i]);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void ReadWriteLargeVmfs()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -278,13 +277,13 @@ namespace LibraryTests.Vmdk
                 {
                     if (buffer[i] != content[i])
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void DisposeTestVmfs()
         {
             Stream contentStream;
@@ -298,12 +297,12 @@ namespace LibraryTests.Vmdk
             try
             {
                 contentStream.Position = 0;
-                Assert.Fail();
+                Assert.True(false);
             }
             catch (ObjectDisposedException) { }
         }
 
-        [Test]
+        [Fact]
         public void ReadNotPresentVmfs()
         {
             DiscFileSystem fs = new InMemoryFileSystem();
@@ -317,13 +316,13 @@ namespace LibraryTests.Vmdk
                 {
                     if (buffer[i] != 0)
                     {
-                        Assert.Fail();
+                        Assert.True(false);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void Extents()
         {
             // Fragile - this is the grain size in bytes of the VMDK file, so dependant on algorithm that
@@ -338,25 +337,25 @@ namespace LibraryTests.Vmdk
 
                 // Starts before first extent, ends before end of extent
                 List<StreamExtent> extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(0, 21 * unit));
-                Assert.AreEqual(1, extents.Count);
-                Assert.AreEqual(20 * unit, extents[0].Start);
-                Assert.AreEqual(1 * unit, extents[0].Length);
+                Assert.Equal(1, extents.Count);
+                Assert.Equal(20 * unit, extents[0].Start);
+                Assert.Equal(1 * unit, extents[0].Length);
 
                 // Limit to disk content length
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * unit, 20 * unit));
-                Assert.AreEqual(1, extents.Count);
-                Assert.AreEqual(21 * unit, extents[0].Start);
-                Assert.AreEqual(3 * unit, extents[0].Length);
+                Assert.Equal(1, extents.Count);
+                Assert.Equal(21 * unit, extents[0].Start);
+                Assert.Equal(3 * unit, extents[0].Length);
 
                 // Out of range
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(25 * unit, 4 * unit));
-                Assert.AreEqual(0, extents.Count);
+                Assert.Equal(0, extents.Count);
 
                 // Non-unit multiples
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * unit + 10, 20 * unit));
-                Assert.AreEqual(1, extents.Count);
-                Assert.AreEqual(21 * unit + 10, extents[0].Start);
-                Assert.AreEqual(3 * unit - 10, extents[0].Length);
+                Assert.Equal(1, extents.Count);
+                Assert.Equal(21 * unit + 10, extents[0].Start);
+                Assert.Equal(3 * unit - 10, extents[0].Length);
             }
         }
     }

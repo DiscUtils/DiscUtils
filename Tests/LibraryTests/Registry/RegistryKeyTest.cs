@@ -23,50 +23,48 @@
 using System;
 using System.IO;
 using DiscUtils.Registry;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Registry
 {
-    [TestFixture]
     public class RegistryKeyTest
     {
         private RegistryHive hive;
 
-        [SetUp]
-        public void Setup()
+        public RegistryKeyTest()
         {
             hive = RegistryHive.Create(new MemoryStream());
         }
 
-        [Test]
+        [Fact]
         public void SetDefaultValue()
         {
             hive.Root.SetValue("", "A default value");
-            Assert.AreEqual("A default value", (string)hive.Root.GetValue(""));
+            Assert.Equal("A default value", (string)hive.Root.GetValue(""));
 
             hive.Root.SetValue(null, "Foobar");
-            Assert.AreEqual("Foobar", (string)hive.Root.GetValue(null));
+            Assert.Equal("Foobar", (string)hive.Root.GetValue(null));
 
             hive.Root.SetValue(null, "asdf");
-            Assert.AreEqual("asdf", (string)hive.Root.GetValue(""));
+            Assert.Equal("asdf", (string)hive.Root.GetValue(""));
         }
 
-        [Test]
+        [Fact]
         public void ValueNameCaseSensitivity()
         {
             hive.Root.SetValue("nAmE", "value");
-            Assert.AreEqual("value", (string)hive.Root.GetValue("NaMe"));
+            Assert.Equal("value", (string)hive.Root.GetValue("NaMe"));
 
             hive.Root.SetValue("moreThanFourCharName", "foo");
-            Assert.AreEqual("foo", (string)hive.Root.GetValue("moretHANfOURcHARnAME"));
+            Assert.Equal("foo", (string)hive.Root.GetValue("moretHANfOURcHARnAME"));
 
-            Assert.AreEqual(2, hive.Root.ValueCount);
+            Assert.Equal(2, hive.Root.ValueCount);
             hive.Root.SetValue("NaMe", "newvalue");
-            Assert.AreEqual(2, hive.Root.ValueCount);
-            Assert.AreEqual("newvalue", (string)hive.Root.GetValue("NaMe"));
+            Assert.Equal(2, hive.Root.ValueCount);
+            Assert.Equal("newvalue", (string)hive.Root.GetValue("NaMe"));
         }
 
-        [Test]
+        [Fact]
         public void SetLargeValue()
         {
             byte[] buffer = new byte[64 * 1024];
@@ -74,99 +72,99 @@ namespace LibraryTests.Registry
             hive.Root.SetValue("bigvalue", buffer);
 
             byte[] readVal = (byte[])hive.Root.GetValue("bigvalue");
-            Assert.AreEqual(buffer.Length, readVal.Length);
-            Assert.AreEqual(0xAD, readVal[5232]);
+            Assert.Equal(buffer.Length, readVal.Length);
+            Assert.Equal(0xAD, readVal[5232]);
         }
 
-        [Test]
+        [Fact]
         public void SetStringValue()
         {
             hive.Root.SetValue("value", "string");
-            Assert.AreEqual(RegistryValueType.String, hive.Root.GetValueType("value"));
-            Assert.AreEqual("string", (string)hive.Root.GetValue("value"));
+            Assert.Equal(RegistryValueType.String, hive.Root.GetValueType("value"));
+            Assert.Equal("string", (string)hive.Root.GetValue("value"));
 
             hive.Root.SetValue("emptyvalue", "");
-            Assert.AreEqual(RegistryValueType.String, hive.Root.GetValueType("emptyvalue"));
-            Assert.AreEqual("", (string)hive.Root.GetValue("emptyvalue"));
+            Assert.Equal(RegistryValueType.String, hive.Root.GetValueType("emptyvalue"));
+            Assert.Equal("", (string)hive.Root.GetValue("emptyvalue"));
         }
 
-        [Test]
+        [Fact]
         public void SetIntegerValue()
         {
             hive.Root.SetValue("value", 0x7342BEEF);
-            Assert.AreEqual(RegistryValueType.Dword, hive.Root.GetValueType("value"));
-            Assert.AreEqual(0x7342BEEF, (int)hive.Root.GetValue("value"));
+            Assert.Equal(RegistryValueType.Dword, hive.Root.GetValueType("value"));
+            Assert.Equal(0x7342BEEF, (int)hive.Root.GetValue("value"));
         }
 
-        [Test]
+        [Fact]
         public void SetByteArrayValue()
         {
             hive.Root.SetValue("value", new byte[] { 1, 2, 3, 4 });
-            Assert.AreEqual(RegistryValueType.Binary, hive.Root.GetValueType("value"));
+            Assert.Equal(RegistryValueType.Binary, hive.Root.GetValueType("value"));
             byte[] readVal = (byte[])hive.Root.GetValue("value");
-            Assert.AreEqual(4, readVal.Length);
-            Assert.AreEqual(3, readVal[2]);
+            Assert.Equal(4, readVal.Length);
+            Assert.Equal(3, readVal[2]);
         }
 
-        [Test]
+        [Fact]
         public void SetStringArrayValue()
         {
             hive.Root.SetValue("value", new string[] { "A", "B", "C" });
-            Assert.AreEqual(RegistryValueType.MultiString, hive.Root.GetValueType("value"));
+            Assert.Equal(RegistryValueType.MultiString, hive.Root.GetValueType("value"));
             string[] readVal = (string[])hive.Root.GetValue("value");
-            Assert.AreEqual(3, readVal.Length);
-            Assert.AreEqual("C", readVal[2]);
+            Assert.Equal(3, readVal.Length);
+            Assert.Equal("C", readVal[2]);
         }
 
-        [Test]
+        [Fact]
         public void SetEnvStringValue()
         {
             hive.Root.SetValue("value", "string", RegistryValueType.ExpandString);
-            Assert.AreEqual(RegistryValueType.ExpandString, hive.Root.GetValueType("value"));
-            Assert.AreEqual("string", (string)hive.Root.GetValue("value"));
+            Assert.Equal(RegistryValueType.ExpandString, hive.Root.GetValueType("value"));
+            Assert.Equal("string", (string)hive.Root.GetValue("value"));
 
             hive.Root.SetValue("value", "str%windir%ing", RegistryValueType.ExpandString);
-            Assert.AreEqual(RegistryValueType.ExpandString, hive.Root.GetValueType("value"));
-            Assert.AreEqual("str" + Environment.GetEnvironmentVariable("windir") + "ing", (string)hive.Root.GetValue("value"));
+            Assert.Equal(RegistryValueType.ExpandString, hive.Root.GetValueType("value"));
+            Assert.Equal("str" + Environment.GetEnvironmentVariable("windir") + "ing", (string)hive.Root.GetValue("value"));
 
             hive.Root.SetValue("emptyvalue", "", RegistryValueType.ExpandString);
-            Assert.AreEqual(RegistryValueType.ExpandString, hive.Root.GetValueType("emptyvalue"));
-            Assert.AreEqual("", (string)hive.Root.GetValue("emptyvalue"));
+            Assert.Equal(RegistryValueType.ExpandString, hive.Root.GetValueType("emptyvalue"));
+            Assert.Equal("", (string)hive.Root.GetValue("emptyvalue"));
         }
 
-        [Test]
+        [Fact]
         public void DeleteValue()
         {
             hive.Root.SetValue("aValue", "value");
             hive.Root.SetValue("nAmE", "value");
             hive.Root.SetValue("otherValue", "value");
-            Assert.AreEqual(3, hive.Root.ValueCount);
+            Assert.Equal(3, hive.Root.ValueCount);
 
             hive.Root.DeleteValue("NaMe");
-            Assert.AreEqual(2, hive.Root.ValueCount);
+            Assert.Equal(2, hive.Root.ValueCount);
         }
 
-        [Test]
+        [Fact]
         public void DeleteOnlyValue()
         {
             hive.Root.SetValue("nAmE", "value");
-            Assert.AreEqual(1, hive.Root.ValueCount);
+            Assert.Equal(1, hive.Root.ValueCount);
 
             hive.Root.DeleteValue("NaMe");
-            Assert.AreEqual(0, hive.Root.ValueCount);
+            Assert.Equal(0, hive.Root.ValueCount);
         }
 
-        [Test]
+        [Fact]
         public void DeleteDefaultValue()
         {
             hive.Root.SetValue("", "value");
-            Assert.AreEqual(1, hive.Root.ValueCount);
+            Assert.Equal(1, hive.Root.ValueCount);
 
             hive.Root.DeleteValue(null);
-            Assert.AreEqual(0, hive.Root.ValueCount);
+            Assert.Equal(0, hive.Root.ValueCount);
         }
 
-        [Test]
+        [Fact]
         public void EnumerateValues()
         {
             hive.Root.SetValue(@"C", "");
@@ -174,60 +172,60 @@ namespace LibraryTests.Registry
             hive.Root.SetValue(@"B", "");
 
             string[] names = hive.Root.GetValueNames();
-            Assert.AreEqual(3, names.Length);
-            Assert.AreEqual("A", names[0]);
-            Assert.AreEqual("B", names[1]);
-            Assert.AreEqual("C", names[2]);
+            Assert.Equal(3, names.Length);
+            Assert.Equal("A", names[0]);
+            Assert.Equal("B", names[1]);
+            Assert.Equal("C", names[2]);
         }
 
-        [Test]
+        [Fact]
         public void CreateKey()
         {
             RegistryKey newKey = hive.Root.CreateSubKey(@"Child\Grandchild");
             Assert.NotNull(newKey);
-            Assert.AreEqual(1, hive.Root.SubKeyCount);
-            Assert.AreEqual(1, hive.Root.OpenSubKey("cHiLd").SubKeyCount);
+            Assert.Equal(1, hive.Root.SubKeyCount);
+            Assert.Equal(1, hive.Root.OpenSubKey("cHiLd").SubKeyCount);
         }
 
-        [Test]
+        [Fact]
         public void CreateExistingKey()
         {
             RegistryKey newKey = hive.Root.CreateSubKey(@"Child");
             Assert.NotNull(newKey);
-            Assert.AreEqual(1, hive.Root.SubKeyCount);
+            Assert.Equal(1, hive.Root.SubKeyCount);
 
             newKey = hive.Root.CreateSubKey(@"cHILD");
             Assert.NotNull(newKey);
-            Assert.AreEqual(1, hive.Root.SubKeyCount);
+            Assert.Equal(1, hive.Root.SubKeyCount);
         }
 
-        [Test]
+        [Fact]
         public void DeleteKey()
         {
             RegistryKey newKey = hive.Root.CreateSubKey(@"Child");
             hive.Root.OpenSubKey(@"Child").SetValue("value", "a value");
-            Assert.AreEqual(1, hive.Root.SubKeyCount);
+            Assert.Equal(1, hive.Root.SubKeyCount);
             hive.Root.DeleteSubKey("cHiLd");
-            Assert.AreEqual(0, hive.Root.SubKeyCount);
+            Assert.Equal(0, hive.Root.SubKeyCount);
         }
 
-        [Test]
+        [Fact]
         public void DeleteNonEmptyKey()
         {
             RegistryKey newKey = hive.Root.CreateSubKey(@"Child\Grandchild");
             Assert.Throws<InvalidOperationException>(() => hive.Root.DeleteSubKey("Child"));
         }
 
-        [Test]
+        [Fact]
         public void DeleteKeyTree()
         {
             RegistryKey newKey = hive.Root.CreateSubKey(@"Child\Grandchild");
-            Assert.AreEqual(1, hive.Root.SubKeyCount);
+            Assert.Equal(1, hive.Root.SubKeyCount);
             hive.Root.DeleteSubKeyTree("cHiLd");
-            Assert.AreEqual(0, hive.Root.SubKeyCount);
+            Assert.Equal(0, hive.Root.SubKeyCount);
         }
 
-        [Test]
+        [Fact]
         public void EnumerateSubKeys()
         {
             hive.Root.CreateSubKey(@"C");
@@ -235,10 +233,10 @@ namespace LibraryTests.Registry
             hive.Root.CreateSubKey(@"B");
 
             string[] names = hive.Root.GetSubKeyNames();
-            Assert.AreEqual(3, names.Length);
-            Assert.AreEqual("A", names[0]);
-            Assert.AreEqual("B", names[1]);
-            Assert.AreEqual("C", names[2]);
+            Assert.Equal(3, names.Length);
+            Assert.Equal("A", names[0]);
+            Assert.Equal("B", names[1]);
+            Assert.Equal("C", names[2]);
         }
     }
 }

@@ -1,5 +1,6 @@
 bin/
 obj/
+Buildlog-*\.txt
 
 *.suo
 *.user
@@ -7,6 +8,7 @@ obj/
 
 .vs/
 Nuget/
+packages/
 
 # Tests
-TestResult.xml
+Tests/LibraryTests/TestResults/

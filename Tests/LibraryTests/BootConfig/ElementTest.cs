@@ -23,14 +23,13 @@
 using System.IO;
 using DiscUtils.BootConfig;
 using DiscUtils.Registry;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.BootConfig
 {
-    [TestFixture]
     public class ElementTest
     {
-        [Test]
+        [Fact]
         public void FriendlyName()
         {
             RegistryHive hive = RegistryHive.Create(new MemoryStream());
@@ -38,7 +37,7 @@ namespace LibraryTests.BootConfig
             BcdObject obj = s.CreateInherit(InheritType.AnyObject);
 
             Element el = obj.AddElement(WellKnownElement.LibraryApplicationPath, ElementValue.ForString(@"a\path\to\nowhere"));
-            Assert.AreEqual("{path}", el.FriendlyName);
+            Assert.Equal("{path}", el.FriendlyName);
         }
     }
 }

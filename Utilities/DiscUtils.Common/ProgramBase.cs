@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace DiscUtils.Common
 {
@@ -370,12 +371,26 @@ namespace DiscUtils.Common
 
         private string ExeName
         {
-            get { return GetType().Assembly.GetName().Name; }
+            get
+            {
+#if NET40
+                return GetType().Assembly.GetName().Name;
+#else
+                return GetType().GetTypeInfo().Assembly.GetName().Name;
+#endif
+            }
         }
 
         private string Version
         {
-            get { return GetType().Assembly.GetName().Version.ToString(3); }
+            get
+            {
+#if NET40
+                return GetType().Assembly.GetName().Version.ToString(3);
+#else
+                return GetType().GetTypeInfo().Assembly.GetName().Version.ToString(3);
+#endif
+            }
         }
 
         [Flags]

@@ -24,14 +24,13 @@
 using System;
 using System.Collections.Generic;
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     public class StreamExtentTest
     {
-        [Test]
+        [Fact]
         public void TestIntersect1()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -43,7 +42,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Intersect(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestIntersect2()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -56,7 +55,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Intersect(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestIntersect3()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -71,7 +70,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Intersect(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestIntersect4()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -86,7 +85,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Intersect(s1, s2, s3));
         }
 
-        [Test]
+        [Fact]
         public void TestIntersect5()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -99,7 +98,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Intersect(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestUnion1()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -112,7 +111,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Union(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestUnion2()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -126,7 +125,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Union(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestUnion3()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -139,7 +138,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Union(s1, s2));
         }
 
-        [Test]
+        [Fact]
         public void TestUnion4()
         {
             StreamExtent[] s1 = new StreamExtent[] {
@@ -151,7 +150,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Union(s1));
         }
 
-        [Test]
+        [Fact]
         public void TestUnion5()
         {
             StreamExtent[] r = new StreamExtent[] { };
@@ -159,7 +158,7 @@ namespace LibraryTests
             Compare(r, StreamExtent.Union());
         }
 
-        [Test]
+        [Fact]
         public void TestBlockCount()
         {
             StreamExtent[] s = new StreamExtent[] {
@@ -167,14 +166,14 @@ namespace LibraryTests
                 new StreamExtent(11, 4)
             };
 
-            Assert.AreEqual(2, StreamExtent.BlockCount(s, 10));
+            Assert.Equal(2, StreamExtent.BlockCount(s, 10));
 
             s = new StreamExtent[] {
                 new StreamExtent(0,8),
                 new StreamExtent(9, 8)
             };
 
-            Assert.AreEqual(2, StreamExtent.BlockCount(s, 10));
+            Assert.Equal(2, StreamExtent.BlockCount(s, 10));
 
             s = new StreamExtent[] {
                 new StreamExtent(3, 4),
@@ -182,10 +181,10 @@ namespace LibraryTests
                 new StreamExtent(44, 4)
             };
 
-            Assert.AreEqual(4, StreamExtent.BlockCount(s, 10));
+            Assert.Equal(4, StreamExtent.BlockCount(s, 10));
         }
 
-        [Test]
+        [Fact]
         public void TestBlocks()
         {
             StreamExtent[] s = new StreamExtent[] {
@@ -195,9 +194,9 @@ namespace LibraryTests
 
             List<Range<long,long>> ranges = new List<Range<long,long>>(StreamExtent.Blocks(s, 10));
 
-            Assert.AreEqual(1, ranges.Count);
-            Assert.AreEqual(0, ranges[0].Offset);
-            Assert.AreEqual(2, ranges[0].Count);
+            Assert.Equal(1, ranges.Count);
+            Assert.Equal(0, ranges[0].Offset);
+            Assert.Equal(2, ranges[0].Count);
 
             s = new StreamExtent[] {
                 new StreamExtent(0,8),
@@ -206,9 +205,9 @@ namespace LibraryTests
 
             ranges = new List<Range<long, long>>(StreamExtent.Blocks(s, 10));
 
-            Assert.AreEqual(1, ranges.Count);
-            Assert.AreEqual(0, ranges[0].Offset);
-            Assert.AreEqual(2, ranges[0].Count);
+            Assert.Equal(1, ranges.Count);
+            Assert.Equal(0, ranges[0].Offset);
+            Assert.Equal(2, ranges[0].Count);
 
             s = new StreamExtent[] {
                 new StreamExtent(3, 4),
@@ -218,11 +217,11 @@ namespace LibraryTests
 
             ranges = new List<Range<long, long>>(StreamExtent.Blocks(s, 10));
 
-            Assert.AreEqual(2, ranges.Count);
-            Assert.AreEqual(0, ranges[0].Offset);
-            Assert.AreEqual(3, ranges[0].Count);
-            Assert.AreEqual(4, ranges[1].Offset);
-            Assert.AreEqual(1, ranges[1].Count);
+            Assert.Equal(2, ranges.Count);
+            Assert.Equal(0, ranges[0].Offset);
+            Assert.Equal(3, ranges[0].Count);
+            Assert.Equal(4, ranges[1].Offset);
+            Assert.Equal(1, ranges[1].Count);
         }
 
 
@@ -279,7 +278,7 @@ namespace LibraryTests
                     str += " - different at index " + failedIndex;
                 }
 
-                Assert.Fail(str);
+                Assert.True(false, str);
             }
         }
     }

@@ -22,21 +22,20 @@
 
 using System.IO;
 using DiscUtils;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests
 {
-    [TestFixture]
     internal sealed class FileSystemManagerTest
     {
-        [Test]
+        [Fact]
         public void Detect()
         {
             MemoryStream shortStream = new MemoryStream(new byte[5]);
-            Assert.AreEqual(0, FileSystemManager.DetectFileSystems(shortStream).Length);
+            Assert.Equal(0, FileSystemManager.DetectFileSystems(shortStream).Length);
 
             MemoryStream longStream = new MemoryStream(new byte[100000]);
-            Assert.AreEqual(0, FileSystemManager.DetectFileSystems(longStream).Length);
+            Assert.Equal(0, FileSystemManager.DetectFileSystems(longStream).Length);
         }
     }
 }

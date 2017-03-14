@@ -24,40 +24,39 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Iso9660;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Iso9660
 {
-    [TestFixture]
     public class IsoDirectoryInfoTest
     {
-        [Test]
+        [Fact]
         public void Exists()
         {
             CDBuilder builder = new CDBuilder();
             builder.AddFile(@"SOMEDIR\CHILDDIR\FILE.TXT", new byte[0]);
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.IsTrue(fs.GetDirectoryInfo(@"\").Exists);
-            Assert.IsTrue(fs.GetDirectoryInfo(@"SOMEDIR").Exists);
-            Assert.IsTrue(fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").Exists);
-            Assert.IsTrue(fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR\").Exists);
-            Assert.IsFalse(fs.GetDirectoryInfo(@"NONDIR").Exists);
-            Assert.IsFalse(fs.GetDirectoryInfo(@"SOMEDIR\NONDIR").Exists);
+            Assert.True(fs.GetDirectoryInfo(@"\").Exists);
+            Assert.True(fs.GetDirectoryInfo(@"SOMEDIR").Exists);
+            Assert.True(fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").Exists);
+            Assert.True(fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR\").Exists);
+            Assert.False(fs.GetDirectoryInfo(@"NONDIR").Exists);
+            Assert.False(fs.GetDirectoryInfo(@"SOMEDIR\NONDIR").Exists);
         }
 
-        [Test]
+        [Fact]
         public void FullName()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual(@"\", fs.Root.FullName);
-            Assert.AreEqual(@"SOMEDIR\", fs.GetDirectoryInfo(@"SOMEDIR").FullName);
-            Assert.AreEqual(@"SOMEDIR\CHILDDIR\", fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").FullName);
+            Assert.Equal(@"\", fs.Root.FullName);
+            Assert.Equal(@"SOMEDIR\", fs.GetDirectoryInfo(@"SOMEDIR").FullName);
+            Assert.Equal(@"SOMEDIR\CHILDDIR\", fs.GetDirectoryInfo(@"SOMEDIR\CHILDDIR").FullName);
         }
 
-        [Test]
+        [Fact]
         public void SimpleSearch()
         {
             CDBuilder builder = new CDBuilder();
@@ -68,17 +67,17 @@ namespace LibraryTests.Iso9660
             DiscFileInfo[] fis = di.GetFiles("*.*", SearchOption.AllDirectories);
         }
 
-        [Test]
+        [Fact]
         public void Extension()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual("dir", fs.GetDirectoryInfo("fred.dir").Extension);
-            Assert.AreEqual("", fs.GetDirectoryInfo("fred").Extension);
+            Assert.Equal("dir", fs.GetDirectoryInfo("fred.dir").Extension);
+            Assert.Equal("", fs.GetDirectoryInfo("fred").Extension);
         }
 
-        [Test]
+        [Fact]
         public void GetDirectories()
         {
             CDBuilder builder = new CDBuilder();
@@ -87,27 +86,27 @@ namespace LibraryTests.Iso9660
             CDReader fs = new CDReader(builder.Build(), false);
 
 
-            Assert.AreEqual(2, fs.Root.GetDirectories().Length);
+            Assert.Equal(2, fs.Root.GetDirectories().Length);
 
             DiscDirectoryInfo someDir = fs.Root.GetDirectories(@"SoMeDir")[0];
-            Assert.AreEqual(1, fs.Root.GetDirectories("SOMEDIR").Length);
-            Assert.AreEqual("SOMEDIR", someDir.Name);
+            Assert.Equal(1, fs.Root.GetDirectories("SOMEDIR").Length);
+            Assert.Equal("SOMEDIR", someDir.Name);
 
-            Assert.AreEqual(1, someDir.GetDirectories("*.*").Length);
-            Assert.AreEqual("CHILD", someDir.GetDirectories("*.*")[0].Name);
-            Assert.AreEqual(2, someDir.GetDirectories("*.*", SearchOption.AllDirectories).Length);
+            Assert.Equal(1, someDir.GetDirectories("*.*").Length);
+            Assert.Equal("CHILD", someDir.GetDirectories("*.*")[0].Name);
+            Assert.Equal(2, someDir.GetDirectories("*.*", SearchOption.AllDirectories).Length);
 
-            Assert.AreEqual(4, fs.Root.GetDirectories("*.*", SearchOption.AllDirectories).Length);
-            Assert.AreEqual(2, fs.Root.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length);
+            Assert.Equal(4, fs.Root.GetDirectories("*.*", SearchOption.AllDirectories).Length);
+            Assert.Equal(2, fs.Root.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length);
 
-            Assert.AreEqual(1, fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories).Length);
-            Assert.AreEqual(@"A.DIR\", fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories)[0].FullName);
+            Assert.Equal(1, fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories).Length);
+            Assert.Equal(@"A.DIR\", fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories)[0].FullName);
 
-            Assert.AreEqual(1, fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories).Length);
-            Assert.AreEqual(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
+            Assert.Equal(1, fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories).Length);
+            Assert.Equal(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
         }
 
-        [Test]
+        [Fact]
         public void GetFiles()
         {
             CDBuilder builder = new CDBuilder();
@@ -119,16 +118,16 @@ namespace LibraryTests.Iso9660
             builder.AddFile(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", new byte[10]);
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual(1, fs.Root.GetFiles().Length);
-            Assert.AreEqual("FOO.TXT", fs.Root.GetFiles()[0].FullName);
+            Assert.Equal(1, fs.Root.GetFiles().Length);
+            Assert.Equal("FOO.TXT", fs.Root.GetFiles()[0].FullName);
 
-            Assert.AreEqual(2, fs.Root.GetDirectories("SOMEDIR")[0].GetFiles("*.TXT").Length);
-            Assert.AreEqual(4, fs.Root.GetFiles("*.TXT", SearchOption.AllDirectories).Length);
+            Assert.Equal(2, fs.Root.GetDirectories("SOMEDIR")[0].GetFiles("*.TXT").Length);
+            Assert.Equal(4, fs.Root.GetFiles("*.TXT", SearchOption.AllDirectories).Length);
 
-            Assert.AreEqual(0, fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories).Length);
+            Assert.Equal(0, fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories).Length);
         }
 
-        [Test]
+        [Fact]
         public void GetFileSystemInfos()
         {
             CDBuilder builder = new CDBuilder();
@@ -140,32 +139,32 @@ namespace LibraryTests.Iso9660
             builder.AddFile(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", new byte[10]);
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual(3, fs.Root.GetFileSystemInfos().Length);
+            Assert.Equal(3, fs.Root.GetFileSystemInfos().Length);
 
-            Assert.AreEqual(1, fs.Root.GetFileSystemInfos("*.EXT").Length);
-            Assert.AreEqual(2, fs.Root.GetFileSystemInfos("*.?XT").Length);
+            Assert.Equal(1, fs.Root.GetFileSystemInfos("*.EXT").Length);
+            Assert.Equal(2, fs.Root.GetFileSystemInfos("*.?XT").Length);
         }
 
-        [Test]
+        [Fact]
         public void Parent()
         {
             CDBuilder builder = new CDBuilder();
             builder.AddDirectory(@"SOMEDIR");
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.AreEqual(fs.Root, fs.Root.GetDirectories("SOMEDIR")[0].Parent);
+            Assert.Equal(fs.Root, fs.Root.GetDirectories("SOMEDIR")[0].Parent);
         }
 
-        [Test]
+        [Fact]
         public void Parent_Root()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.IsNull(fs.Root.Parent);
+            Assert.Null(fs.Root.Parent);
         }
 
-        [Test]
+        [Fact]
         public void RootBehaviour()
         {
             // Start time rounded down to whole seconds
@@ -176,16 +175,16 @@ namespace LibraryTests.Iso9660
             CDReader fs = new CDReader(builder.Build(), false);
             DateTime end = DateTime.UtcNow;
 
-            Assert.AreEqual(FileAttributes.Directory | FileAttributes.ReadOnly, fs.Root.Attributes);
-            Assert.GreaterOrEqual(fs.Root.CreationTimeUtc, start);
-            Assert.LessOrEqual(fs.Root.CreationTimeUtc, end);
-            Assert.GreaterOrEqual(fs.Root.LastAccessTimeUtc, start);
-            Assert.LessOrEqual(fs.Root.LastAccessTimeUtc, end);
-            Assert.GreaterOrEqual(fs.Root.LastWriteTimeUtc, start);
-            Assert.LessOrEqual(fs.Root.LastWriteTimeUtc, end);
+            Assert.Equal(FileAttributes.Directory | FileAttributes.ReadOnly, fs.Root.Attributes);
+            Assert.True(fs.Root.CreationTimeUtc >= start);
+            Assert.True(fs.Root.CreationTimeUtc <= end);
+            Assert.True(fs.Root.LastAccessTimeUtc >= start);
+            Assert.True(fs.Root.LastAccessTimeUtc <= end);
+            Assert.True(fs.Root.LastWriteTimeUtc >= start);
+            Assert.True(fs.Root.LastWriteTimeUtc <= end);
         }
 
-        [Test]
+        [Fact]
         public void Attributes()
         {
             // Start time rounded down to whole seconds
@@ -199,13 +198,13 @@ namespace LibraryTests.Iso9660
 
             DiscDirectoryInfo di = fs.GetDirectoryInfo("Foo");
 
-            Assert.AreEqual(FileAttributes.Directory | FileAttributes.ReadOnly, di.Attributes);
-            Assert.GreaterOrEqual(di.CreationTimeUtc, start);
-            Assert.LessOrEqual(di.CreationTimeUtc, end);
-            Assert.GreaterOrEqual(di.LastAccessTimeUtc, start);
-            Assert.LessOrEqual(di.LastAccessTimeUtc, end);
-            Assert.GreaterOrEqual(di.LastWriteTimeUtc, start);
-            Assert.LessOrEqual(di.LastWriteTimeUtc, end);
+            Assert.Equal(FileAttributes.Directory | FileAttributes.ReadOnly, di.Attributes);
+            Assert.True(di.CreationTimeUtc >= start);
+            Assert.True(di.CreationTimeUtc <= end);
+            Assert.True(di.LastAccessTimeUtc >= start);
+            Assert.True(di.LastAccessTimeUtc <= end);
+            Assert.True(di.LastWriteTimeUtc >= start);
+            Assert.True(di.LastWriteTimeUtc <= end);
         }
     }
 }

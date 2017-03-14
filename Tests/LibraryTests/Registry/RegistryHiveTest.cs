@@ -24,27 +24,26 @@ using System;
 using System.IO;
 using System.Security.AccessControl;
 using DiscUtils.Registry;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Registry
 {
-    [TestFixture]
     public class RegistryHiveTest
     {
-        [Test]
+        [Fact(Skip = "Issue #14")]
         public void Create()
         {
             MemoryStream ms = new MemoryStream();
             RegistryHive hive = RegistryHive.Create(ms);
-            Assert.IsNull(hive.Root.Parent);
-            Assert.AreEqual(0, hive.Root.ValueCount);
-            Assert.AreEqual(0, hive.Root.SubKeyCount);
-            Assert.IsNotNull(hive.Root.SubKeys);
-            Assert.AreEqual("O:BAG:BAD:PAI(A;;KA;;;SY)(A;CI;KA;;;BA)", hive.Root.GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.All));
-            Assert.AreEqual(RegistryKeyFlags.Root | RegistryKeyFlags.Normal, hive.Root.Flags);
+            Assert.Null(hive.Root.Parent);
+            Assert.Equal(0, hive.Root.ValueCount);
+            Assert.Equal(0, hive.Root.SubKeyCount);
+            Assert.NotNull(hive.Root.SubKeys);
+            Assert.Equal("O:BAG:BAD:PAI(A;;KA;;;SY)(A;CI;KA;;;BA)", hive.Root.GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.All));
+            Assert.Equal(RegistryKeyFlags.Root | RegistryKeyFlags.Normal, hive.Root.Flags);
         }
 
-        [Test]
+        [Fact]
         public void Create_Null()
         {
             Assert.Throws<ArgumentNullException>(() => RegistryHive.Create((Stream)null));

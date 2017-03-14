@@ -35,9 +35,9 @@ namespace OSClone
     class Program : ProgramBase
     {
         // Shared to avoid continual re-allocation of a large buffer
-        private static byte[] s_copyBuffer = new byte[10 * 1024 * 1024];
+        private static byte[] _copyBuffer = new byte[10 * 1024 * 1024];
 
-        private static string[] s_excludedFiles = new string[]
+        private static string[] _excludedFiles = new string[]
         {
             @"\PAGEFILE.SYS", @"\HIBERFIL.SYS", @"\SYSTEM VOLUME INFORMATION"
         };
@@ -245,11 +245,11 @@ namespace OSClone
             using (Stream d = destNtfs.OpenFile(path, FileMode.Create, FileAccess.ReadWrite))
             {
                 d.SetLength(s.Length);
-                int numRead = s.Read(s_copyBuffer, 0, s_copyBuffer.Length);
+                int numRead = s.Read(_copyBuffer, 0, _copyBuffer.Length);
                 while (numRead > 0)
                 {
-                    d.Write(s_copyBuffer, 0, numRead);
-                    numRead = s.Read(s_copyBuffer, 0, s_copyBuffer.Length);
+                    d.Write(_copyBuffer, 0, numRead);
+                    numRead = s.Read(_copyBuffer, 0, _copyBuffer.Length);
                 }
             }
 
@@ -262,9 +262,9 @@ namespace OSClone
         {
             string pathUpper = path.ToUpperInvariant();
 
-            for (int i = 0; i < s_excludedFiles.Length; ++i)
+            for (int i = 0; i < _excludedFiles.Length; ++i)
             {
-                if (pathUpper == s_excludedFiles[i])
+                if (pathUpper == _excludedFiles[i])
                 {
                     return true;
                 }

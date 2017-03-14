@@ -22,34 +22,33 @@
 
 using System.IO;
 using DiscUtils.Iso9660;
-using NUnit.Framework;
+using Xunit;
 
 namespace LibraryTests.Iso9660
 {
-    [TestFixture]
     public class BuilderTest
     {
-        [Test]
+        [Fact]
         public void AddFileStream()
         {
             CDBuilder builder = new CDBuilder();
             builder.AddFile(@"ADIR\AFILE.TXT", new MemoryStream());
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.IsTrue(fs.Exists(@"ADIR\AFILE.TXT"));
+            Assert.True(fs.Exists(@"ADIR\AFILE.TXT"));
         }
 
-        [Test]
+        [Fact]
         public void AddFileBytes()
         {
             CDBuilder builder = new CDBuilder();
             builder.AddFile(@"ADIR\AFILE.TXT", new byte[] {});
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.IsTrue(fs.Exists(@"ADIR\AFILE.TXT"));
+            Assert.True(fs.Exists(@"ADIR\AFILE.TXT"));
         }
 
-        [Test]
+        [Fact]
         public void BootImage()
         {
             byte[] memoryStream = new byte[33 * 512];
@@ -62,22 +61,22 @@ namespace LibraryTests.Iso9660
             builder.SetBootImage(new MemoryStream(memoryStream), BootDeviceEmulation.HardDisk, 0x543);
 
             CDReader fs = new CDReader(builder.Build(), false);
-            Assert.IsTrue(fs.HasBootImage);
+            Assert.True(fs.HasBootImage);
 
             using (Stream bootImg = fs.OpenBootImage())
             {
-                Assert.AreEqual(memoryStream.Length, bootImg.Length);
+                Assert.Equal(memoryStream.Length, bootImg.Length);
                 for (int i = 0; i < bootImg.Length; ++i)
                 {
                     if (memoryStream[i] != bootImg.ReadByte())
                     {
-                        Assert.Fail("Boot image corrupted");
+                        Assert.True(false, "Boot image corrupted");
                     }
                 }
             }
 
-            Assert.AreEqual(BootDeviceEmulation.HardDisk, fs.BootEmulation);
-            Assert.AreEqual(0x543, fs.BootLoadSegment);
+            Assert.Equal(BootDeviceEmulation.HardDisk, fs.BootEmulation);
+            Assert.Equal(0x543, fs.BootLoadSegment);
         }
     }
 }
