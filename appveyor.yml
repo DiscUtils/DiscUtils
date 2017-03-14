@@ -34,34 +34,6 @@ build_script:
 - cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.Containers
 - cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils.FileSystems
 - cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Library\DiscUtils
-- cmd: REM Pack library
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.BootConfig
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Core
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Dmg
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Ext
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Fat
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.HfsPlus
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Iscsi
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Iso9660
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Net
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Nfs
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Ntfs
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.OpticalDiscSharing
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.OpticalDisk
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Registry
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Sdi
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.SquashFs
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Udf
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vdi
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vhd
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vhdx
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vmdk
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Wim
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Xva
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Transports
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Containers
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils.FileSystems
-- cmd: msbuild /t:Pack /p:Configuration=Release /Verbosity:Minimal /p:OutputPath=..\..\Nuget\ Library\DiscUtils
 - cmd: REM Utilities
 - cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\BCDDump
 - cmd: msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal Utilities\DiscUtils.Common
@@ -91,7 +63,7 @@ test_script:
 install:
 - msbuild /t:Restore /Verbosity:Minimal
 artifacts:
-- path: Nuget\*.nupkg
+- path: '*.nupkg'
 deploy:
 - provider: NuGet
   api_key:
