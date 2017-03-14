@@ -31,7 +31,7 @@ namespace LibraryTests.Ntfs
 {
     public class NtfsFileSystemTest
     {
-        [Fact]
+        [Fact(Skip = "Issue #14")]
         public void AclInheritance()
         {
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
@@ -82,7 +82,7 @@ namespace LibraryTests.Ntfs
             Assert.Equal(3, rp.Content.Length);
         }
 
-        [Fact]
+        [Fact(Skip = "Issue #14")]
         public void Format_SmallDisk()
         {
             long size = 8 * 1024 * 1024;
@@ -94,7 +94,7 @@ namespace LibraryTests.Ntfs
             ntfs.Dump(TextWriter.Null, "");
         }
 
-        [Fact]
+        [Fact(Skip = "Issue #14")]
         public void Format_LargeDisk()
         {
             long size = 1024L * 1024 * 1024L * 1024; // 1 TB

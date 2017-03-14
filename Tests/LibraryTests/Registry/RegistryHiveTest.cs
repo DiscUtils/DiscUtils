@@ -30,7 +30,7 @@ namespace LibraryTests.Registry
 {
     public class RegistryHiveTest
     {
-        [Fact]
+        [Fact(Skip = "Issue #14")]
         public void Create()
         {
             MemoryStream ms = new MemoryStream();
