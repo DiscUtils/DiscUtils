@@ -7,91 +7,92 @@ build_script:
 
     Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
 - cmd: REM Build library
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.BootConfig
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Core
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Dmg
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Ext
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Fat
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.HfsPlus
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Iscsi
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Iso9660
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Net
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Nfs
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Ntfs
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.OpticalDiscSharing
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.OpticalDisk
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Registry
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Sdi
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.SquashFs
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Udf
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Vdi
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Vhd
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Vhdx
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Vmdk
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Wim
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Xva
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Transports
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.Containers
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils.FileSystems
-- cmd: msbuild /t:Build /p:Configuration=Release Library\DiscUtils
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.BootConfig
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Core
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Dmg
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Ext
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Fat
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.HfsPlus
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Iscsi
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Iso9660
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Net
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Nfs
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Ntfs
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.OpticalDiscSharing
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.OpticalDisk
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Registry
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Sdi
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.SquashFs
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Udf
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Vdi
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Vhd
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Vhdx
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Vmdk
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Wim
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Xva
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Transports
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.Containers
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils.FileSystems
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Library.txt;Append=TrueShowCommandLine Library\DiscUtils
 - cmd: REM Pack library
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.BootConfig
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Core
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Dmg
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Ext
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Fat
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.HfsPlus
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Iscsi
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Iso9660
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Net
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Nfs
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Ntfs
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.OpticalDiscSharing
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.OpticalDisk
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Registry
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Sdi
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.SquashFs
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Udf
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vdi
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vhd
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vhdx
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Vmdk
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Wim
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Xva
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Transports
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.Containers
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils.FileSystems
-- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ Library\DiscUtils
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.BootConfig
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Core
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Dmg
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Ext
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Fat
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.HfsPlus
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Iscsi
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Iso9660
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Net
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Nfs
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Ntfs
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.OpticalDiscSharing
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.OpticalDisk
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Registry
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Sdi
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.SquashFs
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Udf
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Vdi
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Vhd
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Vhdx
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Vmdk
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Wim
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Xva
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Transports
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.Containers
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils.FileSystems
+- cmd: msbuild /t:Pack /p:Configuration=Release /p:OutputPath=..\..\Nuget\ /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Pack.txt;Append=TrueShowCommandLine Library\DiscUtils
 - cmd: REM Utilities
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\BCDDump
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\DiscUtils.Common
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\DiscUtils.Diagnostics
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\DiscUtils.PowerShell
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\DiskClone
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\DiskDump
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\DmgExtract
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\ExternalFileSystem
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\FileExtract
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\FileRecover
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\iSCSIBrowse
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\ISOCreate
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\NTFSDump
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\ODSBrowse
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\OSClone
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\VHDCreate
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\VHDDump
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\VHDXDump
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\VirtualDiskConvert
-- cmd: msbuild /t:Build /p:Configuration=Release Utilities\VolInfo
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\BCDDump
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\DiscUtils.Common
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\DiscUtils.Diagnostics
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\DiscUtils.PowerShell
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\DiskClone
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\DiskDump
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\DmgExtract
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\ExternalFileSystem
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\FileExtract
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\FileRecover
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\iSCSIBrowse
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\ISOCreate
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\NTFSDump
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\ODSBrowse
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\OSClone
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\VHDCreate
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\VHDDump
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\VHDXDump
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\VirtualDiskConvert
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Utilities.txt;Append=TrueShowCommandLine Utilities\VolInfo
 - cmd: REM Tests
-- cmd: msbuild /t:Build /p:Configuration=Release Tests\LibraryTests
+- cmd: msbuild /t:Build /p:Configuration=Release /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Tests.txt;Append=TrueShowCommandLine Tests\LibraryTests
 test_script:
 - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
-- cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --logger:trx
+- cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx
 install:
 - msbuild /t:Restore
 artifacts:
 - path: Nuget\*.nupkg
+- path: Buildlog-*.txt
 deploy:
 - provider: NuGet
   api_key:
