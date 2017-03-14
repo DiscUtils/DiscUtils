@@ -89,7 +89,7 @@ test_script:
 - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
 - cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx
 install:
-- msbuild /t:Restore
+- msbuild /t:Restore /ConsoleloggerParameters:Summary;WarningsOnly /flp:LogFile=Buildlog-Restore.txt;Append=TrueShowCommandLine
 artifacts:
 - path: Nuget\*.nupkg
 - path: Buildlog-*.txt
