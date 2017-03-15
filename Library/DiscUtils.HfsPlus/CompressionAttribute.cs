@@ -28,6 +28,7 @@ namespace DiscUtils.HfsPlus
 {
     internal class CompressionAttribute
     {
+        #pragma warning disable CS0169 // Unused fields.
         private byte _attrData1;
         private byte _attrData2;
         private uint _compressionMagic;
@@ -35,6 +36,7 @@ namespace DiscUtils.HfsPlus
         private uint _reserved1;
         private uint _reserved2;
         private uint _reserved3;
+        #pragma warning restore CS0169
 
         public uint AttrSize { get; private set; }
 
