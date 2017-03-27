@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,43 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
-    internal sealed class PortMapper : RpcProgram
+    internal class Nfs3FileSystemStatResult : Nfs3CallResult
     {
-        public const int ProgramIdentifier = 100000;
-        public const int ProgramVersion = 2;
-
-        public PortMapper(RpcClient client)
-            : base(client) {}
-
-        public override int Identifier
+        public Nfs3FileSystemStatResult(XdrDataReader reader)
         {
-            get { return ProgramIdentifier; }
-        }
-
-        public override int Version
-        {
-            get { return ProgramVersion; }
-        }
-
-        public int GetPort(int program, int version, PortMapperProtocol protocol)
-        {
-            MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Lookup);
-            writer.Write(program);
-            writer.Write(version);
-            writer.Write((uint)protocol);
-            writer.Write((uint)0);
-
-            RpcReply reply = DoSend(ms);
-            if (reply.Header.IsSuccess)
+            Status = (Nfs3Status)reader.ReadInt32();
+            if (reader.ReadBool())
             {
-                return (int)reply.BodyReader.ReadUInt32();
+                PostOpAttributes = new Nfs3FileAttributes(reader);
             }
-            throw new RpcException(reply.Header.ReplyHeader);
+
+            if (Status == Nfs3Status.Ok)
+            {
+                FileSystemStat = new Nfs3FileSystemStat(reader);
+            }
         }
+
+        public Nfs3FileAttributes PostOpAttributes { get; set; }
+
+        public Nfs3FileSystemStat FileSystemStat { get; set; }
     }
 }

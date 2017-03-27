@@ -71,14 +71,25 @@ namespace DiscUtils.Ext
             long blockDescStart = (superblock.FirstDataBlock + 1) * (long)superblock.BlockSize;
 
             stream.Position = blockDescStart;
-            byte[] blockDescData = Utilities.ReadFully(stream, (int)numGroups * BlockGroup.DescriptorSize);
+            var bgDescSize = superblock.Has64Bit ? BlockGroup64.DescriptorSize64 : BlockGroup.DescriptorSize;
+            byte[] blockDescData = Utilities.ReadFully(stream, (int)numGroups * bgDescSize);
 
             _blockGroups = new BlockGroup[numGroups];
             for (int i = 0; i < numGroups; ++i)
             {
-                BlockGroup bg = new BlockGroup();
-                bg.ReadFrom(blockDescData, i * BlockGroup.DescriptorSize);
+                BlockGroup bg = superblock.Has64Bit ? new BlockGroup64() : new BlockGroup();
+                bg.ReadFrom(blockDescData, i * bgDescSize);
                 _blockGroups[i] = bg;
+            }
+
+            var journalSuperBlock = new JournalSuperBlock();
+            if (superblock.JournalInode != 0)
+            {
+                var journalInode = GetInode(superblock.JournalInode);
+                var journalDataStream = journalInode.GetContentBuffer(Context);
+                var journalData = Utilities.ReadFully(journalDataStream, 0, 1024 + 12);
+                journalSuperBlock.ReadFrom(journalData, 0);
+                Context.JournalSuperblock = journalSuperBlock;
             }
 
             RootDirectory = new Directory(Context, 2, GetInode(2));
@@ -164,6 +175,69 @@ namespace DiscUtils.Ext
         private BlockGroup GetBlockGroup(uint index)
         {
             return _blockGroups[index];
+        }
+
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get
+            {
+                var superBlock = Context.SuperBlock;
+                ulong blockCount = (superBlock.BlocksCountHigh << 32) | superBlock.BlocksCount;
+                ulong inodeSize = superBlock.InodesCount * superBlock.InodeSize;
+                ulong overhead = 0;
+                ulong journalSize = 0;
+                if (superBlock.OverheadBlocksCount != 0)
+                {
+                    overhead = superBlock.OverheadBlocksCount* superBlock.BlockSize;
+                }
+                if (Context.JournalSuperblock != null)
+                {
+                    journalSize = Context.JournalSuperblock.MaxLength* Context.JournalSuperblock.BlockSize;
+                }
+                return (long) (superBlock.BlockSize* blockCount - (inodeSize + overhead + journalSize));
+            }
+        }
+
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { return Size - AvailableSpace; }
+        }
+
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get
+            {
+                var superBlock = Context.SuperBlock;
+                if (superBlock.Has64Bit)
+                {
+                    ulong free = 0;
+                    //ext4 64Bit Feature
+                    foreach (BlockGroup64 blockGroup in _blockGroups)
+                    {
+                        free += (uint) (blockGroup.FreeBlocksCountHigh << 16 | blockGroup.FreeBlocksCount);
+                    }
+                    return (long) (superBlock.BlockSize* free);
+                }
+                else
+                {
+                    ulong free = 0;
+                    //ext4 64Bit Feature
+                    foreach (var blockGroup in _blockGroups)
+                    {
+                        free += blockGroup.FreeBlocksCount;
+                    }
+                    return (long) (superBlock.BlockSize* free);
+                }
+            }
         }
     }
 }

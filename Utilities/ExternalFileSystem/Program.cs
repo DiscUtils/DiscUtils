@@ -295,6 +295,12 @@ namespace ExternalFileSystem
         {
             get { return false; }
         }
+
+        public override long Size => throw new NotImplementedException();
+
+        public override long UsedSpace => throw new NotImplementedException();
+
+        public override long AvailableSpace => throw new NotImplementedException();
     }
 
     [VfsFileSystemFactory]

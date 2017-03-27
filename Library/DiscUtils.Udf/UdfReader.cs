@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
@@ -198,6 +199,30 @@ namespace DiscUtils.Udf
                 }
 
                 return result.ToArray();
+            }
+ 
+            /// <summary>
+            /// Size of the Filesystem in bytes
+            /// </summary>
+            public override long Size
+            {
+                get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+            }
+
+            /// <summary>
+            /// Used space of the Filesystem in bytes
+            /// </summary>
+            public override long UsedSpace
+            {
+                 get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+            }
+
+            /// <summary>
+            /// Available space of the Filesystem in bytes
+            /// </summary>
+            public override long AvailableSpace
+            {
+                get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
             }
 
             protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)

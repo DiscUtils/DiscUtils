@@ -28,8 +28,11 @@ namespace DiscUtils.Ext
     internal class Context : VfsContext
     {
         public ExtFileSystemOptions Options { get; set; }
+
         public Stream RawStream { get; set; }
 
         public SuperBlock SuperBlock { get; set; }
+
+        public JournalSuperBlock JournalSuperblock { get; set; }
     }
 }

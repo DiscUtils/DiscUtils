@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,43 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
-    internal sealed class PortMapper : RpcProgram
+    internal enum NfsProc3:uint
     {
-        public const int ProgramIdentifier = 100000;
-        public const int ProgramVersion = 2;
-
-        public PortMapper(RpcClient client)
-            : base(client) {}
-
-        public override int Identifier
-        {
-            get { return ProgramIdentifier; }
-        }
-
-        public override int Version
-        {
-            get { return ProgramVersion; }
-        }
-
-        public int GetPort(int program, int version, PortMapperProtocol protocol)
-        {
-            MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Lookup);
-            writer.Write(program);
-            writer.Write(version);
-            writer.Write((uint)protocol);
-            writer.Write((uint)0);
-
-            RpcReply reply = DoSend(ms);
-            if (reply.Header.IsSuccess)
-            {
-                return (int)reply.BodyReader.ReadUInt32();
-            }
-            throw new RpcException(reply.Header.ReplyHeader);
-        }
+        Null = 0,
+        GetAttr = 1,
+        SetAttr = 2,
+        Lookup = 3,
+        Access = 4,
+        Readlink = 5,
+        Read = 6,
+        Write = 7,
+        Create = 8,
+        Mkdir = 9,
+        Symlink = 10,
+        Mknod = 11,
+        Remove = 12,
+        Rmdir = 13,
+        Rename = 14,
+        Link = 15,
+        Readdir = 16,
+        Readdirplus = 17,
+        Fsstat = 18,
+        Fsinfo = 19,
+        Pathconf = 20,
+        Commit = 21,
     }
 }

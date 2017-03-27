@@ -347,5 +347,20 @@ namespace DiscUtils
         /// </summary>
         /// <returns>The boot code, or <c>null</c> if not available.</returns>
         byte[] ReadBootCode();
+
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        long Size { get; }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        long UsedSpace { get; }
+ 
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        long AvailableSpace { get; }
     }
 }

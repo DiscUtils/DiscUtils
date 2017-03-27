@@ -48,6 +48,7 @@ namespace DiscUtils.Ext
         public ushort DefaultReservedBlockUid;
         public ushort DescriptorSize;
         public byte DirPreallocateBlockCount;
+        public uint ReservedGDTBlocks;
         public ushort Errors;
         public uint FirstDataBlock;
 
@@ -75,6 +76,7 @@ namespace DiscUtils.Ext
         public uint LogBlockSize;
         public uint LogFragSize;
         public byte LogGroupsPerFlex;
+        public uint OverheadBlocksCount;
         public ushort Magic;
         public ushort MaxMountCount;
         public ushort MinimumExtraInodeSize;
@@ -97,6 +99,15 @@ namespace DiscUtils.Ext
         public string VolumeName;
         public ushort WantExtraInodeSize;
         public uint WriteTime;
+
+        public bool Has64Bit
+        {
+            get
+            {
+                return (IncompatibleFeatures & IncompatibleFeatures.SixtyFourBit) ==
+                       IncompatibleFeatures.SixtyFourBit && DescriptorSize == 8;
+            }
+        }
 
         public uint BlockSize
         {
@@ -150,6 +161,7 @@ namespace DiscUtils.Ext
 
             PreallocateBlockCount = buffer[offset + 204];
             DirPreallocateBlockCount = buffer[offset + 205];
+            ReservedGDTBlocks = Utilities.ToUInt16LittleEndian(buffer, offset + 206);
 
             JournalSuperBlockUniqueId = Utilities.ToGuidLittleEndian(buffer, offset + 208);
             JournalInode = Utilities.ToUInt32LittleEndian(buffer, offset + 224);
@@ -183,6 +195,8 @@ namespace DiscUtils.Ext
             MultiMountProtectionBlock = Utilities.ToUInt64LittleEndian(buffer, offset + 260);
             RaidStripeWidth = Utilities.ToUInt32LittleEndian(buffer, offset + 268);
             LogGroupsPerFlex = buffer[offset + 272];
+
+            OverheadBlocksCount = Utilities.ToUInt32LittleEndian(buffer, offset + 584);
 
             return 1024;
         }

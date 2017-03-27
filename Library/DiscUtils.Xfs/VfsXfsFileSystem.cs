@@ -29,6 +29,8 @@ namespace DiscUtils.Xfs
 
     internal sealed class VfsXfsFileSystem :VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>,IUnixFileSystem
     {
+        private static readonly int XFS_ALLOC_AGFL_RESERVE = 4;
+
         public VfsXfsFileSystem(Stream stream, FileSystemParameters parameters)
             :base(new XfsFileSystemOptions(parameters))
         {
@@ -92,6 +94,57 @@ namespace DiscUtils.Xfs
             }
         }
         
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get
+            {
+                var superblock = Context.SuperBlock;
+                var lsize = superblock.Logstart != 0 ? superblock.LogBlocks : 0;
+                return (long) ((superblock.DataBlocks - lsize) * superblock.Blocksize);
+            }
+        }
+
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { return Size - AvailableSpace; }
+        }
+
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get
+            {
+                var superblock = Context.SuperBlock;
+                ulong fdblocks = 0;
+                foreach (var agf in Context.AllocationGroups)
+                {
+                    fdblocks += agf.FreeBlockInfo.FreeBlocks;
+                }
+                ulong alloc_set_aside = 0;
+
+                alloc_set_aside = 4 + (superblock.AgCount * (uint)XFS_ALLOC_AGFL_RESERVE);
+
+                if ((superblock.ReadOnlyCompatibleFeatures & ReadOnlyCompatibleFeatures.RMAPBT) != 0)
+                {
+                    uint rmapMaxlevels = 9;
+                    if ((superblock.ReadOnlyCompatibleFeatures & ReadOnlyCompatibleFeatures.REFLINK) != 0)
+                    {
+                        rmapMaxlevels = superblock.xfs_btree_compute_maxlevels();
+                    }
+                    alloc_set_aside += superblock.AgCount * rmapMaxlevels;
+                }
+                return (long) ((fdblocks - alloc_set_aside) * superblock.Blocksize);
+            }
+        }
+
         public UnixFileSystemInfo GetUnixFileInfo(string path)
         {
             throw new NotImplementedException();

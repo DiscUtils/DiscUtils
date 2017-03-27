@@ -754,6 +754,38 @@ namespace DiscUtils
         {
             return new DiscFileSystemInfo(this, path);
         }
+         
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get
+            {
+                DriveInfo info = new DriveInfo(BasePath);
+                return info.TotalSize;
+            }
+        }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { return Size - AvailableSpace; }
+        }
+ 
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get
+            {
+                DriveInfo info = new DriveInfo(BasePath);
+                return info.AvailableFreeSpace;
+            }
+        }
 
         private string[] CleanItems(string[] dirtyItems)
         {
