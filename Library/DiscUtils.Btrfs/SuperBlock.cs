@@ -193,8 +193,7 @@ namespace DiscUtils.Btrfs
             NodeSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x94);
             LeafSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x98);
             StripeSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x9c);
-            var n = Utilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
-            if (n > 0x800) throw new IOException("invalid size of (Key, CHUNK_ITEM) pairs (n)");
+            
             ChunkRootGeneration = Utilities.ToUInt64LittleEndian(buffer, offset + 0xa4);
             CompatFlags = Utilities.ToUInt64LittleEndian(buffer, offset + 0xac);
             CompatRoFlags = Utilities.ToUInt64LittleEndian(buffer, offset + 0xb4);
@@ -207,6 +206,7 @@ namespace DiscUtils.Btrfs
             var labelData = Utilities.ToByteArray(buffer, offset + 0x12b, 0x100);
             Label = Encoding.UTF8.GetString(labelData, 0, Array.IndexOf(labelData, (byte) 0));
             //22b 	100 		reserved
+            var n = Utilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
             //32b 	800 		(n bytes valid) Contains (KEY, CHUNK_ITEM) pairs for all SYSTEM chunks. This is needed to bootstrap the mapping from logical addresses to physical.
             //b2b 	4d5 		Currently unused 
             return Size;
