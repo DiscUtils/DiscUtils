@@ -91,9 +91,23 @@ namespace DiscUtils.Xfs
         /// </summary>
         public BtreeHeader RootInodeBtree { get; private set; }
 
-        public int Size
+        public Guid UniqueId { get; private set; }
+
+        public ulong Lsn { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public int Size { get; private set; }
+
+        public int InitSize(uint sbversion)
         {
-            get { return 296; }
+            if (sbversion >= 5)
+            {
+                Size = 0x14E;
+                return 0x14E;
+            }
+            Size = 0x128;
+            return 0x128;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -116,6 +130,14 @@ namespace DiscUtils.Xfs
             return Size;
         }
 
+        public int ReadFromVersion5(byte[] buffer, int offset)
+        {
+            UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x132);
+            Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x142);
+            Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x14A);
+            return Size;
+        }
+        
         public void LoadBtree(Context context, long offset)
         {
             var data = context.RawStream;
@@ -129,6 +151,7 @@ namespace DiscUtils.Xfs
                 RootInodeBtree = new BTreeInodeNode();
             }
             var buffer = Utilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
+            RootInodeBtree.InitSize(context.SuperBlock.SbVersion);
             RootInodeBtree.ReadFrom(buffer, 0);
         }
 

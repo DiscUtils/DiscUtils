@@ -36,7 +36,12 @@ namespace DiscUtils.Xfs
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            offset += base.ReadFrom(buffer, offset);
+            base.ReadFrom(buffer, offset);
+            if (base.Size == 0x38)
+            {
+                ReadFromVersion5(buffer, offset);
+            }
+            offset += base.Size;
             if (Level != 0)
                 throw new IOException("invalid B+tree level - expected 1");
             Records = new BTreeInodeRecord[NumberOfRecords];

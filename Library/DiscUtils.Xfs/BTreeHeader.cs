@@ -37,9 +37,27 @@ namespace DiscUtils.Xfs
 
         public int RightSibling { get; private set; }
 
-        public virtual int Size
+        public ulong Bno { get; private set; }
+
+        public ulong Lsn { get; private set; }
+
+        public Guid UniqueId { get; private set; }
+
+        public uint Owner { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public virtual int Size { get; private set; }
+
+        public int InitSize(uint sbVersion)
         {
-            get { return 16; }
+            if (sbVersion >= 5)
+            {
+                Size = 0x38;
+                return 0x38;
+            }
+            Size = 0x1;
+            return 0x1;
         }
 
         public virtual int ReadFrom(byte[] buffer, int offset)
@@ -49,7 +67,17 @@ namespace DiscUtils.Xfs
             NumberOfRecords = Utilities.ToUInt16BigEndian(buffer, offset + 0x6);
             LeftSibling = Utilities.ToInt32BigEndian(buffer, offset + 0x8);
             RightSibling = Utilities.ToInt32BigEndian(buffer, offset + 0xC);
-            return 16;
+            return Size;
+        }
+
+        public int ReadFromVersion5(byte[] buffer, int offset)
+        {
+            Bno = Utilities.ToUInt64BigEndian(buffer, offset + 0x10);
+            Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x18);
+            UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x20);
+            Owner = Utilities.ToUInt32BigEndian(buffer, offset + 0x30);
+            Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x34);
+            return Size;
         }
 
         public virtual void WriteTo(byte[] buffer, int offset)

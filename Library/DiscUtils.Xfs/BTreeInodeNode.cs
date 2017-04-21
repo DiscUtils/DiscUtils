@@ -43,7 +43,12 @@ namespace DiscUtils.Xfs
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            offset += base.ReadFrom(buffer, offset);
+            base.ReadFrom(buffer, offset);
+            if (base.Size == 0x38)
+            {
+                ReadFromVersion5(buffer, offset);
+            }
+            offset += base.Size;
             if (Level == 0)
                 throw new IOException("invalid B+tree level - expected 0");
             Keys = new uint[NumberOfRecords];
@@ -76,6 +81,7 @@ namespace DiscUtils.Xfs
                 var data = ag.Context.RawStream;
                 data.Position = (Pointer[i] * ag.Context.SuperBlock.Blocksize) + ag.Offset;
                 var buffer = Utilities.ReadFully(data, (int)ag.Context.SuperBlock.Blocksize);
+                child.InitSize(ag.Context.SuperBlock.SbVersion);
                 child.ReadFrom(buffer, 0);
                 child.LoadBtree(ag);
                 Children.Add(Keys[i], child);

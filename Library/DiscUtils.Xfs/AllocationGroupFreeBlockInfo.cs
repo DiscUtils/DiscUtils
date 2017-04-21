@@ -108,9 +108,23 @@ namespace DiscUtils.Xfs
         /// </summary>
         public BtreeHeader FreeSpaceCount { get; private set; }
 
-        public int Size
+        public Guid UniqueId { get; private set; }
+
+        public ulong Lsn { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public int Size { get; private set; }
+
+        public int InitSize(uint sbversion)
         {
-            get { return 0x40; }
+            if (sbversion >= 5)
+            {
+                Size = 0x5C;
+                return 0x5C;
+            }
+            Size = 0x40;
+            return 0x40;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -133,6 +147,14 @@ namespace DiscUtils.Xfs
             FreeBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x34);
             Longest = Utilities.ToUInt32BigEndian(buffer, offset + 0x38);
             BTreeBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x3C);
+            return Size;
+        }
+
+        public int ReadFromVersion5(byte[] buffer, int offset)
+        {
+            UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x40);
+            Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x50);
+            Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x58);
             return Size;
         }
 
