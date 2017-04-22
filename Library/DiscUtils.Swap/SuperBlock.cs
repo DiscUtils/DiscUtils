@@ -51,10 +51,10 @@ namespace DiscUtils.Swap
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Version = Utilities.ToUInt32BigEndian(buffer, 0x400);
-            LastPage = Utilities.ToUInt32BigEndian(buffer, 0x404);
-            BadPages = Utilities.ToUInt32BigEndian(buffer, 0x408);
-            Uuid = Utilities.ToGuidBigEndian(buffer, 0x40c);
+            Version = Utilities.ToUInt32LittleEndian(buffer, 0x400);
+            LastPage = Utilities.ToUInt32LittleEndian(buffer, 0x404);
+            BadPages = Utilities.ToUInt32LittleEndian(buffer, 0x408);
+            Uuid = Utilities.ToGuidLittleEndian(buffer, 0x40c);
             var volume = Utilities.ToByteArray(buffer, 0x41c, 16);
             Volume = Encoding.UTF8.GetString(volume, 0, Array.IndexOf(volume, (byte) 0));
             Magic = Utilities.BytesToString(buffer, PageSize - 10, 10);
