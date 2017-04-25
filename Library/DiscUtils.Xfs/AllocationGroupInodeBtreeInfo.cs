@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -93,21 +94,21 @@ namespace DiscUtils.Xfs
 
         public Guid UniqueId { get; private set; }
 
+        /// <summary>
+        /// last write sequence
+        /// </summary>
         public ulong Lsn { get; private set; }
 
         public uint Crc { get; private set; }
 
         public int Size { get; private set; }
 
-        public int InitSize(uint sbversion)
+        private uint SbVersion { get; }
+
+        public AllocationGroupInodeBtreeInfo(SuperBlock superBlock)
         {
-            if (sbversion >= 5)
-            {
-                Size = 0x14E;
-                return 0x14E;
-            }
-            Size = 0x128;
-            return 0x128;
+            SbVersion = superBlock.SbVersion;
+            Size = SbVersion >= 5 ? 334 : 296;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -127,14 +128,12 @@ namespace DiscUtils.Xfs
             {
                 Unlinked[i] = Utilities.ToInt32BigEndian(buffer, offset + 0x28 + i*0x4);
             }
-            return Size;
-        }
-
-        public int ReadFromVersion5(byte[] buffer, int offset)
-        {
-            UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x132);
-            Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x142);
-            Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x14A);
+            if (SbVersion >= 5)
+            {
+                UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x132);
+                Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x142);
+                Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x14A);
+            }
             return Size;
         }
         
@@ -144,14 +143,13 @@ namespace DiscUtils.Xfs
             data.Position = offset + context.SuperBlock.Blocksize*Root;
             if (Level == 1)
             {
-                RootInodeBtree = new BTreeInodeLeave();
+                RootInodeBtree = new BTreeInodeLeaf(SbVersion);
             }
             else
             {
-                RootInodeBtree = new BTreeInodeNode();
+                RootInodeBtree = new BTreeInodeNode(SbVersion);
             }
             var buffer = Utilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
-            RootInodeBtree.InitSize(context.SuperBlock.SbVersion);
             RootInodeBtree.ReadFrom(buffer, 0);
         }
 

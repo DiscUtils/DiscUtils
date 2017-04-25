@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -26,7 +27,7 @@ namespace DiscUtils.Xfs
 {
     using System;
 
-    internal class BTreeInodeLeave : BtreeHeader
+    internal class BTreeInodeLeaf : BtreeHeader
     {
         public BTreeInodeRecord[] Records { get; private set; }
         public override int Size
@@ -34,13 +35,11 @@ namespace DiscUtils.Xfs
             get { return base.Size + (NumberOfRecords * 0x10); }
         }
 
+        public BTreeInodeLeaf(uint superBlockVersion) : base(superBlockVersion){}
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             base.ReadFrom(buffer, offset);
-            if (base.Size == 0x38)
-            {
-                ReadFromVersion5(buffer, offset);
-            }
             offset += base.Size;
             if (Level != 0)
                 throw new IOException("invalid B+tree level - expected 1");

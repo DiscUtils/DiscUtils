@@ -1,6 +1,7 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -47,27 +48,19 @@ namespace DiscUtils.Xfs
             Context = context;
             var data = context.RawStream;
             var superblock = context.SuperBlock;
-            FreeBlockInfo = new AllocationGroupFreeBlockInfo();
+            FreeBlockInfo = new AllocationGroupFreeBlockInfo(superblock);
             data.Position = offset + superblock.SectorSize;
-            var agfData = Utilities.ReadFully(data, FreeBlockInfo.InitSize(superblock.SbVersion)); 
+            var agfData = Utilities.ReadFully(data, FreeBlockInfo.Size); 
             FreeBlockInfo.ReadFrom(agfData, 0);
-            if (superblock.SbVersion >= 5)
-            {
-                FreeBlockInfo.ReadFromVersion5(agfData, 0);
-            }
             if (FreeBlockInfo.Magic != AllocationGroupFreeBlockInfo.AgfMagic)
             {
                 throw new IOException("Invalid AGF magic - probably not an xfs file system");
             }
 
-            InodeBtreeInfo = new AllocationGroupInodeBtreeInfo();
+            InodeBtreeInfo = new AllocationGroupInodeBtreeInfo(superblock);
             data.Position = offset + superblock.SectorSize * 2;
-            var agiData = Utilities.ReadFully(data, InodeBtreeInfo.InitSize(superblock.SbVersion));
+            var agiData = Utilities.ReadFully(data, InodeBtreeInfo.Size);
             InodeBtreeInfo.ReadFrom(agiData, 0);
-            if (superblock.SbVersion >= 5)
-            {
-                InodeBtreeInfo.ReadFromVersion5(agiData, 0);
-            }
             if (InodeBtreeInfo.Magic != AllocationGroupInodeBtreeInfo.AgiMagic)
             {
                 throw new IOException("Invalid AGI magic - probably not an xfs file system");

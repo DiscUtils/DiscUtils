@@ -26,7 +26,7 @@ namespace DiscUtils.Xfs
     using System.Collections.Generic;
     using System.IO;
 
-    internal class BTreeExtentLeave : BTreeExtentHeader
+    internal class BTreeExtentLeaf : BTreeExtentHeader
     {
         public Extent[] Extents { get; private set; }
 

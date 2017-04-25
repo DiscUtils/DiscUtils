@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -37,15 +38,10 @@ namespace DiscUtils.Xfs
             :base(new XfsFileSystemOptions(parameters))
         {
             stream.Position = 0;
-            byte[] superblockData = Utilities.ReadFully(stream, 208);
+            byte[] superblockData = Utilities.ReadFully(stream, 264);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);
-            if (superblock.SbVersion >= 5)
-            {
-                superblockData = Utilities.ReadFully(stream, 56);
-                superblock.ReadFromVersion5(superblockData, 0);
-            }
 
             if (superblock.Magic != SuperBlock.XfsMagic)
             {
@@ -65,7 +61,7 @@ namespace DiscUtils.Xfs
             {
                 var ag = new AllocationGroup(Context, offset);
                 allocationGroups[ag.InodeBtreeInfo.SequenceNumber] = ag;
-                offset = (XFS_AG_DADDR(Context.SuperBlock, i+1, XFS_AGF_DADDR(Context.SuperBlock)) << BBSHIFT) - 4096;
+                offset = (XFS_AG_DADDR(Context.SuperBlock, i+1, XFS_AGF_DADDR(Context.SuperBlock)) << BBSHIFT) - superblock.SectorSize;
             }
             Context.AllocationGroups = allocationGroups;
 
