@@ -1664,6 +1664,36 @@ namespace DiscUtils.Fat
             }
         }
 
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size { get { return ((TotalSectors - ReservedSectorCount - (FatSize * FatCount))*BytesPerSector); } }
+
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get
+            {
+                uint usedCluster = 0;
+                for (uint i = 2; i < Fat.NumEntries; i++)
+                {
+                    var fatValue = Fat.GetNext(i);
+                    if (!Fat.IsFree(fatValue))
+                    {
+                        usedCluster++;
+                    }
+                }
+                return (usedCluster *SectorsPerCluster*BytesPerSector);
+            }
+        }
+
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace { get { return Size - UsedSpace; } }
+
         private delegate void EntryUpdateAction(DirectoryEntry entry);
 
 #region Disk Formatting

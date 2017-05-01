@@ -140,6 +140,31 @@ namespace DiscUtils.BootConfig
         /// </summary>
         /// <remarks>0 = Active, 1 = AutoEnable, 2 = Disable.</remarks>
         LibraryDebuggerStartPolicy = 0x15000018,
+ 
+        /// <summary>
+        /// Debugger bus parameters for KDNET.
+        /// </summary>
+        LibraryDebuggerBusParameters = 0x12000019,
+ 
+        /// <summary>
+        /// Debugger host IP address for KDNET.
+        /// </summary>
+        LibraryDebuggerNetHostIp = 0x1500001a,
+ 
+        /// <summary>
+        /// Debugger port for KDNET.
+        /// </summary>
+        LibraryDebuggerNetPort = 0x1500001b,
+ 
+        /// <summary>
+        /// Use DHCP for KDNET?
+        /// </summary>
+        LibraryDebuggerNetDhcp = 0x1600001c,
+ 
+        /// <summary>
+        /// Debugger encryption key for KDNET.
+        /// </summary>
+        LibraryDebuggerNetKey = 0x1200001d,
 
         /// <summary>
         /// Emergency Management System enabled.

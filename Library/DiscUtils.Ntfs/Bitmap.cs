@@ -183,7 +183,9 @@ namespace DiscUtils.Ntfs
             return length * 8;
         }
 
-        private byte GetByte(long index)
+        internal long Size { get { return _bitmap.Length; } }
+
+        public byte GetByte(long index)
         {
             if (index >= _bitmap.Length)
             {

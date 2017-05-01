@@ -50,7 +50,7 @@ namespace DiscUtils.Nfs
         public Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 1);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.GetAttr);
             handle.Write(writer);
             writer.Write(false);
 
@@ -65,7 +65,7 @@ namespace DiscUtils.Nfs
         public Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 2);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.SetAttr);
             handle.Write(writer);
             newAttributes.Write(writer);
             writer.Write(false);
@@ -81,7 +81,7 @@ namespace DiscUtils.Nfs
         public Nfs3LookupResult Lookup(Nfs3FileHandle dir, string name)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 3);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Lookup);
             dir.Write(writer);
             writer.Write(name);
 
@@ -96,7 +96,7 @@ namespace DiscUtils.Nfs
         public Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 4);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Access);
             handle.Write(writer);
             writer.Write((int)requested);
 
@@ -111,7 +111,7 @@ namespace DiscUtils.Nfs
         public Nfs3ReadResult Read(Nfs3FileHandle handle, long position, int count)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 6);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Read);
             handle.Write(writer);
             writer.Write(position);
             writer.Write(count);
@@ -127,7 +127,7 @@ namespace DiscUtils.Nfs
         public Nfs3WriteResult Write(Nfs3FileHandle handle, long position, byte[] buffer, int bufferOffset, int count)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 7);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Write);
             handle.Write(writer);
             writer.Write(position);
             writer.Write(count);
@@ -146,7 +146,7 @@ namespace DiscUtils.Nfs
                                        Nfs3SetAttributes attributes)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 8);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Create);
             dirHandle.Write(writer);
             writer.Write(name);
             writer.Write(createNew ? 1 : 0);
@@ -163,7 +163,7 @@ namespace DiscUtils.Nfs
         public Nfs3CreateResult MakeDirectory(Nfs3FileHandle dirHandle, string name, Nfs3SetAttributes attributes)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 9);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Mkdir);
             dirHandle.Write(writer);
             writer.Write(name);
             attributes.Write(writer);
@@ -179,7 +179,7 @@ namespace DiscUtils.Nfs
         public Nfs3ModifyResult Remove(Nfs3FileHandle dirHandle, string name)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 12);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Remove);
             dirHandle.Write(writer);
             writer.Write(name);
 
@@ -194,7 +194,7 @@ namespace DiscUtils.Nfs
         public Nfs3ModifyResult RemoveDirectory(Nfs3FileHandle dirHandle, string name)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 13);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Rmdir);
             dirHandle.Write(writer);
             writer.Write(name);
 
@@ -210,7 +210,7 @@ namespace DiscUtils.Nfs
                                        string toName)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 14);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Rename);
             fromDirHandle.Write(writer);
             writer.Write(fromName);
             toDirHandle.Write(writer);
@@ -228,7 +228,7 @@ namespace DiscUtils.Nfs
                                                  uint maxCount)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 17);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Readdirplus);
             dir.Write(writer);
             writer.Write(cookie);
             writer.WriteBytes(cookieVerifier ?? new byte[CookieVerifierSize]);
@@ -246,7 +246,7 @@ namespace DiscUtils.Nfs
         public Nfs3FileSystemInfoResult FileSystemInfo(Nfs3FileHandle fileHandle)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, 19);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Fsinfo);
             fileHandle.Write(writer);
 
             RpcReply reply = DoSend(ms);
@@ -260,6 +260,31 @@ namespace DiscUtils.Nfs
                 throw new Nfs3Exception(fsiReply.Status);
             }
             throw new RpcException(reply.Header.ReplyHeader);
+        }
+
+        public Nfs3FileSystemStatResult FileSystemStat(Nfs3FileHandle fileHandle)
+        {
+            MemoryStream ms = new MemoryStream();
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Fsstat);
+            fileHandle.Write(writer);
+
+            RpcReply reply = DoSend(ms);
+            if (reply.Header.IsSuccess)
+            {
+                Nfs3FileSystemStatResult statReply = new Nfs3FileSystemStatResult(reply.BodyReader);
+                if (statReply.Status == Nfs3Status.Ok)
+                {
+                    return statReply;
+                }
+                else
+                {
+                    throw new Nfs3Exception(statReply.Status);
+                }
+            }
+            else
+            {
+                throw new RpcException(reply.Header.ReplyHeader);
+            }
         }
     }
 }

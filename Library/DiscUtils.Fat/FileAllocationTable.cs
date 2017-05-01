@@ -97,5 +97,10 @@ namespace DiscUtils.Fat
         {
             _buffer.FreeChain(head);
         }
+ 
+        internal int NumEntries
+        {
+            get { return _buffer.NumEntries; }
+        }
     }
 }

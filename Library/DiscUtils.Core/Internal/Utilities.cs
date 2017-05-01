@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -548,10 +548,10 @@ namespace DiscUtils.Internal
         /// this preserves those code points by removing the top 16 bits of each character.</remarks>
         public static void StringToBytes(string value, byte[] dest, int offset, int count)
         {
-            char[] chars = value.ToCharArray();
+            char[] chars = value.ToCharArray(0, Math.Min(value.Length, count));
 
             int i = 0;
-            while (i < chars.Length)
+            while (i < chars.Length && i < count)
             {
                 dest[i + offset] = (byte)chars[i];
                 ++i;
@@ -676,53 +676,26 @@ namespace DiscUtils.Internal
         /// </summary>
         /// <param name="basePath">The base path to resolve from.</param>
         /// <param name="relativePath">The relative path.</param>
-        /// <returns>The absolute path, so far as it can be resolved.  If the
-        /// <paramref name="relativePath"/> contains more '..' characters than the
-        /// base path contains levels of directory, the resultant string will be relative.
-        /// For example: (TEMP\Foo.txt, ..\..\Bar.txt) gives (..\Bar.txt).</returns>
+        /// <returns>The absolute path. If no <paramref name="basePath"/> is specified
+        /// then relativePath is returned as-is. If <paramref name="relativePath"/>
+        /// contains more '..' characters than the base path contains levels of 
+        /// directory, the resultant string be the root drive followed by the file name.
+        /// If no the basePath starts with '\' (no drive specified) then the returned
+        /// path will also start with '\'.
+        /// For example: (\TEMP\Foo.txt, ..\..\Bar.txt) gives (\Bar.txt).
+        /// </returns>
         public static string ResolveRelativePath(string basePath, string relativePath)
         {
-            List<string> pathElements =
-                new List<string>(basePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
-            if (!basePath.EndsWith(@"\", StringComparison.Ordinal) && pathElements.Count > 0)
+            if (string.IsNullOrEmpty(basePath))
             {
-                pathElements.RemoveAt(pathElements.Count - 1);
+                return relativePath;
             }
 
-            pathElements.AddRange(relativePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+            string merged = Path.GetFullPath(Path.Combine(basePath, relativePath));
 
-            int pos = 1;
-            while (pos < pathElements.Count)
+            if (basePath.StartsWith(@"\") && merged.Length > 2 && merged[1].Equals(':'))
             {
-                if (pathElements[pos] == ".")
-                {
-                    pathElements.RemoveAt(pos);
-                }
-                else if (pathElements[pos] == ".." && pos > 0 && pathElements[pos - 1][0] != '.')
-                {
-                    pathElements.RemoveAt(pos);
-                    pathElements.RemoveAt(pos - 1);
-                    pos--;
-                }
-                else
-                {
-                    pos++;
-                }
-            }
-
-            string merged = string.Join(@"\", pathElements.ToArray());
-            if (relativePath.EndsWith(@"\", StringComparison.Ordinal))
-            {
-                merged += @"\";
-            }
-
-            if (basePath.StartsWith(@"\\", StringComparison.Ordinal))
-            {
-                merged = @"\\" + merged;
-            }
-            else if (basePath.StartsWith(@"\", StringComparison.Ordinal))
-            {
-                merged = @"\" + merged;
+                return merged.Substring(2);
             }
 
             return merged;
@@ -1023,7 +996,7 @@ namespace DiscUtils.Internal
 
         public static bool Is8Dot3Char(char ch)
         {
-            return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || "_^$~!#%�-{}()@'`&".IndexOf(ch) != -1;
+            return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || "_^$~!#%£-{}()@'`&".IndexOf(ch) != -1;
         }
 
         /// <summary>
