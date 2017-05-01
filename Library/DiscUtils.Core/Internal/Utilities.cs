@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -693,7 +693,7 @@ namespace DiscUtils.Internal
 
             string merged = Path.GetFullPath(Path.Combine(basePath, relativePath));
 
-            if (basePath.StartsWith(@"\") && merged[1].Equals(':'))
+            if (basePath.StartsWith(@"\") && merged.Length > 2 && merged[1].Equals(':'))
             {
                 return merged.Substring(2);
             }
