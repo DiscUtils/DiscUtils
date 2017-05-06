@@ -37,6 +37,7 @@
     <ProjectReference Include="..\DiscUtils.Registry\DiscUtils.Registry.csproj" />
     <ProjectReference Include="..\DiscUtils.Sdi\DiscUtils.Sdi.csproj" />
     <ProjectReference Include="..\DiscUtils.SquashFs\DiscUtils.SquashFs.csproj" />
+    <ProjectReference Include="..\DiscUtils.Swap\DiscUtils.Swap.csproj" />
     <ProjectReference Include="..\DiscUtils.Udf\DiscUtils.Udf.csproj" />
     <ProjectReference Include="..\DiscUtils.Vdi\DiscUtils.Vdi.csproj" />
     <ProjectReference Include="..\DiscUtils.Vhd\DiscUtils.Vhd.csproj" />

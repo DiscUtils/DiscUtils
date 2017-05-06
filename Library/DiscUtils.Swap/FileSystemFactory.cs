@@ -20,11 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+using DiscUtils.Vfs;
+
 namespace DiscUtils.Swap
 {
-    using System.IO;
-    using DiscUtils.Vfs;
-
     [VfsFileSystemFactory]
     internal class FileSystemFactory : VfsFileSystemFactory
     {

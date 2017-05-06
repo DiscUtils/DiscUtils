@@ -20,12 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using DiscUtils.Internal;
 
 namespace DiscUtils.Swap
 {
-    using System;
-    using System.IO;
-
     /// <summary>
     /// Class for accessing Swap file systems.
     /// </summary>

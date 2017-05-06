@@ -20,11 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Text;
+using DiscUtils.Internal;
+
 namespace DiscUtils.Swap
 {
-    using System;
-    using System.Text;
-
     internal class SwapHeader : IByteArraySerializable
     {
         public static readonly string Magic1 = "SWAP-SPACE";
