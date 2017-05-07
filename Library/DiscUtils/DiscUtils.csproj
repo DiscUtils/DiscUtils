@@ -43,6 +43,7 @@
     <ProjectReference Include="..\DiscUtils.Vhdx\DiscUtils.Vhdx.csproj" />
     <ProjectReference Include="..\DiscUtils.Vmdk\DiscUtils.Vmdk.csproj" />
     <ProjectReference Include="..\DiscUtils.Wim\DiscUtils.Wim.csproj" />
+    <ProjectReference Include="..\DiscUtils.Xfs\DiscUtils.Xfs.csproj" />
     <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
   </ItemGroup>
 
