@@ -204,7 +204,12 @@ namespace DiscUtils.Btrfs
             LogRootLevel = buffer[offset + 0xc8];
             //c9 	62 		DEV_ITEM data for this device
             var labelData = Utilities.ToByteArray(buffer, offset + 0x12b, 0x100);
-            Label = Encoding.UTF8.GetString(labelData, 0, Array.IndexOf(labelData, (byte) 0));
+            int eos = Array.IndexOf(labelData, (byte) 0);
+            if (eos != -1)
+            {
+                Label = Encoding.UTF8.GetString(labelData, 0, eos);
+            }
+
             //22b 	100 		reserved
             var n = Utilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
             //32b 	800 		(n bytes valid) Contains (KEY, CHUNK_ITEM) pairs for all SYSTEM chunks. This is needed to bootstrap the mapping from logical addresses to physical.
