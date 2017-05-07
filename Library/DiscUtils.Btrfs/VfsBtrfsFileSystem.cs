@@ -38,7 +38,7 @@ namespace DiscUtils.Btrfs
             };
             foreach (var offset in BtrfsFileSystem.SuperblockOffsets)
             {
-                if (offset + SuperBlock.Length > stream.Length) continue;
+                if (offset + SuperBlock.Length > stream.Length) break;
 
                 stream.Position = offset;
                 var superblockData = Utilities.ReadFully(stream, SuperBlock.Length);
