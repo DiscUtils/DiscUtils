@@ -27,16 +27,16 @@ using DiscUtils.Vfs;
 namespace DiscUtils.Btrfs
 {
     /// <summary>
-    /// Read-only access to ext file system.
+    /// Read-only access to btrfs file system.
     /// </summary>
     public sealed class BtrfsFileSystem : VfsFileSystemFacade
     {
         internal static readonly long[] SuperblockOffsets = {0x10000L, 0x4000000L, 0x4000000000L, 0x4000000000000L};
 
         /// <summary>
-        /// Initializes a new instance of the ExtFileSystem class.
+        /// Initializes a new instance of the BtrfsFileSystem class.
         /// </summary>
-        /// <param name="stream">The stream containing the ext file system.</param>
+        /// <param name="stream">The stream containing the btrfs file system.</param>
         public BtrfsFileSystem(Stream stream)
             : base(new VfsBtrfsFileSystem(stream))
         {
