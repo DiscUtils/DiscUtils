@@ -408,13 +408,12 @@ namespace DiscUtils.Xfs
                 ProjectQuotaInode = Utilities.ToUInt64BigEndian(buffer, offset + 0x18);
                 Lsn = Utilities.ToInt64BigEndian(buffer, offset + 0x20);
                 MetaUuid = Utilities.ToGuidBigEndian(buffer, offset + 0x28);
-
-                var agOffset = AgBlocksLog2 + InodesPerBlockLog2;
-                RelativeInodeMask = 0xffffffff >> (32 - agOffset);
-                AgInodeMask = ~RelativeInodeMask;
-
-                DirBlockSize = Blocksize << DirBlockLog2;
             }
+            var agOffset = AgBlocksLog2 + InodesPerBlockLog2;
+            RelativeInodeMask = 0xffffffff >> (32 - agOffset);
+            AgInodeMask = ~RelativeInodeMask;
+
+            DirBlockSize = Blocksize << DirBlockLog2;
             return Size;
         }
 
