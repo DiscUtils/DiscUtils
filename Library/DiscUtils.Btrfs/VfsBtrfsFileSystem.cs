@@ -53,6 +53,8 @@ namespace DiscUtils.Btrfs
                 else if (Context.SuperBlock.Generation < superblock.Generation)
                     Context.SuperBlock = superblock;
             }
+            if (Context.SuperBlock == null)
+                throw new IOException("No Superblock detected");
         }
         
         public override string FriendlyName
