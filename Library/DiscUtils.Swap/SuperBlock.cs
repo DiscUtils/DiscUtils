@@ -26,7 +26,7 @@ using DiscUtils.Internal;
 
 namespace DiscUtils.Swap
 {
-    internal class SwapHeader : IByteArraySerializable
+    public class SwapHeader : IByteArraySerializable
     {
         public static readonly string Magic1 = "SWAP-SPACE";
         public static readonly string Magic2 = "SWAPSPACE2";

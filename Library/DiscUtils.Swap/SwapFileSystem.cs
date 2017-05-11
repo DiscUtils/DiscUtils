@@ -23,25 +23,25 @@
 using System;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Vfs;
 
 namespace DiscUtils.Swap
 {
     /// <summary>
     /// Class for accessing Swap file systems.
     /// </summary>
-    public sealed class SwapFileSystem : ReadOnlyDiscFileSystem
+    public sealed class SwapFileSystem : VfsReadOnlyFileSystem<VfsDirEntry, IVfsFile, IVfsDirectory<VfsDirEntry, IVfsFile>, SwapContext>
     {
-        private SwapHeader _header;
-
         /// <summary>
         /// Initializes a new instance of the SwapFileSystem class.
         /// </summary>
         /// <param name="stream">The stream containing the file system.</param>
-        public SwapFileSystem(Stream stream)
+        public SwapFileSystem(Stream stream):base(new DiscFileSystemOptions())
         {
-            _header = ReadSwapHeader(stream);
-            if (_header == null) throw new IOException("Swap Header missing");
-            if (_header.Magic != SwapHeader.Magic1 && _header.Magic != SwapHeader.Magic2)
+            Context = new SwapContext();
+            Context.Header = ReadSwapHeader(stream);
+            if (Context.Header == null) throw new IOException("Swap Header missing");
+            if (Context.Header.Magic != SwapHeader.Magic1 && Context.Header.Magic != SwapHeader.Magic2)
                 throw new IOException("Invalid Swap header");
         }
         
@@ -61,7 +61,7 @@ namespace DiscUtils.Swap
         /// </summary>
         public override string VolumeLabel
         {
-            get { return _header.Volume; }
+            get { return Context.Header.Volume; }
         }
         
         /// <summary>
@@ -93,7 +93,7 @@ namespace DiscUtils.Swap
         /// </summary>
         public override long Size
         {
-            get { return _header.LastPage * SwapHeader.PageSize; }
+            get { return Context.Header.LastPage * SwapHeader.PageSize; }
         }
 
         /// <summary>
@@ -108,76 +108,9 @@ namespace DiscUtils.Swap
         /// </summary>
         public override long AvailableSpace { get { return 0; } }
 
-        ///<inheritdoc/>
-        public override bool DirectoryExists(string path)
+        protected override IVfsFile ConvertDirEntryToFile(VfsDirEntry dirEntry)
         {
-            return false;
-        }
-
-        ///<inheritdoc/>
-        public override bool FileExists(string path)
-        {
-            return false;
-        }
-
-        ///<inheritdoc/>
-        public override string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
-        {
-            return new string[0];
-        }
-
-        ///<inheritdoc/>
-        public override string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
-        {
-            return new string[0];
-        }
-
-        ///<inheritdoc/>
-        public override string[] GetFileSystemEntries(string path)
-        {
-            return new string[0];
-        }
-
-        ///<inheritdoc/>
-        public override string[] GetFileSystemEntries(string path, string searchPattern)
-        {
-            return new string[0];
-        }
-
-        ///<inheritdoc/>
-        public override SparseStream OpenFile(string path, FileMode mode, FileAccess access)
-        {
-            throw new NotSupportedException();
-        }
-
-        ///<inheritdoc/>
-        public override FileAttributes GetAttributes(string path)
-        {
-            throw new NotSupportedException();
-        }
-
-        ///<inheritdoc/>
-        public override DateTime GetCreationTimeUtc(string path)
-        {
-            throw new NotSupportedException();
-        }
-
-        ///<inheritdoc/>
-        public override DateTime GetLastAccessTimeUtc(string path)
-        {
-            throw new NotSupportedException();
-        }
-
-        ///<inheritdoc/>
-        public override DateTime GetLastWriteTimeUtc(string path)
-        {
-            throw new NotSupportedException();
-        }
-
-        ///<inheritdoc/>
-        public override long GetFileLength(string path)
-        {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
     }
 }
