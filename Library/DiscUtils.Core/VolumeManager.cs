@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 using DiscUtils.Partitions;
@@ -44,12 +45,17 @@ namespace DiscUtils
         : MarshalByRefObject
 #endif
     {
-        private static List<LogicalVolumeFactory> s_logicalVolumeFactories;
+        private static List<LogicalVolumeFactory> _logicalVolumeFactories;
         private readonly List<VirtualDisk> _disks;
         private bool _needScan;
 
         private Dictionary<string, PhysicalVolumeInfo> _physicalVolumes;
         private Dictionary<string, LogicalVolumeInfo> _logicalVolumes;
+
+        static VolumeManager()
+        {
+            _logicalVolumeFactories = new List<LogicalVolumeFactory>();
+        }
 
         /// <summary>
         /// Initializes a new instance of the VolumeManager class.
@@ -81,27 +87,29 @@ namespace DiscUtils
             AddDisk(initialDiskContent);
         }
 
-        private static List<LogicalVolumeFactory> LogicalVolumeFactories
+        private static IEnumerable<LogicalVolumeFactory> DetectLogicalVolumeFactories(Assembly assembly)
         {
-            get
+            foreach (Type type in assembly.GetTypes())
             {
-                if (s_logicalVolumeFactories == null)
-                {
-                    List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
+                Attribute attrib = ReflectionHelper.GetCustomAttribute(type, typeof(LogicalVolumeFactoryAttribute), false);
+                if (attrib == null)
+                    continue;
 
-                    foreach (Type type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
-                    {
-                        foreach (LogicalVolumeFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
-                        {
-                            factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
-                        }
-                    }
-
-                    s_logicalVolumeFactories = factories;
-                }
-
-                return s_logicalVolumeFactories;
+                yield return (LogicalVolumeFactory)Activator.CreateInstance(type);
             }
+        }
+
+        /// <summary>
+        /// Register new logical volume managers detected in an assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to inspect.</param>
+        /// <remarks>
+        /// To be detected, the <c>LogicalVolumeFactory</c> instances must be marked with the
+        /// <c>LogicalVolumeFactoryAttribute</c>> attribute.
+        /// </remarks>
+        public static void RegisterLogicalVolumeManagers(Assembly assembly)
+        {
+            _logicalVolumeFactories.AddRange(DetectLogicalVolumeFactories(assembly));
         }
 
         /// <summary>
@@ -247,7 +255,7 @@ namespace DiscUtils
             foreach (PhysicalVolumeInfo pvi in physicalVols)
             {
                 bool handled = false;
-                foreach (LogicalVolumeFactory volFactory in LogicalVolumeFactories)
+                foreach (LogicalVolumeFactory volFactory in _logicalVolumeFactories)
                 {
                     if (volFactory.HandlesPhysicalVolume(pvi))
                     {
@@ -264,7 +272,7 @@ namespace DiscUtils
 
             MapPhysicalVolumes(unhandledPhysical, result);
 
-            foreach (LogicalVolumeFactory volFactory in LogicalVolumeFactories)
+            foreach (LogicalVolumeFactory volFactory in _logicalVolumeFactories)
             {
                 volFactory.MapDisks(_disks, result);
             }
