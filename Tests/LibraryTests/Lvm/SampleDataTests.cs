@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using DiscUtils;
 using DiscUtils.Complete;
 using DiscUtils.Vhdx;

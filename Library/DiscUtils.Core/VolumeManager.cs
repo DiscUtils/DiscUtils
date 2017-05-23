@@ -51,6 +51,7 @@ namespace DiscUtils
 
         private Dictionary<string, PhysicalVolumeInfo> _physicalVolumes;
         private Dictionary<string, LogicalVolumeInfo> _logicalVolumes;
+        private static readonly Assembly _coreAssembly = ReflectionHelper.GetAssembly(typeof(VolumeManager));
 
         /// <summary>
         /// Initializes a new instance of the VolumeManager class.
@@ -89,7 +90,7 @@ namespace DiscUtils
                 if (s_logicalVolumeFactories == null)
                 {
                     List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
-                    factories.AddRange(GetLogicalVolumeFactories(ReflectionHelper.GetAssembly(typeof(VolumeManager))));
+                    factories.AddRange(GetLogicalVolumeFactories(_coreAssembly));
                     s_logicalVolumeFactories = factories;
                 }
 
@@ -114,6 +115,7 @@ namespace DiscUtils
         /// <param name="assembly">The assembly to inspect</param>
         public static void RegisterLogicalVolumeFactory(Assembly assembly)
         {
+            if (assembly == _coreAssembly) return;
             LogicalVolumeFactories.AddRange(GetLogicalVolumeFactories(assembly));
         }
 
