@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>DiscUtils, meta-package with Streams</Description>
+    <Description>DiscUtils Streams</Description>
     <AssemblyTitle>DiscUtils.Streams</AssemblyTitle>
     <VersionPrefix>0.12.2-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike;Bianco Veigel</Authors>
