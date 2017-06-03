@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -57,7 +58,7 @@ namespace DiscUtils.Vhdx
 
                 byte[] checkData = new byte[FixedSize];
                 Array.Copy(_data, checkData, FixedSize);
-                Utilities.WriteBytesLittleEndian((uint)0, checkData, 4);
+                EndianUtilities.WriteBytesLittleEndian((uint)0, checkData, 4);
                 return Checksum == Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, checkData, 0, FixedSize);
             }
         }
@@ -71,17 +72,17 @@ namespace DiscUtils.Vhdx
         {
             Array.Copy(buffer, offset, _data, 0, FixedSize);
 
-            Signature = Utilities.ToUInt32LittleEndian(_data, 0);
-            Checksum = Utilities.ToUInt32LittleEndian(_data, 4);
-            EntryCount = Utilities.ToUInt32LittleEndian(_data, 8);
-            Reserved = Utilities.ToUInt32LittleEndian(_data, 12);
+            Signature = EndianUtilities.ToUInt32LittleEndian(_data, 0);
+            Checksum = EndianUtilities.ToUInt32LittleEndian(_data, 4);
+            EntryCount = EndianUtilities.ToUInt32LittleEndian(_data, 8);
+            Reserved = EndianUtilities.ToUInt32LittleEndian(_data, 12);
             Regions = new Dictionary<Guid, RegionEntry>();
 
             if (IsValid)
             {
                 for (int i = 0; i < EntryCount; ++i)
                 {
-                    RegionEntry entry = Utilities.ToStruct<RegionEntry>(_data, 16 + 32 * i);
+                    RegionEntry entry = EndianUtilities.ToStruct<RegionEntry>(_data, 16 + 32 * i);
                     Regions.Add(entry.Guid, entry);
                 }
             }
@@ -94,9 +95,9 @@ namespace DiscUtils.Vhdx
             EntryCount = (uint)Regions.Count;
             Checksum = 0;
 
-            Utilities.WriteBytesLittleEndian(Signature, _data, 0);
-            Utilities.WriteBytesLittleEndian(Checksum, _data, 4);
-            Utilities.WriteBytesLittleEndian(EntryCount, _data, 8);
+            EndianUtilities.WriteBytesLittleEndian(Signature, _data, 0);
+            EndianUtilities.WriteBytesLittleEndian(Checksum, _data, 4);
+            EndianUtilities.WriteBytesLittleEndian(EntryCount, _data, 8);
 
             int dataOffset = 16;
             foreach (KeyValuePair<Guid, RegionEntry> region in Regions)
@@ -106,7 +107,7 @@ namespace DiscUtils.Vhdx
             }
 
             Checksum = Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, _data, 0, FixedSize);
-            Utilities.WriteBytesLittleEndian(Checksum, _data, 4);
+            EndianUtilities.WriteBytesLittleEndian(Checksum, _data, 4);
 
             Array.Copy(_data, 0, buffer, offset, FixedSize);
         }

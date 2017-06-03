@@ -23,7 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.Ntfs
 {
@@ -81,7 +82,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to read from file not opened for read");
             }
 
-            Utilities.AssertBufferParameters(buffer, offset, count);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count);
 
             if (pos >= Capacity)
             {
@@ -151,7 +152,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to write to file not opened for write");
             }
 
-            Utilities.AssertBufferParameters(buffer, offset, count);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count);
 
             if (count == 0)
             {

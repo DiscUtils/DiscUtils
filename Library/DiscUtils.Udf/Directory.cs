@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
@@ -41,7 +41,7 @@ namespace DiscUtils.Udf
 
             _entries = new List<FileIdentifier>();
 
-            byte[] contentBytes = Utilities.ReadFully(FileContent, 0, (int)FileContent.Capacity);
+            byte[] contentBytes = StreamUtilities.ReadFully(FileContent, 0, (int)FileContent.Capacity);
 
             int pos = 0;
             while (pos < contentBytes.Length)

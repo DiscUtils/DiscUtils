@@ -25,7 +25,7 @@ namespace DiscUtils.Xfs
     using System;
     using System.IO;
     using System.Collections.Generic;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class Inode : IByteArraySerializable
     {
@@ -222,44 +222,44 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt16BigEndian(buffer, offset);
-            Mode = Utilities.ToUInt16BigEndian(buffer, offset + 0x2);
+            Magic = EndianUtilities.ToUInt16BigEndian(buffer, offset);
+            Mode = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x2);
             Version = buffer[offset + 0x4];
             Format = (InodeFormat)buffer[offset + 0x5];
-            Onlink = Utilities.ToUInt16BigEndian(buffer, offset + 0x6);
-            UserId = Utilities.ToUInt32BigEndian(buffer, offset + 0x8);
-            GroupId = Utilities.ToUInt32BigEndian(buffer, offset + 0xC);
-            Nlink = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
-            ProjectId = Utilities.ToUInt16BigEndian(buffer, offset + 0x14);
-            Padding = Utilities.ToByteArray(buffer, offset + 0x16, 8);
-            FlushIterator = Utilities.ToUInt16BigEndian(buffer, 0x1E);
+            Onlink = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6);
+            UserId = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x8);
+            GroupId = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC);
+            Nlink = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
+            ProjectId = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x14);
+            Padding = EndianUtilities.ToByteArray(buffer, offset + 0x16, 8);
+            FlushIterator = EndianUtilities.ToUInt16BigEndian(buffer, 0x1E);
             AccessTime = ReadTimestamp(buffer, offset + 0x20);
             ModificationTime = ReadTimestamp(buffer, offset + 0x28);
             CreationTime = ReadTimestamp(buffer, offset + 0x30);
-            Length = Utilities.ToUInt64BigEndian(buffer, offset + 0x38);
-            BlockCount = Utilities.ToUInt64BigEndian(buffer, offset + 0x40);
-            ExtentSize = Utilities.ToUInt32BigEndian(buffer, offset + 0x48);
-            Extents = Utilities.ToUInt32BigEndian(buffer, offset + 0x4C);
-            AttributeExtents = Utilities.ToUInt16BigEndian(buffer, offset + 0x50);
+            Length = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x38);
+            BlockCount = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x40);
+            ExtentSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x48);
+            Extents = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4C);
+            AttributeExtents = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x50);
             Forkoff = buffer[offset + 0x52];
             AttributeFormat = (sbyte) buffer[offset + 0x53];
-            DmApiEventMask = Utilities.ToUInt32BigEndian(buffer, offset + 0x54);
-            DmState = Utilities.ToUInt16BigEndian(buffer, offset + 0x58);
-            Flags = (InodeFlags) Utilities.ToUInt16BigEndian(buffer, offset + 0x5A);
-            Generation = Utilities.ToUInt32BigEndian(buffer, offset + 0x5C);
+            DmApiEventMask = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x54);
+            DmState = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x58);
+            Flags = (InodeFlags) EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x5A);
+            Generation = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x5C);
             var dfLength = (Forkoff*8) - 0x64;
             if (dfLength < 0)
             {
                 dfLength = buffer.Length - offset - 0x64;
             }
-            DataFork = Utilities.ToByteArray(buffer, offset + 0x64, dfLength);
+            DataFork = EndianUtilities.ToByteArray(buffer, offset + 0x64, dfLength);
             return Size;
         }
 
         private DateTime ReadTimestamp(byte[] buffer, int offset)
         {
-            var seconds = Utilities.ToUInt32BigEndian(buffer, offset);
-            var nanoSeconds = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            var seconds = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            var nanoSeconds = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
             return ((long)seconds).FromUnixTimeSeconds().AddTicks(nanoSeconds/100).LocalDateTime;
         }
 

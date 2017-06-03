@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -61,15 +61,15 @@ namespace DiscUtils.Registry
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            _hashType = Utilities.BytesToString(buffer, offset, 2);
-            _numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
+            _hashType = EndianUtilities.BytesToString(buffer, offset, 2);
+            _numElements = EndianUtilities.ToInt16LittleEndian(buffer, offset + 2);
 
             _subKeyIndexes = new List<int>(_numElements);
             _nameHashes = new List<uint>(_numElements);
             for (int i = 0; i < _numElements; ++i)
             {
-                _subKeyIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + i * 0x8));
-                _nameHashes.Add(Utilities.ToUInt32LittleEndian(buffer, offset + 0x4 + i * 0x8 + 0x4));
+                _subKeyIndexes.Add(EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x4 + i * 0x8));
+                _nameHashes.Add(EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x4 + i * 0x8 + 0x4));
             }
 
             return 0x4 + _numElements * 0x8;
@@ -77,12 +77,12 @@ namespace DiscUtils.Registry
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.StringToBytes(_hashType, buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian(_numElements, buffer, offset + 0x2);
+            EndianUtilities.StringToBytes(_hashType, buffer, offset, 2);
+            EndianUtilities.WriteBytesLittleEndian(_numElements, buffer, offset + 0x2);
             for (int i = 0; i < _numElements; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_subKeyIndexes[i], buffer, offset + 0x4 + i * 0x8);
-                Utilities.WriteBytesLittleEndian(_nameHashes[i], buffer, offset + 0x4 + i * 0x8 + 0x4);
+                EndianUtilities.WriteBytesLittleEndian(_subKeyIndexes[i], buffer, offset + 0x4 + i * 0x8);
+                EndianUtilities.WriteBytesLittleEndian(_nameHashes[i], buffer, offset + 0x4 + i * 0x8 + 0x4);
             }
         }
 

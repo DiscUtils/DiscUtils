@@ -22,7 +22,7 @@
 
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Nfs
 {
@@ -38,11 +38,11 @@ namespace DiscUtils.Nfs
 
         public override byte[] ReadBytes(int count)
         {
-            byte[] buffer = Utilities.ReadFully(_stream, count);
+            byte[] buffer = StreamUtilities.ReadFully(_stream, count);
 
             if ((count & 0x3) != 0)
             {
-                Utilities.ReadFully(_stream, 4 - (count & 0x3));
+                StreamUtilities.ReadFully(_stream, 4 - (count & 0x3));
             }
 
             return buffer;

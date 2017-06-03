@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vdi
 {
@@ -75,18 +75,18 @@ namespace DiscUtils.Vdi
 
         public void Read(byte[] buffer, int offset)
         {
-            Cylinders = Utilities.ToInt32LittleEndian(buffer, offset + 0);
-            Heads = Utilities.ToInt32LittleEndian(buffer, offset + 4);
-            Sectors = Utilities.ToInt32LittleEndian(buffer, offset + 8);
-            SectorSize = Utilities.ToInt32LittleEndian(buffer, offset + 12);
+            Cylinders = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0);
+            Heads = EndianUtilities.ToInt32LittleEndian(buffer, offset + 4);
+            Sectors = EndianUtilities.ToInt32LittleEndian(buffer, offset + 8);
+            SectorSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 12);
         }
 
         public void Write(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(Cylinders, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Heads, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian(Sectors, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(SectorSize, buffer, offset + 12);
+            EndianUtilities.WriteBytesLittleEndian(Cylinders, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian(Heads, buffer, offset + 4);
+            EndianUtilities.WriteBytesLittleEndian(Sectors, buffer, offset + 8);
+            EndianUtilities.WriteBytesLittleEndian(SectorSize, buffer, offset + 12);
         }
 
         public Geometry ToGeometry(long actualCapacity)

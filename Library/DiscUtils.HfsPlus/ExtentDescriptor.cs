@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -37,8 +37,8 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            StartBlock = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            BlockCount = Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            StartBlock = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            BlockCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
 
             return 8;
         }

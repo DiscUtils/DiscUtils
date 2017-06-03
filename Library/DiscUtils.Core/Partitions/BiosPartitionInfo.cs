@@ -21,6 +21,7 @@
 //
 
 using System;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {

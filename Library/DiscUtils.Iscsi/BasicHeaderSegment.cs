@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -46,8 +46,8 @@ namespace DiscUtils.Iscsi
             OpCode = (OpCode)(buffer[offset] & 0x3F);
             FinalPdu = (buffer[offset + 1] & 0x80) != 0;
             TotalAhsLength = buffer[offset + 4];
-            DataSegmentLength = Utilities.ToInt32BigEndian(buffer, offset + 4) & 0x00FFFFFF;
-            InitiatorTaskTag = Utilities.ToUInt32BigEndian(buffer, offset + 16);
+            DataSegmentLength = EndianUtilities.ToInt32BigEndian(buffer, offset + 4) & 0x00FFFFFF;
+            InitiatorTaskTag = EndianUtilities.ToUInt32BigEndian(buffer, offset + 16);
             return 48;
         }
 
@@ -59,7 +59,7 @@ namespace DiscUtils.Iscsi
             buffer[offset + 5] = (byte)((DataSegmentLength >> 16) & 0xFF);
             buffer[offset + 6] = (byte)((DataSegmentLength >> 8) & 0xFF);
             buffer[offset + 7] = (byte)(DataSegmentLength & 0xFF);
-            Utilities.WriteBytesBigEndian(InitiatorTaskTag, buffer, offset + 16);
+            EndianUtilities.WriteBytesBigEndian(InitiatorTaskTag, buffer, offset + 16);
         }
 
         #endregion

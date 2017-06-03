@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal abstract class BtreeHeader : IByteArraySerializable
@@ -44,11 +44,11 @@ namespace DiscUtils.Xfs
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
-            Level = Utilities.ToUInt16BigEndian(buffer, offset + 0x4);
-            NumberOfRecords = Utilities.ToUInt16BigEndian(buffer, offset + 0x6);
-            LeftSibling = Utilities.ToInt32BigEndian(buffer, offset + 0x8);
-            RightSibling = Utilities.ToInt32BigEndian(buffer, offset + 0xC);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            Level = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x4);
+            NumberOfRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6);
+            LeftSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x8);
+            RightSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0xC);
             return 16;
         }
 

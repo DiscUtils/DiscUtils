@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -53,7 +53,7 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            LocatorType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
+            LocatorType = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0);
             if (LocatorType != LocatorTypeGuid)
             {
                 throw new IOException("Unrecognized Parent Locator type: " + LocatorType);
@@ -61,14 +61,14 @@ namespace DiscUtils.Vhdx
 
             Entries = new Dictionary<string, string>();
 
-            Count = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
+            Count = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 18);
             for (ushort i = 0; i < Count; ++i)
             {
                 int kvOffset = offset + 20 + i * 12;
-                int keyOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 0);
-                int valueOffset = Utilities.ToInt32LittleEndian(buffer, kvOffset + 4);
-                int keyLength = Utilities.ToUInt16LittleEndian(buffer, kvOffset + 8);
-                int valueLength = Utilities.ToUInt16LittleEndian(buffer, kvOffset + 10);
+                int keyOffset = EndianUtilities.ToInt32LittleEndian(buffer, kvOffset + 0);
+                int valueOffset = EndianUtilities.ToInt32LittleEndian(buffer, kvOffset + 4);
+                int keyLength = EndianUtilities.ToUInt16LittleEndian(buffer, kvOffset + 8);
+                int valueLength = EndianUtilities.ToUInt16LittleEndian(buffer, kvOffset + 10);
 
                 string key = Encoding.Unicode.GetString(buffer, keyOffset, keyLength);
                 string value = Encoding.Unicode.GetString(buffer, valueOffset, valueLength);
@@ -88,9 +88,9 @@ namespace DiscUtils.Vhdx
 
             Count = (ushort)Entries.Count;
 
-            Utilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);
-            Utilities.WriteBytesLittleEndian(Count, buffer, offset + 18);
+            EndianUtilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);
+            EndianUtilities.WriteBytesLittleEndian(Count, buffer, offset + 18);
         }
     }
 }

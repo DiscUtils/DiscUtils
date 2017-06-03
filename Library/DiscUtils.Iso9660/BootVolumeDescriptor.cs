@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -37,8 +37,8 @@ namespace DiscUtils.Iso9660
         public BootVolumeDescriptor(byte[] src, int offset)
             : base(src, offset)
         {
-            SystemId = Utilities.BytesToString(src, offset + 0x7, 0x20).TrimEnd('\0');
-            CatalogSector = Utilities.ToUInt32LittleEndian(src, offset + 0x47);
+            SystemId = EndianUtilities.BytesToString(src, offset + 0x7, 0x20).TrimEnd('\0');
+            CatalogSector = EndianUtilities.ToUInt32LittleEndian(src, offset + 0x47);
         }
 
         public uint CatalogSector { get; }
@@ -49,8 +49,8 @@ namespace DiscUtils.Iso9660
         {
             base.WriteTo(buffer, offset);
 
-            Utilities.StringToBytes(ElToritoSystemIdentifier, buffer, offset + 7, 0x20);
-            Utilities.WriteBytesLittleEndian(CatalogSector, buffer, offset + 0x47);
+            EndianUtilities.StringToBytes(ElToritoSystemIdentifier, buffer, offset + 7, 0x20);
+            EndianUtilities.WriteBytesLittleEndian(CatalogSector, buffer, offset + 0x47);
         }
     }
 }

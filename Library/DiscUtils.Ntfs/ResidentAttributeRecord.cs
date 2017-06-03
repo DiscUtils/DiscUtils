@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -47,7 +47,7 @@ namespace DiscUtils.Ntfs
 
         public override long AllocatedLength
         {
-            get { return Utilities.RoundUp(DataLength, 8); }
+            get { return MathUtilities.RoundUp(DataLength, 8); }
             set { throw new NotSupportedException(); }
         }
 
@@ -72,7 +72,7 @@ namespace DiscUtils.Ntfs
                     nameLength = (byte)Name.Length;
                 }
 
-                return Utilities.RoundUp(0x18 + nameLength * 2, 8);
+                return MathUtilities.RoundUp(0x18 + nameLength * 2, 8);
             }
         }
 
@@ -96,8 +96,8 @@ namespace DiscUtils.Ntfs
                     nameLength = (byte)Name.Length;
                 }
 
-                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + nameLength * 2, 8);
-                return (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
+                ushort dataOffset = (ushort)MathUtilities.RoundUp(nameOffset + nameLength * 2, 8);
+                return (int)MathUtilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
             }
         }
 
@@ -126,18 +126,18 @@ namespace DiscUtils.Ntfs
                 nameLength = (byte)Name.Length;
             }
 
-            ushort dataOffset = (ushort)Utilities.RoundUp(0x18 + nameLength * 2, 8);
-            int length = (int)Utilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
+            ushort dataOffset = (ushort)MathUtilities.RoundUp(0x18 + nameLength * 2, 8);
+            int length = (int)MathUtilities.RoundUp(dataOffset + _memoryBuffer.Capacity, 8);
 
-            Utilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
+            EndianUtilities.WriteBytesLittleEndian(length, buffer, offset + 0x04);
             buffer[offset + 0x08] = _nonResidentFlag;
             buffer[offset + 0x09] = nameLength;
-            Utilities.WriteBytesLittleEndian(nameOffset, buffer, offset + 0x0A);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
-            Utilities.WriteBytesLittleEndian(_attributeId, buffer, offset + 0x0E);
-            Utilities.WriteBytesLittleEndian((int)_memoryBuffer.Capacity, buffer, offset + 0x10);
-            Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x14);
+            EndianUtilities.WriteBytesLittleEndian(nameOffset, buffer, offset + 0x0A);
+            EndianUtilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
+            EndianUtilities.WriteBytesLittleEndian(_attributeId, buffer, offset + 0x0E);
+            EndianUtilities.WriteBytesLittleEndian((int)_memoryBuffer.Capacity, buffer, offset + 0x10);
+            EndianUtilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x14);
             buffer[offset + 0x16] = _indexedFlag;
             buffer[offset + 0x17] = 0; // Padding
 
@@ -162,8 +162,8 @@ namespace DiscUtils.Ntfs
         {
             base.Read(buffer, offset, out length);
 
-            uint dataLength = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
-            ushort dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x14);
+            uint dataLength = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x10);
+            ushort dataOffset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x14);
             _indexedFlag = buffer[offset + 0x16];
 
             if (dataOffset + dataLength > length)

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {
@@ -53,34 +53,34 @@ namespace DiscUtils.LogicalDiskManager
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.BytesToString(buffer, offset + 0x00, 4);
-            NumVBlks = Utilities.ToUInt32BigEndian(buffer, offset + 0x04);
-            BlockSize = Utilities.ToUInt32BigEndian(buffer, offset + 0x08);
-            HeaderSize = Utilities.ToUInt32BigEndian(buffer, offset + 0x0C);
-            Unknown1 = Utilities.ToUInt16BigEndian(buffer, offset + 0x10);
-            VersionNum = Utilities.ToUInt16BigEndian(buffer, offset + 0x12);
-            VersionDenom = Utilities.ToUInt16BigEndian(buffer, offset + 0x14);
-            GroupName = Utilities.BytesToString(buffer, offset + 0x16, 31).Trim('\0');
-            DiskGroupId = Utilities.BytesToString(buffer, offset + 0x35, 0x40).Trim('\0');
+            Signature = EndianUtilities.BytesToString(buffer, offset + 0x00, 4);
+            NumVBlks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x04);
+            BlockSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x08);
+            HeaderSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x0C);
+            Unknown1 = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x10);
+            VersionNum = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x12);
+            VersionDenom = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x14);
+            GroupName = EndianUtilities.BytesToString(buffer, offset + 0x16, 31).Trim('\0');
+            DiskGroupId = EndianUtilities.BytesToString(buffer, offset + 0x35, 0x40).Trim('\0');
 
             // May be wrong way round...
-            CommittedSequence = Utilities.ToInt64BigEndian(buffer, offset + 0x75);
-            PendingSequence = Utilities.ToInt64BigEndian(buffer, offset + 0x7D);
+            CommittedSequence = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x75);
+            PendingSequence = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x7D);
 
-            Unknown2 = Utilities.ToUInt32BigEndian(buffer, offset + 0x85);
-            Unknown3 = Utilities.ToUInt32BigEndian(buffer, offset + 0x89);
-            Unknown4 = Utilities.ToUInt32BigEndian(buffer, offset + 0x8D);
-            Unknown5 = Utilities.ToUInt32BigEndian(buffer, offset + 0x91);
-            Unknown6 = Utilities.ToInt64BigEndian(buffer, offset + 0x95);
-            Unknown7 = Utilities.ToInt64BigEndian(buffer, offset + 0x9D);
-            Unknown8 = Utilities.ToUInt32BigEndian(buffer, offset + 0xA5);
-            Unknown9 = Utilities.ToUInt32BigEndian(buffer, offset + 0xA9);
-            UnknownA = Utilities.ToUInt32BigEndian(buffer, offset + 0xAD);
+            Unknown2 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x85);
+            Unknown3 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x89);
+            Unknown4 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x8D);
+            Unknown5 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x91);
+            Unknown6 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x95);
+            Unknown7 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x9D);
+            Unknown8 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xA5);
+            Unknown9 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xA9);
+            UnknownA = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xAD);
 
-            UnknownB = Utilities.ToInt64BigEndian(buffer, offset + 0xB1);
-            UnknownC = Utilities.ToUInt32BigEndian(buffer, offset + 0xB9);
+            UnknownB = EndianUtilities.ToInt64BigEndian(buffer, offset + 0xB1);
+            UnknownC = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xB9);
 
-            Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64BigEndian(buffer, offset + 0xBD));
+            Timestamp = DateTime.FromFileTimeUtc(EndianUtilities.ToInt64BigEndian(buffer, offset + 0xBD));
         }
 
         ////}

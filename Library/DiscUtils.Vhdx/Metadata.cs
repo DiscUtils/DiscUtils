@@ -24,8 +24,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using DiscUtils.CoreCompat;
-using DiscUtils.Internal;
-
+using DiscUtils.Streams;
 #if !NETCORE
     using System.Security.Permissions;
 #endif
@@ -42,15 +41,15 @@ namespace DiscUtils.Vhdx
         {
             _regionStream = regionStream;
             _regionStream.Position = 0;
-            Table = Utilities.ReadStruct<MetadataTable>(_regionStream);
+            Table = StreamUtilities.ReadStruct<MetadataTable>(_regionStream);
 
             FileParameters = ReadStruct<FileParameters>(MetadataTable.FileParametersGuid, false);
-            DiskSize = ReadValue(MetadataTable.VirtualDiskSizeGuid, false, Utilities.ToUInt64LittleEndian);
-            _page83Data = ReadValue(MetadataTable.Page83DataGuid, false, Utilities.ToGuidLittleEndian);
+            DiskSize = ReadValue(MetadataTable.VirtualDiskSizeGuid, false, EndianUtilities.ToUInt64LittleEndian);
+            _page83Data = ReadValue(MetadataTable.Page83DataGuid, false, EndianUtilities.ToGuidLittleEndian);
             LogicalSectorSize = ReadValue(MetadataTable.LogicalSectorSizeGuid, false,
-                Utilities.ToUInt32LittleEndian);
+                EndianUtilities.ToUInt32LittleEndian);
             PhysicalSectorSize = ReadValue(MetadataTable.PhysicalSectorSizeGuid, false,
-                Utilities.ToUInt32LittleEndian);
+                EndianUtilities.ToUInt32LittleEndian);
             ParentLocator = ReadStruct<ParentLocator>(MetadataTable.ParentLocatorGuid, false);
         }
 
@@ -78,14 +77,14 @@ namespace DiscUtils.Vhdx
             uint dataOffset = (uint)(64 * Sizes.OneKiB);
             dataOffset += AddEntryStruct(fileParameters, MetadataTable.FileParametersGuid, MetadataEntryFlags.IsRequired,
                 header, dataOffset, metadataStream);
-            dataOffset += AddEntryValue(diskSize, Utilities.WriteBytesLittleEndian, MetadataTable.VirtualDiskSizeGuid,
+            dataOffset += AddEntryValue(diskSize, EndianUtilities.WriteBytesLittleEndian, MetadataTable.VirtualDiskSizeGuid,
                 MetadataEntryFlags.IsRequired | MetadataEntryFlags.IsVirtualDisk, header, dataOffset, metadataStream);
-            dataOffset += AddEntryValue(Guid.NewGuid(), Utilities.WriteBytesLittleEndian, MetadataTable.Page83DataGuid,
+            dataOffset += AddEntryValue(Guid.NewGuid(), EndianUtilities.WriteBytesLittleEndian, MetadataTable.Page83DataGuid,
                 MetadataEntryFlags.IsRequired | MetadataEntryFlags.IsVirtualDisk, header, dataOffset, metadataStream);
-            dataOffset += AddEntryValue(logicalSectorSize, Utilities.WriteBytesLittleEndian,
+            dataOffset += AddEntryValue(logicalSectorSize, EndianUtilities.WriteBytesLittleEndian,
                 MetadataTable.LogicalSectorSizeGuid, MetadataEntryFlags.IsRequired | MetadataEntryFlags.IsVirtualDisk,
                 header, dataOffset, metadataStream);
-            dataOffset += AddEntryValue(physicalSectorSize, Utilities.WriteBytesLittleEndian,
+            dataOffset += AddEntryValue(physicalSectorSize, EndianUtilities.WriteBytesLittleEndian,
                 MetadataTable.PhysicalSectorSizeGuid, MetadataEntryFlags.IsRequired | MetadataEntryFlags.IsVirtualDisk,
                 header, dataOffset, metadataStream);
             if (parentLocator != null)
@@ -95,7 +94,7 @@ namespace DiscUtils.Vhdx
             }
 
             metadataStream.Position = 0;
-            Utilities.WriteStruct(metadataStream, header);
+            StreamUtilities.WriteStruct(metadataStream, header);
             return new Metadata(metadataStream);
         }
 
@@ -113,7 +112,7 @@ namespace DiscUtils.Vhdx
             header.Entries[key] = entry;
 
             stream.Position = dataOffset;
-            Utilities.WriteStruct(stream, data);
+            StreamUtilities.WriteStruct(stream, data);
 
             return entry.Length;
         }
@@ -151,7 +150,7 @@ namespace DiscUtils.Vhdx
             if (Table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
-                return Utilities.ReadStruct<T>(_regionStream, (int)entry.Length);
+                return StreamUtilities.ReadStruct<T>(_regionStream, (int)entry.Length);
             }
 
             return default(T);
@@ -168,7 +167,7 @@ namespace DiscUtils.Vhdx
             if (Table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
-                byte[] data = Utilities.ReadFully(_regionStream, ReflectionHelper.SizeOf<T>());
+                byte[] data = StreamUtilities.ReadFully(_regionStream, ReflectionHelper.SizeOf<T>());
                 return reader(data, 0);
             }
 

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Xfs
 {
@@ -36,9 +36,9 @@ namespace DiscUtils.Xfs
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            Freetag = Utilities.ToUInt16BigEndian(buffer, offset);
-            Length = Utilities.ToUInt16BigEndian(buffer, offset + 0x2);
-            Tag = Utilities.ToUInt16BigEndian(buffer, offset + Length - 0x2);
+            Freetag = EndianUtilities.ToUInt16BigEndian(buffer, offset);
+            Length = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x2);
+            Tag = EndianUtilities.ToUInt16BigEndian(buffer, offset + Length - 0x2);
             return Size;
         }
     }

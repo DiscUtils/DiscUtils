@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
@@ -47,7 +47,7 @@ namespace DiscUtils.Ext
                 long pos = 0;
                 while (pos < Inode.FileSize)
                 {
-                    Utilities.ReadFully(content, blockSize * (long)relBlock, blockData, 0, (int)blockSize);
+                    StreamUtilities.ReadFully(content, blockSize * (long)relBlock, blockData, 0, (int)blockSize);
 
                     int blockPos = 0;
                     while (blockPos < blockSize)

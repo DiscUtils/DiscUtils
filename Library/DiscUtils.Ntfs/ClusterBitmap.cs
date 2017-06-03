@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -40,7 +40,7 @@ namespace DiscUtils.Ntfs
             _file = file;
             _bitmap = new Bitmap(
                 _file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite),
-                Utilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64,
+                MathUtilities.Ceil(file.Context.BiosParameterBlock.TotalSectors64,
                     file.Context.BiosParameterBlock.SectorsPerCluster));
         }
 

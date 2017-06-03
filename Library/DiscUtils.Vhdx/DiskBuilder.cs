@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -96,7 +96,7 @@ namespace DiscUtils.Vhdx
                 _blockSize = blockSize;
             }
 
-            internal override List<BuilderExtent> FixExtents(out long totalLength)
+            protected override List<BuilderExtent> FixExtents(out long totalLength)
             {
                 if (_diskType != DiskType.Dynamic)
                 {
@@ -108,8 +108,8 @@ namespace DiscUtils.Vhdx
                 int logicalSectorSize = 512;
                 int physicalSectorSize = 4096;
                 long chunkRatio = 0x800000L * logicalSectorSize / _blockSize;
-                long dataBlocksCount = Utilities.Ceil(_content.Length, _blockSize);
-                long sectorBitmapBlocksCount = Utilities.Ceil(dataBlocksCount, chunkRatio);
+                long dataBlocksCount = MathUtilities.Ceil(_content.Length, _blockSize);
+                long sectorBitmapBlocksCount = MathUtilities.Ceil(dataBlocksCount, chunkRatio);
                 long totalBatEntriesDynamic = dataBlocksCount + (dataBlocksCount - 1) / chunkRatio;
 
                 FileHeader fileHeader = new FileHeader { Creator = ".NET DiscUtils" };
@@ -147,7 +147,7 @@ namespace DiscUtils.Vhdx
                 RegionEntry batRegion = new RegionEntry();
                 batRegion.Guid = RegionEntry.BatGuid;
                 batRegion.FileOffset = fileEnd;
-                batRegion.Length = (uint)Utilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
+                batRegion.Length = (uint)MathUtilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
                 batRegion.Flags = RegionFlags.Required;
                 regionTable.Regions.Add(batRegion.Guid, batRegion);
 
@@ -230,7 +230,7 @@ namespace DiscUtils.Vhdx
                 _batData = null;
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 _batData = new byte[Length];
 
@@ -254,7 +254,7 @@ namespace DiscUtils.Vhdx
                 }
             }
 
-            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            public override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 int start = (int)Math.Min(diskOffset - Start, _batData.Length);
                 int numRead = Math.Min(count, _batData.Length - start);
@@ -264,7 +264,7 @@ namespace DiscUtils.Vhdx
                 return numRead;
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 _batData = null;
             }

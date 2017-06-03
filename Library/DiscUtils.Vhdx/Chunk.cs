@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -56,7 +56,7 @@ namespace DiscUtils.Vhdx
             _blocksPerChunk = blocksPerChunk;
 
             _bat.Position = _chunk * (_blocksPerChunk + 1) * 8;
-            _batData = Utilities.ReadFully(bat, (_blocksPerChunk + 1) * 8);
+            _batData = StreamUtilities.ReadFully(bat, (_blocksPerChunk + 1) * 8);
         }
 
         private bool HasSectorBitmap
@@ -151,7 +151,7 @@ namespace DiscUtils.Vhdx
             if (_sectorBitmap == null)
             {
                 _file.Position = SectorBitmapPos;
-                _sectorBitmap = Utilities.ReadFully(_file, (int)Sizes.OneMiB);
+                _sectorBitmap = StreamUtilities.ReadFully(_file, (int)Sizes.OneMiB);
             }
 
             return _sectorBitmap;
@@ -162,7 +162,7 @@ namespace DiscUtils.Vhdx
             long pos;
             if (!_freeSpace.TryAllocate(sizeBytes, out pos))
             {
-                pos = Utilities.RoundUp(_file.Length, Sizes.OneMiB);
+                pos = MathUtilities.RoundUp(_file.Length, Sizes.OneMiB);
                 _file.SetLength(pos + sizeBytes);
                 _freeSpace.ExtendTo(pos + sizeBytes, false);
             }

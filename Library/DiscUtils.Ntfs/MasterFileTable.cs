@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -134,9 +135,9 @@ namespace DiscUtils.Ntfs
                     uint index = 0;
                     while (mftStream.Position < mftStream.Length)
                     {
-                        byte[] recordData = Utilities.ReadFully(mftStream, RecordSize);
+                        byte[] recordData = StreamUtilities.ReadFully(mftStream, RecordSize);
 
-                        if (Utilities.BytesToString(recordData, 0, 4) != "FILE")
+                        if (EndianUtilities.BytesToString(recordData, 0, 4) != "FILE")
                         {
                             continue;
                         }
@@ -191,7 +192,7 @@ namespace DiscUtils.Ntfs
         public FileRecord GetBootstrapRecord()
         {
             _recordStream.Position = 0;
-            byte[] mftSelfRecordData = Utilities.ReadFully(_recordStream, RecordSize);
+            byte[] mftSelfRecordData = StreamUtilities.ReadFully(_recordStream, RecordSize);
             FileRecord mftSelfRecord = new FileRecord(_bytesPerSector);
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
             _recordCache[MftIndex] = mftSelfRecord;
@@ -284,7 +285,7 @@ namespace DiscUtils.Ntfs
             if (index * RecordSize >= _recordStream.Length)
             {
                 // Note: 64 is significant, since bitmap extends by 8 bytes (=64 bits) at a time.
-                long newEndIndex = Utilities.RoundUp(index + 1, 64);
+                long newEndIndex = MathUtilities.RoundUp(index + 1, 64);
                 _recordStream.SetLength(newEndIndex * RecordSize);
                 for (long i = index; i < newEndIndex; ++i)
                 {
@@ -366,7 +367,7 @@ namespace DiscUtils.Ntfs
                 if ((index + 1) * RecordSize <= _recordStream.Length)
                 {
                     _recordStream.Position = index * RecordSize;
-                    byte[] recordBuffer = Utilities.ReadFully(_recordStream, RecordSize);
+                    byte[] recordBuffer = StreamUtilities.ReadFully(_recordStream, RecordSize);
 
                     result = new FileRecord(_bytesPerSector);
                     result.FromBytes(recordBuffer, 0, ignoreMagic);
@@ -437,7 +438,7 @@ namespace DiscUtils.Ntfs
         {
             int totalClusters =
                 (int)
-                Utilities.Ceil(_self.Context.BiosParameterBlock.TotalSectors64,
+                MathUtilities.Ceil(_self.Context.BiosParameterBlock.TotalSectors64,
                     _self.Context.BiosParameterBlock.SectorsPerCluster);
 
             ClusterRoles[] clusterToRole = new ClusterRoles[totalClusters];

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -34,7 +34,7 @@ namespace DiscUtils.Iso9660
             CheckAndSetCommonProperties(name, length, version, 5, 1);
 
             Flags = data[offset + 4];
-            NameData = Utilities.BytesToString(data, offset + 5, length - 5);
+            NameData = EndianUtilities.BytesToString(data, offset + 5, length - 5);
         }
     }
 }

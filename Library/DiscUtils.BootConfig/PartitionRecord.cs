@@ -22,7 +22,7 @@
 
 using System;
 using System.Globalization;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.BootConfig
 {
@@ -48,7 +48,7 @@ namespace DiscUtils.BootConfig
             }
             else if (Type == 6)
             {
-                Utilities.WriteBytesLittleEndian(PartitionType, data, offset + 0x24);
+                EndianUtilities.WriteBytesLittleEndian(PartitionType, data, offset + 0x24);
 
                 if (PartitionType == 1)
                 {
@@ -88,10 +88,10 @@ namespace DiscUtils.BootConfig
                         DiskIdentity[1],
                         DiskIdentity[2],
                         DiskIdentity[3],
-                        Utilities.ToUInt64LittleEndian(PartitionIdentity, 0));
+                        EndianUtilities.ToUInt64LittleEndian(PartitionIdentity, 0));
                 }
-                Guid diskGuid = Utilities.ToGuidLittleEndian(DiskIdentity, 0);
-                Guid partitionGuid = Utilities.ToGuidLittleEndian(PartitionIdentity, 0);
+                Guid diskGuid = EndianUtilities.ToGuidLittleEndian(DiskIdentity, 0);
+                Guid partitionGuid = EndianUtilities.ToGuidLittleEndian(PartitionIdentity, 0);
                 return string.Format(CultureInfo.InvariantCulture, "(disk:{0} partition:{1})", diskGuid,
                     partitionGuid);
             }
@@ -112,7 +112,7 @@ namespace DiscUtils.BootConfig
             }
             else if (Type == 6)
             {
-                PartitionType = Utilities.ToInt32LittleEndian(data, offset + 0x24);
+                PartitionType = EndianUtilities.ToInt32LittleEndian(data, offset + 0x24);
 
                 if (PartitionType == 1)
                 {

@@ -27,7 +27,7 @@ namespace DiscUtils.Xfs
     using System.IO;
     using System.Collections.Generic;
     using DiscUtils.Vfs;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
@@ -62,7 +62,7 @@ namespace DiscUtils.Xfs
                         var blockDir = new BlockDirectory();
 
                         var dirContent = Inode.GetContentBuffer(Context);
-                        var buffer = Utilities.ReadAll(dirContent);
+                        var buffer = StreamUtilities.ReadAll(dirContent);
                         blockDir.ReadFrom(buffer, 0);
                         if (blockDir.Magic != BlockDirectory.HeaderMagic)
                             throw new IOException("invalid block directory magic");

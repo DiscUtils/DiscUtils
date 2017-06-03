@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -54,7 +54,7 @@ namespace DiscUtils.SquashFs
             _blockLengths = new int[numBlocks];
             for (int i = 0; i < numBlocks; ++i)
             {
-                _blockLengths[i] = Utilities.ToInt32LittleEndian(lengthData, i * 4);
+                _blockLengths[i] = EndianUtilities.ToInt32LittleEndian(lengthData, i * 4);
             }
         }
 

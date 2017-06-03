@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhd
 {
@@ -50,20 +50,20 @@ namespace DiscUtils.Vhd
         public static ParentLocator FromBytes(byte[] data, int offset)
         {
             ParentLocator result = new ParentLocator();
-            result.PlatformCode = Utilities.BytesToString(data, offset, 4);
-            result.PlatformDataSpace = Utilities.ToInt32BigEndian(data, offset + 4);
-            result.PlatformDataLength = Utilities.ToInt32BigEndian(data, offset + 8);
-            result.PlatformDataOffset = Utilities.ToInt64BigEndian(data, offset + 16);
+            result.PlatformCode = EndianUtilities.BytesToString(data, offset, 4);
+            result.PlatformDataSpace = EndianUtilities.ToInt32BigEndian(data, offset + 4);
+            result.PlatformDataLength = EndianUtilities.ToInt32BigEndian(data, offset + 8);
+            result.PlatformDataOffset = EndianUtilities.ToInt64BigEndian(data, offset + 16);
             return result;
         }
 
         internal void ToBytes(byte[] data, int offset)
         {
-            Utilities.StringToBytes(PlatformCode, data, offset, 4);
-            Utilities.WriteBytesBigEndian(PlatformDataSpace, data, offset + 4);
-            Utilities.WriteBytesBigEndian(PlatformDataLength, data, offset + 8);
-            Utilities.WriteBytesBigEndian((uint)0, data, offset + 12);
-            Utilities.WriteBytesBigEndian(PlatformDataOffset, data, offset + 16);
+            EndianUtilities.StringToBytes(PlatformCode, data, offset, 4);
+            EndianUtilities.WriteBytesBigEndian(PlatformDataSpace, data, offset + 4);
+            EndianUtilities.WriteBytesBigEndian(PlatformDataLength, data, offset + 8);
+            EndianUtilities.WriteBytesBigEndian((uint)0, data, offset + 12);
+            EndianUtilities.WriteBytesBigEndian(PlatformDataOffset, data, offset + 16);
         }
     }
 }

@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {

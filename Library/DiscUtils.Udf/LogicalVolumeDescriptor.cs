@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -54,16 +54,16 @@ namespace DiscUtils.Udf
 
         public override int Parse(byte[] buffer, int offset)
         {
-            VolumeDescriptorSequenceNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            DescriptorCharset = Utilities.ToByteArray(buffer, offset + 20, 64);
+            VolumeDescriptorSequenceNumber = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
+            DescriptorCharset = EndianUtilities.ToByteArray(buffer, offset + 20, 64);
             LogicalVolumeIdentifier = UdfUtilities.ReadDString(buffer, offset + 84, 128);
-            LogicalBlockSize = Utilities.ToUInt32LittleEndian(buffer, offset + 212);
-            DomainIdentifier = Utilities.ToStruct<DomainEntityIdentifier>(buffer, offset + 216);
-            LogicalVolumeContentsUse = Utilities.ToByteArray(buffer, offset + 248, 16);
-            MapTableLength = Utilities.ToUInt32LittleEndian(buffer, offset + 264);
-            NumPartitionMaps = Utilities.ToUInt32LittleEndian(buffer, offset + 268);
-            ImplementationIdentifier = Utilities.ToStruct<ImplementationEntityIdentifier>(buffer, offset + 272);
-            ImplementationUse = Utilities.ToByteArray(buffer, offset + 304, 128);
+            LogicalBlockSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 212);
+            DomainIdentifier = EndianUtilities.ToStruct<DomainEntityIdentifier>(buffer, offset + 216);
+            LogicalVolumeContentsUse = EndianUtilities.ToByteArray(buffer, offset + 248, 16);
+            MapTableLength = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 264);
+            NumPartitionMaps = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 268);
+            ImplementationIdentifier = EndianUtilities.ToStruct<ImplementationEntityIdentifier>(buffer, offset + 272);
+            ImplementationUse = EndianUtilities.ToByteArray(buffer, offset + 304, 128);
             IntegritySequenceExtent = new ExtentDescriptor();
             IntegritySequenceExtent.ReadFrom(buffer, offset + 432);
 

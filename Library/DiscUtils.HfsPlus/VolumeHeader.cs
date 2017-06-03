@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -75,43 +75,43 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.ToUInt16BigEndian(buffer, offset + 0);
-            Version = Utilities.ToUInt16BigEndian(buffer, offset + 2);
-            Attributes = (VolumeAttributes)Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            LastMountedVersion = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            JournalInfoBlock = Utilities.ToUInt32BigEndian(buffer, offset + 12);
+            Signature = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0);
+            Version = EndianUtilities.ToUInt16BigEndian(buffer, offset + 2);
+            Attributes = (VolumeAttributes)EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            LastMountedVersion = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
+            JournalInfoBlock = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
 
             CreateDate = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Local, buffer, offset + 16);
             ModifyDate = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 20);
             BackupDate = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 24);
             CheckedDate = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 28);
 
-            FileCount = Utilities.ToUInt32BigEndian(buffer, offset + 32);
-            FolderCount = Utilities.ToUInt32BigEndian(buffer, offset + 36);
+            FileCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 32);
+            FolderCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 36);
 
-            BlockSize = Utilities.ToUInt32BigEndian(buffer, offset + 40);
-            TotalBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 44);
-            FreeBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 48);
+            BlockSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 40);
+            TotalBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 44);
+            FreeBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 48);
 
-            NextAllocation = Utilities.ToUInt32BigEndian(buffer, offset + 52);
-            ResourceClumpSize = Utilities.ToUInt32BigEndian(buffer, offset + 56);
-            DataClumpSize = Utilities.ToUInt32BigEndian(buffer, offset + 60);
-            NextCatalogId = new CatalogNodeId(Utilities.ToUInt32BigEndian(buffer, offset + 64));
+            NextAllocation = EndianUtilities.ToUInt32BigEndian(buffer, offset + 52);
+            ResourceClumpSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 56);
+            DataClumpSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 60);
+            NextCatalogId = new CatalogNodeId(EndianUtilities.ToUInt32BigEndian(buffer, offset + 64));
 
-            WriteCount = Utilities.ToUInt32BigEndian(buffer, offset + 68);
-            EncodingsBitmap = Utilities.ToUInt64BigEndian(buffer, offset + 72);
+            WriteCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 68);
+            EncodingsBitmap = EndianUtilities.ToUInt64BigEndian(buffer, offset + 72);
 
             FinderInfo = new uint[8];
             for (int i = 0; i < 8; ++i)
             {
-                FinderInfo[i] = Utilities.ToUInt32BigEndian(buffer, offset + 80 + i * 4);
+                FinderInfo[i] = EndianUtilities.ToUInt32BigEndian(buffer, offset + 80 + i * 4);
             }
 
-            AllocationFile = Utilities.ToStruct<ForkData>(buffer, offset + 112);
-            ExtentsFile = Utilities.ToStruct<ForkData>(buffer, offset + 192);
-            CatalogFile = Utilities.ToStruct<ForkData>(buffer, offset + 272);
-            AttributesFile = Utilities.ToStruct<ForkData>(buffer, offset + 352);
-            StartupFile = Utilities.ToStruct<ForkData>(buffer, offset + 432);
+            AllocationFile = EndianUtilities.ToStruct<ForkData>(buffer, offset + 112);
+            ExtentsFile = EndianUtilities.ToStruct<ForkData>(buffer, offset + 192);
+            CatalogFile = EndianUtilities.ToStruct<ForkData>(buffer, offset + 272);
+            AttributesFile = EndianUtilities.ToStruct<ForkData>(buffer, offset + 352);
+            StartupFile = EndianUtilities.ToStruct<ForkData>(buffer, offset + 432);
 
             return 512;
         }

@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {
@@ -45,21 +45,21 @@ namespace DiscUtils.Dmg
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            InfoVersion = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            FirstSector = Utilities.ToInt64BigEndian(buffer, offset + 8);
-            SectorCount = Utilities.ToInt64BigEndian(buffer, offset + 16);
-            DataStart = Utilities.ToUInt64BigEndian(buffer, offset + 24);
-            DecompressBufferRequested = Utilities.ToUInt32BigEndian(buffer, offset + 32);
-            BlocksDescriptor = Utilities.ToUInt32BigEndian(buffer, offset + 36);
+            Signature = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            InfoVersion = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            FirstSector = EndianUtilities.ToInt64BigEndian(buffer, offset + 8);
+            SectorCount = EndianUtilities.ToInt64BigEndian(buffer, offset + 16);
+            DataStart = EndianUtilities.ToUInt64BigEndian(buffer, offset + 24);
+            DecompressBufferRequested = EndianUtilities.ToUInt32BigEndian(buffer, offset + 32);
+            BlocksDescriptor = EndianUtilities.ToUInt32BigEndian(buffer, offset + 36);
 
-            CheckSum = Utilities.ToStruct<UdifChecksum>(buffer, offset + 60);
+            CheckSum = EndianUtilities.ToStruct<UdifChecksum>(buffer, offset + 60);
 
             Runs = new List<CompressedRun>();
-            int numRuns = Utilities.ToInt32BigEndian(buffer, offset + 200);
+            int numRuns = EndianUtilities.ToInt32BigEndian(buffer, offset + 200);
             for (int i = 0; i < numRuns; ++i)
             {
-                Runs.Add(Utilities.ToStruct<CompressedRun>(buffer, offset + 204 + i * 40));
+                Runs.Add(EndianUtilities.ToStruct<CompressedRun>(buffer, offset + 204 + i * 40));
             }
 
             return 0;

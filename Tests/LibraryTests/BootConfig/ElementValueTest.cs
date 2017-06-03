@@ -26,6 +26,7 @@ using DiscUtils;
 using DiscUtils.BootConfig;
 using DiscUtils.Partitions;
 using DiscUtils.Registry;
+using DiscUtils.Streams;
 using Xunit;
 
 namespace LibraryTests.BootConfig

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
@@ -42,12 +42,12 @@ namespace DiscUtils.Ext
         {
             base.ReadFrom(buffer, offset);
 
-            BlockBitmapBlockHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 0x20);
-            InodeBitmapBlockHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 0x24);
-            InodeTableBlockHigh = Utilities.ToUInt32LittleEndian(buffer, offset + 0x28);
-            FreeBlocksCountHigh = Utilities.ToUInt16LittleEndian(buffer, offset + 0x2C);
-            FreeInodesCountHigh = Utilities.ToUInt16LittleEndian(buffer, offset + 0x2E);
-            UsedDirsCountHigh = Utilities.ToUInt16LittleEndian(buffer, offset + 0x30);
+            BlockBitmapBlockHigh = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x20);
+            InodeBitmapBlockHigh = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x24);
+            InodeTableBlockHigh = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x28);
+            FreeBlocksCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2C);
+            FreeInodesCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2E);
+            UsedDirsCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x30);
 
             return DescriptorSize64;
         }
@@ -71,12 +71,12 @@ namespace DiscUtils.Ext
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            BlockBitmapBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            InodeBitmapBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            InodeTableBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-            FreeBlocksCount = Utilities.ToUInt16LittleEndian(buffer, offset + 12);
-            FreeInodesCount = Utilities.ToUInt16LittleEndian(buffer, offset + 14);
-            UsedDirsCount = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
+            BlockBitmapBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            InodeBitmapBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+            InodeTableBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+            FreeBlocksCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 12);
+            FreeInodesCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 14);
+            UsedDirsCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 16);
 
             return DescriptorSize;
         }

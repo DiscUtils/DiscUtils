@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.IO;
 
@@ -98,20 +98,20 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
-            Version = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
-            SequenceNumber = Utilities.ToUInt32BigEndian(buffer, offset + 0x8);
-            Length = Utilities.ToUInt32BigEndian(buffer, offset + 0xc);
-            Count = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
-            Root = Utilities.ToUInt32BigEndian(buffer, offset + 0x14);
-            Level = Utilities.ToUInt32BigEndian(buffer, offset + 0x18);
-            FreeCount = Utilities.ToUInt32BigEndian(buffer, offset + 0x1c);
-            NewInode = Utilities.ToUInt32BigEndian(buffer, offset + 0x20);
-            DirInode = Utilities.ToInt32BigEndian(buffer, offset + 0x24);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            Version = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            SequenceNumber = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x8);
+            Length = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xc);
+            Count = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
+            Root = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x14);
+            Level = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x18);
+            FreeCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x1c);
+            NewInode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x20);
+            DirInode = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x24);
             Unlinked = new int[64];
             for (int i = 0; i < Unlinked.Length; i++)
             {
-                Unlinked[i] = Utilities.ToInt32BigEndian(buffer, offset + 0x28 + i*0x4);
+                Unlinked[i] = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x28 + i*0x4);
             }
             return Size;
         }
@@ -128,7 +128,7 @@ namespace DiscUtils.Xfs
             {
                 RootInodeBtree = new BTreeInodeNode();
             }
-            var buffer = Utilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
+            var buffer = StreamUtilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
             RootInodeBtree.ReadFrom(buffer, 0);
         }
 

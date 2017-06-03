@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
@@ -141,11 +141,11 @@ namespace DiscUtils.Udf
             LogicalPartition partition = context.LogicalPartitions[icb.ExtentLocation.Partition];
 
             byte[] rootDirData = UdfUtilities.ReadExtent(context, icb);
-            DescriptorTag rootDirTag = Utilities.ToStruct<DescriptorTag>(rootDirData, 0);
+            DescriptorTag rootDirTag = EndianUtilities.ToStruct<DescriptorTag>(rootDirData, 0);
 
             if (rootDirTag.TagIdentifier == TagIdentifier.ExtendedFileEntry)
             {
-                ExtendedFileEntry fileEntry = Utilities.ToStruct<ExtendedFileEntry>(rootDirData, 0);
+                ExtendedFileEntry fileEntry = EndianUtilities.ToStruct<ExtendedFileEntry>(rootDirData, 0);
                 if (fileEntry.InformationControlBlock.FileType == FileType.Directory)
                 {
                     return new Directory(context, partition, fileEntry);
@@ -154,7 +154,7 @@ namespace DiscUtils.Udf
             }
             if (rootDirTag.TagIdentifier == TagIdentifier.FileEntry)
             {
-                FileEntry fileEntry = Utilities.ToStruct<FileEntry>(rootDirData, 0);
+                FileEntry fileEntry = EndianUtilities.ToStruct<FileEntry>(rootDirData, 0);
                 if (fileEntry.InformationControlBlock.FileType == FileType.Directory)
                 {
                     return new Directory(context, partition, fileEntry);

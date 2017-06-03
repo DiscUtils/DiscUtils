@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -41,25 +41,25 @@ namespace DiscUtils.Registry
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            uint sig = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
+            uint sig = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
             if (sig != Signature)
             {
                 throw new IOException("Invalid signature for registry bin");
             }
 
-            FileOffset = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-            BinSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
-            long unknown = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
-            long unknown1 = Utilities.ToInt64LittleEndian(buffer, offset + 0x14);
-            int unknown2 = Utilities.ToInt32LittleEndian(buffer, offset + 0x1C);
+            FileOffset = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            BinSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            long unknown = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x0C);
+            long unknown1 = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x14);
+            int unknown2 = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x1C);
             return HeaderSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(Signature, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(BinSize, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(Signature, buffer, offset + 0x00);
+            EndianUtilities.WriteBytesLittleEndian(FileOffset, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian(BinSize, buffer, offset + 0x08);
         }
     }
 }

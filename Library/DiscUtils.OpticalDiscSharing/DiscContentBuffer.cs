@@ -26,6 +26,8 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.OpticalDiscSharing
 {

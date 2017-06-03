@@ -22,9 +22,7 @@
 
 namespace DiscUtils.Lvm
 {
-    using System;
     using System.Collections.Generic;
-    using System.IO;
     using DiscUtils.Partitions;
 
     /// <summary>

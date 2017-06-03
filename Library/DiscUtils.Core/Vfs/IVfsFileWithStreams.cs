@@ -1,3 +1,5 @@
+using DiscUtils.Streams;
+
 namespace DiscUtils.Vfs
 {
     /// <summary>

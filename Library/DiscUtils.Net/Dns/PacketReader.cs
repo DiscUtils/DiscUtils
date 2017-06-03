@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Net.Dns
 {
@@ -67,7 +67,7 @@ namespace DiscUtils.Net.Dns
                         }
 
                         hasIndirected = true;
-                        readPos = Utilities.ToUInt16BigEndian(_data, readPos) & 0x3FFF;
+                        readPos = EndianUtilities.ToUInt16BigEndian(_data, readPos) & 0x3FFF;
                         break;
 
                     default:
@@ -85,14 +85,14 @@ namespace DiscUtils.Net.Dns
 
         public ushort ReadUShort()
         {
-            ushort result = Utilities.ToUInt16BigEndian(_data, Position);
+            ushort result = EndianUtilities.ToUInt16BigEndian(_data, Position);
             Position += 2;
             return result;
         }
 
         public int ReadInt()
         {
-            int result = Utilities.ToInt32BigEndian(_data, Position);
+            int result = EndianUtilities.ToInt32BigEndian(_data, Position);
             Position += 4;
             return result;
         }

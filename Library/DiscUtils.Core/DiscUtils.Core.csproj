@@ -64,4 +64,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DiscUtils.Streams\DiscUtils.Streams.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -28,6 +28,7 @@ using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 using DiscUtils.Partitions;
 using DiscUtils.Raw;
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {

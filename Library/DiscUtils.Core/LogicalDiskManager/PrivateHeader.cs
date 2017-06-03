@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {
@@ -52,31 +52,31 @@ namespace DiscUtils.LogicalDiskManager
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.BytesToString(buffer, offset + 0x00, 8);
-            Checksum = Utilities.ToUInt32BigEndian(buffer, offset + 0x08);
-            Version = Utilities.ToUInt32BigEndian(buffer, offset + 0x0C);
-            Timestamp = DateTime.FromFileTimeUtc(Utilities.ToInt64BigEndian(buffer, offset + 0x10));
-            Unknown2 = Utilities.ToInt64BigEndian(buffer, offset + 0x18);
-            Unknown3 = Utilities.ToInt64BigEndian(buffer, offset + 0x20);
-            Unknown4 = Utilities.ToInt64BigEndian(buffer, offset + 0x28);
-            DiskId = Utilities.BytesToString(buffer, offset + 0x30, 0x40).Trim('\0');
-            HostId = Utilities.BytesToString(buffer, offset + 0x70, 0x40).Trim('\0');
-            DiskGroupId = Utilities.BytesToString(buffer, offset + 0xB0, 0x40).Trim('\0');
-            DiskGroupName = Utilities.BytesToString(buffer, offset + 0xF0, 31).Trim('\0');
-            Unknown5 = Utilities.ToUInt32BigEndian(buffer, offset + 0x10F);
-            DataStartLba = Utilities.ToInt64BigEndian(buffer, offset + 0x11B);
-            DataSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x123);
-            ConfigurationStartLba = Utilities.ToInt64BigEndian(buffer, offset + 0x12B);
-            ConfigurationSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x133);
-            TocSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x13B);
-            NextTocLba = Utilities.ToInt64BigEndian(buffer, offset + 0x143);
+            Signature = EndianUtilities.BytesToString(buffer, offset + 0x00, 8);
+            Checksum = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x08);
+            Version = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x0C);
+            Timestamp = DateTime.FromFileTimeUtc(EndianUtilities.ToInt64BigEndian(buffer, offset + 0x10));
+            Unknown2 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x18);
+            Unknown3 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x20);
+            Unknown4 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x28);
+            DiskId = EndianUtilities.BytesToString(buffer, offset + 0x30, 0x40).Trim('\0');
+            HostId = EndianUtilities.BytesToString(buffer, offset + 0x70, 0x40).Trim('\0');
+            DiskGroupId = EndianUtilities.BytesToString(buffer, offset + 0xB0, 0x40).Trim('\0');
+            DiskGroupName = EndianUtilities.BytesToString(buffer, offset + 0xF0, 31).Trim('\0');
+            Unknown5 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10F);
+            DataStartLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x11B);
+            DataSizeLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x123);
+            ConfigurationStartLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x12B);
+            ConfigurationSizeLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x133);
+            TocSizeLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x13B);
+            NextTocLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x143);
 
             // These two may be reversed
-            NumberOfConfigs = Utilities.ToInt32BigEndian(buffer, offset + 0x14B);
-            NumberOfLogs = Utilities.ToInt32BigEndian(buffer, offset + 0x14F);
+            NumberOfConfigs = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x14B);
+            NumberOfLogs = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x14F);
 
-            ConfigSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x153);
-            LogSizeLba = Utilities.ToInt64BigEndian(buffer, offset + 0x15B);
+            ConfigSizeLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x153);
+            LogSizeLba = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x15B);
         }
 
         ////}

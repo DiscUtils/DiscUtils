@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -68,7 +68,7 @@ namespace DiscUtils.Iscsi
             buffer[offset] = 0x12; // OpCode
             buffer[offset + 1] = (byte)(_askForPage ? 0x01 : 0x00);
             buffer[offset + 2] = _pageCode;
-            Utilities.WriteBytesBigEndian((ushort)_expected, buffer, offset + 3);
+            EndianUtilities.WriteBytesBigEndian((ushort)_expected, buffer, offset + 3);
             buffer[offset + 5] = 0;
         }
     }

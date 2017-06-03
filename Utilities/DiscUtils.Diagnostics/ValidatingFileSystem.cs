@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Diagnostics
 {

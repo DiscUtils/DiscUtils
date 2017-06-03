@@ -25,7 +25,7 @@ namespace DiscUtils.Lvm
     using System;
     using System.IO;
     using System.Collections.Generic;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class MetadataLogicalVolumeSection
     {
@@ -56,7 +56,7 @@ namespace DiscUtils.Lvm
                         case "id":
                             Id = Metadata.ParseStringValue(parameter.Value);
                             byte[] guid = new byte[16];
-                            Utilities.StringToBytes(Id.Replace("-", String.Empty), guid, 0, 16);
+                            EndianUtilities.StringToBytes(Id.Replace("-", String.Empty), guid, 0, 16);
                             // Mark it as a version 4 GUID
                             guid[7] = (byte)((guid[7] | (byte)0x40) & (byte)0x4f);
                             guid[8] = (byte)((guid[8] | (byte)0x80) & (byte)0xbf);

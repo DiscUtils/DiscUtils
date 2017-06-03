@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -38,9 +38,9 @@ namespace DiscUtils.Udf
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            AttributeType = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
+            AttributeType = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
             AttributeSubType = buffer[offset + 4];
-            int dataLength = Utilities.ToInt32LittleEndian(buffer, offset + 8) - 12;
+            int dataLength = EndianUtilities.ToInt32LittleEndian(buffer, offset + 8) - 12;
             AttributeData = new byte[dataLength];
             Array.Copy(buffer, offset + 12, AttributeData, 0, dataLength);
 

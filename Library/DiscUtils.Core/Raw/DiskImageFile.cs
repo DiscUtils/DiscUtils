@@ -22,8 +22,8 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Raw
 {
@@ -112,7 +112,7 @@ namespace DiscUtils.Raw
         /// <returns>An object that accesses the stream as a raw disk image.</returns>
         public static DiskImageFile Initialize(Stream stream, Ownership ownsStream, long capacity, Geometry geometry)
         {
-            stream.SetLength(Utilities.RoundUp(capacity, Sizes.Sector));
+            stream.SetLength(MathUtilities.RoundUp(capacity, Sizes.Sector));
 
             // Wipe any pre-existing master boot record / BPB
             stream.Position = 0;

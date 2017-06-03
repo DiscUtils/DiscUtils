@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Diagnostics
 {

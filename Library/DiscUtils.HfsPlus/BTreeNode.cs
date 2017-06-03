@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -60,7 +60,7 @@ namespace DiscUtils.HfsPlus
         public static BTreeNode ReadNode(BTree tree, byte[] buffer, int offset)
         {
             BTreeNodeDescriptor descriptor =
-                Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
+                EndianUtilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
 
             switch (descriptor.Kind)
             {
@@ -78,7 +78,7 @@ namespace DiscUtils.HfsPlus
             where TKey : BTreeKey, new()
         {
             BTreeNodeDescriptor descriptor =
-                Utilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
+                EndianUtilities.ToStruct<BTreeNodeDescriptor>(buffer, offset);
 
             switch (descriptor.Kind)
             {

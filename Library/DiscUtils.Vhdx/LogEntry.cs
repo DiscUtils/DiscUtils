@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -89,9 +90,9 @@ namespace DiscUtils.Vhdx
             long position = logStream.Position;
 
             byte[] sectorBuffer = new byte[LogSectorSize];
-            Utilities.ReadFully(logStream, sectorBuffer, 0, sectorBuffer.Length);
+            StreamUtilities.ReadFully(logStream, sectorBuffer, 0, sectorBuffer.Length);
 
-            uint sig = Utilities.ToUInt32LittleEndian(sectorBuffer, 0);
+            uint sig = EndianUtilities.ToUInt32LittleEndian(sectorBuffer, 0);
             if (sig != LogEntryHeader.LogEntrySignature)
             {
                 entry = null;
@@ -110,9 +111,9 @@ namespace DiscUtils.Vhdx
             byte[] logEntryBuffer = new byte[header.EntryLength];
             Array.Copy(sectorBuffer, logEntryBuffer, LogSectorSize);
 
-            Utilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
+            StreamUtilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
 
-            Utilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
+            EndianUtilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
             if (header.Checksum !=
                 Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int)header.EntryLength))
             {
@@ -120,7 +121,7 @@ namespace DiscUtils.Vhdx
                 return false;
             }
 
-            int dataPos = Utilities.RoundUp((int)header.DescriptorCount * 32 + 64, LogSectorSize);
+            int dataPos = MathUtilities.RoundUp((int)header.DescriptorCount * 32 + 64, LogSectorSize);
 
             List<Descriptor> descriptors = new List<Descriptor>();
             for (int i = 0; i < header.DescriptorCount; ++i)
@@ -128,7 +129,7 @@ namespace DiscUtils.Vhdx
                 int offset = i * 32 + 64;
                 Descriptor descriptor;
 
-                uint descriptorSig = Utilities.ToUInt32LittleEndian(logEntryBuffer, offset);
+                uint descriptorSig = EndianUtilities.ToUInt32LittleEndian(logEntryBuffer, offset);
                 switch (descriptorSig)
                 {
                     case Descriptor.ZeroDescriptorSignature:
@@ -190,9 +191,9 @@ namespace DiscUtils.Vhdx
 
             public override int ReadFrom(byte[] buffer, int offset)
             {
-                ZeroLength = Utilities.ToUInt64LittleEndian(buffer, offset + 8);
-                FileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 16);
-                SequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 24);
+                ZeroLength = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 8);
+                FileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 16);
+                SequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 24);
 
                 return 32;
             }
@@ -228,10 +229,10 @@ namespace DiscUtils.Vhdx
 
             public override int ReadFrom(byte[] buffer, int offset)
             {
-                TrailingBytes = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-                LeadingBytes = Utilities.ToUInt64LittleEndian(buffer, offset + 8);
-                FileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 16);
-                SequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 24);
+                TrailingBytes = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+                LeadingBytes = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 8);
+                FileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 16);
+                SequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 24);
 
                 return 32;
             }
@@ -246,9 +247,9 @@ namespace DiscUtils.Vhdx
                 return SequenceNumber == sequenceNumber
                        && _offset + LogSectorSize <= _data.Length
                        &&
-                       Utilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
+                       EndianUtilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
                        (sequenceNumber & 0xFFFFFFFF)
-                       && Utilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
+                       && EndianUtilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
             }
         }
     }

@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vdi
 {
@@ -188,7 +189,7 @@ namespace DiscUtils.Vdi
                     long filePos = _fileHeader.DataOffset + _fileHeader.BlockExtraSize + blockOffset +
                                    offsetInBlock;
                     _fileStream.Position = filePos;
-                    Utilities.ReadFully(_fileStream, buffer, offset + numRead, toRead);
+                    StreamUtilities.ReadFully(_fileStream, buffer, offset + numRead, toRead);
                 }
 
                 _position += toRead;
@@ -356,19 +357,19 @@ namespace DiscUtils.Vdi
         {
             _fileStream.Position = _fileHeader.BlocksOffset;
 
-            byte[] buffer = Utilities.ReadFully(_fileStream, _fileHeader.BlockCount * 4);
+            byte[] buffer = StreamUtilities.ReadFully(_fileStream, _fileHeader.BlockCount * 4);
 
             _blockTable = new uint[_fileHeader.BlockCount];
             for (int i = 0; i < _fileHeader.BlockCount; ++i)
             {
-                _blockTable[i] = Utilities.ToUInt32LittleEndian(buffer, i * 4);
+                _blockTable[i] = EndianUtilities.ToUInt32LittleEndian(buffer, i * 4);
             }
         }
 
         private void WriteBlockTableEntry(int block)
         {
             byte[] buffer = new byte[4];
-            Utilities.WriteBytesLittleEndian(_blockTable[block], buffer, 0);
+            EndianUtilities.WriteBytesLittleEndian(_blockTable[block], buffer, 0);
 
             _fileStream.Position = _fileHeader.BlocksOffset + block * 4;
             _fileStream.Write(buffer, 0, 4);

@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
@@ -34,7 +34,7 @@ namespace DiscUtils.HfsPlus
         {
             s.Position = 1024;
 
-            byte[] headerBuf = Utilities.ReadFully(s, 512);
+            byte[] headerBuf = StreamUtilities.ReadFully(s, 512);
             VolumeHeader hdr = new VolumeHeader();
             hdr.ReadFrom(headerBuf, 0);
 

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs.Internals
 {
@@ -40,7 +40,7 @@ namespace DiscUtils.Ntfs.Internals
         internal StandardInformationAttribute(INtfsContext context, AttributeRecord record)
             : base(context, record)
         {
-            byte[] content = Utilities.ReadAll(Content);
+            byte[] content = StreamUtilities.ReadAll(Content);
             _si = new StandardInformation();
             _si.ReadFrom(content, 0);
         }

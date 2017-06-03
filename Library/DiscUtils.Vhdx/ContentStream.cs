@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -187,7 +188,7 @@ namespace DiscUtils.Vhdx
                 if (blockStatus == PayloadBlockStatus.FullyPresent)
                 {
                     _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
-                    int read = Utilities.ReadFully(_fileStream, buffer, offset + totalRead,
+                    int read = StreamUtilities.ReadFully(_fileStream, buffer, offset + totalRead,
                         Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
                     totalRead += read;
@@ -204,12 +205,12 @@ namespace DiscUtils.Vhdx
                     if (present)
                     {
                         _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
-                        read = Utilities.ReadFully(_fileStream, buffer, offset + totalRead, toRead);
+                        read = StreamUtilities.ReadFully(_fileStream, buffer, offset + totalRead, toRead);
                     }
                     else
                     {
                         _parentStream.Position = _position + totalRead;
-                        read = Utilities.ReadFully(_parentStream, buffer, offset + totalRead, toRead);
+                        read = StreamUtilities.ReadFully(_parentStream, buffer, offset + totalRead, toRead);
                     }
 
                     totalRead += read;
@@ -217,7 +218,7 @@ namespace DiscUtils.Vhdx
                 else if (blockStatus == PayloadBlockStatus.NotPresent)
                 {
                     _parentStream.Position = _position + totalRead;
-                    int read = Utilities.ReadFully(_parentStream, buffer, offset + totalRead,
+                    int read = StreamUtilities.ReadFully(_parentStream, buffer, offset + totalRead,
                         Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
                     totalRead += read;
@@ -343,7 +344,7 @@ namespace DiscUtils.Vhdx
             long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
             int chunkRatio = (int)(chunkSize / _metadata.FileParameters.BlockSize);
 
-            long pos = Utilities.RoundDown(start, chunkSize);
+            long pos = MathUtilities.RoundDown(start, chunkSize);
 
             while (pos < start + count)
             {

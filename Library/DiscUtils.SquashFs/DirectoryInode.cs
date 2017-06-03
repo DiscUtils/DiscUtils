@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -60,11 +60,11 @@ namespace DiscUtils.SquashFs
         {
             base.ReadFrom(buffer, offset);
 
-            StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 20);
-            _fileSize = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
-            Offset = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
-            ParentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            StartBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
+            NumLinks = EndianUtilities.ToInt32LittleEndian(buffer, offset + 20);
+            _fileSize = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 24);
+            Offset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 26);
+            ParentInode = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
         }
@@ -73,11 +73,11 @@ namespace DiscUtils.SquashFs
         {
             base.WriteTo(buffer, offset);
 
-            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
-            Utilities.WriteBytesLittleEndian(NumLinks, buffer, offset + 20);
-            Utilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 24);
-            Utilities.WriteBytesLittleEndian(Offset, buffer, offset + 26);
-            Utilities.WriteBytesLittleEndian(ParentInode, buffer, offset + 28);
+            EndianUtilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
+            EndianUtilities.WriteBytesLittleEndian(NumLinks, buffer, offset + 20);
+            EndianUtilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 24);
+            EndianUtilities.WriteBytesLittleEndian(Offset, buffer, offset + 26);
+            EndianUtilities.WriteBytesLittleEndian(ParentInode, buffer, offset + 28);
         }
     }
 }

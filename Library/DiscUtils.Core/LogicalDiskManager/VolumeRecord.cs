@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {
@@ -66,7 +66,7 @@ namespace DiscUtils.LogicalDiskManager
             Size = ReadVarLong(buffer, ref pos);
             Unknown2 = ReadUInt(buffer, ref pos);
             BiosType = ReadByte(buffer, ref pos);
-            VolumeGuid = Utilities.ToGuidBigEndian(buffer, pos);
+            VolumeGuid = EndianUtilities.ToGuidBigEndian(buffer, pos);
             pos += 16;
 
             if ((Flags & 0x0200) != 0)

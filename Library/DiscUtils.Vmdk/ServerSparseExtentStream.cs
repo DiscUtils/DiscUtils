@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -40,7 +40,7 @@ namespace DiscUtils.Vmdk
             _ownsParentDiskStream = ownsParentDiskStream;
 
             file.Position = 0;
-            byte[] firstSectors = Utilities.ReadFully(file, Sizes.Sector * 4);
+            byte[] firstSectors = StreamUtilities.ReadFully(file, Sizes.Sector * 4);
             _serverHeader = ServerSparseExtentHeader.Read(firstSectors, 0);
             _header = _serverHeader;
 
@@ -110,12 +110,12 @@ namespace DiscUtils.Vmdk
             _parentDiskStream.Position = _diskOffset +
                                          (grain + _header.NumGTEsPerGT * grainTable) * _header.GrainSize *
                                          Sizes.Sector;
-            byte[] content = Utilities.ReadFully(_parentDiskStream, (int)(_header.GrainSize * Sizes.Sector * count));
+            byte[] content = StreamUtilities.ReadFully(_parentDiskStream, (int)(_header.GrainSize * Sizes.Sector * count));
             _fileStream.Position = grainStartPos;
             _fileStream.Write(content, 0, content.Length);
 
             // Update next-free-sector in disk header
-            _serverHeader.FreeSector += (uint)Utilities.Ceil(content.Length, Sizes.Sector);
+            _serverHeader.FreeSector += (uint)MathUtilities.Ceil(content.Length, Sizes.Sector);
             byte[] headerBytes = _serverHeader.GetBytes();
             _fileStream.Position = 0;
             _fileStream.Write(headerBytes, 0, headerBytes.Length);
@@ -139,7 +139,7 @@ namespace DiscUtils.Vmdk
             _fileStream.Write(emptyGrainTable, 0, emptyGrainTable.Length);
 
             // Update header
-            _serverHeader.FreeSector += (uint)Utilities.Ceil(emptyGrainTable.Length, Sizes.Sector);
+            _serverHeader.FreeSector += (uint)MathUtilities.Ceil(emptyGrainTable.Length, Sizes.Sector);
             byte[] headerBytes = _serverHeader.GetBytes();
             _fileStream.Position = 0;
             _fileStream.Write(headerBytes, 0, headerBytes.Length);
@@ -157,7 +157,7 @@ namespace DiscUtils.Vmdk
             byte[] buffer = new byte[_globalDirectory.Length * 4];
             for (int i = 0; i < _globalDirectory.Length; ++i)
             {
-                Utilities.WriteBytesLittleEndian(_globalDirectory[i], buffer, i * 4);
+                EndianUtilities.WriteBytesLittleEndian(_globalDirectory[i], buffer, i * 4);
             }
 
             _fileStream.Position = _serverHeader.GdOffset * Sizes.Sector;

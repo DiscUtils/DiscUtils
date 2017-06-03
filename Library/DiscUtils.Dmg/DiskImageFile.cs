@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {
@@ -46,14 +46,14 @@ namespace DiscUtils.Dmg
             _ownsStream = ownsStream;
 
             stream.Position = stream.Length - _udifHeader.Size;
-            byte[] data = Utilities.ReadFully(stream, _udifHeader.Size);
+            byte[] data = StreamUtilities.ReadFully(stream, _udifHeader.Size);
 
             _udifHeader.ReadFrom(data, 0);
 
             if (_udifHeader.SignatureValid)
             {
                 stream.Position = (long)_udifHeader.XmlOffset;
-                byte[] xmlData = Utilities.ReadFully(stream, (int)_udifHeader.XmlLength);
+                byte[] xmlData = StreamUtilities.ReadFully(stream, (int)_udifHeader.XmlLength);
                 Dictionary<string, object> plist = Plist.Parse(new MemoryStream(xmlData));
 
                 _resources = ResourceFork.FromPlist(plist);

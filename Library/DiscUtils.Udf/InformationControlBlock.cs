@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -43,14 +43,14 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            PriorDirectEntries = Utilities.ToUInt32LittleEndian(buffer, offset);
-            StrategyType = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
-            StrategyParameter = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            MaxEntries = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
+            PriorDirectEntries = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
+            StrategyType = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
+            StrategyParameter = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 6);
+            MaxEntries = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 8);
             FileType = (FileType)buffer[offset + 11];
-            ParentICBLocation = Utilities.ToStruct<LogicalBlockAddress>(buffer, offset + 12);
+            ParentICBLocation = EndianUtilities.ToStruct<LogicalBlockAddress>(buffer, offset + 12);
 
-            ushort flagsField = Utilities.ToUInt16LittleEndian(buffer, offset + 18);
+            ushort flagsField = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 18);
             AllocationType = (AllocationType)(flagsField & 0x3);
             Flags = (InformationControlBlockFlags)(flagsField & 0xFFFC);
 

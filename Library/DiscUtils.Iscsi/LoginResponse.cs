@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -58,13 +58,13 @@ namespace DiscUtils.Iscsi
             UnpackState(headerData[headerOffset + 1]);
             MaxVersion = headerData[headerOffset + 2];
             ActiveVersion = headerData[headerOffset + 3];
-            TargetSessionId = Utilities.ToUInt16BigEndian(headerData, headerOffset + 14);
+            TargetSessionId = EndianUtilities.ToUInt16BigEndian(headerData, headerOffset + 14);
             StatusPresent = true;
-            StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
-            ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
-            MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+            StatusSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 24);
+            ExpectedCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 28);
+            MaxCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 32);
             StatusClass = headerData[headerOffset + 36];
-            StatusCode = (LoginStatusCode)Utilities.ToUInt16BigEndian(headerData, headerOffset + 36);
+            StatusCode = (LoginStatusCode)EndianUtilities.ToUInt16BigEndian(headerData, headerOffset + 36);
 
             TextData = bodyData;
         }

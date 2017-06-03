@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -57,16 +57,16 @@ namespace DiscUtils.Vhdx
             _data = new byte[Size];
             Array.Copy(buffer, offset, _data, 0, Size);
 
-            Signature = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            Checksum = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            EntryLength = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-            Tail = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
-            SequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 16);
-            DescriptorCount = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            Reserved = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
-            LogGuid = Utilities.ToGuidLittleEndian(buffer, offset + 32);
-            FlushedFileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 48);
-            LastFileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 56);
+            Signature = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            Checksum = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+            EntryLength = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+            Tail = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 12);
+            SequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 16);
+            DescriptorCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 24);
+            Reserved = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 28);
+            LogGuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 32);
+            FlushedFileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 48);
+            LastFileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 56);
 
             return Size;
         }

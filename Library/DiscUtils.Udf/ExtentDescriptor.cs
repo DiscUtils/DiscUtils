@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -37,8 +37,8 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Length = Utilities.ToUInt32LittleEndian(buffer, offset);
-            Location = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
+            Length = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
+            Location = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
 
             return 8;
         }

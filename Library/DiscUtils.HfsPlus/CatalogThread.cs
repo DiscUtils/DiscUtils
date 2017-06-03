@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -38,8 +38,8 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            RecordType = (CatalogRecordType)Utilities.ToInt16BigEndian(buffer, offset + 0);
-            ParentId = Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            RecordType = (CatalogRecordType)EndianUtilities.ToInt16BigEndian(buffer, offset + 0);
+            ParentId = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
             Name = HfsPlusUtilities.ReadUniStr255(buffer, offset + 8);
 
             return 0;

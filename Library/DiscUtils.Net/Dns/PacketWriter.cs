@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Net.Dns
 {
@@ -59,7 +59,7 @@ namespace DiscUtils.Net.Dns
 
         public void Write(ushort val)
         {
-            Utilities.WriteBytesBigEndian(val, _data, _pos);
+            EndianUtilities.WriteBytesBigEndian(val, _data, _pos);
             _pos += 2;
         }
 

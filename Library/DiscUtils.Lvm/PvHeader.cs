@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Lvm
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.Collections.Generic;
     using System.Text;
@@ -40,7 +40,7 @@ namespace DiscUtils.Lvm
         public int ReadFrom(byte[] buffer, int offset)
         {
             Uuid = ReadUuid(buffer, offset);
-            DeviceSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x20);
+            DeviceSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x20);
             var areas = new List<DiskArea>();
             var areaOffset = offset + 0x28;
             while (true)
@@ -72,13 +72,13 @@ namespace DiscUtils.Lvm
         private static string ReadUuid(byte[] buffer, int offset)
         {
             var sb = new StringBuilder();
-            sb.Append(Utilities.BytesToString(buffer, offset, 0x6)).Append('-');
-            sb.Append(Utilities.BytesToString(buffer, offset + 0x6, 0x4)).Append('-');
-            sb.Append(Utilities.BytesToString(buffer, offset + 0xA, 0x4)).Append('-');
-            sb.Append(Utilities.BytesToString(buffer, offset + 0xE, 0x4)).Append('-');
-            sb.Append(Utilities.BytesToString(buffer, offset + 0x12, 0x4)).Append('-');
-            sb.Append(Utilities.BytesToString(buffer, offset + 0x16, 0x4)).Append('-');
-            sb.Append(Utilities.BytesToString(buffer, offset + 0x1A, 0x6));
+            sb.Append(EndianUtilities.BytesToString(buffer, offset, 0x6)).Append('-');
+            sb.Append(EndianUtilities.BytesToString(buffer, offset + 0x6, 0x4)).Append('-');
+            sb.Append(EndianUtilities.BytesToString(buffer, offset + 0xA, 0x4)).Append('-');
+            sb.Append(EndianUtilities.BytesToString(buffer, offset + 0xE, 0x4)).Append('-');
+            sb.Append(EndianUtilities.BytesToString(buffer, offset + 0x12, 0x4)).Append('-');
+            sb.Append(EndianUtilities.BytesToString(buffer, offset + 0x16, 0x4)).Append('-');
+            sb.Append(EndianUtilities.BytesToString(buffer, offset + 0x1A, 0x6));
             return sb.ToString();
         }
     }

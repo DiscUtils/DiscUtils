@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Xfs
 {
@@ -48,19 +48,19 @@ namespace DiscUtils.Xfs
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            Inode = Utilities.ToUInt64BigEndian(buffer, offset);
+            Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset);
             NameLength = buffer[offset + 0x8];
-            Name = Utilities.ToByteArray(buffer, offset + 0x9, NameLength);
+            Name = EndianUtilities.ToByteArray(buffer, offset + 0x9, NameLength);
             var padding = 6 - ((NameLength + 1)%8);
             offset += padding;
-            Tag = Utilities.ToUInt16BigEndian(buffer, offset + 0x9 + NameLength);
+            Tag = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x9 + NameLength);
             return Size;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Inode}: {Utilities.BytesToString(Name, 0, NameLength)}";
+            return $"{Inode}: {EndianUtilities.BytesToString(Name, 0, NameLength)}";
         }
     }
 }

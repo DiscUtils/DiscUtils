@@ -27,6 +27,7 @@ namespace DiscUtils.Xfs
     using System.IO;
     using DiscUtils.Vfs;
     using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class File : IVfsFile
     {

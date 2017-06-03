@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -37,8 +37,8 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            LogicalBlock = Utilities.ToUInt32LittleEndian(buffer, offset);
-            Partition = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
+            LogicalBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
+            Partition = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
             return 6;
         }
 

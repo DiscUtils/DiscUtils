@@ -22,6 +22,7 @@
 
 using System;
 using System.Globalization;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {

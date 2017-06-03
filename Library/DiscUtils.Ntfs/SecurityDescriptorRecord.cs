@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -48,20 +48,20 @@ namespace DiscUtils.Ntfs
         {
             EntrySize = (uint)Size;
 
-            Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(OffsetInFile, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(EntrySize, buffer, offset + 0x10);
+            EndianUtilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+            EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian(OffsetInFile, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(EntrySize, buffer, offset + 0x10);
 
             Array.Copy(SecurityDescriptor, 0, buffer, offset + 0x14, SecurityDescriptor.Length);
         }
 
         public bool Read(byte[] buffer, int offset)
         {
-            Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
-            Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
-            OffsetInFile = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
-            EntrySize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
+            Hash = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+            Id = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x04);
+            OffsetInFile = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x08);
+            EntrySize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x10);
 
             if (EntrySize > 0)
             {

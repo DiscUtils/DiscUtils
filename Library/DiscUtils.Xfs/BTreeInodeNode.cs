@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class BTreeInodeNode : BtreeHeader
@@ -50,11 +50,11 @@ namespace DiscUtils.Xfs
             Pointer = new uint[NumberOfRecords];
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                Keys[i] = Utilities.ToUInt32BigEndian(buffer, offset);
+                Keys[i] = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             }
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                Pointer[i] = Utilities.ToUInt32BigEndian(buffer, offset);
+                Pointer[i] = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             }
             return Size;
         }
@@ -75,7 +75,7 @@ namespace DiscUtils.Xfs
                 }
                 var data = ag.Context.RawStream;
                 data.Position = (Pointer[i] * ag.Context.SuperBlock.Blocksize) + ag.Offset;
-                var buffer = Utilities.ReadFully(data, (int)ag.Context.SuperBlock.Blocksize);
+                var buffer = StreamUtilities.ReadFully(data, (int)ag.Context.SuperBlock.Blocksize);
                 child.ReadFrom(buffer, 0);
                 child.LoadBtree(ag);
                 Children.Add(Keys[i], child);

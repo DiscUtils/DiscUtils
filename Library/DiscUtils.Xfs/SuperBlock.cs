@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class SuperBlock : IByteArraySerializable
@@ -333,26 +333,26 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
-            Blocksize = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
-            DataBlocks = Utilities.ToUInt64BigEndian(buffer, offset + 0x8);
-            RealtimeBlocks = Utilities.ToUInt64BigEndian(buffer, offset + 0x10);
-            RealtimeExtents = Utilities.ToUInt64BigEndian(buffer, offset + 0x18);
-            UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x20);
-            Logstart = Utilities.ToUInt64BigEndian(buffer, offset + 0x30);
-            RootInode = Utilities.ToUInt64BigEndian(buffer, offset + 0x38);
-            RealtimeBitmapInode = Utilities.ToUInt64BigEndian(buffer, offset + 0x40);
-            RealtimeSummaryInode = Utilities.ToUInt64BigEndian(buffer, offset + 0x48);
-            RealtimeExtentSize = Utilities.ToUInt32BigEndian(buffer, offset + 0x50);
-            AgBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x54);
-            AgCount = Utilities.ToUInt32BigEndian(buffer, offset + 0x58);
-            RealtimeBitmapBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x5C);
-            LogBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x60);
-            Version = Utilities.ToUInt16BigEndian(buffer, offset + 0x64);
-            SectorSize = Utilities.ToUInt16BigEndian(buffer, offset + 0x66);
-            InodeSize = Utilities.ToUInt16BigEndian(buffer, offset + 0x68);
-            InodesPerBlock = Utilities.ToUInt16BigEndian(buffer, offset + 0x6A);
-            FilesystemName = Utilities.BytesToZString(buffer, offset + 0x6C, 12);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            Blocksize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            DataBlocks = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x8);
+            RealtimeBlocks = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x10);
+            RealtimeExtents = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x18);
+            UniqueId = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x20);
+            Logstart = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x30);
+            RootInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x38);
+            RealtimeBitmapInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x40);
+            RealtimeSummaryInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x48);
+            RealtimeExtentSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x50);
+            AgBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x54);
+            AgCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x58);
+            RealtimeBitmapBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x5C);
+            LogBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x60);
+            Version = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x64);
+            SectorSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x66);
+            InodeSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x68);
+            InodesPerBlock = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6A);
+            FilesystemName = EndianUtilities.BytesToZString(buffer, offset + 0x6C, 12);
             BlocksizeLog2 = buffer[offset + 0x78];
             SectorSizeLog2 = buffer[offset + 0x79];
             InodeSizeLog2 = buffer[offset + 0x7A];
@@ -361,33 +361,33 @@ namespace DiscUtils.Xfs
             RealtimeExtentsLog2 = buffer[offset + 0x7D];
             InProgress = buffer[offset + 0x7E];
             InodesMaxPercent = buffer[offset + 0x7F];
-            AllocatedInodes = Utilities.ToUInt64BigEndian(buffer, offset + 0x80);
-            FreeInodes = Utilities.ToUInt64BigEndian(buffer, offset + 0x88);
-            FreeDataBlocks = Utilities.ToUInt64BigEndian(buffer, offset + 0x90);
-            FreeRealtimeExtents = Utilities.ToUInt64BigEndian(buffer, offset + 0x98);
-            UserQuotaInode = Utilities.ToUInt64BigEndian(buffer, offset + 0xA0);
-            GroupQuotaInode = Utilities.ToUInt64BigEndian(buffer, offset + 0xA8);
-            QuotaFlags = Utilities.ToUInt16BigEndian(buffer, offset + 0xB0);
+            AllocatedInodes = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x80);
+            FreeInodes = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x88);
+            FreeDataBlocks = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x90);
+            FreeRealtimeExtents = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x98);
+            UserQuotaInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0xA0);
+            GroupQuotaInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0xA8);
+            QuotaFlags = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0xB0);
             Flags = buffer[offset + 0xB2];
             SharedVersionNumber = buffer[offset + 0xB3];
-            InodeChunkAlignment = Utilities.ToUInt32BigEndian(buffer, offset + 0xB4);
-            Unit = Utilities.ToUInt32BigEndian(buffer, offset + 0xB8);
-            Width = Utilities.ToUInt32BigEndian(buffer, offset + 0xBC);
+            InodeChunkAlignment = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xB4);
+            Unit = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xB8);
+            Width = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xBC);
             DirBlockLog2 = buffer[offset + 0xC0];
             LogSectorSizeLog2 = buffer[offset + 0xC1];
-            LogSectorSize = Utilities.ToUInt16BigEndian(buffer, offset + 0xC2);
-            LogUnitSize = Utilities.ToUInt32BigEndian(buffer, offset + 0xC4);
-            Features2 = Utilities.ToUInt32BigEndian(buffer, offset + 0xC8);
-            BadFeatures2 = Utilities.ToUInt32BigEndian(buffer, offset + 0xCC);
-            CompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0xD0);
-            ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)Utilities.ToUInt32BigEndian(buffer, offset + 0xD4);
-            IncompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0xD8);
-            LogIncompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0xDC);
-            Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0xE0);
-            SparseInodeAlignment = Utilities.ToUInt32BigEndian(buffer, offset + 0xE4);
-            ProjectQuotaInode = Utilities.ToUInt64BigEndian(buffer, offset + 0xE8);
-            Lsn = Utilities.ToInt64BigEndian(buffer, offset + 0xF0);
-            MetaUuid = Utilities.ToGuidBigEndian(buffer, offset + 0xF8);
+            LogSectorSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0xC2);
+            LogUnitSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC4);
+            Features2 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC8);
+            BadFeatures2 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xCC);
+            CompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xD0);
+            ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xD4);
+            IncompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xD8);
+            LogIncompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xDC);
+            Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xE0);
+            SparseInodeAlignment = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xE4);
+            ProjectQuotaInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0xE8);
+            Lsn = EndianUtilities.ToInt64BigEndian(buffer, offset + 0xF0);
+            MetaUuid = EndianUtilities.ToGuidBigEndian(buffer, offset + 0xF8);
 
             var agOffset = AgBlocksLog2 + InodesPerBlockLog2;
             RelativeInodeMask = 0xffffffff >> (32-agOffset);

@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Internal;
-
+using DiscUtils.Streams;
 #if !NETCORE
 using System.Runtime.Serialization;
 #endif
@@ -116,7 +116,7 @@ namespace DiscUtils.Vhd
 
         private void CheckBat()
         {
-            int batSize = Utilities.RoundUp(_dynamicHeader.MaxTableEntries * 4, Sizes.Sector);
+            int batSize = MathUtilities.RoundUp(_dynamicHeader.MaxTableEntries * 4, Sizes.Sector);
             if (_dynamicHeader.TableOffset > _fileStream.Length - batSize)
             {
                 ReportError("BAT: BAT extends beyond end of file");
@@ -124,11 +124,11 @@ namespace DiscUtils.Vhd
             }
 
             _fileStream.Position = _dynamicHeader.TableOffset;
-            byte[] batData = Utilities.ReadFully(_fileStream, batSize);
+            byte[] batData = StreamUtilities.ReadFully(_fileStream, batSize);
             uint[] bat = new uint[batSize / 4];
             for (int i = 0; i < bat.Length; ++i)
             {
-                bat[i] = Utilities.ToUInt32BigEndian(batData, i * 4);
+                bat[i] = EndianUtilities.ToUInt32BigEndian(batData, i * 4);
             }
 
             for (int i = _dynamicHeader.MaxTableEntries; i < bat.Length; ++i)
@@ -155,7 +155,7 @@ namespace DiscUtils.Vhd
 
             long dataStart = (long)dataStartSector * Sizes.Sector;
             uint blockBitmapSize =
-                (uint)Utilities.RoundUp(_dynamicHeader.BlockSize / Sizes.Sector / 8, Sizes.Sector);
+                (uint)MathUtilities.RoundUp(_dynamicHeader.BlockSize / Sizes.Sector / 8, Sizes.Sector);
             uint storedBlockSize = _dynamicHeader.BlockSize + blockBitmapSize;
 
             bool[] seenBlocks = new bool[_dynamicHeader.MaxTableEntries];
@@ -250,7 +250,7 @@ namespace DiscUtils.Vhd
                 ReportError("DynHeader: Unrecognized header version");
             }
 
-            if (_dynamicHeader.MaxTableEntries != Utilities.Ceil(_footer.CurrentSize, _dynamicHeader.BlockSize))
+            if (_dynamicHeader.MaxTableEntries != MathUtilities.Ceil(_footer.CurrentSize, _dynamicHeader.BlockSize))
             {
                 ReportError("DynHeader: Max table entries is invalid");
             }
@@ -357,7 +357,7 @@ namespace DiscUtils.Vhd
         private void CheckFooter()
         {
             _fileStream.Position = _fileStream.Length - Sizes.Sector;
-            byte[] sector = Utilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] sector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
 
             _footer = Footer.FromBytes(sector, 0);
             if (!_footer.IsValid())
@@ -369,7 +369,7 @@ namespace DiscUtils.Vhd
         private void CheckHeader()
         {
             _fileStream.Position = 0;
-            byte[] headerSector = Utilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] headerSector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
 
             Footer header = Footer.FromBytes(headerSector, 0);
             if (!header.IsValid())
@@ -378,7 +378,7 @@ namespace DiscUtils.Vhd
             }
 
             _fileStream.Position = _fileStream.Length - Sizes.Sector;
-            byte[] footerSector = Utilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] footerSector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
 
             if (!Utilities.AreEqual(footerSector, headerSector))
             {

@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.AccessControl;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -61,7 +61,7 @@ namespace DiscUtils.Registry
             _fileStream.Position = 0;
             _ownsStream = ownership;
 
-            byte[] buffer = Utilities.ReadFully(_fileStream, HiveHeader.HeaderSize);
+            byte[] buffer = StreamUtilities.ReadFully(_fileStream, HiveHeader.HeaderSize);
 
             _header = new HiveHeader();
             _header.ReadFrom(buffer, 0);
@@ -71,7 +71,7 @@ namespace DiscUtils.Registry
             while (pos < _header.Length)
             {
                 _fileStream.Position = BinStart + pos;
-                byte[] headerBuffer = Utilities.ReadFully(_fileStream, BinHeader.HeaderSize);
+                byte[] headerBuffer = StreamUtilities.ReadFully(_fileStream, BinHeader.HeaderSize);
                 BinHeader header = new BinHeader();
                 header.ReadFrom(headerBuffer, 0);
                 _bins.Add(header);
@@ -146,7 +146,7 @@ namespace DiscUtils.Registry
             stream.Write(buffer, 0, buffer.Length);
 
             buffer = new byte[4];
-            Utilities.WriteBytesLittleEndian(binHeader.BinSize - binHeader.Size, buffer, 0);
+            EndianUtilities.WriteBytesLittleEndian(binHeader.BinSize - binHeader.Size, buffer, 0);
             stream.Write(buffer, 0, buffer.Length);
 
             // Make sure the file is initialized out to the end of the firs bin
@@ -272,7 +272,7 @@ namespace DiscUtils.Registry
 
         internal int AllocateRawCell(int capacity)
         {
-            int minSize = Utilities.RoundUp(capacity + 4, 8); // Allow for size header and ensure multiple of 8
+            int minSize = MathUtilities.RoundUp(capacity + 4, 8); // Allow for size header and ensure multiple of 8
 
             // Incredibly inefficient algorithm...
             foreach (BinHeader binHeader in _bins)
@@ -326,7 +326,7 @@ namespace DiscUtils.Registry
 
             BinHeader newBinHeader = new BinHeader();
             newBinHeader.FileOffset = lastBin.FileOffset + lastBin.BinSize;
-            newBinHeader.BinSize = Utilities.RoundUp(minSize + newBinHeader.Size, 4 * (int)Sizes.OneKiB);
+            newBinHeader.BinSize = MathUtilities.RoundUp(minSize + newBinHeader.Size, 4 * (int)Sizes.OneKiB);
 
             byte[] buffer = new byte[newBinHeader.Size];
             newBinHeader.WriteTo(buffer, 0);
@@ -334,7 +334,7 @@ namespace DiscUtils.Registry
             _fileStream.Write(buffer, 0, buffer.Length);
 
             byte[] cellHeader = new byte[4];
-            Utilities.WriteBytesLittleEndian(newBinHeader.BinSize - newBinHeader.Size, cellHeader, 0);
+            EndianUtilities.WriteBytesLittleEndian(newBinHeader.BinSize - newBinHeader.Size, cellHeader, 0);
             _fileStream.Write(cellHeader, 0, 4);
 
             // Update hive with new length
@@ -343,7 +343,7 @@ namespace DiscUtils.Registry
             _header.Sequence1++;
             _header.Sequence2++;
             _fileStream.Position = 0;
-            byte[] hiveHeader = Utilities.ReadFully(_fileStream, _header.Size);
+            byte[] hiveHeader = StreamUtilities.ReadFully(_fileStream, _header.Size);
             _header.WriteTo(hiveHeader, 0);
             _fileStream.Position = 0;
             _fileStream.Write(hiveHeader, 0, hiveHeader.Length);

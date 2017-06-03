@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -76,10 +76,10 @@ namespace DiscUtils.HfsPlus
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            _keyLength = Utilities.ToUInt16BigEndian(buffer, offset + 0);
+            _keyLength = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0);
             _forkType = buffer[offset + 2];
-            NodeId = new CatalogNodeId(Utilities.ToUInt32BigEndian(buffer, offset + 4));
-            _startBlock = Utilities.ToUInt32BigEndian(buffer, offset + 8);
+            NodeId = new CatalogNodeId(EndianUtilities.ToUInt32BigEndian(buffer, offset + 4));
+            _startBlock = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
             return _keyLength + 2;
         }
 

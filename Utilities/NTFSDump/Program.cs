@@ -25,6 +25,7 @@ using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
+using DiscUtils.Streams;
 
 namespace NTFSDump
 {

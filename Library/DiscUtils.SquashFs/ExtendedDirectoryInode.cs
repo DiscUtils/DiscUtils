@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -62,13 +62,13 @@ namespace DiscUtils.SquashFs
         {
             base.ReadFrom(buffer, offset);
 
-            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 16);
-            _fileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            ParentInode = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
-            _indexCount = Utilities.ToUInt16LittleEndian(buffer, offset + 32);
-            Offset = Utilities.ToUInt16LittleEndian(buffer, offset + 34);
-            _extendedAttributes = Utilities.ToUInt32LittleEndian(buffer, offset + 36);
+            NumLinks = EndianUtilities.ToInt32LittleEndian(buffer, offset + 16);
+            _fileSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
+            StartBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 24);
+            ParentInode = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 28);
+            _indexCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 32);
+            Offset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 34);
+            _extendedAttributes = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 36);
 
             return 40;
         }

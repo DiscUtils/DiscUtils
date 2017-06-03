@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {
@@ -107,7 +107,7 @@ namespace DiscUtils.Partitions
             foreach (StreamExtent extent in new BiosPartitionTable(sourceDisk).GetMetadataDiskExtents())
             {
                 sourceDisk.Content.Position = extent.Start;
-                byte[] buffer = Utilities.ReadFully(sourceDisk.Content, (int)extent.Length);
+                byte[] buffer = StreamUtilities.ReadFully(sourceDisk.Content, (int)extent.Length);
                 _bootSectors.Position = extent.Start;
                 _bootSectors.Write(buffer, 0, buffer.Length);
             }
@@ -145,7 +145,7 @@ namespace DiscUtils.Partitions
             _biosGeometry = geometry;
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             totalLength = _capacity;
 
@@ -154,7 +154,7 @@ namespace DiscUtils.Partitions
             foreach (StreamExtent extent in PartitionTable.GetMetadataDiskExtents())
             {
                 _bootSectors.Position = extent.Start;
-                byte[] buffer = Utilities.ReadFully(_bootSectors, (int)extent.Length);
+                byte[] buffer = StreamUtilities.ReadFully(_bootSectors, (int)extent.Length);
 
                 extents.Add(new BuilderBufferExtent(extent.Start, buffer));
             }

@@ -25,7 +25,7 @@ namespace DiscUtils.Xfs
     using System;
     using System.IO;
     using System.Collections.Generic;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class BlockDirectory : IByteArraySerializable
     {
@@ -48,7 +48,7 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             BestFree = new BlockDirectoryDataFree[3];
             offset += 0x4;
             for (int i = 0; i < BestFree.Length; i++)
@@ -58,8 +58,8 @@ namespace DiscUtils.Xfs
                 BestFree[i] = free;
             }
 
-            LeafStale = Utilities.ToUInt32BigEndian(buffer, buffer.Length - 0x4);
-            LeafCount = Utilities.ToUInt32BigEndian(buffer, buffer.Length - 0x8);
+            LeafStale = EndianUtilities.ToUInt32BigEndian(buffer, buffer.Length - 0x4);
+            LeafCount = EndianUtilities.ToUInt32BigEndian(buffer, buffer.Length - 0x8);
             var entries = new List<BlockDirectoryData>();
             var eof = buffer.Length - 0x8 - LeafCount*0x8;
             while (offset < eof)

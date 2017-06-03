@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using DiscUtils.CoreCompat;
 using DiscUtils.Raw;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {

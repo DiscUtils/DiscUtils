@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {
@@ -237,8 +238,8 @@ namespace DiscUtils.Partitions
             EstablishReservedPartition(allEntries);
 
             // Fill the rest of the disk with the requested partition
-            long start = Utilities.RoundUp(FirstAvailableSector(allEntries), alignment / _diskGeometry.BytesPerSector);
-            long end = Utilities.RoundDown(FindLastFreeSector(start, allEntries) + 1,
+            long start = MathUtilities.RoundUp(FirstAvailableSector(allEntries), alignment / _diskGeometry.BytesPerSector);
+            long end = MathUtilities.RoundDown(FindLastFreeSector(start, allEntries) + 1,
                 alignment / _diskGeometry.BytesPerSector);
 
             if (end <= start)
@@ -361,7 +362,7 @@ namespace DiscUtils.Partitions
             _diskGeometry = diskGeometry;
 
             disk.Position = diskGeometry.BytesPerSector;
-            byte[] sector = Utilities.ReadFully(disk, diskGeometry.BytesPerSector);
+            byte[] sector = StreamUtilities.ReadFully(disk, diskGeometry.BytesPerSector);
 
             _primaryHeader = new GptHeader(diskGeometry.BytesPerSector);
             if (!_primaryHeader.ReadFrom(sector, 0) || !ReadEntries(_primaryHeader))
@@ -400,7 +401,7 @@ namespace DiscUtils.Partitions
                     _secondaryHeader.HeaderLba = _secondaryHeader.AlternateHeaderLba;
                     _secondaryHeader.AlternateHeaderLba = _secondaryHeader.HeaderLba;
                     _secondaryHeader.PartitionEntriesLba = _secondaryHeader.HeaderLba -
-                                                           Utilities.RoundUp(
+                                                           MathUtilities.RoundUp(
                                                                _secondaryHeader.PartitionEntryCount *
                                                                _secondaryHeader.PartitionEntrySize,
                                                                diskGeometry.BytesPerSector);
@@ -473,7 +474,7 @@ namespace DiscUtils.Partitions
             List<GptEntry> list = new List<GptEntry>(GetAllEntries());
             list.Sort();
 
-            long startSector = Utilities.RoundUp(_primaryHeader.FirstUsable, alignmentSectors);
+            long startSector = MathUtilities.RoundUp(_primaryHeader.FirstUsable, alignmentSectors);
             foreach (GptEntry entry in list)
             {
                 if (
@@ -482,7 +483,7 @@ namespace DiscUtils.Partitions
                 {
                     break;
                 }
-                startSector = Utilities.RoundUp(entry.LastUsedLogicalBlock + 1, alignmentSectors);
+                startSector = MathUtilities.RoundUp(entry.LastUsedLogicalBlock + 1, alignmentSectors);
             }
 
             if (_diskGeometry.TotalSectorsLong - startSector < numSectors)
@@ -557,7 +558,7 @@ namespace DiscUtils.Partitions
         private bool ReadEntries(GptHeader header)
         {
             _diskData.Position = header.PartitionEntriesLba * _diskGeometry.BytesPerSector;
-            _entryBuffer = Utilities.ReadFully(_diskData, (int)(header.PartitionEntrySize * header.PartitionEntryCount));
+            _entryBuffer = StreamUtilities.ReadFully(_diskData, (int)(header.PartitionEntrySize * header.PartitionEntryCount));
             if (header.EntriesCrc != CalcEntriesCrc())
             {
                 return false;

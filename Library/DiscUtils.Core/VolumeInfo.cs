@@ -23,6 +23,7 @@
 #if !NETCORE
 using System;
 #endif
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {

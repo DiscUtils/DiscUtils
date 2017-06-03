@@ -25,6 +25,7 @@ using System.IO;
 using System.IO.Compression;
 using DiscUtils.Compression;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -286,7 +287,7 @@ namespace DiscUtils.SquashFs
             superBlock.CreationTime = DateTime.Now;
             superBlock.BlockSize = (uint)_context.DataBlockSize;
             superBlock.Compression = 1; // DEFLATE
-            superBlock.BlockSizeLog2 = (ushort)Utilities.Log2(superBlock.BlockSize);
+            superBlock.BlockSizeLog2 = (ushort)MathUtilities.Log2(superBlock.BlockSize);
             superBlock.MajorVersion = 4;
             superBlock.MinorVersion = 0;
 
@@ -313,7 +314,7 @@ namespace DiscUtils.SquashFs
             superBlock.BytesUsed = output.Position;
 
             // Pad to 4KB
-            long end = Utilities.RoundUp(output.Position, 4 * Sizes.OneKiB);
+            long end = MathUtilities.RoundUp(output.Position, 4 * Sizes.OneKiB);
             if (end != output.Position)
             {
                 byte[] padding = new byte[(int)(end - output.Position)];

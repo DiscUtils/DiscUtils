@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -48,11 +48,11 @@ namespace DiscUtils.Iscsi
             }
 
             Continue = (headerData[headerOffset + 1] & 0x40) != 0;
-            _lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
-            _targetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
-            StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
-            ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
-            MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+            _lun = EndianUtilities.ToUInt64BigEndian(headerData, headerOffset + 8);
+            _targetTransferTag = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 20);
+            StatusSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 24);
+            ExpectedCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 28);
+            MaxCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 32);
 
             TextData = bodyData;
         }

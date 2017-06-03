@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -653,7 +654,7 @@ namespace DiscUtils.Ntfs
             AttributeRecord newAttrRecord = _records[0].GetAttribute(id);
 
             IBuffer attrBuffer = attr.GetDataBuffer();
-            byte[] tempData = Utilities.ReadFully(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
+            byte[] tempData = StreamUtilities.ReadFully(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
 
             RemoveAttributeExtents(attr);
             attr.SetExtent(_records[0].Reference, newAttrRecord);
@@ -1074,7 +1075,7 @@ namespace DiscUtils.Ntfs
             AttributeRecord newAttrRecord = _records[0].GetAttribute(id);
 
             IBuffer attrBuffer = attr.GetDataBuffer();
-            byte[] tempData = Utilities.ReadFully(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
+            byte[] tempData = StreamUtilities.ReadFully(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
 
             RemoveAttributeExtents(attr);
             attr.SetExtent(_records[0].Reference, newAttrRecord);

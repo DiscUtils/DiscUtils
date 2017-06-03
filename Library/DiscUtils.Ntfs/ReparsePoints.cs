@@ -23,7 +23,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -85,15 +85,15 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Tag = Utilities.ToUInt32LittleEndian(buffer, offset);
-                File = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 4));
+                Tag = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
+                File = new FileRecordReference(EndianUtilities.ToUInt64LittleEndian(buffer, offset + 4));
                 return 12;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Tag, buffer, offset);
-                Utilities.WriteBytesLittleEndian(File.Value, buffer, offset + 4);
+                EndianUtilities.WriteBytesLittleEndian(Tag, buffer, offset);
+                EndianUtilities.WriteBytesLittleEndian(File.Value, buffer, offset + 4);
                 ////Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 12);
             }
 

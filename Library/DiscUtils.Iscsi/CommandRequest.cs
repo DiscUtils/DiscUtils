@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -48,13 +48,13 @@ namespace DiscUtils.Iscsi
             _basicHeader.DataSegmentLength = count;
             _basicHeader.InitiatorTaskTag = _connection.Session.CurrentTaskTag;
 
-            byte[] buffer = new byte[48 + Utilities.RoundUp(count, 4)];
+            byte[] buffer = new byte[48 + MathUtilities.RoundUp(count, 4)];
             _basicHeader.WriteTo(buffer, 0);
             buffer[1] = PackAttrByte(isFinalData, willRead, willWrite, cmd.TaskAttributes);
-            Utilities.WriteBytesBigEndian(_lun, buffer, 8);
-            Utilities.WriteBytesBigEndian(expected, buffer, 20);
-            Utilities.WriteBytesBigEndian(_connection.Session.CommandSequenceNumber, buffer, 24);
-            Utilities.WriteBytesBigEndian(_connection.ExpectedStatusSequenceNumber, buffer, 28);
+            EndianUtilities.WriteBytesBigEndian(_lun, buffer, 8);
+            EndianUtilities.WriteBytesBigEndian(expected, buffer, 20);
+            EndianUtilities.WriteBytesBigEndian(_connection.Session.CommandSequenceNumber, buffer, 24);
+            EndianUtilities.WriteBytesBigEndian(_connection.ExpectedStatusSequenceNumber, buffer, 28);
             cmd.WriteTo(buffer, 32);
 
             if (immediateData != null && count != 0)

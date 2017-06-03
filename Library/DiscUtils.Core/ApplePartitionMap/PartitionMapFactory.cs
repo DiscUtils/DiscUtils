@@ -21,8 +21,8 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiscUtils.ApplePartitionMap
 {
@@ -38,7 +38,7 @@ namespace DiscUtils.ApplePartitionMap
 
             s.Position = 0;
 
-            byte[] initialBytes = Utilities.ReadFully(s, 1024);
+            byte[] initialBytes = StreamUtilities.ReadFully(s, 1024);
 
             BlockZero b0 = new BlockZero();
             b0.ReadFrom(initialBytes, 0);
