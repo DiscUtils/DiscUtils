@@ -1,5 +1,6 @@
 ﻿//
 // Copyright (c) 2008-2013, Kenneth Bell
+// Copyright (c) 2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -84,6 +85,15 @@ namespace DiscUtils.Vhdx
             get { return _header.Tail; }
         }
 
+        public void Replay(Stream target)
+        {
+            if (IsEmpty) return;
+            foreach (Descriptor descriptor in _descriptors)
+            {
+                descriptor.WriteData(target);
+            }
+        }
+
         public static bool TryRead(Stream logStream, out LogEntry entry)
         {
             long position = logStream.Position;
@@ -161,6 +171,7 @@ namespace DiscUtils.Vhdx
         {
             public const uint ZeroDescriptorSignature = 0x6F72657A;
             public const uint DataDescriptorSignature = 0x63736564;
+            public const uint DataSectorSignature = 0x61746164;
 
             public ulong FileOffset;
             public ulong SequenceNumber;
@@ -177,6 +188,8 @@ namespace DiscUtils.Vhdx
             public abstract void WriteTo(byte[] buffer, int offset);
 
             public abstract bool IsValid(ulong sequenceNumber);
+
+            public abstract void WriteData(Stream target);
         }
 
         private sealed class ZeroDescriptor : Descriptor
@@ -206,6 +219,21 @@ namespace DiscUtils.Vhdx
             {
                 return SequenceNumber == sequenceNumber;
             }
+
+            public override void WriteData(Stream target)
+            {
+                target.Seek((long)FileOffset, SeekOrigin.Begin);
+                var zeroBuffer = new byte[4 * Sizes.OneKiB];
+                var total = ZeroLength;
+                while (total > 0)
+                {
+                    int count = zeroBuffer.Length;
+                    if (total < (uint)count)
+                        count = (int)total;
+                    target.Write(zeroBuffer, 0, count);
+                    total -= (uint)count;
+                }
+            }
         }
 
         private sealed class DataDescriptor : Descriptor
@@ -214,6 +242,7 @@ namespace DiscUtils.Vhdx
             private readonly int _offset;
             public ulong LeadingBytes;
             public uint TrailingBytes;
+            public uint DataSignature;
 
             public DataDescriptor(byte[] data, int offset)
             {
@@ -233,6 +262,8 @@ namespace DiscUtils.Vhdx
                 FileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 16);
                 SequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 24);
 
+                DataSignature = Utilities.ToUInt32LittleEndian(_data, _offset);
+
                 return 32;
             }
 
@@ -248,7 +279,21 @@ namespace DiscUtils.Vhdx
                        &&
                        Utilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
                        (sequenceNumber & 0xFFFFFFFF)
-                       && Utilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
+                       && Utilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF)
+                       && DataSignature == DataSectorSignature;
+            }
+
+            public override void WriteData(Stream target)
+            {
+                target.Seek((long)FileOffset, SeekOrigin.Begin);
+                var leading = new byte[8];
+                Utilities.WriteBytesLittleEndian(LeadingBytes, leading, 0);
+                var trailing = new byte[4];
+                Utilities.WriteBytesLittleEndian(TrailingBytes, trailing, 0);
+
+                target.Write(leading, 0, leading.Length);
+                target.Write(_data, _offset+8, 4084);
+                target.Write(trailing, 0, trailing.Length);
             }
         }
     }
