@@ -74,12 +74,12 @@ namespace DiscUtils.Xfs
 
         public byte[] GetData(Context context)
         {
-            return GetData(context, context.SuperBlock.Blocksize*BlockCount);
+            return GetData(context,0 , context.SuperBlock.Blocksize*BlockCount);
         }
 
-        public byte[] GetData(Context context, uint count)
+        public byte[] GetData(Context context, long offset, uint count)
         {
-            context.RawStream.Position = GetOffset(context);
+            context.RawStream.Position = GetOffset(context) + offset;
             return Utilities.ReadFully(context.RawStream, (int) count);
         }
 

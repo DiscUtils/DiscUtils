@@ -1,6 +1,7 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -29,6 +30,11 @@ namespace DiscUtils.Xfs
     internal class SuperBlock : IByteArraySerializable
     {
         public const uint XfsMagic = 0x58465342;
+
+        public const uint XfsSbVersionNumbits = 0x000f;
+
+        public const uint XfsSbVersion5 = 5;
+
         /// <summary>
         /// magic number == XFS_SB_MAGIC
         /// </summary>
@@ -328,7 +334,19 @@ namespace DiscUtils.Xfs
 
         public int Size
         {
-            get { return 264; }
+            get
+            {
+                if (SbVersion >= XfsSbVersion5)
+                {
+                    return 264;
+                }
+                return 208;
+            }
+        }
+
+        public uint SbVersion
+        {
+            get { return Version & XfsSbVersionNumbits; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -379,22 +397,24 @@ namespace DiscUtils.Xfs
             LogUnitSize = Utilities.ToUInt32BigEndian(buffer, offset + 0xC4);
             Features2 = Utilities.ToUInt32BigEndian(buffer, offset + 0xC8);
             BadFeatures2 = Utilities.ToUInt32BigEndian(buffer, offset + 0xCC);
-            CompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0xD0);
-            ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)Utilities.ToUInt32BigEndian(buffer, offset + 0xD4);
-            IncompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0xD8);
-            LogIncompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0xDC);
-            Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0xE0);
-            SparseInodeAlignment = Utilities.ToUInt32BigEndian(buffer, offset + 0xE4);
-            ProjectQuotaInode = Utilities.ToUInt64BigEndian(buffer, offset + 0xE8);
-            Lsn = Utilities.ToInt64BigEndian(buffer, offset + 0xF0);
-            MetaUuid = Utilities.ToGuidBigEndian(buffer, offset + 0xF8);
-
+            if (SbVersion >= XfsSbVersion5)
+            {
+                CompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset);
+                ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)Utilities.ToUInt32BigEndian(buffer, offset + 0x04);
+                IncompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0x08);
+                LogIncompatibleFeatures = Utilities.ToUInt32BigEndian(buffer, offset + 0x0C);
+                Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
+                SparseInodeAlignment = Utilities.ToUInt32BigEndian(buffer, offset + 0x14);
+                ProjectQuotaInode = Utilities.ToUInt64BigEndian(buffer, offset + 0x18);
+                Lsn = Utilities.ToInt64BigEndian(buffer, offset + 0x20);
+                MetaUuid = Utilities.ToGuidBigEndian(buffer, offset + 0x28);
+            }
             var agOffset = AgBlocksLog2 + InodesPerBlockLog2;
-            RelativeInodeMask = 0xffffffff >> (32-agOffset);
+            RelativeInodeMask = 0xffffffff >> (32 - agOffset);
             AgInodeMask = ~RelativeInodeMask;
 
             DirBlockSize = Blocksize << DirBlockLog2;
-            return 264;
+            return Size;
         }
 
         public void WriteTo(byte[] buffer, int offset)

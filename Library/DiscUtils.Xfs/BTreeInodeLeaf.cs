@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,45 +21,41 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.IO;
+
 namespace DiscUtils.Xfs
 {
     using System;
-    using System.Collections.Generic;
-    using System.IO;
 
-    internal class BTreeExtentLeave : BTreeExtentHeader
+    internal class BTreeInodeLeaf : BtreeHeader
     {
-        public Extent[] Extents { get; private set; }
-
+        public BTreeInodeRecord[] Records { get; private set; }
         public override int Size
         {
             get { return base.Size + (NumberOfRecords * 0x10); }
         }
 
+        public BTreeInodeLeaf(uint superBlockVersion) : base(superBlockVersion){}
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            offset += base.ReadFrom(buffer, offset);
+            base.ReadFrom(buffer, offset);
+            offset += base.Size;
             if (Level != 0)
-                throw new IOException("invalid B+tree level - expected 0");
-            Extents = new Extent[NumberOfRecords];
+                throw new IOException("invalid B+tree level - expected 1");
+            Records = new BTreeInodeRecord[NumberOfRecords];
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                var rec = new Extent();
+                var rec = new BTreeInodeRecord();
                 offset += rec.ReadFrom(buffer, offset);
-                Extents[i] = rec;
+                Records[i] = rec;
             }
             return Size;
         }
 
-        /// <inheritdoc />
-        public override void LoadBtree(Context context)
+        public override void LoadBtree(AllocationGroup ag)
         {
-        }
-
-        /// <inheritdoc />
-        public override IList<Extent> GetExtents()
-        {
-            return Extents;
+            
         }
     }
 }

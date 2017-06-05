@@ -20,15 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.IO;
-
 namespace DiscUtils.Xfs
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
 
-    internal class BTreeInodeLeave : BtreeHeader
+    internal class BTreeExtentLeaf : BTreeExtentHeader
     {
-        public BTreeInodeRecord[] Records { get; private set; }
+        public Extent[] Extents { get; private set; }
+
         public override int Size
         {
             get { return base.Size + (NumberOfRecords * 0x10); }
@@ -38,20 +39,26 @@ namespace DiscUtils.Xfs
         {
             offset += base.ReadFrom(buffer, offset);
             if (Level != 0)
-                throw new IOException("invalid B+tree level - expected 1");
-            Records = new BTreeInodeRecord[NumberOfRecords];
+                throw new IOException("invalid B+tree level - expected 0");
+            Extents = new Extent[NumberOfRecords];
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                var rec = new BTreeInodeRecord();
+                var rec = new Extent();
                 offset += rec.ReadFrom(buffer, offset);
-                Records[i] = rec;
+                Extents[i] = rec;
             }
             return Size;
         }
 
-        public override void LoadBtree(AllocationGroup ag)
+        /// <inheritdoc />
+        public override void LoadBtree(Context context)
         {
-            
+        }
+
+        /// <inheritdoc />
+        public override IList<Extent> GetExtents()
+        {
+            return Extents;
         }
     }
 }
