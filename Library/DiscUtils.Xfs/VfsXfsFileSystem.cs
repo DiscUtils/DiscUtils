@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -31,6 +32,8 @@ namespace DiscUtils.Xfs
     {
         private static readonly int XFS_ALLOC_AGFL_RESERVE = 4;
 
+        private static readonly int BBSHIFT = 9;
+
         public VfsXfsFileSystem(Stream stream, FileSystemParameters parameters)
             :base(new XfsFileSystemOptions(parameters))
         {
@@ -58,7 +61,7 @@ namespace DiscUtils.Xfs
             {
                 var ag = new AllocationGroup(Context, offset);
                 allocationGroups[ag.InodeBtreeInfo.SequenceNumber] = ag;
-                offset += ag.FreeBlockInfo.Length*superblock.Blocksize;
+                offset = (XFS_AG_DADDR(Context.SuperBlock, i+1, XFS_AGF_DADDR(Context.SuperBlock)) << BBSHIFT) - superblock.SectorSize;
             }
             Context.AllocationGroups = allocationGroups;
 
@@ -150,5 +153,36 @@ namespace DiscUtils.Xfs
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// https://github.com/torvalds/linux/blob/2a610b8aa8e5bd449ba270e517b0e72295d62c9c/fs/xfs/libxfs/xfs_format.h#L832
+        /// </summary>
+        private long XFS_AG_DADDR(SuperBlock sb, int agno, long d)
+        {
+            return XFS_AGB_TO_DADDR(sb, agno, 0) + d;
+        }
+
+        /// <summary>
+        /// https://github.com/torvalds/linux/blob/2a610b8aa8e5bd449ba270e517b0e72295d62c9c/fs/xfs/libxfs/xfs_format.h#L829
+        /// </summary>
+        private long XFS_AGB_TO_DADDR(SuperBlock sb, int agno, int agbno)
+        {
+            return XFS_FSB_TO_BB(sb, agno * sb.AgBlocks) + agbno;
+        }
+
+        /// <summary>
+        /// https://github.com/torvalds/linux/blob/2a610b8aa8e5bd449ba270e517b0e72295d62c9c/fs/xfs/libxfs/xfs_format.h#L587
+        /// </summary>
+        private long XFS_FSB_TO_BB(SuperBlock sb, long fsbno)
+        {
+            return fsbno << (sb.BlocksizeLog2 - BBSHIFT);
+        }
+
+        /// <summary>
+        /// https://github.com/torvalds/linux/blob/2a610b8aa8e5bd449ba270e517b0e72295d62c9c/fs/xfs/libxfs/xfs_format.h#L716
+        /// </summary>
+        private long XFS_AGF_DADDR(SuperBlock sb)
+        {
+            return 1 << (sb.SectorSizeLog2 - BBSHIFT);
+        }
     }
 }

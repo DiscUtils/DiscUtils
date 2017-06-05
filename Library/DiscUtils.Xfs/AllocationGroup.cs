@@ -1,6 +1,7 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -31,6 +32,8 @@ namespace DiscUtils.Xfs
     {
         public const uint IbtMagic = 0x49414254;
 
+        public const uint IbtCrcMagic = 0x49414233;
+
         public long Offset { get; private set; }
 
         public AllocationGroupFreeBlockInfo FreeBlockInfo { get; private set; }
@@ -45,7 +48,7 @@ namespace DiscUtils.Xfs
             Context = context;
             var data = context.RawStream;
             var superblock = context.SuperBlock;
-            FreeBlockInfo = new AllocationGroupFreeBlockInfo();
+            FreeBlockInfo = new AllocationGroupFreeBlockInfo(superblock);
             data.Position = offset + superblock.SectorSize;
             var agfData = StreamUtilities.ReadFully(data, FreeBlockInfo.Size); 
             FreeBlockInfo.ReadFrom(agfData, 0);
@@ -54,16 +57,17 @@ namespace DiscUtils.Xfs
                 throw new IOException("Invalid AGF magic - probably not an xfs file system");
             }
 
-            InodeBtreeInfo = new AllocationGroupInodeBtreeInfo();
-            data.Position = offset + superblock.SectorSize*2;
+            InodeBtreeInfo = new AllocationGroupInodeBtreeInfo(superblock);
+            data.Position = offset + superblock.SectorSize * 2;
             var agiData = StreamUtilities.ReadFully(data, InodeBtreeInfo.Size);
+
             InodeBtreeInfo.ReadFrom(agiData, 0);
             if (InodeBtreeInfo.Magic != AllocationGroupInodeBtreeInfo.AgiMagic)
             {
                 throw new IOException("Invalid AGI magic - probably not an xfs file system");
             }
             InodeBtreeInfo.LoadBtree(context, offset);
-            if (InodeBtreeInfo.RootInodeBtree.Magic != IbtMagic)
+            if (superblock.SbVersion < 5 && InodeBtreeInfo.RootInodeBtree.Magic != IbtMagic || superblock.SbVersion >= 5 && InodeBtreeInfo.RootInodeBtree.Magic != IbtCrcMagic)
             {
                 throw new IOException("Invalid IBT magic - probably not an xfs file system");
             }

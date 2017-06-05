@@ -31,6 +31,7 @@
     <ProjectReference Include="..\DiscUtils.HfsPlus\DiscUtils.HfsPlus.csproj" />
     <ProjectReference Include="..\DiscUtils.Iscsi\DiscUtils.Iscsi.csproj" />
     <ProjectReference Include="..\DiscUtils.Iso9660\DiscUtils.Iso9660.csproj" />
+    <ProjectReference Include="..\DiscUtils.Lvm\DiscUtils.Lvm.csproj" />
     <ProjectReference Include="..\DiscUtils.Nfs\DiscUtils.Nfs.csproj" />
     <ProjectReference Include="..\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDisk\DiscUtils.OpticalDisk.csproj" />
@@ -43,6 +44,7 @@
     <ProjectReference Include="..\DiscUtils.Vhdx\DiscUtils.Vhdx.csproj" />
     <ProjectReference Include="..\DiscUtils.Vmdk\DiscUtils.Vmdk.csproj" />
     <ProjectReference Include="..\DiscUtils.Wim\DiscUtils.Wim.csproj" />
+    <ProjectReference Include="..\DiscUtils.Xfs\DiscUtils.Xfs.csproj" />
     <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
   </ItemGroup>
 

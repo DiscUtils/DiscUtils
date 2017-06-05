@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -91,9 +92,23 @@ namespace DiscUtils.Xfs
         /// </summary>
         public BtreeHeader RootInodeBtree { get; private set; }
 
-        public int Size
+        public Guid UniqueId { get; private set; }
+
+        /// <summary>
+        /// last write sequence
+        /// </summary>
+        public ulong Lsn { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public int Size { get; private set; }
+
+        private uint SbVersion { get; }
+
+        public AllocationGroupInodeBtreeInfo(SuperBlock superBlock)
         {
-            get { return 296; }
+            SbVersion = superBlock.SbVersion;
+            Size = SbVersion >= 5 ? 334 : 296;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -113,20 +128,26 @@ namespace DiscUtils.Xfs
             {
                 Unlinked[i] = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x28 + i*0x4);
             }
+            if (SbVersion >= 5)
+            {
+                UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x132);
+                Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x142);
+                Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x14A);
+            }
             return Size;
         }
-
+        
         public void LoadBtree(Context context, long offset)
         {
             var data = context.RawStream;
             data.Position = offset + context.SuperBlock.Blocksize*Root;
             if (Level == 1)
             {
-                RootInodeBtree = new BTreeInodeLeave();
+                RootInodeBtree = new BTreeInodeLeaf(SbVersion);
             }
             else
             {
-                RootInodeBtree = new BTreeInodeNode();
+                RootInodeBtree = new BTreeInodeNode(SbVersion);
             }
             var buffer = StreamUtilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
             RootInodeBtree.ReadFrom(buffer, 0);

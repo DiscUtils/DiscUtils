@@ -13,6 +13,7 @@ using DiscUtils.Sdi;
 using DiscUtils.SquashFs;
 using DiscUtils.Udf;
 using DiscUtils.Wim;
+using DiscUtils.Xfs;
 
 #if !NETCORE
 using DiscUtils.Net.Dns;
@@ -50,7 +51,9 @@ namespace DiscUtils.Complete
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Vhdx.Disk)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Vmdk.Disk)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(WimFile)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(XfsFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Xva.Disk)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Lvm.LogicalVolumeManager)));
         }
     }
 }

@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2008-2012, Kenneth Bell
+// Copyright (c) 2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -688,21 +689,29 @@ namespace DiscUtils.Vhdx
                 throw new IOException("Unable to replay VHDX log, suspected corrupt VHDX file");
             }
 
+            if (activeLogSequence.Head.FlushedFileOffset > (ulong)_logicalStream.Length)
+            {
+                throw new IOException("truncated VHDX file found while replaying log");
+            }
+
             if (activeLogSequence.Count > 1 || !activeLogSequence.Head.IsEmpty)
             {
-                // TODO - perform actual replay (needs VHDX with real log to replay)
                 // However, have seen VHDX with a non-empty log with no data to replay.  These are
                 // 'safe' to open.
-                throw new NotImplementedException("Actual replay of VHDX logs not implemented yet");
-
-                //// Have a log to replay, and the base stream is read-only. Use a snapshot stream to
-                //// replay in RAM.
-                ////if (!_fileStream.CanWrite)
-                ////{
-                ////    SnapshotStream replayStream = new SnapshotStream(_fileStream, Ownership.None);
-                ////    replayStream.Snapshot();
-                ////    _logicalStream = replayStream;
-                ////}
+                if (!_fileStream.CanWrite)
+                {
+                    SnapshotStream replayStream = new SnapshotStream(_fileStream, Ownership.None);
+                    replayStream.Snapshot();
+                    _logicalStream = replayStream;
+                }
+                foreach (LogEntry logEntry in activeLogSequence)
+                {
+                    if (logEntry.LogGuid != _header.LogGuid)
+                        throw new IOException("Invalid log entry in VHDX log, suspected currupt VHDX file");
+                    if (logEntry.IsEmpty) continue;
+                    logEntry.Replay(_logicalStream);
+                }
+                _logicalStream.Seek((long)activeLogSequence.Head.LastFileOffset, SeekOrigin.Begin);
             }
         }
 

@@ -67,7 +67,7 @@ namespace DiscUtils.Xfs
                 BTreeExtentHeader child;
                 if (Level == 1)
                 {
-                    child = new BTreeExtentLeave();
+                    child = new BTreeExtentLeaf();
                 }
                 else
                 {

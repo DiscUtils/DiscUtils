@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -37,9 +38,30 @@ namespace DiscUtils.Xfs
 
         public int RightSibling { get; private set; }
 
-        public virtual int Size
+        /// <summary>
+        /// location on disk
+        /// </summary>
+        public ulong Bno { get; private set; }
+
+        /// <summary>
+        /// last write sequence
+        /// </summary>
+        public ulong Lsn { get; private set; }
+
+        public Guid UniqueId { get; private set; }
+
+        public uint Owner { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public virtual int Size { get; }
+
+        protected uint SbVersion { get; }
+
+        public BtreeHeader(uint superBlockVersion)
         {
-            get { return 16; }
+            SbVersion = superBlockVersion;
+            Size = SbVersion >= 5 ? 56 : 16;
         }
 
         public virtual int ReadFrom(byte[] buffer, int offset)
@@ -49,7 +71,16 @@ namespace DiscUtils.Xfs
             NumberOfRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6);
             LeftSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x8);
             RightSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0xC);
-            return 16;
+            if (SbVersion >= 5)
+            {
+                Bno = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x10);
+                Lsn = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x18);
+                UniqueId = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x20);
+                Owner = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x30);
+                Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x34);
+            }
+            
+            return Size;
         }
 
         public virtual void WriteTo(byte[] buffer, int offset)

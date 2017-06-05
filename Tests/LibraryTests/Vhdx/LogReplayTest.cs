@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017 Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,38 +20,28 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using System.IO;
+using DiscUtils;
+using DiscUtils.Vhdx;
+using LibraryTests.Utilities;
+using Xunit;
 
-namespace DiscUtils.Xfs
+namespace LibraryTests.Vhdx
 {
-    using System;
-
-    internal class BTreeInodeLeave : BtreeHeader
+    public class LogReplayTest
     {
-        public BTreeInodeRecord[] Records { get; private set; }
-        public override int Size
+        [Fact]
+        public void ReplayLog()
         {
-            get { return base.Size + (NumberOfRecords * 0x10); }
-        }
-
-        public override int ReadFrom(byte[] buffer, int offset)
-        {
-            offset += base.ReadFrom(buffer, offset);
-            if (Level != 0)
-                throw new IOException("invalid B+tree level - expected 1");
-            Records = new BTreeInodeRecord[NumberOfRecords];
-            for (int i = 0; i < NumberOfRecords; i++)
+            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Vhdx", "Data", "vhdx-log-replay.zip")))
+            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+            using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
+            using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {
-                var rec = new BTreeInodeRecord();
-                offset += rec.ReadFrom(buffer, offset);
-                Records[i] = rec;
+                Assert.True(disk.IsPartitioned);
+                Assert.Equal(2, disk.Partitions.Count);
             }
-            return Size;
-        }
-
-        public override void LoadBtree(AllocationGroup ag)
-        {
-            
         }
     }
 }

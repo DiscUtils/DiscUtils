@@ -95,12 +95,15 @@ namespace DiscUtils.Xfs
             {
                 if (extent.StartOffset < leafOffset)
                 {
-                    var leafDir = new LeafDirectory();
-                    var buffer = extent.GetData(Context, Context.SuperBlock.DirBlockSize);
-                    leafDir.ReadFrom(buffer, 0);
-                    if (leafDir.Magic != LeafDirectory.HeaderMagic)
-                        throw new IOException("invalid leaf directory magic");
-                    AddDirEntries(leafDir.Entries, target);
+                    for (int i = 0; i < extent.BlockCount; i++)
+                    {
+                        var buffer = extent.GetData(Context, i* Context.SuperBlock.DirBlockSize, Context.SuperBlock.DirBlockSize);
+                        var leafDir = new LeafDirectory();
+                        leafDir.ReadFrom(buffer, 0);
+                        if (leafDir.Magic != LeafDirectory.HeaderMagic)
+                            throw new IOException("invalid leaf directory magic");
+                        AddDirEntries(leafDir.Entries, target);
+                    }
 
                 }
             }

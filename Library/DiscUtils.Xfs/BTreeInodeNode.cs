@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -41,9 +42,12 @@ namespace DiscUtils.Xfs
             get { return base.Size + (NumberOfRecords * 0x8); }
         }
 
+        public BTreeInodeNode(uint superBlockVersion) : base(superBlockVersion) { }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            offset += base.ReadFrom(buffer, offset);
+            base.ReadFrom(buffer, offset);
+            offset += base.Size;
             if (Level == 0)
                 throw new IOException("invalid B+tree level - expected 0");
             Keys = new uint[NumberOfRecords];
@@ -67,11 +71,11 @@ namespace DiscUtils.Xfs
                 BtreeHeader child;
                 if (Level == 1)
                 {
-                    child = new BTreeInodeLeave();
+                    child = new BTreeInodeLeaf(base.SbVersion);
                 }
                 else
                 {
-                    child = new BTreeInodeNode();
+                    child = new BTreeInodeNode(base.SbVersion);
                 }
                 var data = ag.Context.RawStream;
                 data.Position = (Pointer[i] * ag.Context.SuperBlock.Blocksize) + ag.Offset;
