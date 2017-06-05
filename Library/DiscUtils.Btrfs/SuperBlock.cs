@@ -21,7 +21,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Text;
+using DiscUtils.Btrfs.Base;
+using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Btrfs
@@ -166,6 +169,8 @@ namespace DiscUtils.Btrfs
         /// </summary>
         public string Label { get; private set; }
 
+        public Tuple<Key,ChunkItem>[] SystemChunkArray { get; private set; }
+
         public int Size
         {
             get { return Length; }
@@ -211,6 +216,18 @@ namespace DiscUtils.Btrfs
 
             //22b 	100 		reserved
             var n = Utilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
+            offset += 0x32b;
+            var systemChunks = new List<Tuple<Key, ChunkItem>>();
+            while (n > 0)
+            {
+                var key = new Key();
+                offset += key.ReadFrom(buffer, offset);
+                var chunkItem = new ChunkItem();
+                offset += chunkItem.ReadFrom(buffer, offset);
+                systemChunks.Add(new Tuple<Key, ChunkItem>(key, chunkItem));
+                n = n - (uint)key.Size - (uint)chunkItem.Size;
+            }
+            SystemChunkArray = systemChunks.ToArray();
             //32b 	800 		(n bytes valid) Contains (KEY, CHUNK_ITEM) pairs for all SYSTEM chunks. This is needed to bootstrap the mapping from logical addresses to physical.
             //b2b 	4d5 		Currently unused 
             return Size;

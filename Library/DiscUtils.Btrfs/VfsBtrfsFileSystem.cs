@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Btrfs.Base;
 using DiscUtils.Internal;
 using DiscUtils.Vfs;
 
@@ -55,6 +56,8 @@ namespace DiscUtils.Btrfs
             }
             if (Context.SuperBlock == null)
                 throw new IOException("No Superblock detected");
+            Context.ChunkTreeRoot = ReadTree(Context.SuperBlock.ChunkRoot, Context.SuperBlock.ChunkRootLevel);
+            //Context.RootTreeRoot = ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
         }
         
         public override string FriendlyName
@@ -92,6 +95,16 @@ namespace DiscUtils.Btrfs
         protected override IVfsFile ConvertDirEntryToFile(VfsDirEntry dirEntry)
         {
             throw new NotImplementedException();
+        }
+
+        private NodeHeader ReadTree(ulong logical, byte level)
+        {
+            var physical = Context.MapToPhysical(logical);
+            Context.RawStream.Seek((long)physical, SeekOrigin.Begin);
+            var dataSize = level > 0 ? Context.SuperBlock.NodeSize : Context.SuperBlock.LeafSize;
+            var buffer = new byte[dataSize];
+            Context.RawStream.Read(buffer, 0, buffer.Length);
+            return NodeHeader.Create(buffer, 0);
         }
     }
 }
