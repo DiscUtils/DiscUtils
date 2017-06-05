@@ -22,7 +22,7 @@
 
 using System;
 using System.Globalization;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.BootConfig
 {
@@ -50,17 +50,17 @@ namespace DiscUtils.BootConfig
             {
                 record.PartitionType = 1;
                 record.DiskIdentity = new byte[4];
-                Utilities.WriteBytesLittleEndian(pvi.DiskSignature, record.DiskIdentity, 0);
+                EndianUtilities.WriteBytesLittleEndian(pvi.DiskSignature, record.DiskIdentity, 0);
                 record.PartitionIdentity = new byte[8];
-                Utilities.WriteBytesLittleEndian(pvi.PhysicalStartSector * 512, record.PartitionIdentity, 0);
+                EndianUtilities.WriteBytesLittleEndian(pvi.PhysicalStartSector * 512, record.PartitionIdentity, 0);
             }
             else if (pvi.VolumeType == PhysicalVolumeType.GptPartition)
             {
                 record.PartitionType = 0;
                 record.DiskIdentity = new byte[16];
-                Utilities.WriteBytesLittleEndian(pvi.DiskIdentity, record.DiskIdentity, 0);
+                EndianUtilities.WriteBytesLittleEndian(pvi.DiskIdentity, record.DiskIdentity, 0);
                 record.PartitionIdentity = new byte[16];
-                Utilities.WriteBytesLittleEndian(pvi.PartitionIdentity, record.PartitionIdentity, 0);
+                EndianUtilities.WriteBytesLittleEndian(pvi.PartitionIdentity, record.PartitionIdentity, 0);
             }
             else
             {
@@ -73,7 +73,7 @@ namespace DiscUtils.BootConfig
 
         public DeviceElementValue(byte[] value)
         {
-            _parentObject = Utilities.ToGuidLittleEndian(value, 0x00);
+            _parentObject = EndianUtilities.ToGuidLittleEndian(value, 0x00);
             _record = DeviceRecord.Parse(value, 0x10);
         }
 
@@ -104,7 +104,7 @@ namespace DiscUtils.BootConfig
         {
             byte[] buffer = new byte[_record.Size + 0x10];
 
-            Utilities.WriteBytesLittleEndian(_parentObject, buffer, 0);
+            EndianUtilities.WriteBytesLittleEndian(_parentObject, buffer, 0);
             _record.GetBytes(buffer, 0x10);
 
             return buffer;

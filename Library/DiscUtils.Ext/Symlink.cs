@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
@@ -35,8 +35,8 @@ namespace DiscUtils.Ext
             get
             {
                 IBuffer content = FileContent;
-                byte[] data = Utilities.ReadFully(content, 0, (int)content.Capacity);
-                return Utilities.BytesToZString(data, 0, data.Length).Replace('/', '\\');
+                byte[] data = StreamUtilities.ReadFully(content, 0, (int)content.Capacity);
+                return EndianUtilities.BytesToZString(data, 0, data.Length).Replace('/', '\\');
             }
         }
     }

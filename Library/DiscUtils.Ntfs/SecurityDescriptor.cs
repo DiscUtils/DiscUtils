@@ -22,7 +22,7 @@
 
 using System.IO;
 using System.Security.AccessControl;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -56,7 +56,7 @@ namespace DiscUtils.Ntfs
             ControlFlags controlFlags = Descriptor.ControlFlags;
             buffer[offset + 0x00] = 1;
             buffer[offset + 0x01] = Descriptor.ResourceManagerControl;
-            Utilities.WriteBytesLittleEndian((ushort)controlFlags, buffer, offset + 0x02);
+            EndianUtilities.WriteBytesLittleEndian((ushort)controlFlags, buffer, offset + 0x02);
 
             // Blank out offsets, will fill later
             for (int i = 0x04; i < 0x14; ++i)
@@ -69,32 +69,32 @@ namespace DiscUtils.Ntfs
             RawAcl discAcl = Descriptor.DiscretionaryAcl;
             if ((controlFlags & ControlFlags.DiscretionaryAclPresent) != 0 && discAcl != null)
             {
-                Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x10);
+                EndianUtilities.WriteBytesLittleEndian(pos, buffer, offset + 0x10);
                 discAcl.GetBinaryForm(buffer, offset + pos);
                 pos += Descriptor.DiscretionaryAcl.BinaryLength;
             }
             else
             {
-                Utilities.WriteBytesLittleEndian(0, buffer, offset + 0x10);
+                EndianUtilities.WriteBytesLittleEndian(0, buffer, offset + 0x10);
             }
 
             RawAcl sysAcl = Descriptor.SystemAcl;
             if ((controlFlags & ControlFlags.SystemAclPresent) != 0 && sysAcl != null)
             {
-                Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x0C);
+                EndianUtilities.WriteBytesLittleEndian(pos, buffer, offset + 0x0C);
                 sysAcl.GetBinaryForm(buffer, offset + pos);
                 pos += Descriptor.SystemAcl.BinaryLength;
             }
             else
             {
-                Utilities.WriteBytesLittleEndian(0, buffer, offset + 0x0C);
+                EndianUtilities.WriteBytesLittleEndian(0, buffer, offset + 0x0C);
             }
 
-            Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian(pos, buffer, offset + 0x04);
             Descriptor.Owner.GetBinaryForm(buffer, offset + pos);
             pos += Descriptor.Owner.BinaryLength;
 
-            Utilities.WriteBytesLittleEndian(pos, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(pos, buffer, offset + 0x08);
             Descriptor.Group.GetBinaryForm(buffer, offset + pos);
             pos += Descriptor.Group.BinaryLength;
 
@@ -116,7 +116,7 @@ namespace DiscUtils.Ntfs
             uint hash = 0;
             for (int i = 0; i < buffer.Length / 4; ++i)
             {
-                hash = Utilities.ToUInt32LittleEndian(buffer, i * 4) + ((hash << 3) | (hash >> 29));
+                hash = EndianUtilities.ToUInt32LittleEndian(buffer, i * 4) + ((hash << 3) | (hash >> 29));
             }
 
             return hash;

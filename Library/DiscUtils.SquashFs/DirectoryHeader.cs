@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -43,9 +43,9 @@ namespace DiscUtils.SquashFs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(Count, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 8);
+            EndianUtilities.WriteBytesLittleEndian(Count, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 4);
+            EndianUtilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 8);
         }
 
         public static DirectoryHeader ReadFrom(MetablockReader reader)

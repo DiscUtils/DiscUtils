@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using DiscUtils;
+using DiscUtils.Streams;
 using Microsoft.Win32.SafeHandles;
 
 namespace DiskClone

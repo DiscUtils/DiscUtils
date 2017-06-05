@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -84,15 +84,15 @@ namespace DiscUtils.Vhdx
         {
             Array.Copy(buffer, offset, _headerData, 0, 32);
 
-            Signature = Utilities.ToUInt64LittleEndian(_headerData, 0);
-            EntryCount = Utilities.ToUInt16LittleEndian(_headerData, 10);
+            Signature = EndianUtilities.ToUInt64LittleEndian(_headerData, 0);
+            EntryCount = EndianUtilities.ToUInt16LittleEndian(_headerData, 10);
 
             Entries = new Dictionary<MetadataEntryKey, MetadataEntry>();
             if (IsValid)
             {
                 for (int i = 0; i < EntryCount; ++i)
                 {
-                    MetadataEntry entry = Utilities.ToStruct<MetadataEntry>(buffer, offset + 32 + i * 32);
+                    MetadataEntry entry = EndianUtilities.ToStruct<MetadataEntry>(buffer, offset + 32 + i * 32);
                     Entries[MetadataEntryKey.FromEntry(entry)] = entry;
                 }
             }
@@ -103,8 +103,8 @@ namespace DiscUtils.Vhdx
         public void WriteTo(byte[] buffer, int offset)
         {
             EntryCount = (ushort)Entries.Count;
-            Utilities.WriteBytesLittleEndian(Signature, _headerData, 0);
-            Utilities.WriteBytesLittleEndian(EntryCount, _headerData, 10);
+            EndianUtilities.WriteBytesLittleEndian(Signature, _headerData, 0);
+            EndianUtilities.WriteBytesLittleEndian(EntryCount, _headerData, 10);
 
             Array.Copy(_headerData, 0, buffer, offset, 32);
 

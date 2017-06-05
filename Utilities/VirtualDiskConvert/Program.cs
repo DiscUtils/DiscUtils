@@ -27,6 +27,7 @@ using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
 using DiscUtils.Setup;
+using DiscUtils.Streams;
 
 namespace VirtualDiskConvert
 {

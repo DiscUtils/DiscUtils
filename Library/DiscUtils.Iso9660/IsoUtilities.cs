@@ -24,7 +24,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -34,34 +34,34 @@ namespace DiscUtils.Iso9660
 
         public static uint ToUInt32FromBoth(byte[] data, int offset)
         {
-            return Utilities.ToUInt32LittleEndian(data, offset);
+            return EndianUtilities.ToUInt32LittleEndian(data, offset);
         }
 
         public static ushort ToUInt16FromBoth(byte[] data, int offset)
         {
-            return Utilities.ToUInt16LittleEndian(data, offset);
+            return EndianUtilities.ToUInt16LittleEndian(data, offset);
         }
 
         internal static void ToBothFromUInt32(byte[] buffer, int offset, uint value)
         {
-            Utilities.WriteBytesLittleEndian(value, buffer, offset);
-            Utilities.WriteBytesBigEndian(value, buffer, offset + 4);
+            EndianUtilities.WriteBytesLittleEndian(value, buffer, offset);
+            EndianUtilities.WriteBytesBigEndian(value, buffer, offset + 4);
         }
 
         internal static void ToBothFromUInt16(byte[] buffer, int offset, ushort value)
         {
-            Utilities.WriteBytesLittleEndian(value, buffer, offset);
-            Utilities.WriteBytesBigEndian(value, buffer, offset + 2);
+            EndianUtilities.WriteBytesLittleEndian(value, buffer, offset);
+            EndianUtilities.WriteBytesBigEndian(value, buffer, offset + 2);
         }
 
         internal static void ToBytesFromUInt32(byte[] buffer, int offset, uint value)
         {
-            Utilities.WriteBytesLittleEndian(value, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian(value, buffer, offset);
         }
 
         internal static void ToBytesFromUInt16(byte[] buffer, int offset, ushort value)
         {
-            Utilities.WriteBytesLittleEndian(value, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian(value, buffer, offset);
         }
 
         internal static void WriteAChars(byte[] buffer, int offset, int numBytes, string str)
@@ -404,7 +404,7 @@ namespace DiscUtils.Iso9660
             }
 
             string strForm = dateTime.ToString("yyyyMMddHHmmssff", CultureInfo.InvariantCulture);
-            Utilities.StringToBytes(strForm, buffer, offset, 16);
+            EndianUtilities.StringToBytes(strForm, buffer, offset, 16);
             buffer[offset + 16] = 0;
         }
 

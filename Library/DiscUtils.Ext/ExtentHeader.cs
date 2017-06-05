@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
@@ -42,11 +42,11 @@ namespace DiscUtils.Ext
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt16LittleEndian(buffer, offset + 0);
-            Entries = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            MaxEntries = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
-            Depth = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            Generation = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
+            Magic = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0);
+            Entries = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 2);
+            MaxEntries = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
+            Depth = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 6);
+            Generation = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
             return 12;
         }
 

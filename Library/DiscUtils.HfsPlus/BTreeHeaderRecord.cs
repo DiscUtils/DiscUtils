@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -49,20 +49,20 @@ namespace DiscUtils.HfsPlus
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            TreeDepth = Utilities.ToUInt16BigEndian(buffer, offset + 0);
-            RootNode = Utilities.ToUInt32BigEndian(buffer, offset + 2);
-            NumLeafRecords = Utilities.ToUInt32BigEndian(buffer, offset + 6);
-            FirstLeafNode = Utilities.ToUInt32BigEndian(buffer, offset + 10);
-            LastLeafNode = Utilities.ToUInt32BigEndian(buffer, offset + 14);
-            NodeSize = Utilities.ToUInt16BigEndian(buffer, offset + 18);
-            MaxKeyLength = Utilities.ToUInt16BigEndian(buffer, offset + 20);
-            TotalNodes = Utilities.ToUInt16BigEndian(buffer, offset + 22);
-            FreeNodes = Utilities.ToUInt32BigEndian(buffer, offset + 24);
-            Res1 = Utilities.ToUInt16BigEndian(buffer, offset + 28);
-            ClumpSize = Utilities.ToUInt32BigEndian(buffer, offset + 30);
+            TreeDepth = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0);
+            RootNode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 2);
+            NumLeafRecords = EndianUtilities.ToUInt32BigEndian(buffer, offset + 6);
+            FirstLeafNode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 10);
+            LastLeafNode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 14);
+            NodeSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 18);
+            MaxKeyLength = EndianUtilities.ToUInt16BigEndian(buffer, offset + 20);
+            TotalNodes = EndianUtilities.ToUInt16BigEndian(buffer, offset + 22);
+            FreeNodes = EndianUtilities.ToUInt32BigEndian(buffer, offset + 24);
+            Res1 = EndianUtilities.ToUInt16BigEndian(buffer, offset + 28);
+            ClumpSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 30);
             TreeType = buffer[offset + 34];
             KeyCompareType = buffer[offset + 35];
-            Attributes = Utilities.ToUInt32BigEndian(buffer, offset + 36);
+            Attributes = EndianUtilities.ToUInt32BigEndian(buffer, offset + 36);
 
             return 104;
         }

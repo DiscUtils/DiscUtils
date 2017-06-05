@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -240,7 +240,7 @@ namespace DiscUtils.Iso9660
             return fi;
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             List<BuilderExtent> fixedRegions = new List<BuilderExtent>();
 
@@ -269,14 +269,14 @@ namespace DiscUtils.Iso9660
                     (uint)(bootImagePos / IsoUtilities.SectorSize));
                 BuilderStreamExtent bootImageExtent = new BuilderStreamExtent(focus, realBootImage);
                 fixedRegions.Add(bootImageExtent);
-                focus += Utilities.RoundUp(bootImageExtent.Length, IsoUtilities.SectorSize);
+                focus += MathUtilities.RoundUp(bootImageExtent.Length, IsoUtilities.SectorSize);
 
                 bootCatalogPos = focus;
                 byte[] bootCatalog = new byte[IsoUtilities.SectorSize];
                 BootValidationEntry bve = new BootValidationEntry();
                 bve.WriteTo(bootCatalog, 0x00);
-                _bootEntry.ImageStart = (uint)Utilities.Ceil(bootImagePos, IsoUtilities.SectorSize);
-                _bootEntry.SectorCount = (ushort)Utilities.Ceil(_bootImage.Length, Sizes.Sector);
+                _bootEntry.ImageStart = (uint)MathUtilities.Ceil(bootImagePos, IsoUtilities.SectorSize);
+                _bootEntry.SectorCount = (ushort)MathUtilities.Ceil(_bootImage.Length, Sizes.Sector);
                 _bootEntry.WriteTo(bootCatalog, 0x20);
                 fixedRegions.Add(new BuilderBufferExtent(bootCatalogPos, bootCatalog));
                 focus += IsoUtilities.SectorSize;
@@ -299,7 +299,7 @@ namespace DiscUtils.Iso9660
                     fixedRegions.Add(extent);
                 }
 
-                focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+                focus += MathUtilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
             }
 
             // ####################################################################
@@ -317,7 +317,7 @@ namespace DiscUtils.Iso9660
                 primaryLocationTable.Add(di, (uint)(focus / IsoUtilities.SectorSize));
                 DirectoryExtent extent = new DirectoryExtent(di, primaryLocationTable, Encoding.ASCII, focus);
                 fixedRegions.Add(extent);
-                focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+                focus += MathUtilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
             }
 
             // Find end of the second directory table, fixing supplementary directories in place.
@@ -327,7 +327,7 @@ namespace DiscUtils.Iso9660
                 supplementaryLocationTable.Add(di, (uint)(focus / IsoUtilities.SectorSize));
                 DirectoryExtent extent = new DirectoryExtent(di, supplementaryLocationTable, suppEncoding, focus);
                 fixedRegions.Add(extent);
-                focus += Utilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+                focus += MathUtilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
             }
 
             // ####################################################################
@@ -344,24 +344,24 @@ namespace DiscUtils.Iso9660
             long startOfFirstPathTable = focus;
             PathTable pathTable = new PathTable(false, Encoding.ASCII, _dirs, primaryLocationTable, focus);
             fixedRegions.Add(pathTable);
-            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+            focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
             long primaryPathTableLength = pathTable.Length;
 
             long startOfSecondPathTable = focus;
             pathTable = new PathTable(true, Encoding.ASCII, _dirs, primaryLocationTable, focus);
             fixedRegions.Add(pathTable);
-            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+            focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
 
             long startOfThirdPathTable = focus;
             pathTable = new PathTable(false, suppEncoding, _dirs, supplementaryLocationTable, focus);
             fixedRegions.Add(pathTable);
-            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+            focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
             long supplementaryPathTableLength = pathTable.Length;
 
             long startOfFourthPathTable = focus;
             pathTable = new PathTable(true, suppEncoding, _dirs, supplementaryLocationTable, focus);
             fixedRegions.Add(pathTable);
-            focus += Utilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+            focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
 
             // Find the end of the disk
             totalLength = focus;
@@ -429,20 +429,20 @@ namespace DiscUtils.Iso9660
                 return bootImage;
             }
 
-            byte[] bootData = Utilities.ReadFully(bootImage, (int)bootImage.Length);
+            byte[] bootData = StreamUtilities.ReadFully(bootImage, (int)bootImage.Length);
 
             Array.Clear(bootData, 8, 56);
 
             uint checkSum = 0;
             for (int i = 64; i < bootData.Length; i += 4)
             {
-                checkSum += Utilities.ToUInt32LittleEndian(bootData, i);
+                checkSum += EndianUtilities.ToUInt32LittleEndian(bootData, i);
             }
 
-            Utilities.WriteBytesLittleEndian(pvdLba, bootData, 8);
-            Utilities.WriteBytesLittleEndian(bootImageLba, bootData, 12);
-            Utilities.WriteBytesLittleEndian(bootData.Length, bootData, 16);
-            Utilities.WriteBytesLittleEndian(checkSum, bootData, 20);
+            EndianUtilities.WriteBytesLittleEndian(pvdLba, bootData, 8);
+            EndianUtilities.WriteBytesLittleEndian(bootImageLba, bootData, 12);
+            EndianUtilities.WriteBytesLittleEndian(bootData.Length, bootData, 16);
+            EndianUtilities.WriteBytesLittleEndian(checkSum, bootData, 20);
 
             return new MemoryStream(bootData, false);
         }

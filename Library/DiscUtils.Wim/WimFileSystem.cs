@@ -27,6 +27,7 @@ using System.IO;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -607,7 +608,7 @@ namespace DiscUtils.Wim
                 reader.Skip((int)(startPos + totalLength - reader.Position));
             }
 
-            _rootDirPos = Utilities.RoundUp(startPos + totalLength, 8);
+            _rootDirPos = MathUtilities.RoundUp(startPos + totalLength, 8);
         }
 
         private DirectoryEntry GetEntry(string path)

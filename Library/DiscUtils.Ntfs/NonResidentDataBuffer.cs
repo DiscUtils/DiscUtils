@@ -23,7 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.Ntfs
 {
@@ -112,7 +113,7 @@ namespace DiscUtils.Ntfs
                 throw new IOException("Attempt to read from file not opened for read");
             }
 
-            Utilities.AssertBufferParameters(buffer, offset, count);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count);
 
             // Limit read to length of attribute
             int totalToRead = (int)Math.Min(count, Capacity - pos);

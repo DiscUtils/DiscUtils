@@ -25,6 +25,7 @@ using System.IO;
 using System.Security.AccessControl;
 using DiscUtils;
 using DiscUtils.Ntfs;
+using DiscUtils.Streams;
 using Xunit;
 
 namespace LibraryTests.Ntfs

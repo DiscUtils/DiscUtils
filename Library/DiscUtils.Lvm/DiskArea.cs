@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Lvm
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class DiskArea : IByteArraySerializable
@@ -36,8 +36,8 @@ namespace DiscUtils.Lvm
         /// <inheritdoc />
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Offset = Utilities.ToUInt64LittleEndian(buffer, offset);
-            Length = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            Offset = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            Length = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
             return Size;
         }
 

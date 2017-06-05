@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -606,15 +607,15 @@ namespace DiscUtils.Vmdk
 
         internal static ServerSparseExtentHeader CreateServerSparseExtentHeader(long size)
         {
-            uint numSectors = (uint)Utilities.Ceil(size, Sizes.Sector);
-            uint numGDEntries = (uint)Utilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
+            uint numSectors = (uint)MathUtilities.Ceil(size, Sizes.Sector);
+            uint numGDEntries = (uint)MathUtilities.Ceil(numSectors * (long)Sizes.Sector, 2 * Sizes.OneMiB);
 
             ServerSparseExtentHeader header = new ServerSparseExtentHeader();
             header.Capacity = numSectors;
             header.GrainSize = 1;
             header.GdOffset = 4;
             header.NumGdEntries = numGDEntries;
-            header.FreeSector = (uint)(header.GdOffset + Utilities.Ceil(numGDEntries * 4, Sizes.Sector));
+            header.FreeSector = (uint)(header.GdOffset + MathUtilities.Ceil(numGDEntries * 4, Sizes.Sector));
             return header;
         }
 
@@ -743,35 +744,35 @@ namespace DiscUtils.Vmdk
             // of grain size
             const int GtesPerGt = 512;
             long grainSize = 128;
-            int numGrainTables = (int)Utilities.Ceil(size, grainSize * GtesPerGt * Sizes.Sector);
+            int numGrainTables = (int)MathUtilities.Ceil(size, grainSize * GtesPerGt * Sizes.Sector);
 
-            descriptorLength = Utilities.RoundUp(descriptorLength, Sizes.Sector);
+            descriptorLength = MathUtilities.RoundUp(descriptorLength, Sizes.Sector);
             descriptorStart = 0;
             if (descriptorLength != 0)
             {
                 descriptorStart = 1;
             }
 
-            long redundantGrainDirStart = Math.Max(descriptorStart, 1) + Utilities.Ceil(descriptorLength, Sizes.Sector);
+            long redundantGrainDirStart = Math.Max(descriptorStart, 1) + MathUtilities.Ceil(descriptorLength, Sizes.Sector);
             long redundantGrainDirLength = numGrainTables * 4;
 
             long redundantGrainTablesStart = redundantGrainDirStart +
-                                             Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
-            long redundantGrainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+                                             MathUtilities.Ceil(redundantGrainDirLength, Sizes.Sector);
+            long redundantGrainTablesLength = numGrainTables * MathUtilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
 
-            long grainDirStart = redundantGrainTablesStart + Utilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
+            long grainDirStart = redundantGrainTablesStart + MathUtilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
             long grainDirLength = numGrainTables * 4;
 
-            long grainTablesStart = grainDirStart + Utilities.Ceil(grainDirLength, Sizes.Sector);
-            long grainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+            long grainTablesStart = grainDirStart + MathUtilities.Ceil(grainDirLength, Sizes.Sector);
+            long grainTablesLength = numGrainTables * MathUtilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
 
-            long dataStart = Utilities.RoundUp(grainTablesStart + Utilities.Ceil(grainTablesLength, Sizes.Sector),
+            long dataStart = MathUtilities.RoundUp(grainTablesStart + MathUtilities.Ceil(grainTablesLength, Sizes.Sector),
                 grainSize);
 
             // Generate the header, and write it
             HostedSparseExtentHeader header = new HostedSparseExtentHeader();
             header.Flags = HostedSparseExtentFlags.ValidLineDetectionTest | HostedSparseExtentFlags.RedundantGrainTable;
-            header.Capacity = Utilities.RoundUp(size, grainSize * Sizes.Sector) / Sizes.Sector;
+            header.Capacity = MathUtilities.RoundUp(size, grainSize * Sizes.Sector) / Sizes.Sector;
             header.GrainSize = grainSize;
             header.DescriptorOffset = descriptorStart;
             header.DescriptorSize = descriptorLength / Sizes.Sector;
@@ -795,8 +796,8 @@ namespace DiscUtils.Vmdk
             byte[] grainDir = new byte[numGrainTables * 4];
             for (int i = 0; i < numGrainTables; ++i)
             {
-                Utilities.WriteBytesLittleEndian(
-                    (uint)(redundantGrainTablesStart + i * Utilities.Ceil(GtesPerGt * 4, Sizes.Sector)), grainDir, i * 4);
+                EndianUtilities.WriteBytesLittleEndian(
+                    (uint)(redundantGrainTablesStart + i * MathUtilities.Ceil(GtesPerGt * 4, Sizes.Sector)), grainDir, i * 4);
             }
 
             extentStream.Position = redundantGrainDirStart * Sizes.Sector;
@@ -807,15 +808,15 @@ namespace DiscUtils.Vmdk
             for (int i = 0; i < numGrainTables; ++i)
             {
                 extentStream.Position = redundantGrainTablesStart * Sizes.Sector +
-                                        i * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+                                        i * MathUtilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
                 extentStream.Write(grainTable, 0, grainTable.Length);
             }
 
             // Generate the main grain dir, and write it
             for (int i = 0; i < numGrainTables; ++i)
             {
-                Utilities.WriteBytesLittleEndian(
-                    (uint)(grainTablesStart + i * Utilities.Ceil(GtesPerGt * 4, Sizes.Sector)), grainDir, i * 4);
+                EndianUtilities.WriteBytesLittleEndian(
+                    (uint)(grainTablesStart + i * MathUtilities.Ceil(GtesPerGt * 4, Sizes.Sector)), grainDir, i * 4);
             }
 
             extentStream.Position = grainDirStart * Sizes.Sector;
@@ -825,7 +826,7 @@ namespace DiscUtils.Vmdk
             for (int i = 0; i < numGrainTables; ++i)
             {
                 extentStream.Position = grainTablesStart * Sizes.Sector +
-                                        i * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+                                        i * MathUtilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
                 extentStream.Write(grainTable, 0, grainTable.Length);
             }
 
@@ -983,9 +984,9 @@ namespace DiscUtils.Vmdk
         private void LoadDescriptor(Stream s)
         {
             s.Position = 0;
-            byte[] header = Utilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
+            byte[] header = StreamUtilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
             if (header.Length < Sizes.Sector ||
-                Utilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
+                EndianUtilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
             {
                 s.Position = 0;
                 _descriptor = new DescriptorFile(s);

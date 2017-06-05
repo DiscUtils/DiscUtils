@@ -22,6 +22,7 @@
 
 using System;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {
@@ -75,19 +76,19 @@ namespace DiscUtils.Partitions
 
         public bool ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.BytesToString(buffer, offset + 0, 8);
-            Version = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-            HeaderSize = Utilities.ToInt32LittleEndian(buffer, offset + 12);
-            Crc = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            HeaderLba = Utilities.ToInt64LittleEndian(buffer, offset + 24);
-            AlternateHeaderLba = Utilities.ToInt64LittleEndian(buffer, offset + 32);
-            FirstUsable = Utilities.ToInt64LittleEndian(buffer, offset + 40);
-            LastUsable = Utilities.ToInt64LittleEndian(buffer, offset + 48);
-            DiskGuid = Utilities.ToGuidLittleEndian(buffer, offset + 56);
-            PartitionEntriesLba = Utilities.ToInt64LittleEndian(buffer, offset + 72);
-            PartitionEntryCount = Utilities.ToUInt32LittleEndian(buffer, offset + 80);
-            PartitionEntrySize = Utilities.ToInt32LittleEndian(buffer, offset + 84);
-            EntriesCrc = Utilities.ToUInt32LittleEndian(buffer, offset + 88);
+            Signature = EndianUtilities.BytesToString(buffer, offset + 0, 8);
+            Version = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+            HeaderSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 12);
+            Crc = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
+            HeaderLba = EndianUtilities.ToInt64LittleEndian(buffer, offset + 24);
+            AlternateHeaderLba = EndianUtilities.ToInt64LittleEndian(buffer, offset + 32);
+            FirstUsable = EndianUtilities.ToInt64LittleEndian(buffer, offset + 40);
+            LastUsable = EndianUtilities.ToInt64LittleEndian(buffer, offset + 48);
+            DiskGuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 56);
+            PartitionEntriesLba = EndianUtilities.ToInt64LittleEndian(buffer, offset + 72);
+            PartitionEntryCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 80);
+            PartitionEntrySize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 84);
+            EntriesCrc = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 88);
 
             // In case the header has new fields unknown to us, store the entire header
             // as a byte array
@@ -109,22 +110,22 @@ namespace DiscUtils.Partitions
             Array.Copy(Buffer, 0, buffer, offset, Buffer.Length);
 
             // Next, write the fields
-            Utilities.StringToBytes(Signature, buffer, offset + 0, 8);
-            Utilities.WriteBytesLittleEndian(Version, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(HeaderSize, buffer, offset + 12);
-            Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 16);
-            Utilities.WriteBytesLittleEndian(HeaderLba, buffer, offset + 24);
-            Utilities.WriteBytesLittleEndian(AlternateHeaderLba, buffer, offset + 32);
-            Utilities.WriteBytesLittleEndian(FirstUsable, buffer, offset + 40);
-            Utilities.WriteBytesLittleEndian(LastUsable, buffer, offset + 48);
-            Utilities.WriteBytesLittleEndian(DiskGuid, buffer, offset + 56);
-            Utilities.WriteBytesLittleEndian(PartitionEntriesLba, buffer, offset + 72);
-            Utilities.WriteBytesLittleEndian(PartitionEntryCount, buffer, offset + 80);
-            Utilities.WriteBytesLittleEndian(PartitionEntrySize, buffer, offset + 84);
-            Utilities.WriteBytesLittleEndian(EntriesCrc, buffer, offset + 88);
+            EndianUtilities.StringToBytes(Signature, buffer, offset + 0, 8);
+            EndianUtilities.WriteBytesLittleEndian(Version, buffer, offset + 8);
+            EndianUtilities.WriteBytesLittleEndian(HeaderSize, buffer, offset + 12);
+            EndianUtilities.WriteBytesLittleEndian((uint)0, buffer, offset + 16);
+            EndianUtilities.WriteBytesLittleEndian(HeaderLba, buffer, offset + 24);
+            EndianUtilities.WriteBytesLittleEndian(AlternateHeaderLba, buffer, offset + 32);
+            EndianUtilities.WriteBytesLittleEndian(FirstUsable, buffer, offset + 40);
+            EndianUtilities.WriteBytesLittleEndian(LastUsable, buffer, offset + 48);
+            EndianUtilities.WriteBytesLittleEndian(DiskGuid, buffer, offset + 56);
+            EndianUtilities.WriteBytesLittleEndian(PartitionEntriesLba, buffer, offset + 72);
+            EndianUtilities.WriteBytesLittleEndian(PartitionEntryCount, buffer, offset + 80);
+            EndianUtilities.WriteBytesLittleEndian(PartitionEntrySize, buffer, offset + 84);
+            EndianUtilities.WriteBytesLittleEndian(EntriesCrc, buffer, offset + 88);
 
             // Calculate & write the CRC
-            Utilities.WriteBytesLittleEndian(CalcCrc(buffer, offset, HeaderSize), buffer, offset + 16);
+            EndianUtilities.WriteBytesLittleEndian(CalcCrc(buffer, offset, HeaderSize), buffer, offset + 16);
 
             // Update the cached copy - re-allocate the buffer to allow for HeaderSize potentially having changed
             Buffer = new byte[HeaderSize];
@@ -137,7 +138,7 @@ namespace DiscUtils.Partitions
             Array.Copy(buffer, offset, temp, 0, count);
 
             // Reset CRC field
-            Utilities.WriteBytesLittleEndian((uint)0, temp, 16);
+            EndianUtilities.WriteBytesLittleEndian((uint)0, temp, 16);
 
             return Crc32LittleEndian.Compute(Crc32Algorithm.Common, temp, 0, count);
         }

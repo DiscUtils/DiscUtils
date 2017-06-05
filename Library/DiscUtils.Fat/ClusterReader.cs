@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Fat
 {
@@ -65,7 +65,7 @@ namespace DiscUtils.Fat
             uint firstSector = (uint)((cluster - 2) * _sectorsPerCluster + _firstDataSector);
 
             _stream.Position = firstSector * _bytesPerSector;
-            if (Utilities.ReadFully(_stream, buffer, offset, _clusterSize) != _clusterSize)
+            if (StreamUtilities.ReadFully(_stream, buffer, offset, _clusterSize) != _clusterSize)
             {
                 throw new IOException("Failed to read cluster " + cluster);
             }

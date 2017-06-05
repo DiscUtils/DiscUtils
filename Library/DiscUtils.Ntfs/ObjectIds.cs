@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -108,13 +108,13 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Id = Utilities.ToGuidLittleEndian(buffer, offset + 0);
+                Id = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0);
                 return 16;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
+                EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
             }
 
             public override string ToString()

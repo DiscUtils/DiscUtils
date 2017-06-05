@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -44,7 +45,7 @@ namespace DiscUtils.Wim
         {
             _fileStream = stream;
 
-            byte[] buffer = Utilities.ReadFully(stream, 512);
+            byte[] buffer = StreamUtilities.ReadFully(stream, 512);
             _fileHeader = new FileHeader();
             _fileHeader.Read(buffer, 0);
 
@@ -128,7 +129,7 @@ namespace DiscUtils.Wim
                 long numRead = 0;
                 while (numRead < s.Length)
                 {
-                    byte[] resBuffer = Utilities.ReadFully(s, ResourceInfo.Size);
+                    byte[] resBuffer = StreamUtilities.ReadFully(s, ResourceInfo.Size);
                     numRead += ResourceInfo.Size;
 
                     ResourceInfo info = new ResourceInfo();
@@ -151,7 +152,7 @@ namespace DiscUtils.Wim
 
         internal ShortResourceHeader LocateResource(byte[] hash)
         {
-            uint hashHash = Utilities.ToUInt32LittleEndian(hash, 0);
+            uint hashHash = EndianUtilities.ToUInt32LittleEndian(hash, 0);
 
             if (!_resources.ContainsKey(hashHash))
             {
@@ -190,13 +191,13 @@ namespace DiscUtils.Wim
                 long numRead = 0;
                 while (numRead < s.Length)
                 {
-                    byte[] resBuffer = Utilities.ReadFully(s, ResourceInfo.Size);
+                    byte[] resBuffer = StreamUtilities.ReadFully(s, ResourceInfo.Size);
                     numRead += ResourceInfo.Size;
 
                     ResourceInfo info = new ResourceInfo();
                     info.Read(resBuffer, 0);
 
-                    uint hashHash = Utilities.ToUInt32LittleEndian(info.Hash, 0);
+                    uint hashHash = EndianUtilities.ToUInt32LittleEndian(info.Hash, 0);
 
                     if (!_resources.ContainsKey(hashHash))
                     {

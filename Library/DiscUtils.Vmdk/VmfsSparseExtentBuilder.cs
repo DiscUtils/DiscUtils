@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -36,7 +36,7 @@ namespace DiscUtils.Vmdk
             _content = content;
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             List<BuilderExtent> extents = new List<BuilderExtent>();
 
@@ -80,7 +80,7 @@ namespace DiscUtils.Vmdk
             private MemoryStream _streamView;
 
             public GlobalDirectoryExtent(ServerSparseExtentHeader header)
-                : base(header.GdOffset * Sizes.Sector, Utilities.RoundUp(header.NumGdEntries * 4, Sizes.Sector))
+                : base(header.GdOffset * Sizes.Sector, MathUtilities.RoundUp(header.NumGdEntries * 4, Sizes.Sector))
             {
                 _buffer = new byte[Length];
             }
@@ -96,21 +96,21 @@ namespace DiscUtils.Vmdk
 
             public void SetEntry(int index, uint grainTableSector)
             {
-                Utilities.WriteBytesLittleEndian(grainTableSector, _buffer, index * 4);
+                EndianUtilities.WriteBytesLittleEndian(grainTableSector, _buffer, index * 4);
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 _streamView = new MemoryStream(_buffer, 0, _buffer.Length, false);
             }
 
-            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            public override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 _streamView.Position = diskOffset - Start;
                 return _streamView.Read(block, offset, count);
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 if (_streamView != null)
                 {
@@ -157,9 +157,9 @@ namespace DiscUtils.Vmdk
                 }
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
-                byte[] grainTable = new byte[Utilities.RoundUp(_header.NumGTEsPerGT * 4, Sizes.Sector)];
+                byte[] grainTable = new byte[MathUtilities.RoundUp(_header.NumGTEsPerGT * 4, Sizes.Sector)];
 
                 long dataSector = (Start + grainTable.Length) / Sizes.Sector;
 
@@ -169,7 +169,7 @@ namespace DiscUtils.Vmdk
                 {
                     for (int i = 0; i < grainRange.Count; ++i)
                     {
-                        Utilities.WriteBytesLittleEndian((uint)dataSector, grainTable,
+                        EndianUtilities.WriteBytesLittleEndian((uint)dataSector, grainTable,
                             (int)(4 * (grainRange.Offset + i)));
                         dataSector += _header.GrainSize;
                         _grainMapping.Add(grainRange.Offset + i);
@@ -180,7 +180,7 @@ namespace DiscUtils.Vmdk
                 _grainTableStream = new MemoryStream(grainTable, 0, grainTable.Length, false);
             }
 
-            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            public override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 long relOffset = diskOffset - Start;
 
@@ -200,7 +200,7 @@ namespace DiscUtils.Vmdk
                 return _content.Read(block, offset, maxToRead);
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 if (_grainTableStream != null)
                 {
@@ -215,7 +215,7 @@ namespace DiscUtils.Vmdk
             private static long CalcSize(SparseStream content, ServerSparseExtentHeader header)
             {
                 long numDataGrains = StreamExtent.BlockCount(content.Extents, header.GrainSize * Sizes.Sector);
-                long grainTableSectors = Utilities.Ceil(header.NumGTEsPerGT * 4, Sizes.Sector);
+                long grainTableSectors = MathUtilities.Ceil(header.NumGTEsPerGT * 4, Sizes.Sector);
 
                 return (grainTableSectors + numDataGrains * header.GrainSize) * Sizes.Sector;
             }

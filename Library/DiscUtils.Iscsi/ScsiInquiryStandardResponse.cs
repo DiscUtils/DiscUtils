@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -62,9 +62,9 @@ namespace DiscUtils.Iscsi
             Removable = (buffer[1] & 0x80) != 0;
             SpecificationVersion = buffer[2];
 
-            VendorId = Utilities.BytesToString(buffer, 8, 8);
-            ProductId = Utilities.BytesToString(buffer, 16, 16);
-            ProductRevision = Utilities.BytesToString(buffer, 32, 4);
+            VendorId = EndianUtilities.BytesToString(buffer, 8, 8);
+            ProductId = EndianUtilities.BytesToString(buffer, 16, 16);
+            ProductRevision = EndianUtilities.BytesToString(buffer, 32, 4);
         }
     }
 }

@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {

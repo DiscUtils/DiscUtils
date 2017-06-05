@@ -23,7 +23,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -58,8 +58,8 @@ namespace DiscUtils.Vhdx
             get
             {
                 byte[] buffer = new byte[8];
-                Utilities.WriteBytesLittleEndian(_table.Signature, buffer, 0);
-                return Utilities.BytesToString(buffer, 0, 8);
+                EndianUtilities.WriteBytesLittleEndian(_table.Signature, buffer, 0);
+                return EndianUtilities.BytesToString(buffer, 0, 8);
             }
         }
 

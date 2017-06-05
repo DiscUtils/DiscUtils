@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
@@ -70,7 +71,7 @@ namespace DiscUtils.Iso9660
                 if (clEntry != null)
                 {
                     _context.DataStream.Position = clEntry.ChildDirLocation * _context.VolumeDescriptor.LogicalBlockSize;
-                    byte[] firstSector = Utilities.ReadFully(_context.DataStream,
+                    byte[] firstSector = StreamUtilities.ReadFully(_context.DataStream,
                         _context.VolumeDescriptor.LogicalBlockSize);
 
                     DirectoryRecord.ReadFrom(firstSector, 0, _context.VolumeDescriptor.CharacterEncoding, out _record);

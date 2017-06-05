@@ -23,8 +23,6 @@
 namespace DiscUtils.Lvm
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     [Flags]
     internal enum RawLocationFlags : uint

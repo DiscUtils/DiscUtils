@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -44,15 +44,15 @@ namespace DiscUtils.Wim
 
         public void Read(byte[] buffer, int offset)
         {
-            Tag = Utilities.BytesToString(buffer, offset, 8);
-            HeaderSize = Utilities.ToUInt32LittleEndian(buffer, 8);
-            Version = Utilities.ToUInt32LittleEndian(buffer, 12);
-            Flags = (FileFlags)Utilities.ToUInt32LittleEndian(buffer, 16);
-            CompressionSize = Utilities.ToInt32LittleEndian(buffer, 20);
-            WimGuid = Utilities.ToGuidLittleEndian(buffer, 24);
-            PartNumber = Utilities.ToUInt16LittleEndian(buffer, 40);
-            TotalParts = Utilities.ToUInt16LittleEndian(buffer, 42);
-            ImageCount = Utilities.ToUInt32LittleEndian(buffer, 44);
+            Tag = EndianUtilities.BytesToString(buffer, offset, 8);
+            HeaderSize = EndianUtilities.ToUInt32LittleEndian(buffer, 8);
+            Version = EndianUtilities.ToUInt32LittleEndian(buffer, 12);
+            Flags = (FileFlags)EndianUtilities.ToUInt32LittleEndian(buffer, 16);
+            CompressionSize = EndianUtilities.ToInt32LittleEndian(buffer, 20);
+            WimGuid = EndianUtilities.ToGuidLittleEndian(buffer, 24);
+            PartNumber = EndianUtilities.ToUInt16LittleEndian(buffer, 40);
+            TotalParts = EndianUtilities.ToUInt16LittleEndian(buffer, 42);
+            ImageCount = EndianUtilities.ToUInt32LittleEndian(buffer, 44);
 
             OffsetTableHeader = new ShortResourceHeader();
             OffsetTableHeader.Read(buffer, 48);
@@ -63,7 +63,7 @@ namespace DiscUtils.Wim
             BootMetaData = new ShortResourceHeader();
             BootMetaData.Read(buffer, 96);
 
-            BootIndex = Utilities.ToUInt32LittleEndian(buffer, 120);
+            BootIndex = EndianUtilities.ToUInt32LittleEndian(buffer, 120);
 
             IntegrityHeader = new ShortResourceHeader();
             IntegrityHeader.Read(buffer, 124);

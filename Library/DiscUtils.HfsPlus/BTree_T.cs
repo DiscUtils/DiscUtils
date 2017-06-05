@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -35,12 +35,12 @@ namespace DiscUtils.HfsPlus
         {
             _data = data;
 
-            byte[] headerInfo = Utilities.ReadFully(_data, 0, 114);
+            byte[] headerInfo = StreamUtilities.ReadFully(_data, 0, 114);
 
             _header = new BTreeHeaderRecord();
             _header.ReadFrom(headerInfo, 14);
 
-            byte[] node0data = Utilities.ReadFully(_data, 0, _header.NodeSize);
+            byte[] node0data = StreamUtilities.ReadFully(_data, 0, _header.NodeSize);
 
             BTreeHeaderNode node0 = BTreeNode.ReadNode(this, node0data, 0) as BTreeHeaderNode;
             node0.ReadFrom(node0data, 0);
@@ -68,7 +68,7 @@ namespace DiscUtils.HfsPlus
 
         internal BTreeKeyedNode<TKey> GetKeyedNode(uint nodeId)
         {
-            byte[] nodeData = Utilities.ReadFully(_data, (int)nodeId * _header.NodeSize, _header.NodeSize);
+            byte[] nodeData = StreamUtilities.ReadFully(_data, (int)nodeId * _header.NodeSize, _header.NodeSize);
 
             BTreeKeyedNode<TKey> node = BTreeNode.ReadNode<TKey>(this, nodeData, 0) as BTreeKeyedNode<TKey>;
             node.ReadFrom(nodeData, 0);

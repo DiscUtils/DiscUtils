@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
@@ -184,7 +184,7 @@ namespace DiscUtils.Iso9660
             }
 
             data.Position = 0x8000;
-            int numRead = Utilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
+            int numRead = StreamUtilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
             if (numRead != IsoUtilities.SectorSize)
             {
                 return false;

@@ -23,8 +23,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using DiscUtils.Internal;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiscUtils.ApplePartitionMap
 {
@@ -45,7 +45,7 @@ namespace DiscUtils.ApplePartitionMap
             _stream = stream;
 
             stream.Position = 0;
-            byte[] initialBytes = Utilities.ReadFully(stream, 1024);
+            byte[] initialBytes = StreamUtilities.ReadFully(stream, 1024);
 
             BlockZero b0 = new BlockZero();
             b0.ReadFrom(initialBytes, 0);
@@ -53,7 +53,7 @@ namespace DiscUtils.ApplePartitionMap
             PartitionMapEntry initialPart = new PartitionMapEntry(_stream);
             initialPart.ReadFrom(initialBytes, 512);
 
-            byte[] partTableData = Utilities.ReadFully(stream, (int)(initialPart.MapEntries - 1) * 512);
+            byte[] partTableData = StreamUtilities.ReadFully(stream, (int)(initialPart.MapEntries - 1) * 512);
 
             _partitions = new PartitionMapEntry[initialPart.MapEntries - 1];
             for (uint i = 0; i < initialPart.MapEntries - 1; ++i)

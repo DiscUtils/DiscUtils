@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {
@@ -40,11 +40,11 @@ namespace DiscUtils.Dmg
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Type = (RunType)Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            SectorStart = Utilities.ToInt64BigEndian(buffer, offset + 8);
-            SectorCount = Utilities.ToInt64BigEndian(buffer, offset + 16);
-            CompOffset = Utilities.ToInt64BigEndian(buffer, offset + 24);
-            CompLength = Utilities.ToInt64BigEndian(buffer, offset + 32);
+            Type = (RunType)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            SectorStart = EndianUtilities.ToInt64BigEndian(buffer, offset + 8);
+            SectorCount = EndianUtilities.ToInt64BigEndian(buffer, offset + 16);
+            CompOffset = EndianUtilities.ToInt64BigEndian(buffer, offset + 24);
+            CompLength = EndianUtilities.ToInt64BigEndian(buffer, offset + 32);
 
             return 40;
         }

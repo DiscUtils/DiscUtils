@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -197,13 +198,13 @@ namespace DiscUtils.Vhdx
             get
             {
                 _fileStream.Position = 0;
-                FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
+                FileHeader fileHeader = StreamUtilities.ReadStruct<FileHeader>(_fileStream);
 
                 _fileStream.Position = 64 * Sizes.OneKiB;
-                VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+                VhdxHeader vhdxHeader1 = StreamUtilities.ReadStruct<VhdxHeader>(_fileStream);
 
                 _fileStream.Position = 128 * Sizes.OneKiB;
-                VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+                VhdxHeader vhdxHeader2 = StreamUtilities.ReadStruct<VhdxHeader>(_fileStream);
 
                 LogSequence activeLogSequence = FindActiveLogSequence();
 
@@ -517,8 +518,8 @@ namespace DiscUtils.Vhdx
             int logicalSectorSize = 512;
             int physicalSectorSize = 4096;
             long chunkRatio = 0x800000L * logicalSectorSize / blockSize;
-            long dataBlocksCount = Utilities.Ceil(capacity, blockSize);
-            long sectorBitmapBlocksCount = Utilities.Ceil(dataBlocksCount, chunkRatio);
+            long dataBlocksCount = MathUtilities.Ceil(capacity, blockSize);
+            long sectorBitmapBlocksCount = MathUtilities.Ceil(dataBlocksCount, chunkRatio);
             long totalBatEntriesDynamic = dataBlocksCount + (dataBlocksCount - 1) / chunkRatio;
 
             FileHeader fileHeader = new FileHeader { Creator = ".NET DiscUtils" };
@@ -556,26 +557,26 @@ namespace DiscUtils.Vhdx
             RegionEntry batRegion = new RegionEntry();
             batRegion.Guid = RegionEntry.BatGuid;
             batRegion.FileOffset = 3 * Sizes.OneMiB;
-            batRegion.Length = (uint)Utilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
+            batRegion.Length = (uint)MathUtilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
             batRegion.Flags = RegionFlags.Required;
             regionTable.Regions.Add(batRegion.Guid, batRegion);
 
             fileEnd += batRegion.Length;
 
             stream.Position = 0;
-            Utilities.WriteStruct(stream, fileHeader);
+            StreamUtilities.WriteStruct(stream, fileHeader);
 
             stream.Position = 64 * Sizes.OneKiB;
-            Utilities.WriteStruct(stream, header1);
+            StreamUtilities.WriteStruct(stream, header1);
 
             stream.Position = 128 * Sizes.OneKiB;
-            Utilities.WriteStruct(stream, header2);
+            StreamUtilities.WriteStruct(stream, header2);
 
             stream.Position = 192 * Sizes.OneKiB;
-            Utilities.WriteStruct(stream, regionTable);
+            StreamUtilities.WriteStruct(stream, regionTable);
 
             stream.Position = 256 * Sizes.OneKiB;
-            Utilities.WriteStruct(stream, regionTable);
+            StreamUtilities.WriteStruct(stream, regionTable);
 
             // Set stream to min size
             stream.Position = fileEnd - 1;
@@ -603,7 +604,7 @@ namespace DiscUtils.Vhdx
         private void Initialize()
         {
             _fileStream.Position = 0;
-            FileHeader fileHeader = Utilities.ReadStruct<FileHeader>(_fileStream);
+            FileHeader fileHeader = StreamUtilities.ReadStruct<FileHeader>(_fileStream);
             if (!fileHeader.IsValid)
             {
                 throw new IOException("Invalid VHDX file - file signature mismatch");
@@ -633,7 +634,7 @@ namespace DiscUtils.Vhdx
         private IEnumerable<StreamExtent> BatControlledFileExtents()
         {
             _batStream.Position = 0;
-            byte[] batData = Utilities.ReadFully(_batStream, (int)_batStream.Length);
+            byte[] batData = StreamUtilities.ReadFully(_batStream, (int)_batStream.Length);
 
             uint blockSize = _metadata.FileParameters.BlockSize;
             long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;
@@ -642,7 +643,7 @@ namespace DiscUtils.Vhdx
             List<StreamExtent> extents = new List<StreamExtent>();
             for (int i = 0; i < batData.Length; i += 8)
             {
-                ulong entry = Utilities.ToUInt64LittleEndian(batData, i);
+                ulong entry = EndianUtilities.ToUInt64LittleEndian(batData, i);
                 long filePos = (long)((entry >> 20) & 0xFFFFFFFFFFF) * Sizes.OneMiB;
                 if (filePos != 0)
                 {
@@ -769,7 +770,7 @@ namespace DiscUtils.Vhdx
         private void ReadRegionTable()
         {
             _fileStream.Position = 192 * Sizes.OneKiB;
-            _regionTable = Utilities.ReadStruct<RegionTable>(_fileStream);
+            _regionTable = StreamUtilities.ReadStruct<RegionTable>(_fileStream);
             foreach (RegionEntry entry in _regionTable.Regions.Values)
             {
                 if ((entry.Flags & RegionFlags.Required) != 0)
@@ -791,7 +792,7 @@ namespace DiscUtils.Vhdx
             _activeHeader = 0;
 
             _fileStream.Position = 64 * Sizes.OneKiB;
-            VhdxHeader vhdxHeader1 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+            VhdxHeader vhdxHeader1 = StreamUtilities.ReadStruct<VhdxHeader>(_fileStream);
             if (vhdxHeader1.IsValid)
             {
                 _header = vhdxHeader1;
@@ -799,7 +800,7 @@ namespace DiscUtils.Vhdx
             }
 
             _fileStream.Position = 128 * Sizes.OneKiB;
-            VhdxHeader vhdxHeader2 = Utilities.ReadStruct<VhdxHeader>(_fileStream);
+            VhdxHeader vhdxHeader2 = StreamUtilities.ReadStruct<VhdxHeader>(_fileStream);
             if (vhdxHeader2.IsValid && (_activeHeader == 0 || _header.SequenceNumber < vhdxHeader2.SequenceNumber))
             {
                 _header = vhdxHeader2;
@@ -830,14 +831,14 @@ namespace DiscUtils.Vhdx
                 otherPos = 128 * Sizes.OneKiB;
             }
 
-            Utilities.WriteStruct(_fileStream, _header);
+            StreamUtilities.WriteStruct(_fileStream, _header);
             _fileStream.Flush();
 
             _header.SequenceNumber++;
             _header.CalcChecksum();
 
             _fileStream.Position = otherPos;
-            Utilities.WriteStruct(_fileStream, _header);
+            StreamUtilities.WriteStruct(_fileStream, _header);
             _fileStream.Flush();
         }
 

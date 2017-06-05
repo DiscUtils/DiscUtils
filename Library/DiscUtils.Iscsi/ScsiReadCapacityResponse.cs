@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -50,8 +50,8 @@ namespace DiscUtils.Iscsi
                 return;
             }
 
-            NumLogicalBlocks = Utilities.ToUInt32BigEndian(buffer, offset);
-            LogicalBlockSize = Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            NumLogicalBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            LogicalBlockSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
         }
     }
 }

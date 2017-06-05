@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -68,17 +68,17 @@ namespace DiscUtils.Iscsi
             _commandSequenceNumber = _connection.Session.CommandSequenceNumber;
             _expectedStatusSequenceNumber = _connection.ExpectedStatusSequenceNumber;
 
-            byte[] buffer = new byte[Utilities.RoundUp(48 + count, 4)];
+            byte[] buffer = new byte[MathUtilities.RoundUp(48 + count, 4)];
             _basicHeader.WriteTo(buffer, 0);
             buffer[1] = PackState();
             buffer[2] = 0; // Max Version
             buffer[3] = 0; // Min Version
-            Utilities.WriteBytesBigEndian(_connection.Session.InitiatorSessionId, buffer, 8);
-            Utilities.WriteBytesBigEndian(IsidQualifier, buffer, 12);
-            Utilities.WriteBytesBigEndian(_connection.Session.TargetSessionId, buffer, 14);
-            Utilities.WriteBytesBigEndian(_connectionId, buffer, 20);
-            Utilities.WriteBytesBigEndian(_commandSequenceNumber, buffer, 24);
-            Utilities.WriteBytesBigEndian(_expectedStatusSequenceNumber, buffer, 28);
+            EndianUtilities.WriteBytesBigEndian(_connection.Session.InitiatorSessionId, buffer, 8);
+            EndianUtilities.WriteBytesBigEndian(IsidQualifier, buffer, 12);
+            EndianUtilities.WriteBytesBigEndian(_connection.Session.TargetSessionId, buffer, 14);
+            EndianUtilities.WriteBytesBigEndian(_connectionId, buffer, 20);
+            EndianUtilities.WriteBytesBigEndian(_commandSequenceNumber, buffer, 24);
+            EndianUtilities.WriteBytesBigEndian(_expectedStatusSequenceNumber, buffer, 28);
             Array.Copy(data, offset, buffer, 48, count);
             return buffer;
         }

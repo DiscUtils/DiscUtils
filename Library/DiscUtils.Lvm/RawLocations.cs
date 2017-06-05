@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Lvm
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class RawLocation : IByteArraySerializable
@@ -38,10 +38,10 @@ namespace DiscUtils.Lvm
         /// <inheritdoc />
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Offset = Utilities.ToUInt64LittleEndian(buffer, offset);
-            Length = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
-            Checksum = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
-            Flags = (RawLocationFlags) Utilities.ToUInt32LittleEndian(buffer, offset + 0x14);
+            Offset = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            Length = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            Checksum = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x10);
+            Flags = (RawLocationFlags) EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x14);
             return Size;
         }
 

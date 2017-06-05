@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using DiscUtils.CoreCompat;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
@@ -47,7 +47,7 @@ namespace DiscUtils.Iso9660
             while (totalRead < totalLength)
             {
                 int toRead = (int)Math.Min(buffer.Length, totalLength - totalRead);
-                uint bytesRead = (uint)Utilities.ReadFully(extent, buffer, 0, toRead);
+                uint bytesRead = (uint)StreamUtilities.ReadFully(extent, buffer, 0, toRead);
                 if (bytesRead != toRead)
                 {
                     throw new IOException("Failed to read whole directory");

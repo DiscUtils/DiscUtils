@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Lvm
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -47,12 +47,12 @@ namespace DiscUtils.Lvm
         /// <inheritdoc />
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Crc = Utilities.ToUInt32LittleEndian(buffer, offset);
+            Crc = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
             CalculatedCrc = PhysicalVolume.CalcCrc(buffer, offset + 0x4, PhysicalVolume.SECTOR_SIZE - 0x4);
-            Magic = Utilities.BytesToString(buffer, offset + 0x4, 0x10);
-            Version = Utilities.ToUInt32LittleEndian(buffer, offset + 0x14);
-            Start = Utilities.ToUInt64LittleEndian(buffer, offset + 0x18);
-            Length = Utilities.ToUInt64LittleEndian(buffer, offset + 0x20);
+            Magic = EndianUtilities.BytesToString(buffer, offset + 0x4, 0x10);
+            Version = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x14);
+            Start = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x18);
+            Length = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x20);
 
             var locations = new List<RawLocation>();
             var locationOffset = offset + 0x28;
@@ -71,7 +71,7 @@ namespace DiscUtils.Lvm
                 var checksum = PhysicalVolume.CalcCrc(buffer, (int) location.Offset, (int) location.Length);
                 if (location.Checksum != checksum)
                     throw new IOException("invalid metadata checksum");
-                Metadata = Utilities.BytesToString(buffer, (int)location.Offset, (int)location.Length);
+                Metadata = EndianUtilities.BytesToString(buffer, (int)location.Offset, (int)location.Length);
                 ParsedMetadata = Lvm.Metadata.Parse(Metadata);
                 break;
             }

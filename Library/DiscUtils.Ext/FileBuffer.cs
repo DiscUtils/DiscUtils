@@ -22,7 +22,8 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.Ext
 {
@@ -82,8 +83,8 @@ namespace DiscUtils.Ext
                         if (_inode.IndirectBlock != 0)
                         {
                             _context.RawStream.Position = _inode.IndirectBlock * (long)blockSize + logicalBlock * 4;
-                            byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
-                            physicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                            byte[] indirectData = StreamUtilities.ReadFully(_context.RawStream, 4);
+                            physicalBlock = EndianUtilities.ToUInt32LittleEndian(indirectData, 0);
                         }
                     }
                     else
@@ -95,15 +96,15 @@ namespace DiscUtils.Ext
                             {
                                 _context.RawStream.Position = _inode.DoubleIndirectBlock * (long)blockSize +
                                                               logicalBlock / (blockSize / 4) * 4;
-                                byte[] indirectData = Utilities.ReadFully(_context.RawStream, 4);
-                                uint indirectBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                                byte[] indirectData = StreamUtilities.ReadFully(_context.RawStream, 4);
+                                uint indirectBlock = EndianUtilities.ToUInt32LittleEndian(indirectData, 0);
 
                                 if (indirectBlock != 0)
                                 {
                                     _context.RawStream.Position = indirectBlock * (long)blockSize +
                                                                   logicalBlock % (blockSize / 4) * 4;
-                                    Utilities.ReadFully(_context.RawStream, indirectData, 0, 4);
-                                    physicalBlock = Utilities.ToUInt32LittleEndian(indirectData, 0);
+                                    StreamUtilities.ReadFully(_context.RawStream, indirectData, 0, 4);
+                                    physicalBlock = EndianUtilities.ToUInt32LittleEndian(indirectData, 0);
                                 }
                             }
                         }

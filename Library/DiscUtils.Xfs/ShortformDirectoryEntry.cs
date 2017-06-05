@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.IO;
 
@@ -51,15 +51,15 @@ namespace DiscUtils.Xfs
         public int ReadFrom(byte[] buffer, int offset)
         {
             NameLength = buffer[offset];
-            Offset = Utilities.ToUInt16BigEndian(buffer, offset + 0x1);
-            Name = Utilities.ToByteArray(buffer, offset + 0x3, NameLength);
+            Offset = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x1);
+            Name = EndianUtilities.ToByteArray(buffer, offset + 0x3, NameLength);
             if (_useShortInode)
             {
-                Inode = Utilities.ToUInt32BigEndian(buffer, offset + 0x3 + NameLength);
+                Inode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x3 + NameLength);
             }
             else
             {
-                Inode = Utilities.ToUInt64BigEndian(buffer, offset + 0x3 + NameLength);
+                Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x3 + NameLength);
             }
             return Size;
         }
@@ -72,7 +72,7 @@ namespace DiscUtils.Xfs
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Inode}: {Utilities.BytesToString(Name, 0, NameLength)}";
+            return $"{Inode}: {EndianUtilities.BytesToString(Name, 0, NameLength)}";
         }
     }
 }

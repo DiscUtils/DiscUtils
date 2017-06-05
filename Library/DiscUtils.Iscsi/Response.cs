@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -52,12 +52,12 @@ namespace DiscUtils.Iscsi
             ResponseCode = headerData[headerOffset + 2];
             StatusPresent = true;
             Status = (ScsiStatus)headerData[headerOffset + 3];
-            StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
-            ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
-            MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
-            ExpectedDataSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 36);
-            BidiReadResidualCount = Utilities.ToUInt32BigEndian(headerData, headerOffset + 40);
-            ResidualCount = Utilities.ToUInt32BigEndian(headerData, headerOffset + 44);
+            StatusSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 24);
+            ExpectedCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 28);
+            MaxCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+            ExpectedDataSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 36);
+            BidiReadResidualCount = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 40);
+            ResidualCount = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 44);
         }
     }
 }

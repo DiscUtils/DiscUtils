@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -75,7 +75,7 @@ namespace DiscUtils.Ntfs
         public void AlignVirtualClusterCount()
         {
             _file.MarkMftRecordDirty();
-            _activeStream.ExpandToClusters(Utilities.Ceil(_attribute.Length, _bytesPerCluster),
+            _activeStream.ExpandToClusters(MathUtilities.Ceil(_attribute.Length, _bytesPerCluster),
                 (NonResidentAttributeRecord)_attribute.LastExtent, false);
         }
 
@@ -93,7 +93,7 @@ namespace DiscUtils.Ntfs
 
             _file.MarkMftRecordDirty();
 
-            long newClusterCount = Utilities.Ceil(value, _bytesPerCluster);
+            long newClusterCount = MathUtilities.Ceil(value, _bytesPerCluster);
 
             if (value < Capacity)
             {
@@ -328,7 +328,7 @@ namespace DiscUtils.Ntfs
 
         private void Truncate(long value)
         {
-            long endVcn = Utilities.Ceil(value, _bytesPerCluster);
+            long endVcn = MathUtilities.Ceil(value, _bytesPerCluster);
 
             // Release the clusters
             _activeStream.TruncateToClusters(endVcn);

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 #if !NETCORE
 using System.Runtime.Serialization;
@@ -105,7 +105,7 @@ namespace DiscUtils.Ntfs
             _context.Options = new NtfsOptions();
 
             _context.RawStream.Position = 0;
-            byte[] bytes = Utilities.ReadFully(_context.RawStream, 512);
+            byte[] bytes = StreamUtilities.ReadFully(_context.RawStream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
@@ -123,7 +123,7 @@ namespace DiscUtils.Ntfs
         private void DoCheck()
         {
             _context.RawStream.Position = 0;
-            byte[] bytes = Utilities.ReadFully(_context.RawStream, 512);
+            byte[] bytes = StreamUtilities.ReadFully(_context.RawStream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
@@ -315,7 +315,7 @@ namespace DiscUtils.Ntfs
             byte[] rootBuffer;
             using (Stream s = file.OpenStream(AttributeType.IndexRoot, name, FileAccess.Read))
             {
-                rootBuffer = Utilities.ReadFully(s, (int)s.Length);
+                rootBuffer = StreamUtilities.ReadFully(s, (int)s.Length);
             }
 
             Bitmap indexBitmap = null;
@@ -357,7 +357,7 @@ namespace DiscUtils.Ntfs
                 if ((entry.Flags & IndexEntryFlags.Node) != 0)
                 {
                     long bitmapIdx = entry.ChildrenVirtualCluster /
-                                     Utilities.Ceil(root.IndexAllocationSize,
+                                     MathUtilities.Ceil(root.IndexAllocationSize,
                                          _context.BiosParameterBlock.SectorsPerCluster *
                                          _context.BiosParameterBlock.BytesPerSector);
                     if (!bitmap.IsPresent(bitmapIdx))
@@ -423,9 +423,9 @@ namespace DiscUtils.Ntfs
                 long index = 0;
                 while (mftStream.Position < mftStream.Length)
                 {
-                    byte[] recordData = Utilities.ReadFully(mftStream, recordLength);
+                    byte[] recordData = StreamUtilities.ReadFully(mftStream, recordLength);
 
-                    string magic = Utilities.BytesToString(recordData, 0, 4);
+                    string magic = EndianUtilities.BytesToString(recordData, 0, 4);
                     if (magic != "FILE")
                     {
                         if (bitmap.IsPresent(index))
@@ -502,8 +502,8 @@ namespace DiscUtils.Ntfs
             GenericFixupRecord genericRecord = new GenericFixupRecord(bytesPerSector);
             genericRecord.FromBytes(tempBuffer, 0);
 
-            int pos = Utilities.ToUInt16LittleEndian(genericRecord.Content, 0x14);
-            while (Utilities.ToUInt32LittleEndian(genericRecord.Content, pos) != 0xFFFFFFFF)
+            int pos = EndianUtilities.ToUInt16LittleEndian(genericRecord.Content, 0x14);
+            while (EndianUtilities.ToUInt32LittleEndian(genericRecord.Content, pos) != 0xFFFFFFFF)
             {
                 int attrLen;
                 try
@@ -564,7 +564,7 @@ namespace DiscUtils.Ntfs
                 ok = false;
             }
 
-            if (Utilities.ToUInt32LittleEndian(recordData, (int)record.RealSize - 8) != uint.MaxValue)
+            if (EndianUtilities.ToUInt32LittleEndian(recordData, (int)record.RealSize - 8) != uint.MaxValue)
             {
                 ReportError("MFT record is not correctly terminated with 0xFFFFFFFF");
                 ok = false;

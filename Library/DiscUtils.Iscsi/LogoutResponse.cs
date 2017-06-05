@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -47,11 +47,11 @@ namespace DiscUtils.Iscsi
             }
 
             Response = (LogoutResponseCode)headerData[headerOffset + 2];
-            StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
-            ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
-            MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
-            Time2Wait = Utilities.ToUInt16BigEndian(headerData, headerOffset + 40);
-            Time2Retain = Utilities.ToUInt16BigEndian(headerData, headerOffset + 42);
+            StatusSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 24);
+            ExpectedCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 28);
+            MaxCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+            Time2Wait = EndianUtilities.ToUInt16BigEndian(headerData, headerOffset + 40);
+            Time2Retain = EndianUtilities.ToUInt16BigEndian(headerData, headerOffset + 42);
         }
     }
 }

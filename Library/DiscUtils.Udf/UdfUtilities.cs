@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -94,7 +94,7 @@ namespace DiscUtils.Udf
                 return DateTime.MinValue;
             }
 
-            ushort typeAndZone = Utilities.ToUInt16LittleEndian(buffer, offset);
+            ushort typeAndZone = EndianUtilities.ToUInt16LittleEndian(buffer, offset);
 
             int type = (typeAndZone >> 12) & 0x0F;
             int minutesWest = typeAndZone & 0xFFF;
@@ -104,7 +104,7 @@ namespace DiscUtils.Udf
                 minutesWest = (-1 & ~0xFFF) | minutesWest;
             }
 
-            int year = ForceRange(1, 9999, Utilities.ToInt16LittleEndian(buffer, offset + 2));
+            int year = ForceRange(1, 9999, EndianUtilities.ToInt16LittleEndian(buffer, offset + 2));
             int month = ForceRange(1, 12, buffer[offset + 4]);
             int day = ForceRange(1, 31, buffer[offset + 5]);
             int hour = ForceRange(0, 23, buffer[offset + 6]);
@@ -175,7 +175,7 @@ namespace DiscUtils.Udf
         {
             LogicalPartition partition = context.LogicalPartitions[extent.ExtentLocation.Partition];
             long pos = extent.ExtentLocation.LogicalBlock * partition.LogicalBlockSize;
-            return Utilities.ReadFully(partition.Content, pos, (int)extent.ExtentLength);
+            return StreamUtilities.ReadFully(partition.Content, pos, (int)extent.ExtentLength);
         }
 
         private static short ForceRange(short min, short max, short val)

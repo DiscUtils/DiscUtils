@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
@@ -50,13 +50,13 @@ namespace DiscUtils.Ext
 
         public int Size
         {
-            get { return Utilities.RoundUp(8 + Name.Length, 4); }
+            get { return MathUtilities.RoundUp(8 + Name.Length, 4); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Inode = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            ushort recordLen = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
+            Inode = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            ushort recordLen = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
             int nameLen = buffer[offset + 6];
             FileType = buffer[offset + 7];
             Name = _nameEncoding.GetString(buffer, offset + 8, nameLen);

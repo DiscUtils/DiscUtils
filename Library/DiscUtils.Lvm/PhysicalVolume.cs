@@ -24,7 +24,7 @@ namespace DiscUtils.Lvm
 {
     using System.IO;
     using DiscUtils.Partitions;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class PhysicalVolume
     {
@@ -41,14 +41,14 @@ namespace DiscUtils.Lvm
             PhysicalVolumeLabel = physicalVolumeLabel;
             PvHeader = new PvHeader();
             content.Position = (long) (physicalVolumeLabel.Sector * SECTOR_SIZE);
-            var buffer = Utilities.ReadFully(content, SECTOR_SIZE);
+            var buffer = StreamUtilities.ReadFully(content, SECTOR_SIZE);
             PvHeader.ReadFrom(buffer, (int) physicalVolumeLabel.Offset);
             if (PvHeader.MetadataDiskAreas.Length > 0)
             {
                 var area = PvHeader.MetadataDiskAreas[0];
                 var metadata = new VolumeGroupMetadata();
                 content.Position = (long) area.Offset;
-                buffer = Utilities.ReadFully(content, (int) area.Length);
+                buffer = StreamUtilities.ReadFully(content, (int) area.Length);
                 metadata.ReadFrom(buffer, 0x0);
                 VgMetadata = metadata;
             }
@@ -79,9 +79,9 @@ namespace DiscUtils.Lvm
             byte[] buffer = new byte[SECTOR_SIZE];
             for (uint i = 0; i < 4; i++)
             {
-                if (Utilities.ReadFully(content, buffer, 0, SECTOR_SIZE) != SECTOR_SIZE)
+                if (StreamUtilities.ReadFully(content, buffer, 0, SECTOR_SIZE) != SECTOR_SIZE)
                     return false;
-                var label = Utilities.BytesToString(buffer, 0x0, 0x8);
+                var label = EndianUtilities.BytesToString(buffer, 0x0, 0x8);
                 if (label == PhysicalVolumeLabel.LABEL_ID)
                 {
                     pvLabel = new PhysicalVolumeLabel();

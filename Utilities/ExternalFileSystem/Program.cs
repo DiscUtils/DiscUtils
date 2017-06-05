@@ -26,6 +26,7 @@ using System.IO;
 using System.Text;
 using DiscUtils;
 using DiscUtils.Setup;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace ExternalFileSystem

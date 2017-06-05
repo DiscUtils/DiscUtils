@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
@@ -43,9 +43,9 @@ namespace DiscUtils.Ext
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            FirstLogicalBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            LeafPhysicalBlockLo = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            LeafPhysicalBlockHi = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
+            FirstLogicalBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            LeafPhysicalBlockLo = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+            LeafPhysicalBlockHi = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 8);
             return 12;
         }
 

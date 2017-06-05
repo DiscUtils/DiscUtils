@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -41,10 +41,10 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            HeaderSize = Utilities.ToUInt32BigEndian(buffer, offset);
-            TotalSize = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            DataSize = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            Flags = Utilities.ToUInt32BigEndian(buffer, offset + 12);
+            HeaderSize = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            TotalSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            DataSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
+            Flags = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
 
             return Size;
         }

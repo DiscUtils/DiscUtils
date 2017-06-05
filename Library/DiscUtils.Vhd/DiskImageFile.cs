@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhd
 {
@@ -489,7 +490,7 @@ namespace DiscUtils.Vhd
 
             byte[] sector = new byte[Sizes.Sector];
             footer.ToBytes(sector, 0);
-            stream.Position = Utilities.RoundUp(capacity, Sizes.Sector);
+            stream.Position = MathUtilities.RoundUp(capacity, Sizes.Sector);
             stream.Write(sector, 0, sector.Length);
             stream.SetLength(stream.Position);
 
@@ -614,7 +615,7 @@ namespace DiscUtils.Vhd
                     || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
                 {
                     _fileStream.Position = pl.PlatformDataOffset;
-                    byte[] buffer = Utilities.ReadFully(_fileStream, pl.PlatformDataLength);
+                    byte[] buffer = StreamUtilities.ReadFully(_fileStream, pl.PlatformDataLength);
                     string locationVal = Encoding.Unicode.GetString(buffer);
 
                     if (pl.PlatformCode == ParentLocator.PlatformCodeWindowsAbsoluteUnicode)
@@ -645,7 +646,7 @@ namespace DiscUtils.Vhd
         private void ReadFooter(bool fallbackToFront)
         {
             _fileStream.Position = _fileStream.Length - Sizes.Sector;
-            byte[] sector = Utilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] sector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
 
             _footer = Footer.FromBytes(sector, 0);
 
@@ -657,7 +658,7 @@ namespace DiscUtils.Vhd
                 }
 
                 _fileStream.Position = 0;
-                Utilities.ReadFully(_fileStream, sector, 0, Sizes.Sector);
+                StreamUtilities.ReadFully(_fileStream, sector, 0, Sizes.Sector);
 
                 _footer = Footer.FromBytes(sector, 0);
                 if (!_footer.IsValid())

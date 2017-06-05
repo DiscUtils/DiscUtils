@@ -26,7 +26,7 @@ namespace DiscUtils.Xfs
     using System;
     using System.IO;
     using DiscUtils.Vfs;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal sealed class VfsXfsFileSystem :VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>,IUnixFileSystem
     {
@@ -38,7 +38,7 @@ namespace DiscUtils.Xfs
             :base(new XfsFileSystemOptions(parameters))
         {
             stream.Position = 0;
-            byte[] superblockData = Utilities.ReadFully(stream, 264);
+            byte[] superblockData = StreamUtilities.ReadFully(stream, 264);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

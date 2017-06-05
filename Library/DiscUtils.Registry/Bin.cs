@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -49,19 +49,19 @@ namespace DiscUtils.Registry
             _streamPos = stream.Position;
 
             stream.Position = _streamPos;
-            byte[] buffer = Utilities.ReadFully(stream, 0x20);
+            byte[] buffer = StreamUtilities.ReadFully(stream, 0x20);
             _header = new BinHeader();
             _header.ReadFrom(buffer, 0);
 
             _fileStream.Position = _streamPos;
-            _buffer = Utilities.ReadFully(_fileStream, _header.BinSize);
+            _buffer = StreamUtilities.ReadFully(_fileStream, _header.BinSize);
 
             // Gather list of all free cells.
             _freeCells = new List<Range<int, int>>();
             int pos = 0x20;
             while (pos < _buffer.Length)
             {
-                int size = Utilities.ToInt32LittleEndian(_buffer, pos);
+                int size = EndianUtilities.ToInt32LittleEndian(_buffer, pos);
                 if (size > 0)
                 {
                     _freeCells.Add(new Range<int, int>(pos, size));
@@ -73,7 +73,7 @@ namespace DiscUtils.Registry
 
         public Cell TryGetCell(int index)
         {
-            int size = Utilities.ToInt32LittleEndian(_buffer, index - _header.FileOffset);
+            int size = EndianUtilities.ToInt32LittleEndian(_buffer, index - _header.FileOffset);
             if (size >= 0)
             {
                 return null;
@@ -86,7 +86,7 @@ namespace DiscUtils.Registry
         {
             int freeIndex = index - _header.FileOffset;
 
-            int len = Utilities.ToInt32LittleEndian(_buffer, freeIndex);
+            int len = EndianUtilities.ToInt32LittleEndian(_buffer, freeIndex);
             if (len >= 0)
             {
                 throw new ArgumentException("Attempt to free non-allocated cell");
@@ -121,7 +121,7 @@ namespace DiscUtils.Registry
             _freeCells.Insert(i, new Range<int, int>(freeIndex, len));
 
             // Free cells are indicated by length > 0
-            Utilities.WriteBytesLittleEndian(len, _buffer, freeIndex);
+            EndianUtilities.WriteBytesLittleEndian(len, _buffer, freeIndex);
 
             _fileStream.Position = _streamPos + freeIndex;
             _fileStream.Write(_buffer, freeIndex, 4);
@@ -130,7 +130,7 @@ namespace DiscUtils.Registry
         public bool UpdateCell(Cell cell)
         {
             int index = cell.Index - _header.FileOffset;
-            int allocSize = Math.Abs(Utilities.ToInt32LittleEndian(_buffer, index));
+            int allocSize = Math.Abs(EndianUtilities.ToInt32LittleEndian(_buffer, index));
 
             int newSize = cell.Size + 4;
             if (newSize > allocSize)
@@ -149,7 +149,7 @@ namespace DiscUtils.Registry
         public byte[] ReadRawCellData(int cellIndex, int maxBytes)
         {
             int index = cellIndex - _header.FileOffset;
-            int len = Math.Abs(Utilities.ToInt32LittleEndian(_buffer, index));
+            int len = Math.Abs(EndianUtilities.ToInt32LittleEndian(_buffer, index));
             byte[] result = new byte[Math.Min(len - 4, maxBytes)];
             Array.Copy(_buffer, index + 4, result, 0, result.Length);
             return result;
@@ -158,7 +158,7 @@ namespace DiscUtils.Registry
         internal bool WriteRawCellData(int cellIndex, byte[] data, int offset, int count)
         {
             int index = cellIndex - _header.FileOffset;
-            int allocSize = Math.Abs(Utilities.ToInt32LittleEndian(_buffer, index));
+            int allocSize = Math.Abs(EndianUtilities.ToInt32LittleEndian(_buffer, index));
 
             int newSize = count + 4;
             if (newSize > allocSize)
@@ -188,13 +188,13 @@ namespace DiscUtils.Registry
                 if (_freeCells[i].Count > size)
                 {
                     // Record the newly allocated cell
-                    Utilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);
+                    EndianUtilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);
                     _fileStream.Position = _streamPos + _freeCells[i].Offset;
                     _fileStream.Write(_buffer, _freeCells[i].Offset, 4);
 
                     // Keep the remainder of the free buffer as unallocated
                     _freeCells[i] = new Range<int, int>(_freeCells[i].Offset + size, _freeCells[i].Count - size);
-                    Utilities.WriteBytesLittleEndian(_freeCells[i].Count, _buffer, _freeCells[i].Offset);
+                    EndianUtilities.WriteBytesLittleEndian(_freeCells[i].Count, _buffer, _freeCells[i].Offset);
                     _fileStream.Position = _streamPos + _freeCells[i].Offset;
                     _fileStream.Write(_buffer, _freeCells[i].Offset, 4);
 
@@ -203,7 +203,7 @@ namespace DiscUtils.Registry
                 if (_freeCells[i].Count == size)
                 {
                     // Record the whole of the free buffer as a newly allocated cell
-                    Utilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);
+                    EndianUtilities.WriteBytesLittleEndian(-size, _buffer, _freeCells[i].Offset);
                     _fileStream.Position = _streamPos + _freeCells[i].Offset;
                     _fileStream.Write(_buffer, _freeCells[i].Offset, 4);
 

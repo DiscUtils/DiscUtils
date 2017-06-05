@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -42,20 +42,20 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return Utilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)),
+                return MathUtilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)),
                     8);
             }
         }
 
         public int ReadFrom(byte[] data, int offset)
         {
-            Type = (AttributeType)Utilities.ToUInt32LittleEndian(data, offset + 0x00);
-            RecordLength = Utilities.ToUInt16LittleEndian(data, offset + 0x04);
+            Type = (AttributeType)EndianUtilities.ToUInt32LittleEndian(data, offset + 0x00);
+            RecordLength = EndianUtilities.ToUInt16LittleEndian(data, offset + 0x04);
             NameLength = data[offset + 0x06];
             NameOffset = data[offset + 0x07];
-            StartVcn = Utilities.ToUInt64LittleEndian(data, offset + 0x08);
-            BaseFileReference = new FileRecordReference(Utilities.ToUInt64LittleEndian(data, offset + 0x10));
-            AttributeId = Utilities.ToUInt16LittleEndian(data, offset + 0x18);
+            StartVcn = EndianUtilities.ToUInt64LittleEndian(data, offset + 0x08);
+            BaseFileReference = new FileRecordReference(EndianUtilities.ToUInt64LittleEndian(data, offset + 0x10));
+            AttributeId = EndianUtilities.ToUInt16LittleEndian(data, offset + 0x18);
 
             if (NameLength > 0)
             {
@@ -86,15 +86,15 @@ namespace DiscUtils.Ntfs
                 NameLength = (byte)(Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + NameOffset) / 2);
             }
 
-            RecordLength = (ushort)Utilities.RoundUp(NameOffset + NameLength * 2, 8);
+            RecordLength = (ushort)MathUtilities.RoundUp(NameOffset + NameLength * 2, 8);
 
-            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset);
-            Utilities.WriteBytesLittleEndian(RecordLength, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian((uint)Type, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian(RecordLength, buffer, offset + 0x04);
             buffer[offset + 0x06] = NameLength;
             buffer[offset + 0x07] = NameOffset;
-            Utilities.WriteBytesLittleEndian(StartVcn, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(BaseFileReference.Value, buffer, offset + 0x10);
-            Utilities.WriteBytesLittleEndian(AttributeId, buffer, offset + 0x18);
+            EndianUtilities.WriteBytesLittleEndian(StartVcn, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(BaseFileReference.Value, buffer, offset + 0x10);
+            EndianUtilities.WriteBytesLittleEndian(AttributeId, buffer, offset + 0x18);
         }
 
         public int CompareTo(AttributeListRecord other)

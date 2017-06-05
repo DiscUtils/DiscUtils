@@ -36,8 +36,8 @@ namespace DiscUtils.Iso9660
         ////{
         ////    byte directoryIdentifierLength = src[offset + 0];
         ////    record.ExtendedAttributeRecordLength = src[offset + 1];
-        ////    record.LocationOfExtent = Utilities.ToUInt32LittleEndian(src, offset + 2);
-        ////    record.ParentDirectoryNumber = Utilities.ToUInt16LittleEndian(src, offset + 6);
+        ////    record.LocationOfExtent = EndianUtilities.ToUInt32LittleEndian(src, offset + 2);
+        ////    record.ParentDirectoryNumber = EndianUtilities.ToUInt16LittleEndian(src, offset + 6);
         ////    record.DirectoryIdentifier = IsoUtilities.ReadChars(src, offset + 8, directoryIdentifierLength, enc);
         ////
         ////    if (byteSwap)

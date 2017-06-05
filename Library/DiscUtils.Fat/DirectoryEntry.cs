@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Fat
 {
@@ -45,7 +45,7 @@ namespace DiscUtils.Fat
         {
             _options = options;
             _fatVariant = fatVariant;
-            byte[] buffer = Utilities.ReadFully(stream, 32);
+            byte[] buffer = StreamUtilities.ReadFully(stream, 32);
             Load(buffer, 0);
         }
 
@@ -134,14 +134,14 @@ namespace DiscUtils.Fat
             Name.GetBytes(buffer, 0);
             buffer[11] = _attr;
             buffer[13] = _creationTimeTenth;
-            Utilities.WriteBytesLittleEndian(_creationTime, buffer, 14);
-            Utilities.WriteBytesLittleEndian(_creationDate, buffer, 16);
-            Utilities.WriteBytesLittleEndian(_lastAccessDate, buffer, 18);
-            Utilities.WriteBytesLittleEndian(_firstClusterHi, buffer, 20);
-            Utilities.WriteBytesLittleEndian(_lastWriteTime, buffer, 22);
-            Utilities.WriteBytesLittleEndian(_lastWriteDate, buffer, 24);
-            Utilities.WriteBytesLittleEndian(_firstClusterLo, buffer, 26);
-            Utilities.WriteBytesLittleEndian(_fileSize, buffer, 28);
+            EndianUtilities.WriteBytesLittleEndian(_creationTime, buffer, 14);
+            EndianUtilities.WriteBytesLittleEndian(_creationDate, buffer, 16);
+            EndianUtilities.WriteBytesLittleEndian(_lastAccessDate, buffer, 18);
+            EndianUtilities.WriteBytesLittleEndian(_firstClusterHi, buffer, 20);
+            EndianUtilities.WriteBytesLittleEndian(_lastWriteTime, buffer, 22);
+            EndianUtilities.WriteBytesLittleEndian(_lastWriteDate, buffer, 24);
+            EndianUtilities.WriteBytesLittleEndian(_firstClusterLo, buffer, 26);
+            EndianUtilities.WriteBytesLittleEndian(_fileSize, buffer, 28);
 
             stream.Write(buffer, 0, buffer.Length);
         }
@@ -197,14 +197,14 @@ namespace DiscUtils.Fat
             Name = new FileName(data, offset);
             _attr = data[offset + 11];
             _creationTimeTenth = data[offset + 13];
-            _creationTime = Utilities.ToUInt16LittleEndian(data, offset + 14);
-            _creationDate = Utilities.ToUInt16LittleEndian(data, offset + 16);
-            _lastAccessDate = Utilities.ToUInt16LittleEndian(data, offset + 18);
-            _firstClusterHi = Utilities.ToUInt16LittleEndian(data, offset + 20);
-            _lastWriteTime = Utilities.ToUInt16LittleEndian(data, offset + 22);
-            _lastWriteDate = Utilities.ToUInt16LittleEndian(data, offset + 24);
-            _firstClusterLo = Utilities.ToUInt16LittleEndian(data, offset + 26);
-            _fileSize = Utilities.ToUInt32LittleEndian(data, offset + 28);
+            _creationTime = EndianUtilities.ToUInt16LittleEndian(data, offset + 14);
+            _creationDate = EndianUtilities.ToUInt16LittleEndian(data, offset + 16);
+            _lastAccessDate = EndianUtilities.ToUInt16LittleEndian(data, offset + 18);
+            _firstClusterHi = EndianUtilities.ToUInt16LittleEndian(data, offset + 20);
+            _lastWriteTime = EndianUtilities.ToUInt16LittleEndian(data, offset + 22);
+            _lastWriteDate = EndianUtilities.ToUInt16LittleEndian(data, offset + 24);
+            _firstClusterLo = EndianUtilities.ToUInt16LittleEndian(data, offset + 26);
+            _fileSize = EndianUtilities.ToUInt32LittleEndian(data, offset + 28);
         }
     }
 }

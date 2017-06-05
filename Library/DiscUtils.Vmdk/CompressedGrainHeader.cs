@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -33,8 +33,8 @@ namespace DiscUtils.Vmdk
 
         public void Read(byte[] buffer, int offset)
         {
-            LogicalBlockAddress = Utilities.ToInt64LittleEndian(buffer, offset + 0);
-            DataSize = Utilities.ToInt32LittleEndian(buffer, offset + 8);
+            LogicalBlockAddress = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0);
+            DataSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 8);
         }
     }
 }

@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.Collections.Generic;
 
@@ -45,7 +45,7 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             BestFree = new BlockDirectoryDataFree[3];
             offset += 0x4;
             for (int i = 0; i < BestFree.Length; i++)

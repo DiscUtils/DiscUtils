@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {
@@ -42,7 +42,7 @@ namespace DiscUtils.LogicalDiskManager
         {
             DatabaseRecord result = null;
 
-            if (Utilities.ToInt32BigEndian(buffer, offset + 0xC) != 0)
+            if (EndianUtilities.ToInt32BigEndian(buffer, offset + 0xC) != 0)
             {
                 switch ((RecordType)(buffer[offset + 0x13] & 0xF))
                 {
@@ -100,7 +100,7 @@ namespace DiscUtils.LogicalDiskManager
         {
             int length = buffer[offset];
 
-            string result = Utilities.BytesToString(buffer, offset + 1, length);
+            string result = EndianUtilities.BytesToString(buffer, offset + 1, length);
             offset += length + 1;
             return result;
         }
@@ -113,42 +113,42 @@ namespace DiscUtils.LogicalDiskManager
         protected static uint ReadUInt(byte[] buffer, ref int offset)
         {
             offset += 4;
-            return Utilities.ToUInt32BigEndian(buffer, offset - 4);
+            return EndianUtilities.ToUInt32BigEndian(buffer, offset - 4);
         }
 
         protected static long ReadLong(byte[] buffer, ref int offset)
         {
             offset += 8;
-            return Utilities.ToInt64BigEndian(buffer, offset - 8);
+            return EndianUtilities.ToInt64BigEndian(buffer, offset - 8);
         }
 
         protected static ulong ReadULong(byte[] buffer, ref int offset)
         {
             offset += 8;
-            return Utilities.ToUInt64BigEndian(buffer, offset - 8);
+            return EndianUtilities.ToUInt64BigEndian(buffer, offset - 8);
         }
 
         protected static string ReadString(byte[] buffer, int len, ref int offset)
         {
             offset += len;
-            return Utilities.BytesToString(buffer, offset - len, len);
+            return EndianUtilities.BytesToString(buffer, offset - len, len);
         }
 
         protected static Guid ReadBinaryGuid(byte[] buffer, ref int offset)
         {
             offset += 16;
-            return Utilities.ToGuidBigEndian(buffer, offset - 16);
+            return EndianUtilities.ToGuidBigEndian(buffer, offset - 16);
         }
 
         protected virtual void DoReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.BytesToString(buffer, offset + 0x00, 4);
-            Label = Utilities.ToUInt32BigEndian(buffer, offset + 0x04);
-            Counter = Utilities.ToUInt32BigEndian(buffer, offset + 0x08);
-            Valid = Utilities.ToUInt32BigEndian(buffer, offset + 0x0C);
-            Flags = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
+            Signature = EndianUtilities.BytesToString(buffer, offset + 0x00, 4);
+            Label = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x04);
+            Counter = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x08);
+            Valid = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x0C);
+            Flags = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
             RecordType = (RecordType)(Flags & 0xF);
-            DataLength = Utilities.ToUInt32BigEndian(buffer, 0x14);
+            DataLength = EndianUtilities.ToUInt32BigEndian(buffer, 0x14);
         }
     }
 }

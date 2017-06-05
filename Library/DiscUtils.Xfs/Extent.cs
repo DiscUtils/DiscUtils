@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.IO;
 
@@ -46,9 +46,9 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            ulong lower = Utilities.ToUInt64BigEndian(buffer, offset + 0x8);
-            ulong middle = Utilities.ToUInt64BigEndian(buffer, offset + 0x6);
-            ulong upper = Utilities.ToUInt64BigEndian(buffer, offset + 0);
+            ulong lower = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x8);
+            ulong middle = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x6);
+            ulong upper = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0);
             BlockCount = (uint)(lower & 0x001FFFFF);
             StartBlock = (middle >> 5) & 0x000FFFFFFFFFFFFF;
             StartOffset = (upper >> 9) & 0x003FFFFFFFFFFFFF;
@@ -80,7 +80,7 @@ namespace DiscUtils.Xfs
         public byte[] GetData(Context context, long offset, uint count)
         {
             context.RawStream.Position = GetOffset(context) + offset;
-            return Utilities.ReadFully(context.RawStream, (int) count);
+            return StreamUtilities.ReadFully(context.RawStream, (int) count);
         }
 
         /// <inheritdoc />

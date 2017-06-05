@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -40,10 +40,10 @@ namespace DiscUtils.Iso9660
         {
             BootIndicator = buffer[offset + 0x00];
             BootMediaType = (BootDeviceEmulation)buffer[offset + 0x01];
-            LoadSegment = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
+            LoadSegment = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x02);
             SystemType = buffer[offset + 0x04];
-            SectorCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x06);
-            ImageStart = Utilities.ToUInt32LittleEndian(buffer, offset + 0x08);
+            SectorCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x06);
+            ImageStart = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x08);
         }
 
         internal void WriteTo(byte[] buffer, int offset)
@@ -51,10 +51,10 @@ namespace DiscUtils.Iso9660
             Array.Clear(buffer, offset, 0x20);
             buffer[offset + 0x00] = BootIndicator;
             buffer[offset + 0x01] = (byte)BootMediaType;
-            Utilities.WriteBytesLittleEndian(LoadSegment, buffer, offset + 0x02);
+            EndianUtilities.WriteBytesLittleEndian(LoadSegment, buffer, offset + 0x02);
             buffer[offset + 0x04] = SystemType;
-            Utilities.WriteBytesLittleEndian(SectorCount, buffer, offset + 0x06);
-            Utilities.WriteBytesLittleEndian(ImageStart, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(SectorCount, buffer, offset + 0x06);
+            EndianUtilities.WriteBytesLittleEndian(ImageStart, buffer, offset + 0x08);
         }
     }
 }

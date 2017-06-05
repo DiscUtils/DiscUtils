@@ -21,7 +21,7 @@
 //
 
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -40,23 +40,23 @@ namespace DiscUtils.Ntfs
         internal void Read(byte[] buffer, int offset)
         {
             Name = Encoding.Unicode.GetString(buffer, offset + 0, 128).Trim('\0');
-            Type = (AttributeType)Utilities.ToUInt32LittleEndian(buffer, offset + 0x80);
-            DisplayRule = Utilities.ToUInt32LittleEndian(buffer, offset + 0x84);
-            CollationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, offset + 0x88);
-            Flags = (AttributeTypeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 0x8C);
-            MinSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x90);
-            MaxSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x98);
+            Type = (AttributeType)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x80);
+            DisplayRule = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x84);
+            CollationRule = (AttributeCollationRule)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x88);
+            Flags = (AttributeTypeFlags)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x8C);
+            MinSize = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x90);
+            MaxSize = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x98);
         }
 
         internal void Write(byte[] buffer, int offset)
         {
             Encoding.Unicode.GetBytes(Name, 0, Name.Length, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian((uint)Type, buffer, offset + 0x80);
-            Utilities.WriteBytesLittleEndian(DisplayRule, buffer, offset + 0x84);
-            Utilities.WriteBytesLittleEndian((uint)CollationRule, buffer, offset + 0x88);
-            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 0x8C);
-            Utilities.WriteBytesLittleEndian(MinSize, buffer, offset + 0x90);
-            Utilities.WriteBytesLittleEndian(MaxSize, buffer, offset + 0x98);
+            EndianUtilities.WriteBytesLittleEndian((uint)Type, buffer, offset + 0x80);
+            EndianUtilities.WriteBytesLittleEndian(DisplayRule, buffer, offset + 0x84);
+            EndianUtilities.WriteBytesLittleEndian((uint)CollationRule, buffer, offset + 0x88);
+            EndianUtilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 0x8C);
+            EndianUtilities.WriteBytesLittleEndian(MinSize, buffer, offset + 0x90);
+            EndianUtilities.WriteBytesLittleEndian(MaxSize, buffer, offset + 0x98);
         }
     }
 }

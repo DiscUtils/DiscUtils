@@ -27,7 +27,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using DiscUtils.Archives;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Xva
 {
@@ -202,7 +202,7 @@ namespace DiscUtils.Xva
             return tarBuilder.Build();
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             // Not required - deferred to TarFileBuilder
             throw new NotSupportedException();
@@ -232,7 +232,7 @@ namespace DiscUtils.Xva
                 vdiGuids[diskIdx] = Guid.NewGuid();
                 vdiIds[diskIdx] = id++;
                 vdiNames[diskIdx] = disk.Item1;
-                vdiSizes[diskIdx] = Utilities.RoundUp(disk.Item2.Length, Sizes.OneMiB);
+                vdiSizes[diskIdx] = MathUtilities.RoundUp(disk.Item2.Length, Sizes.OneMiB);
                 diskIdx++;
             }
 

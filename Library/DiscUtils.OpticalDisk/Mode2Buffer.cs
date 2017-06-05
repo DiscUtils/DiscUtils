@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.OpticalDisk
 {
@@ -76,7 +76,7 @@ namespace DiscUtils.OpticalDisk
                 long sector = thisPos / DiscImageFile.Mode1SectorSize;
                 int sectorOffset = (int)(thisPos - sector * DiscImageFile.Mode1SectorSize);
 
-                int numRead = Utilities.ReadFully(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0,
+                int numRead = StreamUtilities.ReadFully(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0,
                     DiscImageFile.Mode2SectorSize);
                 if (numRead < DiscImageFile.Mode2SectorSize)
                 {

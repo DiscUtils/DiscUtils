@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs.Internals
 {
@@ -43,7 +43,7 @@ namespace DiscUtils.Ntfs.Internals
         internal AttributeListAttribute(INtfsContext context, AttributeRecord record)
             : base(context, record)
         {
-            byte[] content = Utilities.ReadAll(Content);
+            byte[] content = StreamUtilities.ReadAll(Content);
             _list = new AttributeList();
             _list.ReadFrom(content, 0);
         }

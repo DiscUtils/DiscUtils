@@ -25,7 +25,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using DiscUtils.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.Dmg
 {
@@ -90,7 +91,7 @@ namespace DiscUtils.Dmg
 
                     case RunType.Raw:
                         _stream.Position = _activeRun.CompOffset + bufferOffset;
-                        Utilities.ReadFully(_stream, buffer, offset + totalCopied, toCopy);
+                        StreamUtilities.ReadFully(_stream, buffer, offset + totalCopied, toCopy);
                         break;
 
                     case RunType.AdcCompressed:
@@ -198,7 +199,7 @@ namespace DiscUtils.Dmg
                 {
                     // 3 byte code
                     int chunkSize = (focusByte & 0x3F) + 4;
-                    int offset = Utilities.ToUInt16BigEndian(inputBuffer, inputOffset + consumed + 1);
+                    int offset = EndianUtilities.ToUInt16BigEndian(inputBuffer, inputOffset + consumed + 1);
 
                     for (int i = 0; i < chunkSize; ++i)
                     {
@@ -278,14 +279,14 @@ namespace DiscUtils.Dmg
                     _stream.Position = run.CompOffset + 2; // 2 byte zlib header
                     using (DeflateStream ds = new DeflateStream(_stream, CompressionMode.Decompress, true))
                     {
-                        Utilities.ReadFully(ds, _decompBuffer, 0, toCopy);
+                        StreamUtilities.ReadFully(ds, _decompBuffer, 0, toCopy);
                     }
 
                     break;
 
                 case RunType.AdcCompressed:
                     _stream.Position = run.CompOffset;
-                    byte[] compressed = Utilities.ReadFully(_stream, (int)run.CompLength);
+                    byte[] compressed = StreamUtilities.ReadFully(_stream, (int)run.CompLength);
                     if (ADCDecompress(compressed, 0, compressed.Length, _decompBuffer, 0) != toCopy)
                     {
                         throw new InvalidDataException("Run too short when decompressed");
@@ -299,7 +300,7 @@ namespace DiscUtils.Dmg
                             new BZip2DecoderStream(new SubStream(_stream, run.CompOffset, run.CompLength),
                                 Ownership.None))
                     {
-                        Utilities.ReadFully(ds, _decompBuffer, 0, toCopy);
+                        StreamUtilities.ReadFully(ds, _decompBuffer, 0, toCopy);
                     }
 
                     break;

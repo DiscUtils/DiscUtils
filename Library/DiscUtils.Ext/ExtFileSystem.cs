@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Ext
@@ -65,7 +65,7 @@ namespace DiscUtils.Ext
             }
 
             stream.Position = 1024;
-            byte[] superblockData = Utilities.ReadFully(stream, 1024);
+            byte[] superblockData = StreamUtilities.ReadFully(stream, 1024);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -39,10 +39,10 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            FileType = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            FileCreator = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            FinderFlags = (FinderFlags)Utilities.ToUInt16BigEndian(buffer, offset + 8);
-            Point = Utilities.ToStruct<Point>(buffer, offset + 10);
+            FileType = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            FileCreator = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            FinderFlags = (FinderFlags)EndianUtilities.ToUInt16BigEndian(buffer, offset + 8);
+            Point = EndianUtilities.ToStruct<Point>(buffer, offset + 10);
 
             return 16;
         }

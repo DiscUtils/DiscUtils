@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -98,7 +98,7 @@ namespace DiscUtils.SquashFs
 
             long tablePos = _context.RawStream.Position;
             byte[] tableBuffer = new byte[8];
-            Utilities.WriteBytesLittleEndian(blockPos, tableBuffer, 0);
+            EndianUtilities.WriteBytesLittleEndian(blockPos, tableBuffer, 0);
             _context.RawStream.Write(tableBuffer, 0, 8);
 
             return tablePos;

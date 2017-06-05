@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Compression
 {
@@ -52,8 +52,8 @@ namespace DiscUtils.Compression
             if (mode == CompressionMode.Decompress)
             {
                 // We just sanity check against expected header values...
-                byte[] headerBuffer = Utilities.ReadFully(stream, 2);
-                ushort header = Utilities.ToUInt16BigEndian(headerBuffer, 0);
+                byte[] headerBuffer = StreamUtilities.ReadFully(stream, 2);
+                ushort header = EndianUtilities.ToUInt16BigEndian(headerBuffer, 0);
 
                 if (header % 31 != 0)
                 {
@@ -79,7 +79,7 @@ namespace DiscUtils.Compression
                 header |= (ushort)(31 - header % 31);
 
                 byte[] headerBuffer = new byte[2];
-                Utilities.WriteBytesBigEndian(header, headerBuffer, 0);
+                EndianUtilities.WriteBytesBigEndian(header, headerBuffer, 0);
                 stream.Write(headerBuffer, 0, 2);
             }
 
@@ -140,8 +140,8 @@ namespace DiscUtils.Compression
                 if (_stream.CanSeek)
                 {
                     _stream.Seek(-4, SeekOrigin.End);
-                    byte[] footerBuffer = Utilities.ReadFully(_stream, 4);
-                    if (Utilities.ToInt32BigEndian(footerBuffer, 0) != _adler32.Value)
+                    byte[] footerBuffer = StreamUtilities.ReadFully(_stream, 4);
+                    if (EndianUtilities.ToInt32BigEndian(footerBuffer, 0) != _adler32.Value)
                     {
                         throw new InvalidDataException("Corrupt decompressed data detected");
                     }
@@ -154,7 +154,7 @@ namespace DiscUtils.Compression
                 _deflateStream.Dispose();
 
                 byte[] footerBuffer = new byte[4];
-                Utilities.WriteBytesBigEndian(_adler32.Value, footerBuffer, 0);
+                EndianUtilities.WriteBytesBigEndian(_adler32.Value, footerBuffer, 0);
                 _stream.Write(footerBuffer, 0, 4);
             }
 

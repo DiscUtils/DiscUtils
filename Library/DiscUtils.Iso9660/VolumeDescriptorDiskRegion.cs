@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -34,12 +34,12 @@ namespace DiscUtils.Iso9660
 
         public override void Dispose() {}
 
-        internal override void PrepareForRead()
+        public override void PrepareForRead()
         {
             _readCache = GetBlockData();
         }
 
-        internal override int Read(long diskOffset, byte[] buffer, int offset, int count)
+        public override int Read(long diskOffset, byte[] buffer, int offset, int count)
         {
             long relPos = diskOffset - Start;
 
@@ -50,7 +50,7 @@ namespace DiscUtils.Iso9660
             return numRead;
         }
 
-        internal override void DisposeReadState()
+        public override void DisposeReadState()
         {
             _readCache = null;
         }

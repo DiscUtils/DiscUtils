@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -37,11 +37,11 @@ namespace DiscUtils.Ntfs
             {
                 _table = new char[s.Length / 2];
 
-                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = StreamUtilities.ReadFully(s, (int)s.Length);
 
                 for (int i = 0; i < _table.Length; ++i)
                 {
-                    _table[i] = (char)Utilities.ToUInt16LittleEndian(buffer, i * 2);
+                    _table[i] = (char)EndianUtilities.ToUInt16LittleEndian(buffer, i * 2);
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[(char.MaxValue + 1) * 2];
             for (int i = char.MinValue; i <= char.MaxValue; ++i)
             {
-                Utilities.WriteBytesLittleEndian(char.ToUpperInvariant((char)i), buffer, i * 2);
+                EndianUtilities.WriteBytesLittleEndian(char.ToUpperInvariant((char)i), buffer, i * 2);
             }
 
             using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.ReadWrite))

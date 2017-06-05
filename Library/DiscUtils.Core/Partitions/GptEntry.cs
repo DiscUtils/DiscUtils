@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {
@@ -125,21 +125,21 @@ namespace DiscUtils.Partitions
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            PartitionType = Utilities.ToGuidLittleEndian(buffer, offset + 0);
-            Identity = Utilities.ToGuidLittleEndian(buffer, offset + 16);
-            FirstUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 32);
-            LastUsedLogicalBlock = Utilities.ToInt64LittleEndian(buffer, offset + 40);
-            Attributes = Utilities.ToUInt64LittleEndian(buffer, offset + 48);
+            PartitionType = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0);
+            Identity = EndianUtilities.ToGuidLittleEndian(buffer, offset + 16);
+            FirstUsedLogicalBlock = EndianUtilities.ToInt64LittleEndian(buffer, offset + 32);
+            LastUsedLogicalBlock = EndianUtilities.ToInt64LittleEndian(buffer, offset + 40);
+            Attributes = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 48);
             Name = Encoding.Unicode.GetString(buffer, offset + 56, 72).TrimEnd('\0');
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(PartitionType, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Identity, buffer, offset + 16);
-            Utilities.WriteBytesLittleEndian(FirstUsedLogicalBlock, buffer, offset + 32);
-            Utilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
-            Utilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
+            EndianUtilities.WriteBytesLittleEndian(PartitionType, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian(Identity, buffer, offset + 16);
+            EndianUtilities.WriteBytesLittleEndian(FirstUsedLogicalBlock, buffer, offset + 32);
+            EndianUtilities.WriteBytesLittleEndian(LastUsedLogicalBlock, buffer, offset + 40);
+            EndianUtilities.WriteBytesLittleEndian(Attributes, buffer, offset + 48);
             Encoding.Unicode.GetBytes(Name + new string('\0', 36), 0, 36, buffer, offset + 56);
         }
     }
