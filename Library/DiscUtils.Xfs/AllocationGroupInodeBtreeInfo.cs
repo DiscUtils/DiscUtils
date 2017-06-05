@@ -130,9 +130,9 @@ namespace DiscUtils.Xfs
             }
             if (SbVersion >= 5)
             {
-                UniqueId = Utilities.ToGuidBigEndian(buffer, offset + 0x132);
-                Lsn = Utilities.ToUInt64BigEndian(buffer, offset + 0x142);
-                Crc = Utilities.ToUInt32BigEndian(buffer, offset + 0x14A);
+                UniqueId = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x132);
+                Lsn = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x142);
+                Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x14A);
             }
             return Size;
         }

@@ -263,7 +263,7 @@ namespace DiscUtils.Vhdx
                 FileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 16);
                 SequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 24);
 
-                DataSignature = Utilities.ToUInt32LittleEndian(_data, _offset);
+                DataSignature = EndianUtilities.ToUInt32LittleEndian(_data, _offset);
 
                 return 32;
             }
@@ -280,7 +280,7 @@ namespace DiscUtils.Vhdx
                        &&
                        EndianUtilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
                        (sequenceNumber & 0xFFFFFFFF)
-                       && EndianUtilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
+                       && EndianUtilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF)
                        && DataSignature == DataSectorSignature;
             }
 
@@ -288,9 +288,9 @@ namespace DiscUtils.Vhdx
             {
                 target.Seek((long)FileOffset, SeekOrigin.Begin);
                 var leading = new byte[8];
-                Utilities.WriteBytesLittleEndian(LeadingBytes, leading, 0);
+                EndianUtilities.WriteBytesLittleEndian(LeadingBytes, leading, 0);
                 var trailing = new byte[4];
-                Utilities.WriteBytesLittleEndian(TrailingBytes, trailing, 0);
+                EndianUtilities.WriteBytesLittleEndian(TrailingBytes, trailing, 0);
 
                 target.Write(leading, 0, leading.Length);
                 target.Write(_data, _offset+8, 4084);

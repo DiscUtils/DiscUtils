@@ -4,6 +4,7 @@ using System.IO;
 using System.Security.Cryptography;
 using DiscUtils;
 using DiscUtils.Complete;
+using DiscUtils.Streams;
 using DiscUtils.Xfs;
 using DiscUtils.Vhdx;
 using LibraryTests.Utilities;
