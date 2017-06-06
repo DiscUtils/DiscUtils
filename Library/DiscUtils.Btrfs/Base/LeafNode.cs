@@ -67,6 +67,18 @@ namespace DiscUtils.Btrfs.Base
                 case ItemType.DevItem:
                     result = new DevItem();
                     break;
+                case ItemType.RootItem:
+                    result = new RootItem();
+                    break;
+                case ItemType.InodeRef:
+                    result = new InodeRef();
+                    break;
+                case ItemType.InodeItem:
+                    result = new InodeItem();
+                    break;
+                case ItemType.DirItem:
+                    result = new DirItem();
+                    break;
                 default:
                     throw new IOException($"Unsupported item type {item.Key.ItemType}");
             }

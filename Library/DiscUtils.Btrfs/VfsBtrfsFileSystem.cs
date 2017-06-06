@@ -57,7 +57,7 @@ namespace DiscUtils.Btrfs
             if (Context.SuperBlock == null)
                 throw new IOException("No Superblock detected");
             Context.ChunkTreeRoot = ReadTree(Context.SuperBlock.ChunkRoot, Context.SuperBlock.ChunkRootLevel);
-            //Context.RootTreeRoot = ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
+            Context.RootTreeRoot = ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
         }
         
         public override string FriendlyName

@@ -102,10 +102,5 @@ namespace DiscUtils.Btrfs.Base.Items
             }
             return Size;
         }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

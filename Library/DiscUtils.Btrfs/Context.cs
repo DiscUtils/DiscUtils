@@ -42,12 +42,26 @@ namespace DiscUtils.Btrfs
         {
             if (ChunkTreeRoot != null)
             {
-                throw new NotImplementedException();
+                var node = (LeafNode)ChunkTreeRoot;
+                for (int i = 0; i < node.Items.Length; i++)
+                {
+                    var chunkKey = node.Items[i].Key;
+                    if (chunkKey.ItemType != ItemType.ChunkItem) continue;
+                    if (chunkKey.Offset > logical) continue;
+                    var chunk = (ChunkItem)node.NodeData[i];
+                    if (chunkKey.Offset + chunk.ChunkSize < logical) continue;
+                    CheckStriping(chunk.Type);
+                    if (chunk.StripeCount < 1)
+                        throw new IOException("Invalid stripe count in ChunkItem");
+                    var stripe = chunk.Stripes[0];
+                    return stripe.Offset + (logical - chunkKey.Offset);
+                }
             }
             foreach (Tuple<Key, ChunkItem> tuple in SuperBlock.SystemChunkArray)
             {
                 if (tuple.Item1.ItemType != ItemType.ChunkItem) continue;
-                if (tuple.Item1.Offset != logical) continue;
+                if (tuple.Item1.Offset > logical) continue;
+                if (tuple.Item1.Offset  + tuple.Item2.ChunkSize < logical) continue;
 
                 CheckStriping(tuple.Item2.Type);
                 if (tuple.Item2.StripeCount <1)

@@ -126,10 +126,5 @@ namespace DiscUtils.Btrfs.Base.Items
             FsUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x52);
             return Size;
         }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
