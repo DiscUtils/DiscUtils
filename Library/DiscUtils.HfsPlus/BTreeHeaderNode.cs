@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -40,9 +40,9 @@ namespace DiscUtils.HfsPlus
             int totalRecords = Descriptor.NumRecords;
             int nodeSize = Tree.NodeSize;
 
-            int headerRecordOffset = Utilities.ToUInt16BigEndian(buffer, nodeSize - 2);
-            int userDataRecordOffset = Utilities.ToUInt16BigEndian(buffer, nodeSize - 4);
-            int mapRecordOffset = Utilities.ToUInt16BigEndian(buffer, nodeSize - 6);
+            int headerRecordOffset = EndianUtilities.ToUInt16BigEndian(buffer, nodeSize - 2);
+            int userDataRecordOffset = EndianUtilities.ToUInt16BigEndian(buffer, nodeSize - 4);
+            int mapRecordOffset = EndianUtilities.ToUInt16BigEndian(buffer, nodeSize - 6);
 
             BTreeNodeRecord[] results = new BTreeNodeRecord[3];
             results[0] = new BTreeHeaderRecord();

@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.IO;
 
@@ -57,7 +57,7 @@ namespace DiscUtils.Xfs
             Count8Bytes = buffer[offset+0x1];
             byte count;
             _useShortInode = false;
-            Parent = Utilities.ToUInt32BigEndian(buffer, offset + 0x2);
+            Parent = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x2);
             offset = offset + 0x6;
             if (Count4Bytes != 0)
             {

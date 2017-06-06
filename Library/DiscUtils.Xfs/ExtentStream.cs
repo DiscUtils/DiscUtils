@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.Collections.Generic;
 

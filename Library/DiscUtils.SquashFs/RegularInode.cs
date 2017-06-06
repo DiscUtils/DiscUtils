@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -58,10 +58,10 @@ namespace DiscUtils.SquashFs
             base.ReadFrom(buffer, offset);
 
             NumLinks = 1;
-            StartBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            FragmentKey = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            FragmentOffset = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            _fileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
+            StartBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
+            FragmentKey = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
+            FragmentOffset = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 24);
+            _fileSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 28);
 
             return 32;
         }
@@ -70,10 +70,10 @@ namespace DiscUtils.SquashFs
         {
             base.WriteTo(buffer, offset);
 
-            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
-            Utilities.WriteBytesLittleEndian(FragmentKey, buffer, offset + 20);
-            Utilities.WriteBytesLittleEndian(FragmentOffset, buffer, offset + 24);
-            Utilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 28);
+            EndianUtilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 16);
+            EndianUtilities.WriteBytesLittleEndian(FragmentKey, buffer, offset + 20);
+            EndianUtilities.WriteBytesLittleEndian(FragmentOffset, buffer, offset + 24);
+            EndianUtilities.WriteBytesLittleEndian(_fileSize, buffer, offset + 28);
         }
     }
 }

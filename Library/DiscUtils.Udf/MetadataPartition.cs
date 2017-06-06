@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -40,16 +40,16 @@ namespace DiscUtils.Udf
             PhysicalPartition physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
             long fileEntryPos = partitionMap.MetadataFileLocation * (long)volumeDescriptor.LogicalBlockSize;
 
-            byte[] entryData = Utilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
+            byte[] entryData = StreamUtilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
             if (!DescriptorTag.IsValid(entryData, 0))
             {
                 throw new IOException("Invalid descriptor tag looking for Metadata file entry");
             }
 
-            DescriptorTag dt = Utilities.ToStruct<DescriptorTag>(entryData, 0);
+            DescriptorTag dt = EndianUtilities.ToStruct<DescriptorTag>(entryData, 0);
             if (dt.TagIdentifier == TagIdentifier.ExtendedFileEntry)
             {
-                ExtendedFileEntry efe = Utilities.ToStruct<ExtendedFileEntry>(entryData, 0);
+                ExtendedFileEntry efe = EndianUtilities.ToStruct<ExtendedFileEntry>(entryData, 0);
                 _metadataFile = new File(context, physical, efe, _volumeDescriptor.LogicalBlockSize);
             }
             else

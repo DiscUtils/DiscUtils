@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {
@@ -114,7 +115,7 @@ namespace DiscUtils.Partitions
             if (disk.Length >= Sizes.Sector)
             {
                 disk.Position = 0;
-                byte[] bootSector = Utilities.ReadFully(disk, Sizes.Sector);
+                byte[] bootSector = StreamUtilities.ReadFully(disk, Sizes.Sector);
                 if (bootSector[510] == 0x55 && bootSector[511] == 0xAA)
                 {
                     byte maxHead = 0;
@@ -128,7 +129,7 @@ namespace DiscUtils.Partitions
                     if (maxHead > 0 && maxSector > 0)
                     {
                         int cylSize = (maxHead + 1) * maxSector * 512;
-                        return new Geometry((int)Utilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
+                        return new Geometry((int)MathUtilities.Ceil(disk.Length, cylSize), maxHead + 1, maxSector);
                     }
                 }
             }
@@ -149,7 +150,7 @@ namespace DiscUtils.Partitions
             }
 
             disk.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(disk, Sizes.Sector);
+            byte[] bootSector = StreamUtilities.ReadFully(disk, Sizes.Sector);
 
             // Check for the 'bootable sector' marker
             if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
@@ -221,7 +222,7 @@ namespace DiscUtils.Partitions
             if (data.Length >= Sizes.Sector)
             {
                 data.Position = 0;
-                bootSector = Utilities.ReadFully(data, Sizes.Sector);
+                bootSector = StreamUtilities.ReadFully(data, Sizes.Sector);
             }
             else
             {
@@ -304,9 +305,9 @@ namespace DiscUtils.Partitions
 
             ChsAddress start = new ChsAddress(0, 1, 1);
 
-            long startLba = Utilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start),
+            long startLba = MathUtilities.RoundUp(allocationGeometry.ToLogicalBlockAddress(start),
                 alignment / _diskGeometry.BytesPerSector);
-            long lastLba = Utilities.RoundDown(_diskData.Length / _diskGeometry.BytesPerSector,
+            long lastLba = MathUtilities.RoundDown(_diskData.Length / _diskGeometry.BytesPerSector,
                 alignment / _diskGeometry.BytesPerSector);
 
             return CreatePrimaryBySector(startLba, lastLba - 1,
@@ -513,7 +514,7 @@ namespace DiscUtils.Partitions
         public void UpdateBiosGeometry(Geometry geometry)
         {
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
+            byte[] bootSector = StreamUtilities.ReadFully(_diskData, Sizes.Sector);
 
             BiosPartitionRecord[] records = ReadPrimaryRecords(bootSector);
             for (int i = 0; i < records.Length; ++i)
@@ -626,7 +627,7 @@ namespace DiscUtils.Partitions
         private BiosPartitionRecord[] GetPrimaryRecords()
         {
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
+            byte[] bootSector = StreamUtilities.ReadFully(_diskData, Sizes.Sector);
 
             return ReadPrimaryRecords(bootSector);
         }
@@ -639,7 +640,7 @@ namespace DiscUtils.Partitions
         private void WriteRecord(int i, BiosPartitionRecord newRecord)
         {
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
+            byte[] bootSector = StreamUtilities.ReadFully(_diskData, Sizes.Sector);
             newRecord.WriteTo(bootSector, 0x01BE + i * 16);
             _diskData.Position = 0;
             _diskData.Write(bootSector, 0, bootSector.Length);
@@ -687,7 +688,7 @@ namespace DiscUtils.Partitions
                 r => r.IsValid);
             list.Sort();
 
-            long startSector = Utilities.RoundUp(_diskGeometry.ToLogicalBlockAddress(0, 1, 1), alignmentSectors);
+            long startSector = MathUtilities.RoundUp(_diskGeometry.ToLogicalBlockAddress(0, 1, 1), alignmentSectors);
 
             int idx = 0;
             while (idx < list.Count)
@@ -702,7 +703,7 @@ namespace DiscUtils.Partitions
                 if (Utilities.RangesOverlap(startSector, startSector + numSectors, entry.LBAStartAbsolute,
                     entry.LBAStartAbsolute + entry.LBALength))
                 {
-                    startSector = Utilities.RoundUp(entry.LBAStartAbsolute + entry.LBALength, alignmentSectors);
+                    startSector = MathUtilities.RoundUp(entry.LBAStartAbsolute + entry.LBALength, alignmentSectors);
                 }
 
                 idx++;
@@ -723,7 +724,7 @@ namespace DiscUtils.Partitions
             _diskGeometry = diskGeometry;
 
             _diskData.Position = 0;
-            byte[] bootSector = Utilities.ReadFully(_diskData, Sizes.Sector);
+            byte[] bootSector = StreamUtilities.ReadFully(_diskData, Sizes.Sector);
             if (bootSector[510] != 0x55 || bootSector[511] != 0xAA)
             {
                 throw new IOException("Invalid boot sector - no magic number 0xAA55");

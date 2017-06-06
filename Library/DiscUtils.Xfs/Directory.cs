@@ -27,7 +27,7 @@ namespace DiscUtils.Xfs
     using System.IO;
     using System.Collections.Generic;
     using DiscUtils.Vfs;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
@@ -62,7 +62,7 @@ namespace DiscUtils.Xfs
                         var blockDir = new BlockDirectory();
 
                         var dirContent = Inode.GetContentBuffer(Context);
-                        var buffer = Utilities.ReadAll(dirContent);
+                        var buffer = StreamUtilities.ReadAll(dirContent);
                         blockDir.ReadFrom(buffer, 0);
                         if (blockDir.Magic != BlockDirectory.HeaderMagic)
                             throw new IOException("invalid block directory magic");
@@ -95,12 +95,15 @@ namespace DiscUtils.Xfs
             {
                 if (extent.StartOffset < leafOffset)
                 {
-                    var leafDir = new LeafDirectory();
-                    var buffer = extent.GetData(Context, Context.SuperBlock.DirBlockSize);
-                    leafDir.ReadFrom(buffer, 0);
-                    if (leafDir.Magic != LeafDirectory.HeaderMagic)
-                        throw new IOException("invalid leaf directory magic");
-                    AddDirEntries(leafDir.Entries, target);
+                    for (int i = 0; i < extent.BlockCount; i++)
+                    {
+                        var buffer = extent.GetData(Context, i* Context.SuperBlock.DirBlockSize, Context.SuperBlock.DirBlockSize);
+                        var leafDir = new LeafDirectory();
+                        leafDir.ReadFrom(buffer, 0);
+                        if (leafDir.Magic != LeafDirectory.HeaderMagic)
+                            throw new IOException("invalid leaf directory magic");
+                        AddDirEntries(leafDir.Entries, target);
+                    }
 
                 }
             }

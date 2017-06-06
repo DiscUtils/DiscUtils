@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -95,7 +95,7 @@ namespace DiscUtils.Ntfs
                     size += IsFileIndexEntry ? 0 : _dataBuffer.Length;
                 }
 
-                size = Utilities.RoundUp(size, 8);
+                size = MathUtilities.RoundUp(size, 8);
 
                 if ((_flags & IndexEntryFlags.Node) != 0)
                 {
@@ -108,11 +108,11 @@ namespace DiscUtils.Ntfs
 
         public virtual void Read(byte[] buffer, int offset)
         {
-            ushort dataOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x00);
-            ushort dataLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
-            ushort length = Utilities.ToUInt16LittleEndian(buffer, offset + 0x08);
-            ushort keyLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = (IndexEntryFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            ushort dataOffset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x00);
+            ushort dataLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x02);
+            ushort length = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x08);
+            ushort keyLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            _flags = (IndexEntryFlags)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
 
             if ((_flags & IndexEntryFlags.End) == 0)
             {
@@ -134,7 +134,7 @@ namespace DiscUtils.Ntfs
 
             if ((_flags & IndexEntryFlags.Node) != 0)
             {
-                _vcn = Utilities.ToInt64LittleEndian(buffer, offset + length - 8);
+                _vcn = EndianUtilities.ToInt64LittleEndian(buffer, offset + length - 8);
             }
         }
 
@@ -155,26 +155,26 @@ namespace DiscUtils.Ntfs
                     ushort dataOffset = (ushort)(IsFileIndexEntry ? 0 : 0x10 + keyLength);
                     ushort dataLength = (ushort)_dataBuffer.Length;
 
-                    Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x00);
-                    Utilities.WriteBytesLittleEndian(dataLength, buffer, offset + 0x02);
+                    EndianUtilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x00);
+                    EndianUtilities.WriteBytesLittleEndian(dataLength, buffer, offset + 0x02);
                     Array.Copy(_dataBuffer, 0, buffer, offset + dataOffset, _dataBuffer.Length);
                 }
 
-                Utilities.WriteBytesLittleEndian(keyLength, buffer, offset + 0x0A);
+                EndianUtilities.WriteBytesLittleEndian(keyLength, buffer, offset + 0x0A);
                 Array.Copy(_keyBuffer, 0, buffer, offset + 0x10, _keyBuffer.Length);
             }
             else
             {
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x00); // dataOffset
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x02); // dataLength
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0A); // keyLength
+                EndianUtilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x00); // dataOffset
+                EndianUtilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x02); // dataLength
+                EndianUtilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x0A); // keyLength
             }
 
-            Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
+            EndianUtilities.WriteBytesLittleEndian(length, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
             if ((_flags & IndexEntryFlags.Node) != 0)
             {
-                Utilities.WriteBytesLittleEndian(_vcn, buffer, offset + length - 8);
+                EndianUtilities.WriteBytesLittleEndian(_vcn, buffer, offset + length - 8);
             }
         }
     }

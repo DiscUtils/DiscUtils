@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Archives
 {
@@ -94,7 +94,7 @@ namespace DiscUtils.Archives
             _files.Add(new UnixBuildFileRecord(name, stream, fileMode, ownerId, groupId, modificationTime));
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             List<BuilderExtent> result = new List<BuilderExtent>(_files.Count * 2 + 2);
             long pos = 0;
@@ -109,7 +109,7 @@ namespace DiscUtils.Archives
                 pos += TarHeader.Length;
 
                 result.Add(fileContentExtent);
-                pos += Utilities.RoundUp(fileContentExtent.Length, 512);
+                pos += MathUtilities.RoundUp(fileContentExtent.Length, 512);
             }
 
             // Two empty 512-byte blocks at end of tar file.

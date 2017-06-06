@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.BootConfig
 {
@@ -35,8 +35,8 @@ namespace DiscUtils.BootConfig
 
         public static DeviceRecord Parse(byte[] data, int offset)
         {
-            int type = Utilities.ToInt32LittleEndian(data, offset);
-            int length = Utilities.ToInt32LittleEndian(data, offset + 0x8);
+            int type = EndianUtilities.ToInt32LittleEndian(data, offset);
+            int length = EndianUtilities.ToInt32LittleEndian(data, offset + 0x8);
             if (offset + length > data.Length)
             {
                 throw new InvalidDataException("Device record is truncated");
@@ -70,15 +70,15 @@ namespace DiscUtils.BootConfig
 
         protected virtual void DoParse(byte[] data, int offset)
         {
-            Type = Utilities.ToInt32LittleEndian(data, offset);
-            Length = Utilities.ToInt32LittleEndian(data, offset + 0x8);
+            Type = EndianUtilities.ToInt32LittleEndian(data, offset);
+            Length = EndianUtilities.ToInt32LittleEndian(data, offset + 0x8);
         }
 
         protected void WriteHeader(byte[] data, int offset)
         {
             Length = Size;
-            Utilities.WriteBytesLittleEndian(Type, data, offset);
-            Utilities.WriteBytesLittleEndian(Size, data, offset + 0x8);
+            EndianUtilities.WriteBytesLittleEndian(Type, data, offset);
+            EndianUtilities.WriteBytesLittleEndian(Size, data, offset + 0x8);
         }
     }
 }

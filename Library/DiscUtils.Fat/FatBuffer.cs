@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Fat
 {
@@ -127,20 +127,20 @@ namespace DiscUtils.Fat
         {
             if (_type == FatType.Fat16)
             {
-                return Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster * 2));
+                return EndianUtilities.ToUInt16LittleEndian(_buffer, (int)(cluster * 2));
             }
             if (_type == FatType.Fat32)
             {
-                return Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
+                return EndianUtilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4)) & 0x0FFFFFFF;
             }
 
             // FAT12
             if ((cluster & 1) != 0)
             {
                 return
-                    (uint)((Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + cluster / 2)) >> 4) & 0x0FFF);
+                    (uint)((EndianUtilities.ToUInt16LittleEndian(_buffer, (int)(cluster + cluster / 2)) >> 4) & 0x0FFF);
             }
-            return (uint)(Utilities.ToUInt16LittleEndian(_buffer, (int)(cluster + cluster / 2)) & 0x0FFF);
+            return (uint)(EndianUtilities.ToUInt16LittleEndian(_buffer, (int)(cluster + cluster / 2)) & 0x0FFF);
         }
 
         internal void SetEndOfChain(uint cluster)
@@ -168,14 +168,14 @@ namespace DiscUtils.Fat
             if (_type == FatType.Fat16)
             {
                 MarkDirty(cluster * 2);
-                Utilities.WriteBytesLittleEndian((ushort)next, _buffer, (int)(cluster * 2));
+                EndianUtilities.WriteBytesLittleEndian((ushort)next, _buffer, (int)(cluster * 2));
             }
             else if (_type == FatType.Fat32)
             {
                 MarkDirty(cluster * 4);
-                uint oldVal = Utilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4));
+                uint oldVal = EndianUtilities.ToUInt32LittleEndian(_buffer, (int)(cluster * 4));
                 uint newVal = (oldVal & 0xF0000000) | (next & 0x0FFFFFFF);
-                Utilities.WriteBytesLittleEndian(newVal, _buffer, (int)(cluster * 4));
+                EndianUtilities.WriteBytesLittleEndian(newVal, _buffer, (int)(cluster * 4));
             }
             else
             {
@@ -187,17 +187,17 @@ namespace DiscUtils.Fat
                 if ((cluster & 1) != 0)
                 {
                     next = next << 4;
-                    maskedOldVal = (ushort)(Utilities.ToUInt16LittleEndian(_buffer, (int)offset) & 0x000F);
+                    maskedOldVal = (ushort)(EndianUtilities.ToUInt16LittleEndian(_buffer, (int)offset) & 0x000F);
                 }
                 else
                 {
                     next = next & 0x0FFF;
-                    maskedOldVal = (ushort)(Utilities.ToUInt16LittleEndian(_buffer, (int)offset) & 0xF000);
+                    maskedOldVal = (ushort)(EndianUtilities.ToUInt16LittleEndian(_buffer, (int)offset) & 0xF000);
                 }
 
                 ushort newVal = (ushort)(maskedOldVal | next);
 
-                Utilities.WriteBytesLittleEndian(newVal, _buffer, (int)offset);
+                EndianUtilities.WriteBytesLittleEndian(newVal, _buffer, (int)offset);
             }
         }
 

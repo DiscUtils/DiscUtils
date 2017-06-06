@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -59,16 +59,16 @@ namespace DiscUtils.Ntfs
         {
             _majorVersion = buffer[offset + 0x08];
             _minorVersion = buffer[offset + 0x09];
-            Flags = (VolumeInformationFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            Flags = (VolumeInformationFlags)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
             return 0x0C;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian((ulong)0, buffer, offset + 0x00);
+            EndianUtilities.WriteBytesLittleEndian((ulong)0, buffer, offset + 0x00);
             buffer[offset + 0x08] = _majorVersion;
             buffer[offset + 0x09] = _minorVersion;
-            Utilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x0A);
+            EndianUtilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x0A);
         }
 
         public void Dump(TextWriter writer, string indent)

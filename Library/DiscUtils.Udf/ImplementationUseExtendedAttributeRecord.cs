@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -34,7 +34,7 @@ namespace DiscUtils.Udf
         {
             int read = base.ReadFrom(buffer, offset);
 
-            int iuSize = Utilities.ToInt32LittleEndian(buffer, offset + 12);
+            int iuSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 12);
 
             ImplementationIdentifier = new ImplementationEntityIdentifier();
             ImplementationIdentifier.ReadFrom(buffer, offset + 16);

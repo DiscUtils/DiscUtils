@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -63,7 +63,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[AttributeDefinitionRecord.Size];
             using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             {
-                while (Utilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
+                while (StreamUtilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
                 {
                     AttributeDefinitionRecord record = new AttributeDefinitionRecord();
                     record.Read(buffer, 0);

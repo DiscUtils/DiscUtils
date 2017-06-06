@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -25,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class BTreeInodeNode : BtreeHeader
@@ -41,20 +42,23 @@ namespace DiscUtils.Xfs
             get { return base.Size + (NumberOfRecords * 0x8); }
         }
 
+        public BTreeInodeNode(uint superBlockVersion) : base(superBlockVersion) { }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            offset += base.ReadFrom(buffer, offset);
+            base.ReadFrom(buffer, offset);
+            offset += base.Size;
             if (Level == 0)
                 throw new IOException("invalid B+tree level - expected 0");
             Keys = new uint[NumberOfRecords];
             Pointer = new uint[NumberOfRecords];
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                Keys[i] = Utilities.ToUInt32BigEndian(buffer, offset);
+                Keys[i] = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             }
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                Pointer[i] = Utilities.ToUInt32BigEndian(buffer, offset);
+                Pointer[i] = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             }
             return Size;
         }
@@ -67,15 +71,15 @@ namespace DiscUtils.Xfs
                 BtreeHeader child;
                 if (Level == 1)
                 {
-                    child = new BTreeInodeLeave();
+                    child = new BTreeInodeLeaf(base.SbVersion);
                 }
                 else
                 {
-                    child = new BTreeInodeNode();
+                    child = new BTreeInodeNode(base.SbVersion);
                 }
                 var data = ag.Context.RawStream;
                 data.Position = (Pointer[i] * ag.Context.SuperBlock.Blocksize) + ag.Offset;
-                var buffer = Utilities.ReadFully(data, (int)ag.Context.SuperBlock.Blocksize);
+                var buffer = StreamUtilities.ReadFully(data, (int)ag.Context.SuperBlock.Blocksize);
                 child.ReadFrom(buffer, 0);
                 child.LoadBtree(ag);
                 Children.Add(Keys[i], child);

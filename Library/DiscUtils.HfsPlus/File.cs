@@ -25,6 +25,7 @@ using System.IO;
 using System.IO.Compression;
 using DiscUtils.Compression;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus

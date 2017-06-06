@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -35,11 +35,11 @@ namespace DiscUtils.Wim
 
         public void Read(byte[] buffer, int offset)
         {
-            CompressedSize = Utilities.ToInt64LittleEndian(buffer, offset);
+            CompressedSize = EndianUtilities.ToInt64LittleEndian(buffer, offset);
             Flags = (ResourceFlags)((CompressedSize >> 56) & 0xFF);
             CompressedSize = CompressedSize & 0x00FFFFFFFFFFFFFF;
-            FileOffset = Utilities.ToInt64LittleEndian(buffer, offset + 8);
-            OriginalSize = Utilities.ToInt64LittleEndian(buffer, offset + 16);
+            FileOffset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 8);
+            OriginalSize = EndianUtilities.ToInt64LittleEndian(buffer, offset + 16);
         }
     }
 }

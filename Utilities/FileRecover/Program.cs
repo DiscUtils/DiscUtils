@@ -26,6 +26,7 @@ using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Ntfs.Internals;
+using DiscUtils.Streams;
 
 namespace FileRecover
 {

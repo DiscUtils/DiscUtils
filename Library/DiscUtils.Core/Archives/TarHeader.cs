@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Archives
 {
@@ -50,28 +50,28 @@ namespace DiscUtils.Archives
         {
             Array.Clear(buffer, offset, Length);
 
-            Utilities.StringToBytes(FileName, buffer, offset, 99);
-            Utilities.StringToBytes(LongToOctal((long)FileMode, 7), buffer, offset + 100, 7);
-            Utilities.StringToBytes(LongToOctal(OwnerId, 7), buffer, offset + 108, 7);
-            Utilities.StringToBytes(LongToOctal(GroupId, 7), buffer, offset + 116, 7);
-            Utilities.StringToBytes(LongToOctal(FileLength, 11), buffer, offset + 124, 11);
-            Utilities.StringToBytes(LongToOctal(Convert.ToUInt32((new DateTimeOffset(ModificationTime)).ToUnixTimeSeconds()), 11), buffer, offset + 136, 11);
+            EndianUtilities.StringToBytes(FileName, buffer, offset, 99);
+            EndianUtilities.StringToBytes(LongToOctal((long)FileMode, 7), buffer, offset + 100, 7);
+            EndianUtilities.StringToBytes(LongToOctal(OwnerId, 7), buffer, offset + 108, 7);
+            EndianUtilities.StringToBytes(LongToOctal(GroupId, 7), buffer, offset + 116, 7);
+            EndianUtilities.StringToBytes(LongToOctal(FileLength, 11), buffer, offset + 124, 11);
+            EndianUtilities.StringToBytes(LongToOctal(Convert.ToUInt32((new DateTimeOffset(ModificationTime)).ToUnixTimeSeconds()), 11), buffer, offset + 136, 11);
 
             // Checksum
-            Utilities.StringToBytes(new string(' ', 8), buffer, offset + 148, 8);
+            EndianUtilities.StringToBytes(new string(' ', 8), buffer, offset + 148, 8);
             long checkSum = 0;
             for (int i = 0; i < 512; ++i)
             {
                 checkSum += buffer[offset + i];
             }
 
-            Utilities.StringToBytes(LongToOctal(checkSum, 7), buffer, offset + 148, 7);
+            EndianUtilities.StringToBytes(LongToOctal(checkSum, 7), buffer, offset + 148, 7);
             buffer[155] = 0;
         }
 
         private static string ReadNullTerminatedString(byte[] buffer, int offset, int length)
         {
-            return Utilities.BytesToString(buffer, offset, length).TrimEnd('\0');
+            return EndianUtilities.BytesToString(buffer, offset, length).TrimEnd('\0');
         }
 
         private static long OctalToLong(string value)

@@ -23,6 +23,7 @@
 using System.IO;
 using System.Management.Automation;
 using DiscUtils.Registry;
+using DiscUtils.Streams;
 
 namespace DiscUtils.PowerShell.VirtualRegistryProvider
 {

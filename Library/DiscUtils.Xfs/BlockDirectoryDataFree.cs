@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.IO;
 
@@ -39,8 +39,8 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Offset = Utilities.ToUInt16BigEndian(buffer, offset);
-            Length = Utilities.ToUInt16BigEndian(buffer, offset + 0x2);
+            Offset = EndianUtilities.ToUInt16BigEndian(buffer, offset);
+            Length = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x2);
             return Size;
         }
 

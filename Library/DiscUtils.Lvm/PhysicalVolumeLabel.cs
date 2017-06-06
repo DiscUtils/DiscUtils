@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Lvm
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class PhysicalVolumeLabel : IByteArraySerializable
@@ -43,12 +43,12 @@ namespace DiscUtils.Lvm
         /// <inheritdoc />
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Label = Utilities.BytesToString(buffer, offset, 0x8);
-            Sector = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
-            Crc = Utilities.ToUInt32LittleEndian(buffer, offset + 0x10);
+            Label = EndianUtilities.BytesToString(buffer, offset, 0x8);
+            Sector = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            Crc = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x10);
             CalculatedCrc = PhysicalVolume.CalcCrc(buffer, offset + 0x14, PhysicalVolume.SECTOR_SIZE - 0x14);
-            Offset = Utilities.ToUInt32LittleEndian(buffer, offset + 0x14);
-            Label2 = Utilities.BytesToString(buffer, offset + 0x18, 0x8);
+            Offset = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x14);
+            Label2 = EndianUtilities.BytesToString(buffer, offset + 0x18, 0x8);
             return Size;
         }
 

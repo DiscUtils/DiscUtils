@@ -22,7 +22,7 @@
 
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -47,12 +47,12 @@ namespace DiscUtils.Iso9660
             }
         }
 
-        internal override void PrepareForRead()
+        public override void PrepareForRead()
         {
             _readStream = _fileInfo.OpenStream();
         }
 
-        internal override int Read(long diskOffset, byte[] block, int offset, int count)
+        public override int Read(long diskOffset, byte[] block, int offset, int count)
         {
             long relPos = diskOffset - Start;
             int totalRead = 0;
@@ -76,7 +76,7 @@ namespace DiscUtils.Iso9660
             return totalRead;
         }
 
-        internal override void DisposeReadState()
+        public override void DisposeReadState()
         {
             _fileInfo.CloseStream(_readStream);
             _readStream = null;

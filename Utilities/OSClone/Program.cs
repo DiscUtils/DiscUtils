@@ -29,6 +29,7 @@ using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
 using DiscUtils.Registry;
+using DiscUtils.Streams;
 
 namespace OSClone
 {

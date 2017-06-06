@@ -24,7 +24,7 @@ using System.Collections;
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class BTreeInodeRecord: IByteArraySerializable
@@ -50,9 +50,9 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            StartInode = Utilities.ToUInt32BigEndian(buffer, offset);
-            FreeCount = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
-            Free = new BitArray(Utilities.ToByteArray(buffer, offset + 0x8, 0x8));
+            StartInode = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            FreeCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            Free = new BitArray(EndianUtilities.ToByteArray(buffer, offset + 0x8, 0x8));
             return Size;
         }
 

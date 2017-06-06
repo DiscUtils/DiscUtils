@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
@@ -95,16 +95,16 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
-            FileVersionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
+            DescriptorTag = EndianUtilities.ToStruct<DescriptorTag>(buffer, offset);
+            FileVersionNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 16);
             FileCharacteristics = (FileCharacteristic)buffer[offset + 18];
             NameLength = buffer[offset + 19];
-            FileLocation = Utilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 20);
-            ImplementationUseLength = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
-            ImplementationUse = Utilities.ToByteArray(buffer, offset + 38, ImplementationUseLength);
+            FileLocation = EndianUtilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 20);
+            ImplementationUseLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 36);
+            ImplementationUse = EndianUtilities.ToByteArray(buffer, offset + 38, ImplementationUseLength);
             Name = UdfUtilities.ReadDCharacters(buffer, offset + 38 + ImplementationUseLength, NameLength);
 
-            return Utilities.RoundUp(38 + ImplementationUseLength + NameLength, 4);
+            return MathUtilities.RoundUp(38 + ImplementationUseLength + NameLength, 4);
         }
 
         public void WriteTo(byte[] buffer, int offset)

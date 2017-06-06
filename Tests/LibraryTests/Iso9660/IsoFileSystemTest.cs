@@ -23,6 +23,7 @@
 using System.IO;
 using DiscUtils;
 using DiscUtils.Iso9660;
+using DiscUtils.Streams;
 using Xunit;
 
 namespace LibraryTests.Iso9660

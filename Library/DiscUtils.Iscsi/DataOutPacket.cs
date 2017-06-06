@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -48,14 +48,14 @@ namespace DiscUtils.Iscsi
             _basicHeader.DataSegmentLength = count;
             _basicHeader.InitiatorTaskTag = _connection.Session.CurrentTaskTag;
 
-            byte[] buffer = new byte[48 + Utilities.RoundUp(count, 4)];
+            byte[] buffer = new byte[48 + MathUtilities.RoundUp(count, 4)];
             _basicHeader.WriteTo(buffer, 0);
             buffer[1] = (byte)(isFinalData ? 0x80 : 0x00);
-            Utilities.WriteBytesBigEndian(_lun, buffer, 8);
-            Utilities.WriteBytesBigEndian(targetTransferTag, buffer, 20);
-            Utilities.WriteBytesBigEndian(_connection.ExpectedStatusSequenceNumber, buffer, 28);
-            Utilities.WriteBytesBigEndian(dataSeqNumber, buffer, 36);
-            Utilities.WriteBytesBigEndian(bufferOffset, buffer, 40);
+            EndianUtilities.WriteBytesBigEndian(_lun, buffer, 8);
+            EndianUtilities.WriteBytesBigEndian(targetTransferTag, buffer, 20);
+            EndianUtilities.WriteBytesBigEndian(_connection.ExpectedStatusSequenceNumber, buffer, 28);
+            EndianUtilities.WriteBytesBigEndian(dataSeqNumber, buffer, 36);
+            EndianUtilities.WriteBytesBigEndian(bufferOffset, buffer, 40);
 
             Array.Copy(data, offset, buffer, 48, count);
 

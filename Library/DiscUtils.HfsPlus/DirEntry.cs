@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
@@ -96,13 +97,13 @@ namespace DiscUtils.HfsPlus
 
         internal static bool IsFileOrDirectory(byte[] dirEntryData)
         {
-            CatalogRecordType type = (CatalogRecordType)Utilities.ToInt16BigEndian(dirEntryData, 0);
+            CatalogRecordType type = (CatalogRecordType)EndianUtilities.ToInt16BigEndian(dirEntryData, 0);
             return type == CatalogRecordType.FolderRecord || type == CatalogRecordType.FileRecord;
         }
 
         private static CommonCatalogFileInfo ParseDirEntryData(byte[] dirEntryData)
         {
-            CatalogRecordType type = (CatalogRecordType)Utilities.ToInt16BigEndian(dirEntryData, 0);
+            CatalogRecordType type = (CatalogRecordType)EndianUtilities.ToInt16BigEndian(dirEntryData, 0);
 
             CommonCatalogFileInfo result = null;
             switch (type)

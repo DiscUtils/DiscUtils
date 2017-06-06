@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -98,7 +98,7 @@ namespace DiscUtils.Ntfs
                     entriesTotal += _entries[i].Size;
                 }
 
-                int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+                int firstEntryOffset = MathUtilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
 
                 return TotalSpaceAvailable - (entriesTotal + firstEntryOffset);
             }
@@ -181,7 +181,7 @@ namespace DiscUtils.Ntfs
                 haveSubNodes |= (entry.Flags & IndexEntryFlags.Node) != 0;
             }
 
-            Header.OffsetToFirstEntry = (uint)Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+            Header.OffsetToFirstEntry = (uint)MathUtilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
             Header.TotalSizeOfEntries = totalEntriesSize + Header.OffsetToFirstEntry;
             Header.HasChildNodes = (byte)(haveSubNodes ? 1 : 0);
             Header.WriteTo(buffer, offset + 0);
@@ -209,7 +209,7 @@ namespace DiscUtils.Ntfs
 
         public virtual int CalcSize()
         {
-            int firstEntryOffset = Utilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
+            int firstEntryOffset = MathUtilities.RoundUp(IndexHeader.Size + _storageOverhead, 8);
             return firstEntryOffset + CalcEntriesSize();
         }
 

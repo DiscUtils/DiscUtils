@@ -22,7 +22,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -298,7 +298,7 @@ namespace DiscUtils.Ntfs
 
         internal long GetAttributeOffset(ushort id)
         {
-            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
+            int firstAttrPos = (ushort)MathUtilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
 
             int offset = firstAttrPos;
             foreach (AttributeRecord attr in Attributes)
@@ -335,19 +335,19 @@ namespace DiscUtils.Ntfs
 
         protected override void Read(byte[] buffer, int offset)
         {
-            LogFileSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
-            SequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
-            HardLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x12);
-            _firstAttributeOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x14);
-            Flags = (FileRecordFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x16);
-            RealSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x18);
-            AllocatedSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x1C);
-            BaseFile = new FileRecordReference(Utilities.ToUInt64LittleEndian(buffer, offset + 0x20));
-            NextAttributeId = Utilities.ToUInt16LittleEndian(buffer, offset + 0x28);
+            LogFileSequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x08);
+            SequenceNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x10);
+            HardLinkCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x12);
+            _firstAttributeOffset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x14);
+            Flags = (FileRecordFlags)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x16);
+            RealSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x18);
+            AllocatedSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x1C);
+            BaseFile = new FileRecordReference(EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x20));
+            NextAttributeId = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x28);
 
             if (UpdateSequenceOffset >= 0x30)
             {
-                _index = Utilities.ToUInt32LittleEndian(buffer, offset + 0x2C);
+                _index = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x2C);
                 _haveIndex = true;
             }
 
@@ -371,23 +371,23 @@ namespace DiscUtils.Ntfs
         {
             ushort headerEnd = (ushort)(_haveIndex ? 0x30 : 0x2A);
 
-            _firstAttributeOffset = (ushort)Utilities.RoundUp(headerEnd + UpdateSequenceSize, 0x08);
+            _firstAttributeOffset = (ushort)MathUtilities.RoundUp(headerEnd + UpdateSequenceSize, 0x08);
             RealSize = (uint)CalcSize();
 
-            Utilities.WriteBytesLittleEndian(LogFileSequenceNumber, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(SequenceNumber, buffer, offset + 0x10);
-            Utilities.WriteBytesLittleEndian(HardLinkCount, buffer, offset + 0x12);
-            Utilities.WriteBytesLittleEndian(_firstAttributeOffset, buffer, offset + 0x14);
-            Utilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x16);
-            Utilities.WriteBytesLittleEndian(RealSize, buffer, offset + 0x18);
-            Utilities.WriteBytesLittleEndian(AllocatedSize, buffer, offset + 0x1C);
-            Utilities.WriteBytesLittleEndian(BaseFile.Value, buffer, offset + 0x20);
-            Utilities.WriteBytesLittleEndian(NextAttributeId, buffer, offset + 0x28);
+            EndianUtilities.WriteBytesLittleEndian(LogFileSequenceNumber, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(SequenceNumber, buffer, offset + 0x10);
+            EndianUtilities.WriteBytesLittleEndian(HardLinkCount, buffer, offset + 0x12);
+            EndianUtilities.WriteBytesLittleEndian(_firstAttributeOffset, buffer, offset + 0x14);
+            EndianUtilities.WriteBytesLittleEndian((ushort)Flags, buffer, offset + 0x16);
+            EndianUtilities.WriteBytesLittleEndian(RealSize, buffer, offset + 0x18);
+            EndianUtilities.WriteBytesLittleEndian(AllocatedSize, buffer, offset + 0x1C);
+            EndianUtilities.WriteBytesLittleEndian(BaseFile.Value, buffer, offset + 0x20);
+            EndianUtilities.WriteBytesLittleEndian(NextAttributeId, buffer, offset + 0x28);
 
             if (_haveIndex)
             {
-                Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x2A); // Alignment field
-                Utilities.WriteBytesLittleEndian(_index, buffer, offset + 0x2C);
+                EndianUtilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 0x2A); // Alignment field
+                EndianUtilities.WriteBytesLittleEndian(_index, buffer, offset + 0x2C);
             }
 
             int pos = _firstAttributeOffset;
@@ -396,14 +396,14 @@ namespace DiscUtils.Ntfs
                 pos += attr.Write(buffer, offset + pos);
             }
 
-            Utilities.WriteBytesLittleEndian(uint.MaxValue, buffer, offset + pos);
+            EndianUtilities.WriteBytesLittleEndian(uint.MaxValue, buffer, offset + pos);
 
             return headerEnd;
         }
 
         protected override int CalcSize()
         {
-            int firstAttrPos = (ushort)Utilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
+            int firstAttrPos = (ushort)MathUtilities.RoundUp((_haveIndex ? 0x30 : 0x2A) + UpdateSequenceSize, 8);
 
             int size = firstAttrPos;
             foreach (AttributeRecord attr in Attributes)
@@ -411,7 +411,7 @@ namespace DiscUtils.Ntfs
                 size += attr.Size;
             }
 
-            return Utilities.RoundUp(size + 4, 8); // 0xFFFFFFFF terminator on attributes
+            return MathUtilities.RoundUp(size + 4, 8); // 0xFFFFFFFF terminator on attributes
         }
     }
 }

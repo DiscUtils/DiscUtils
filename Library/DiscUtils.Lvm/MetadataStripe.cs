@@ -23,7 +23,6 @@
 namespace DiscUtils.Lvm
 {
     using System;
-    using System.IO;
 
     internal class MetadataStripe
     {

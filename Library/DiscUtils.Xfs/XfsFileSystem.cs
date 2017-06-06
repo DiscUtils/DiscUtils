@@ -24,7 +24,7 @@ namespace DiscUtils.Xfs
 {
     using System.IO;
     using DiscUtils.Vfs;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     /// <summary>
     /// Read-only access to ext file system.
@@ -69,7 +69,7 @@ namespace DiscUtils.Xfs
             }
 
             stream.Position = 0;
-            byte[] superblockData = Utilities.ReadFully(stream, 264);
+            byte[] superblockData = StreamUtilities.ReadFully(stream, 264);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

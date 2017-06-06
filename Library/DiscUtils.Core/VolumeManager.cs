@@ -24,10 +24,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 using DiscUtils.Partitions;
 using DiscUtils.Raw;
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {
@@ -50,6 +52,7 @@ namespace DiscUtils
 
         private Dictionary<string, PhysicalVolumeInfo> _physicalVolumes;
         private Dictionary<string, LogicalVolumeInfo> _logicalVolumes;
+        private static readonly Assembly _coreAssembly = ReflectionHelper.GetAssembly(typeof(VolumeManager));
 
         /// <summary>
         /// Initializes a new instance of the VolumeManager class.
@@ -88,20 +91,33 @@ namespace DiscUtils
                 if (s_logicalVolumeFactories == null)
                 {
                     List<LogicalVolumeFactory> factories = new List<LogicalVolumeFactory>();
-
-                    foreach (Type type in ReflectionHelper.GetAssembly(typeof(VolumeManager)).GetTypes())
-                    {
-                        foreach (LogicalVolumeFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
-                        {
-                            factories.Add((LogicalVolumeFactory)Activator.CreateInstance(type));
-                        }
-                    }
-
+                    factories.AddRange(GetLogicalVolumeFactories(_coreAssembly));
                     s_logicalVolumeFactories = factories;
                 }
 
                 return s_logicalVolumeFactories;
             }
+        }
+
+        private static IEnumerable<LogicalVolumeFactory> GetLogicalVolumeFactories(Assembly assembly)
+        {
+            foreach (Type type in assembly.GetTypes())
+            {
+                foreach (LogicalVolumeFactoryAttribute attr in ReflectionHelper.GetCustomAttributes(type, typeof(LogicalVolumeFactoryAttribute), false))
+                {
+                    yield return (LogicalVolumeFactory)Activator.CreateInstance(type);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Register new LogicalVolumeFactories detected in an assembly
+        /// </summary>
+        /// <param name="assembly">The assembly to inspect</param>
+        public static void RegisterLogicalVolumeFactory(Assembly assembly)
+        {
+            if (assembly == _coreAssembly) return;
+            LogicalVolumeFactories.AddRange(GetLogicalVolumeFactories(assembly));
         }
 
         /// <summary>

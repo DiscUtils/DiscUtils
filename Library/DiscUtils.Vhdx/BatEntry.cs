@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -30,7 +30,7 @@ namespace DiscUtils.Vhdx
 
         public BatEntry(byte[] buffer, int offset)
         {
-            _value = Utilities.ToUInt64LittleEndian(buffer, offset);
+            _value = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
         }
 
         public PayloadBlockStatus PayloadBlockStatus
@@ -58,13 +58,13 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _value = Utilities.ToUInt64LittleEndian(buffer, offset);
+            _value = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
             return 8;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(_value, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian(_value, buffer, offset);
         }
     }
 }

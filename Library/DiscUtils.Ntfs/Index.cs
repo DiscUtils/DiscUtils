@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -54,7 +55,7 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
-                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = StreamUtilities.ReadFully(s, (int)s.Length);
                 _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, buffer, IndexRoot.HeaderOffset);
 
                 // Give the attribute some room to breathe, so long as it doesn't squeeze others out
@@ -353,7 +354,7 @@ namespace DiscUtils.Ntfs
             long idx = _indexBitmap.AllocateFirstAvailable(0);
 
             parentEntry.ChildrenVirtualCluster = idx *
-                                                 Utilities.Ceil(_bpb.IndexBufferSize,
+                                                 MathUtilities.Ceil(_bpb.IndexBufferSize,
                                                      _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             parentEntry.Flags |= IndexEntryFlags.Node;
 
@@ -364,7 +365,7 @@ namespace DiscUtils.Ntfs
 
         internal void FreeBlock(long vcn)
         {
-            long idx = vcn / Utilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
+            long idx = vcn / MathUtilities.Ceil(_bpb.IndexBufferSize, _bpb.SectorsPerCluster * _bpb.BytesPerSector);
             _indexBitmap.MarkAbsent(idx);
             _blockCache.Remove(vcn);
         }

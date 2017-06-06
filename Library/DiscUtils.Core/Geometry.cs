@@ -22,7 +22,7 @@
 
 using System;
 using System.Globalization;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {

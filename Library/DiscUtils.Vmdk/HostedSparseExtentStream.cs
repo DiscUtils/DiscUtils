@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -45,13 +45,13 @@ namespace DiscUtils.Vmdk
             _ownsParentDiskStream = ownsParentDiskStream;
 
             file.Position = 0;
-            byte[] headerSector = Utilities.ReadFully(file, Sizes.Sector);
+            byte[] headerSector = StreamUtilities.ReadFully(file, Sizes.Sector);
             _hostedHeader = HostedSparseExtentHeader.Read(headerSector, 0);
             if (_hostedHeader.GdOffset == -1)
             {
                 // Fall back to secondary copy that (should) be at the end of the stream, just before the end-of-stream sector marker
                 file.Position = file.Length - Sizes.OneKiB;
-                headerSector = Utilities.ReadFully(file, Sizes.Sector);
+                headerSector = StreamUtilities.ReadFully(file, Sizes.Sector);
                 _hostedHeader = HostedSparseExtentHeader.Read(headerSector, 0);
 
                 if (_hostedHeader.MagicNumber != HostedSparseExtentHeader.VmdkMagicNumber)
@@ -132,15 +132,15 @@ namespace DiscUtils.Vmdk
             {
                 _fileStream.Position = grainStart;
 
-                byte[] readBuffer = Utilities.ReadFully(_fileStream, CompressedGrainHeader.Size);
+                byte[] readBuffer = StreamUtilities.ReadFully(_fileStream, CompressedGrainHeader.Size);
                 CompressedGrainHeader hdr = new CompressedGrainHeader();
                 hdr.Read(readBuffer, 0);
 
-                readBuffer = Utilities.ReadFully(_fileStream, hdr.DataSize);
+                readBuffer = StreamUtilities.ReadFully(_fileStream, hdr.DataSize);
 
                 // This is really a zlib stream, so has header and footer.  We ignore this right now, but we sanity
                 // check against expected header values...
-                ushort header = Utilities.ToUInt16BigEndian(readBuffer, 0);
+                ushort header = EndianUtilities.ToUInt16BigEndian(readBuffer, 0);
 
                 if (header % 31 != 0)
                 {
@@ -161,7 +161,7 @@ namespace DiscUtils.Vmdk
                 DeflateStream deflateStream = new DeflateStream(readStream, CompressionMode.Decompress);
 
                 // Need to skip some bytes, but DefaultStream doesn't support seeking...
-                Utilities.ReadFully(deflateStream, grainOffset);
+                StreamUtilities.ReadFully(deflateStream, grainOffset);
 
                 return deflateStream.Read(buffer, bufferOffset, numToRead);
             }
@@ -174,7 +174,7 @@ namespace DiscUtils.Vmdk
             {
                 _fileStream.Position = grainStart;
 
-                byte[] readBuffer = Utilities.ReadFully(_fileStream, CompressedGrainHeader.Size);
+                byte[] readBuffer = StreamUtilities.ReadFully(_fileStream, CompressedGrainHeader.Size);
                 CompressedGrainHeader hdr = new CompressedGrainHeader();
                 hdr.Read(readBuffer, 0);
 
@@ -189,13 +189,13 @@ namespace DiscUtils.Vmdk
 
             if ((_hostedHeader.Flags & HostedSparseExtentFlags.RedundantGrainTable) != 0)
             {
-                int numGTs = (int)Utilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
+                int numGTs = (int)MathUtilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
                 _redundantGlobalDirectory = new uint[numGTs];
                 _fileStream.Position = _hostedHeader.RgdOffset * Sizes.Sector;
-                byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
+                byte[] gdAsBytes = StreamUtilities.ReadFully(_fileStream, numGTs * 4);
                 for (int i = 0; i < _globalDirectory.Length; ++i)
                 {
-                    _redundantGlobalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
+                    _redundantGlobalDirectory[i] = EndianUtilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
                 }
             }
         }
@@ -203,13 +203,13 @@ namespace DiscUtils.Vmdk
         private void AllocateGrain(int grainTable, int grain)
         {
             // Calculate start pos for new grain
-            long grainStartPos = Utilities.RoundUp(_fileStream.Length, _header.GrainSize * Sizes.Sector);
+            long grainStartPos = MathUtilities.RoundUp(_fileStream.Length, _header.GrainSize * Sizes.Sector);
 
             // Copy-on-write semantics, read the bytes from parent and write them out to this extent.
             _parentDiskStream.Position = _diskOffset +
                                          (grain + _header.NumGTEsPerGT * grainTable) * _header.GrainSize *
                                          Sizes.Sector;
-            byte[] content = Utilities.ReadFully(_parentDiskStream, (int)_header.GrainSize * Sizes.Sector);
+            byte[] content = StreamUtilities.ReadFully(_parentDiskStream, (int)_header.GrainSize * Sizes.Sector);
             _fileStream.Position = grainStartPos;
             _fileStream.Write(content, 0, content.Length);
 

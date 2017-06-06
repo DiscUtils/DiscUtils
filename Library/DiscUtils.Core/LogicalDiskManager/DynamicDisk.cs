@@ -22,8 +22,8 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {

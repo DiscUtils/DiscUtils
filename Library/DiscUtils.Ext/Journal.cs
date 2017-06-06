@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Ext
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System.IO;
 
     internal class JournalSuperBlock : IByteArraySerializable
@@ -36,18 +36,18 @@ namespace DiscUtils.Ext
         /// <inheritdoc />
         public int ReadFrom(byte[] buffer, int offset)
         {
-            var magic = Utilities.ToUInt32BigEndian(buffer, offset);
+            var magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             if (magic != Magic)
             {
                 throw new IOException("Invalid journal magic - probably not an Ext file system");
             }
-            var blocktype = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            var blocktype = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
             if (blocktype != 3 && blocktype != 4)
             {
                 throw new IOException("Invalid journal block type - no superblock found");
             }
-            BlockSize = Utilities.ToUInt32BigEndian(buffer, offset + 0xc);
-            MaxLength = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
+            BlockSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xc);
+            MaxLength = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
 
             return 1024;
         }

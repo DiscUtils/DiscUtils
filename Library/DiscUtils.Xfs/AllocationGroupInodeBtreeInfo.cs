@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,7 +23,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.IO;
 
@@ -91,44 +92,64 @@ namespace DiscUtils.Xfs
         /// </summary>
         public BtreeHeader RootInodeBtree { get; private set; }
 
-        public int Size
+        public Guid UniqueId { get; private set; }
+
+        /// <summary>
+        /// last write sequence
+        /// </summary>
+        public ulong Lsn { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public int Size { get; private set; }
+
+        private uint SbVersion { get; }
+
+        public AllocationGroupInodeBtreeInfo(SuperBlock superBlock)
         {
-            get { return 296; }
+            SbVersion = superBlock.SbVersion;
+            Size = SbVersion >= 5 ? 334 : 296;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
-            Version = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
-            SequenceNumber = Utilities.ToUInt32BigEndian(buffer, offset + 0x8);
-            Length = Utilities.ToUInt32BigEndian(buffer, offset + 0xc);
-            Count = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
-            Root = Utilities.ToUInt32BigEndian(buffer, offset + 0x14);
-            Level = Utilities.ToUInt32BigEndian(buffer, offset + 0x18);
-            FreeCount = Utilities.ToUInt32BigEndian(buffer, offset + 0x1c);
-            NewInode = Utilities.ToUInt32BigEndian(buffer, offset + 0x20);
-            DirInode = Utilities.ToInt32BigEndian(buffer, offset + 0x24);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            Version = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            SequenceNumber = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x8);
+            Length = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xc);
+            Count = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
+            Root = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x14);
+            Level = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x18);
+            FreeCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x1c);
+            NewInode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x20);
+            DirInode = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x24);
             Unlinked = new int[64];
             for (int i = 0; i < Unlinked.Length; i++)
             {
-                Unlinked[i] = Utilities.ToInt32BigEndian(buffer, offset + 0x28 + i*0x4);
+                Unlinked[i] = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x28 + i*0x4);
+            }
+            if (SbVersion >= 5)
+            {
+                UniqueId = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x132);
+                Lsn = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x142);
+                Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x14A);
             }
             return Size;
         }
-
+        
         public void LoadBtree(Context context, long offset)
         {
             var data = context.RawStream;
             data.Position = offset + context.SuperBlock.Blocksize*Root;
             if (Level == 1)
             {
-                RootInodeBtree = new BTreeInodeLeave();
+                RootInodeBtree = new BTreeInodeLeaf(SbVersion);
             }
             else
             {
-                RootInodeBtree = new BTreeInodeNode();
+                RootInodeBtree = new BTreeInodeNode(SbVersion);
             }
-            var buffer = Utilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
+            var buffer = StreamUtilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
             RootInodeBtree.ReadFrom(buffer, 0);
         }
 

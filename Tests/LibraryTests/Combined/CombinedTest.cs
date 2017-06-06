@@ -24,6 +24,7 @@ using System.IO;
 using DiscUtils;
 using DiscUtils.Fat;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 using DiscUtils.Vhd;
 using Xunit;
 

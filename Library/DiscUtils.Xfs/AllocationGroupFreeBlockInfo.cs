@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2017, Timo Walter
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,7 +23,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
 
     internal class AllocationGroupFreeBlockInfo : IByteArraySerializable
@@ -108,31 +109,53 @@ namespace DiscUtils.Xfs
         /// </summary>
         public BtreeHeader FreeSpaceCount { get; private set; }
 
-        public int Size
+        public Guid UniqueId { get; private set; }
+
+        /// <summary>
+        /// last write sequence
+        /// </summary>
+        public ulong Lsn { get; private set; }
+
+        public uint Crc { get; private set; }
+
+        public int Size { get; }
+
+        private uint SbVersion { get; }
+
+        public AllocationGroupFreeBlockInfo(SuperBlock superBlock)
         {
-            get { return 0x40; }
+            SbVersion = superBlock.SbVersion;
+            Size = SbVersion >= 5 ? 92 : 64;
         }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt32BigEndian(buffer, offset);
-            Version = Utilities.ToUInt32BigEndian(buffer, offset + 0x4);
-            SequenceNumber = Utilities.ToUInt32BigEndian(buffer, offset + 0x8);
-            Length = Utilities.ToUInt32BigEndian(buffer, offset + 0xC);
+            Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            Version = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
+            SequenceNumber = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x8);
+            Length = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC);
             RootBlockNumbers = new uint[2];
-            RootBlockNumbers[0] = Utilities.ToUInt32BigEndian(buffer, offset + 0x10);
-            RootBlockNumbers[1] = Utilities.ToUInt32BigEndian(buffer, offset + 0x14);
-            Spare0 = Utilities.ToUInt32BigEndian(buffer, offset + 0x18);
+            RootBlockNumbers[0] = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
+            RootBlockNumbers[1] = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x14);
+            Spare0 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x18);
             Levels = new uint[2];
-            Levels[0] = Utilities.ToUInt32BigEndian(buffer, offset + 0x1C);
-            Levels[1] = Utilities.ToUInt32BigEndian(buffer, offset + 0x20);
-            Spare1 = Utilities.ToUInt32BigEndian(buffer, offset + 0x24);
-            FreeListFirst = Utilities.ToUInt32BigEndian(buffer, offset + 0x28);
-            FreeListLast = Utilities.ToUInt32BigEndian(buffer, offset + 0x2C);
-            FreeListCount = Utilities.ToUInt32BigEndian(buffer, offset + 0x30);
-            FreeBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x34);
-            Longest = Utilities.ToUInt32BigEndian(buffer, offset + 0x38);
-            BTreeBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 0x3C);
+
+            Levels[0] = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x1C);
+            Levels[1] = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x20);
+            Spare1 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x24);
+            FreeListFirst = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x28);
+            FreeListLast = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x2C);
+            FreeListCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x30);
+            FreeBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x34);
+            Longest = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x38);
+            BTreeBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x3C);
+            if (SbVersion >= 5)
+            {
+                UniqueId = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x40);
+                Lsn = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x50);
+                Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x58);
+            }
+
             return Size;
         }
 

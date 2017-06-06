@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -86,7 +86,7 @@ namespace DiscUtils.Iscsi
             int maxToRead = (int)Math.Min(_length - _position, count);
 
             long firstBlock = _position / _blockSize;
-            long lastBlock = Utilities.Ceil(_position + maxToRead, _blockSize);
+            long lastBlock = MathUtilities.Ceil(_position + maxToRead, _blockSize);
 
             byte[] tempBuffer = new byte[(lastBlock - firstBlock) * _blockSize];
             int numRead = _session.Read(_lun, firstBlock, (short)(lastBlock - firstBlock), tempBuffer, 0);

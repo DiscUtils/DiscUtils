@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -44,7 +44,7 @@ namespace DiscUtils.Iso9660
                 return null;
             }
 
-            string name = Utilities.BytesToString(data, offset, 2);
+            string name = EndianUtilities.BytesToString(data, offset, 2);
             length = data[offset + 2];
             byte version = data[offset + 3];
 

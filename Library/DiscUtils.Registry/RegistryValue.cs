@@ -23,7 +23,7 @@
 using System;
 using System.Globalization;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -111,7 +111,7 @@ namespace DiscUtils.Registry
             {
                 int len = _cell.DataLength & 0x7FFFFFFF;
                 byte[] buffer = new byte[4];
-                Utilities.WriteBytesLittleEndian(_cell.DataIndex, buffer, 0);
+                EndianUtilities.WriteBytesLittleEndian(_cell.DataIndex, buffer, 0);
 
                 byte[] result = new byte[len];
                 Array.Copy(buffer, result, len);
@@ -139,7 +139,7 @@ namespace DiscUtils.Registry
                 }
 
                 _cell.DataLength = (int)((uint)count | 0x80000000);
-                _cell.DataIndex = Utilities.ToInt32LittleEndian(data, offset);
+                _cell.DataIndex = EndianUtilities.ToInt32LittleEndian(data, offset);
                 _cell.DataType = valueType;
             }
             else
@@ -214,17 +214,17 @@ namespace DiscUtils.Registry
                     return Encoding.Unicode.GetString(data).Trim('\0');
 
                 case RegistryValueType.Dword:
-                    return Utilities.ToInt32LittleEndian(data, 0);
+                    return EndianUtilities.ToInt32LittleEndian(data, 0);
 
                 case RegistryValueType.DwordBigEndian:
-                    return Utilities.ToInt32BigEndian(data, 0);
+                    return EndianUtilities.ToInt32BigEndian(data, 0);
 
                 case RegistryValueType.MultiString:
                     string multiString = Encoding.Unicode.GetString(data).Trim('\0');
                     return multiString.Split('\0');
 
                 case RegistryValueType.QWord:
-                    return string.Empty + Utilities.ToUInt64LittleEndian(data, 0);
+                    return string.Empty + EndianUtilities.ToUInt64LittleEndian(data, 0);
 
                 default:
                     return data;
@@ -250,12 +250,12 @@ namespace DiscUtils.Registry
 
                 case RegistryValueType.Dword:
                     data = new byte[4];
-                    Utilities.WriteBytesLittleEndian((int)value, data, 0);
+                    EndianUtilities.WriteBytesLittleEndian((int)value, data, 0);
                     break;
 
                 case RegistryValueType.DwordBigEndian:
                     data = new byte[4];
-                    Utilities.WriteBytesBigEndian((int)value, data, 0);
+                    EndianUtilities.WriteBytesBigEndian((int)value, data, 0);
                     break;
 
                 case RegistryValueType.MultiString:

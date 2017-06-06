@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -38,7 +38,7 @@ namespace DiscUtils.Vmdk
             _descriptor = descriptor;
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             List<BuilderExtent> extents = new List<BuilderExtent>();
 
@@ -49,35 +49,35 @@ namespace DiscUtils.Vmdk
             // of grain size
             const int GtesPerGt = 512;
             long grainSize = 128;
-            int numGrainTables = (int)Utilities.Ceil(_content.Length, grainSize * GtesPerGt * Sizes.Sector);
+            int numGrainTables = (int)MathUtilities.Ceil(_content.Length, grainSize * GtesPerGt * Sizes.Sector);
 
-            long descriptorLength = 10 * Sizes.OneKiB; // Utilities.RoundUp(descriptorStream.Length, Sizes.Sector);
+            long descriptorLength = 10 * Sizes.OneKiB; // MathUtilities.RoundUp(descriptorStream.Length, Sizes.Sector);
             long descriptorStart = 0;
             if (descriptorLength != 0)
             {
                 descriptorStart = 1;
             }
 
-            long redundantGrainDirStart = Math.Max(descriptorStart, 1) + Utilities.Ceil(descriptorLength, Sizes.Sector);
+            long redundantGrainDirStart = Math.Max(descriptorStart, 1) + MathUtilities.Ceil(descriptorLength, Sizes.Sector);
             long redundantGrainDirLength = numGrainTables * 4;
 
             long redundantGrainTablesStart = redundantGrainDirStart +
-                                             Utilities.Ceil(redundantGrainDirLength, Sizes.Sector);
-            long redundantGrainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+                                             MathUtilities.Ceil(redundantGrainDirLength, Sizes.Sector);
+            long redundantGrainTablesLength = numGrainTables * MathUtilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
 
-            long grainDirStart = redundantGrainTablesStart + Utilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
+            long grainDirStart = redundantGrainTablesStart + MathUtilities.Ceil(redundantGrainTablesLength, Sizes.Sector);
             long grainDirLength = numGrainTables * 4;
 
-            long grainTablesStart = grainDirStart + Utilities.Ceil(grainDirLength, Sizes.Sector);
-            long grainTablesLength = numGrainTables * Utilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
+            long grainTablesStart = grainDirStart + MathUtilities.Ceil(grainDirLength, Sizes.Sector);
+            long grainTablesLength = numGrainTables * MathUtilities.RoundUp(GtesPerGt * 4, Sizes.Sector);
 
-            long dataStart = Utilities.RoundUp(grainTablesStart + Utilities.Ceil(grainTablesLength, Sizes.Sector),
+            long dataStart = MathUtilities.RoundUp(grainTablesStart + MathUtilities.Ceil(grainTablesLength, Sizes.Sector),
                 grainSize);
 
             // Generate the header, and write it
             HostedSparseExtentHeader header = new HostedSparseExtentHeader();
             header.Flags = HostedSparseExtentFlags.ValidLineDetectionTest | HostedSparseExtentFlags.RedundantGrainTable;
-            header.Capacity = Utilities.RoundUp(_content.Length, grainSize * Sizes.Sector) / Sizes.Sector;
+            header.Capacity = MathUtilities.RoundUp(_content.Length, grainSize * Sizes.Sector) / Sizes.Sector;
             header.GrainSize = grainSize;
             header.DescriptorOffset = descriptorStart;
             header.DescriptorSize = descriptorLength / Sizes.Sector;
@@ -130,7 +130,7 @@ namespace DiscUtils.Vmdk
 
         private static long GrainTablePosition(long grainTablesStart, long grainTable, int gtesPerGt)
         {
-            return grainTablesStart * Sizes.Sector + grainTable * Utilities.RoundUp(gtesPerGt * 4, Sizes.Sector);
+            return grainTablesStart * Sizes.Sector + grainTable * MathUtilities.RoundUp(gtesPerGt * 4, Sizes.Sector);
         }
 
         private class GrainDirectoryExtent : BuilderBytesExtent
@@ -140,24 +140,24 @@ namespace DiscUtils.Vmdk
             private readonly int _numGrainTables;
 
             public GrainDirectoryExtent(long start, long grainTablesStart, int numGrainTables, int gtesPerGt)
-                : base(start, Utilities.RoundUp(numGrainTables * 4, Sizes.Sector))
+                : base(start, MathUtilities.RoundUp(numGrainTables * 4, Sizes.Sector))
             {
                 _grainTablesStart = grainTablesStart;
                 _numGrainTables = numGrainTables;
                 _gtesPerGt = gtesPerGt;
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 _data = new byte[Length];
                 for (int i = 0; i < _numGrainTables; ++i)
                 {
-                    Utilities.WriteBytesLittleEndian(
-                        (uint)(_grainTablesStart + i * Utilities.Ceil(_gtesPerGt * 4, Sizes.Sector)), _data, i * 4);
+                    EndianUtilities.WriteBytesLittleEndian(
+                        (uint)(_grainTablesStart + i * MathUtilities.Ceil(_gtesPerGt * 4, Sizes.Sector)), _data, i * 4);
                 }
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 _data = null;
             }
@@ -179,7 +179,7 @@ namespace DiscUtils.Vmdk
                 _dataStart = dataStart;
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 _data = new byte[_gtesPerGt * 4];
 
@@ -190,14 +190,14 @@ namespace DiscUtils.Vmdk
                 {
                     for (int i = 0; i < block.Count; ++i)
                     {
-                        Utilities.WriteBytesLittleEndian((uint)(_dataStart + sectorsAllocated), _data,
+                        EndianUtilities.WriteBytesLittleEndian((uint)(_dataStart + sectorsAllocated), _data,
                             (int)((block.Offset + i) * 4));
                         sectorsAllocated += _grainSize;
                     }
                 }
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 _data = null;
             }
@@ -231,7 +231,7 @@ namespace DiscUtils.Vmdk
                 }
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 long outputGrain = 0;
 
@@ -248,7 +248,7 @@ namespace DiscUtils.Vmdk
                 }
             }
 
-            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            public override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 long start = diskOffset - Start;
                 long grainSizeBytes = _grainSize * Sizes.Sector;
@@ -271,7 +271,7 @@ namespace DiscUtils.Vmdk
                 return _content.Read(block, offset, toRead);
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 _grainMapOffsets = null;
                 _grainMapRanges = null;

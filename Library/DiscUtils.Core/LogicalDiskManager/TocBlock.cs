@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {
@@ -44,21 +44,21 @@ namespace DiscUtils.LogicalDiskManager
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.BytesToString(buffer, offset + 0x00, 8);
-            Checksum = Utilities.ToUInt32BigEndian(buffer, offset + 0x08);
-            SequenceNumber = Utilities.ToInt64BigEndian(buffer, offset + 0x0C);
-            Unknown1 = Utilities.ToInt64BigEndian(buffer, offset + 0x14);
-            Unknown2 = Utilities.ToInt64BigEndian(buffer, offset + 0x1C);
-            Item1Str = Utilities.BytesToString(buffer, offset + 0x24, 10).Trim('\0');
-            Item1Start = Utilities.ToInt64BigEndian(buffer, offset + 0x2E);
-            Item1Size = Utilities.ToInt64BigEndian(buffer, offset + 0x36);
-            Unknown3 = Utilities.ToUInt32BigEndian(buffer, offset + 0x3E);
-            Unknown4 = Utilities.ToUInt32BigEndian(buffer, offset + 0x42);
-            Item2Str = Utilities.BytesToString(buffer, offset + 0x46, 10).Trim('\0');
-            Item2Start = Utilities.ToInt64BigEndian(buffer, offset + 0x50);
-            Item2Size = Utilities.ToInt64BigEndian(buffer, offset + 0x58);
-            Unknown5 = Utilities.ToUInt32BigEndian(buffer, offset + 0x60);
-            Unknown6 = Utilities.ToUInt32BigEndian(buffer, offset + 0x64);
+            Signature = EndianUtilities.BytesToString(buffer, offset + 0x00, 8);
+            Checksum = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x08);
+            SequenceNumber = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x0C);
+            Unknown1 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x14);
+            Unknown2 = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x1C);
+            Item1Str = EndianUtilities.BytesToString(buffer, offset + 0x24, 10).Trim('\0');
+            Item1Start = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x2E);
+            Item1Size = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x36);
+            Unknown3 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x3E);
+            Unknown4 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x42);
+            Item2Str = EndianUtilities.BytesToString(buffer, offset + 0x46, 10).Trim('\0');
+            Item2Start = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x50);
+            Item2Size = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x58);
+            Unknown5 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x60);
+            Unknown6 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x64);
         }
 
         ////}

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -42,16 +42,16 @@ namespace DiscUtils.Udf
 
         public override int Parse(byte[] buffer, int offset)
         {
-            VolumeDescriptorSequenceNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            PartitionFlags = Utilities.ToUInt16LittleEndian(buffer, offset + 20);
-            PartitionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 22);
-            PartitionContents = Utilities.ToStruct<ApplicationEntityIdentifier>(buffer, offset + 24);
-            PartitionContentsUse = Utilities.ToByteArray(buffer, offset + 56, 128);
-            AccessType = Utilities.ToUInt32LittleEndian(buffer, offset + 184);
-            PartitionStartingLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 188);
-            PartitionLength = Utilities.ToUInt32LittleEndian(buffer, offset + 192);
-            ImplementationIdentifier = Utilities.ToStruct<ImplementationEntityIdentifier>(buffer, offset + 196);
-            ImplementationUse = Utilities.ToByteArray(buffer, offset + 228, 128);
+            VolumeDescriptorSequenceNumber = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
+            PartitionFlags = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 20);
+            PartitionNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 22);
+            PartitionContents = EndianUtilities.ToStruct<ApplicationEntityIdentifier>(buffer, offset + 24);
+            PartitionContentsUse = EndianUtilities.ToByteArray(buffer, offset + 56, 128);
+            AccessType = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 184);
+            PartitionStartingLocation = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 188);
+            PartitionLength = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 192);
+            ImplementationIdentifier = EndianUtilities.ToStruct<ImplementationEntityIdentifier>(buffer, offset + 196);
+            ImplementationUse = EndianUtilities.ToByteArray(buffer, offset + 228, 128);
 
             return 512;
         }

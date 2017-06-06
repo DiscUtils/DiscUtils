@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {
@@ -38,9 +38,9 @@ namespace DiscUtils.Dmg
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Type = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            ChecksumSize = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            Data = Utilities.ToByteArray(buffer, offset + 8, 128);
+            Type = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            ChecksumSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            Data = EndianUtilities.ToByteArray(buffer, offset + 8, 128);
 
             return 136;
         }

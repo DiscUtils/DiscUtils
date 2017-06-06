@@ -23,7 +23,7 @@
 using System;
 using System.Globalization;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -39,8 +39,8 @@ namespace DiscUtils.Ntfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Tag = Utilities.ToUInt32LittleEndian(buffer, offset);
-            ushort length = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
+            Tag = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
+            ushort length = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
             Content = new byte[length];
             Array.Copy(buffer, offset + 8, Content, 0, length);
             return 8 + length;
@@ -48,9 +48,9 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(Tag, buffer, offset);
-            Utilities.WriteBytesLittleEndian((ushort)Content.Length, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 6);
+            EndianUtilities.WriteBytesLittleEndian(Tag, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian((ushort)Content.Length, buffer, offset + 4);
+            EndianUtilities.WriteBytesLittleEndian((ushort)0, buffer, offset + 6);
             Array.Copy(Content, 0, buffer, offset + 8, Content.Length);
         }
 

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -44,7 +44,7 @@ namespace DiscUtils.Registry
 
         internal static Cell Parse(RegistryHive hive, int index, byte[] buffer, int pos)
         {
-            string type = Utilities.BytesToString(buffer, pos, 2);
+            string type = EndianUtilities.BytesToString(buffer, pos, 2);
 
             Cell result = null;
 

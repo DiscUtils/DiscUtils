@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -291,7 +291,7 @@ namespace DiscUtils.Ntfs
 
         public override void ReadClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            Utilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
 
             int runIdx = 0;
             int totalRead = 0;
@@ -312,7 +312,7 @@ namespace DiscUtils.Ntfs
                 {
                     long lcn = _cookedRuns[runIdx].StartLcn + (focusVcn - run.StartVcn);
                     _fsStream.Position = lcn * _bytesPerCluster;
-                    int numRead = Utilities.ReadFully(_fsStream, buffer, offset + totalRead * _bytesPerCluster,
+                    int numRead = StreamUtilities.ReadFully(_fsStream, buffer, offset + totalRead * _bytesPerCluster,
                         toRead * _bytesPerCluster);
                     if (numRead != toRead * _bytesPerCluster)
                     {
@@ -327,7 +327,7 @@ namespace DiscUtils.Ntfs
 
         public override int WriteClusters(long startVcn, int count, byte[] buffer, int offset)
         {
-            Utilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count * _bytesPerCluster);
 
             int runIdx = 0;
             int totalWritten = 0;

@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using DiscUtils.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -113,7 +113,7 @@ namespace DiscUtils.SquashFs
             }
 
             byte[] header = new byte[2];
-            Utilities.WriteBytesLittleEndian(writeLen, header, 0);
+            EndianUtilities.WriteBytesLittleEndian(writeLen, header, 0);
             _buffer.Write(header, 0, 2);
             _buffer.Write(writeData, 0, writeLen & 0x7FFF);
 

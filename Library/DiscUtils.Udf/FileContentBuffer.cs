@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -115,7 +115,7 @@ namespace DiscUtils.Udf
                 int i = 0;
                 while (i < activeBuffer.Length)
                 {
-                    ShortAllocationDescriptor sad = Utilities.ToStruct<ShortAllocationDescriptor>(activeBuffer, i);
+                    ShortAllocationDescriptor sad = EndianUtilities.ToStruct<ShortAllocationDescriptor>(activeBuffer, i);
                     if (sad.ExtentLength == 0)
                     {
                         break;
@@ -151,7 +151,7 @@ namespace DiscUtils.Udf
                 int i = 0;
                 while (i < activeBuffer.Length)
                 {
-                    LongAllocationDescriptor lad = Utilities.ToStruct<LongAllocationDescriptor>(activeBuffer, i);
+                    LongAllocationDescriptor lad = EndianUtilities.ToStruct<LongAllocationDescriptor>(activeBuffer, i);
                     if (lad.ExtentLength == 0)
                     {
                         break;

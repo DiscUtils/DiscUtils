@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -41,7 +41,7 @@ namespace DiscUtils.Udf
         {
             Flags = buffer[offset];
             Identifier = Encoding.ASCII.GetString(buffer, offset + 1, 23).TrimEnd('\0');
-            Suffix = Utilities.ToByteArray(buffer, offset + 24, 8);
+            Suffix = EndianUtilities.ToByteArray(buffer, offset + 24, 8);
 
             return 32;
         }

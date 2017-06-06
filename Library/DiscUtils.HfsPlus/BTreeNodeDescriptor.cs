@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -41,12 +41,12 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            ForwardLink = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            BackwardLink = Utilities.ToUInt32BigEndian(buffer, offset + 4);
+            ForwardLink = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            BackwardLink = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
             Kind = (BTreeNodeKind)buffer[offset + 8];
             Height = buffer[offset + 9];
-            NumRecords = Utilities.ToUInt16BigEndian(buffer, offset + 10);
-            Reserved = Utilities.ToUInt16BigEndian(buffer, offset + 12);
+            NumRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 10);
+            Reserved = EndianUtilities.ToUInt16BigEndian(buffer, offset + 12);
 
             return 14;
         }

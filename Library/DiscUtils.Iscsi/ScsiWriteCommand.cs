@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -57,9 +57,9 @@ namespace DiscUtils.Iscsi
         {
             buffer[offset] = 0x2A;
             buffer[offset + 1] = 0;
-            Utilities.WriteBytesBigEndian(_logicalBlockAddress, buffer, offset + 2);
+            EndianUtilities.WriteBytesBigEndian(_logicalBlockAddress, buffer, offset + 2);
             buffer[offset + 6] = 0;
-            Utilities.WriteBytesBigEndian(NumBlocks, buffer, offset + 7);
+            EndianUtilities.WriteBytesBigEndian(NumBlocks, buffer, offset + 7);
             buffer[offset + 9] = 0;
         }
     }

@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -102,7 +102,7 @@ namespace DiscUtils.Ntfs
 
         public static AttributeRecord FromBytes(byte[] buffer, int offset, out int length)
         {
-            if (Utilities.ToUInt32LittleEndian(buffer, offset) == 0xFFFFFFFF)
+            if (EndianUtilities.ToUInt32LittleEndian(buffer, offset) == 0xFFFFFFFF)
             {
                 length = 0;
                 return null;
@@ -145,14 +145,14 @@ namespace DiscUtils.Ntfs
 
         protected virtual void Read(byte[] buffer, int offset, out int length)
         {
-            _type = (AttributeType)Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
-            length = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            _type = (AttributeType)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+            length = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x04);
 
             _nonResidentFlag = buffer[offset + 0x08];
             byte nameLength = buffer[offset + 0x09];
-            ushort nameOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
-            _flags = (AttributeFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
-            _attributeId = Utilities.ToUInt16LittleEndian(buffer, offset + 0x0E);
+            ushort nameOffset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x0A);
+            _flags = (AttributeFlags)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x0C);
+            _attributeId = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x0E);
 
             if (nameLength != 0x00)
             {

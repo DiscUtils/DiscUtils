@@ -1,5 +1,6 @@
 ﻿//
 // Copyright (c) 2008-2013, Kenneth Bell
+// Copyright (c) 2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -24,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -84,14 +86,23 @@ namespace DiscUtils.Vhdx
             get { return _header.Tail; }
         }
 
+        public void Replay(Stream target)
+        {
+            if (IsEmpty) return;
+            foreach (Descriptor descriptor in _descriptors)
+            {
+                descriptor.WriteData(target);
+            }
+        }
+
         public static bool TryRead(Stream logStream, out LogEntry entry)
         {
             long position = logStream.Position;
 
             byte[] sectorBuffer = new byte[LogSectorSize];
-            Utilities.ReadFully(logStream, sectorBuffer, 0, sectorBuffer.Length);
+            StreamUtilities.ReadFully(logStream, sectorBuffer, 0, sectorBuffer.Length);
 
-            uint sig = Utilities.ToUInt32LittleEndian(sectorBuffer, 0);
+            uint sig = EndianUtilities.ToUInt32LittleEndian(sectorBuffer, 0);
             if (sig != LogEntryHeader.LogEntrySignature)
             {
                 entry = null;
@@ -110,9 +121,9 @@ namespace DiscUtils.Vhdx
             byte[] logEntryBuffer = new byte[header.EntryLength];
             Array.Copy(sectorBuffer, logEntryBuffer, LogSectorSize);
 
-            Utilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
+            StreamUtilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
 
-            Utilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
+            EndianUtilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
             if (header.Checksum !=
                 Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int)header.EntryLength))
             {
@@ -120,7 +131,7 @@ namespace DiscUtils.Vhdx
                 return false;
             }
 
-            int dataPos = Utilities.RoundUp((int)header.DescriptorCount * 32 + 64, LogSectorSize);
+            int dataPos = MathUtilities.RoundUp((int)header.DescriptorCount * 32 + 64, LogSectorSize);
 
             List<Descriptor> descriptors = new List<Descriptor>();
             for (int i = 0; i < header.DescriptorCount; ++i)
@@ -128,7 +139,7 @@ namespace DiscUtils.Vhdx
                 int offset = i * 32 + 64;
                 Descriptor descriptor;
 
-                uint descriptorSig = Utilities.ToUInt32LittleEndian(logEntryBuffer, offset);
+                uint descriptorSig = EndianUtilities.ToUInt32LittleEndian(logEntryBuffer, offset);
                 switch (descriptorSig)
                 {
                     case Descriptor.ZeroDescriptorSignature:
@@ -161,6 +172,7 @@ namespace DiscUtils.Vhdx
         {
             public const uint ZeroDescriptorSignature = 0x6F72657A;
             public const uint DataDescriptorSignature = 0x63736564;
+            public const uint DataSectorSignature = 0x61746164;
 
             public ulong FileOffset;
             public ulong SequenceNumber;
@@ -177,6 +189,8 @@ namespace DiscUtils.Vhdx
             public abstract void WriteTo(byte[] buffer, int offset);
 
             public abstract bool IsValid(ulong sequenceNumber);
+
+            public abstract void WriteData(Stream target);
         }
 
         private sealed class ZeroDescriptor : Descriptor
@@ -190,9 +204,9 @@ namespace DiscUtils.Vhdx
 
             public override int ReadFrom(byte[] buffer, int offset)
             {
-                ZeroLength = Utilities.ToUInt64LittleEndian(buffer, offset + 8);
-                FileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 16);
-                SequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 24);
+                ZeroLength = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 8);
+                FileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 16);
+                SequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 24);
 
                 return 32;
             }
@@ -206,6 +220,21 @@ namespace DiscUtils.Vhdx
             {
                 return SequenceNumber == sequenceNumber;
             }
+
+            public override void WriteData(Stream target)
+            {
+                target.Seek((long)FileOffset, SeekOrigin.Begin);
+                var zeroBuffer = new byte[4 * Sizes.OneKiB];
+                var total = ZeroLength;
+                while (total > 0)
+                {
+                    int count = zeroBuffer.Length;
+                    if (total < (uint)count)
+                        count = (int)total;
+                    target.Write(zeroBuffer, 0, count);
+                    total -= (uint)count;
+                }
+            }
         }
 
         private sealed class DataDescriptor : Descriptor
@@ -214,6 +243,7 @@ namespace DiscUtils.Vhdx
             private readonly int _offset;
             public ulong LeadingBytes;
             public uint TrailingBytes;
+            public uint DataSignature;
 
             public DataDescriptor(byte[] data, int offset)
             {
@@ -228,10 +258,12 @@ namespace DiscUtils.Vhdx
 
             public override int ReadFrom(byte[] buffer, int offset)
             {
-                TrailingBytes = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-                LeadingBytes = Utilities.ToUInt64LittleEndian(buffer, offset + 8);
-                FileOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 16);
-                SequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 24);
+                TrailingBytes = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+                LeadingBytes = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 8);
+                FileOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 16);
+                SequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 24);
+
+                DataSignature = EndianUtilities.ToUInt32LittleEndian(_data, _offset);
 
                 return 32;
             }
@@ -246,9 +278,23 @@ namespace DiscUtils.Vhdx
                 return SequenceNumber == sequenceNumber
                        && _offset + LogSectorSize <= _data.Length
                        &&
-                       Utilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
+                       EndianUtilities.ToUInt32LittleEndian(_data, _offset + LogSectorSize - 4) ==
                        (sequenceNumber & 0xFFFFFFFF)
-                       && Utilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF);
+                       && EndianUtilities.ToUInt32LittleEndian(_data, _offset + 4) == ((sequenceNumber >> 32) & 0xFFFFFFFF)
+                       && DataSignature == DataSectorSignature;
+            }
+
+            public override void WriteData(Stream target)
+            {
+                target.Seek((long)FileOffset, SeekOrigin.Begin);
+                var leading = new byte[8];
+                EndianUtilities.WriteBytesLittleEndian(LeadingBytes, leading, 0);
+                var trailing = new byte[4];
+                EndianUtilities.WriteBytesLittleEndian(TrailingBytes, trailing, 0);
+
+                target.Write(leading, 0, leading.Length);
+                target.Write(_data, _offset+8, 4084);
+                target.Write(trailing, 0, trailing.Length);
             }
         }
     }

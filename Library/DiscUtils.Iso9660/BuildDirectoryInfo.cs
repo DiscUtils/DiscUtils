@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using DiscUtils.CoreCompat;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -96,7 +96,7 @@ namespace DiscUtils.Iso9660
                 total += recordSize;
             }
 
-            return Utilities.RoundUp(total, IsoUtilities.SectorSize);
+            return MathUtilities.RoundUp(total, IsoUtilities.SectorSize);
         }
 
         internal uint GetPathTableEntrySize(Encoding enc)
@@ -131,7 +131,7 @@ namespace DiscUtils.Iso9660
             }
 
             // Ensure final padding data is zero'd
-            int finalPadLength = Utilities.RoundUp(pos, IsoUtilities.SectorSize) - pos;
+            int finalPadLength = MathUtilities.RoundUp(pos, IsoUtilities.SectorSize) - pos;
             Array.Clear(buffer, offset + pos, finalPadLength);
 
             return pos + finalPadLength;

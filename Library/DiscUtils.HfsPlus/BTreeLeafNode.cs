@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -71,11 +71,11 @@ namespace DiscUtils.HfsPlus
 
             _records = new BTreeLeafRecord<TKey>[numRecords];
 
-            int start = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - 2);
+            int start = EndianUtilities.ToUInt16BigEndian(buffer, offset + nodeSize - 2);
 
             for (int i = 0; i < numRecords; ++i)
             {
-                int end = Utilities.ToUInt16BigEndian(buffer, offset + nodeSize - (i + 2) * 2);
+                int end = EndianUtilities.ToUInt16BigEndian(buffer, offset + nodeSize - (i + 2) * 2);
 
                 _records[i] = new BTreeLeafRecord<TKey>(end - start);
                 _records[i].ReadFrom(buffer, offset + start);

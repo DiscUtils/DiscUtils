@@ -22,6 +22,7 @@
 
 using System;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -70,7 +71,7 @@ namespace DiscUtils.Vhdx
 
                 byte[] checkData = new byte[4096];
                 Array.Copy(_data, checkData, 4096);
-                Utilities.WriteBytesLittleEndian((uint)0, checkData, 4);
+                EndianUtilities.WriteBytesLittleEndian((uint)0, checkData, 4);
                 return Checksum == Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, checkData, 0, 4096);
             }
         }
@@ -84,17 +85,17 @@ namespace DiscUtils.Vhdx
         {
             Array.Copy(buffer, offset, _data, 0, 4096);
 
-            Signature = Utilities.ToUInt32LittleEndian(_data, 0);
-            Checksum = Utilities.ToUInt32LittleEndian(_data, 4);
+            Signature = EndianUtilities.ToUInt32LittleEndian(_data, 0);
+            Checksum = EndianUtilities.ToUInt32LittleEndian(_data, 4);
 
-            SequenceNumber = Utilities.ToUInt64LittleEndian(_data, 8);
-            FileWriteGuid = Utilities.ToGuidLittleEndian(_data, 16);
-            DataWriteGuid = Utilities.ToGuidLittleEndian(_data, 32);
-            LogGuid = Utilities.ToGuidLittleEndian(_data, 48);
-            LogVersion = Utilities.ToUInt16LittleEndian(_data, 64);
-            Version = Utilities.ToUInt16LittleEndian(_data, 66);
-            LogLength = Utilities.ToUInt32LittleEndian(_data, 68);
-            LogOffset = Utilities.ToUInt64LittleEndian(_data, 72);
+            SequenceNumber = EndianUtilities.ToUInt64LittleEndian(_data, 8);
+            FileWriteGuid = EndianUtilities.ToGuidLittleEndian(_data, 16);
+            DataWriteGuid = EndianUtilities.ToGuidLittleEndian(_data, 32);
+            LogGuid = EndianUtilities.ToGuidLittleEndian(_data, 48);
+            LogVersion = EndianUtilities.ToUInt16LittleEndian(_data, 64);
+            Version = EndianUtilities.ToUInt16LittleEndian(_data, 66);
+            LogLength = EndianUtilities.ToUInt32LittleEndian(_data, 68);
+            LogOffset = EndianUtilities.ToUInt64LittleEndian(_data, 72);
 
             return Size;
         }
@@ -114,16 +115,16 @@ namespace DiscUtils.Vhdx
 
         private void RefreshData()
         {
-            Utilities.WriteBytesLittleEndian(Signature, _data, 0);
-            Utilities.WriteBytesLittleEndian(Checksum, _data, 4);
-            Utilities.WriteBytesLittleEndian(SequenceNumber, _data, 8);
-            Utilities.WriteBytesLittleEndian(FileWriteGuid, _data, 16);
-            Utilities.WriteBytesLittleEndian(DataWriteGuid, _data, 32);
-            Utilities.WriteBytesLittleEndian(LogGuid, _data, 48);
-            Utilities.WriteBytesLittleEndian(LogVersion, _data, 64);
-            Utilities.WriteBytesLittleEndian(Version, _data, 66);
-            Utilities.WriteBytesLittleEndian(LogLength, _data, 68);
-            Utilities.WriteBytesLittleEndian(LogOffset, _data, 72);
+            EndianUtilities.WriteBytesLittleEndian(Signature, _data, 0);
+            EndianUtilities.WriteBytesLittleEndian(Checksum, _data, 4);
+            EndianUtilities.WriteBytesLittleEndian(SequenceNumber, _data, 8);
+            EndianUtilities.WriteBytesLittleEndian(FileWriteGuid, _data, 16);
+            EndianUtilities.WriteBytesLittleEndian(DataWriteGuid, _data, 32);
+            EndianUtilities.WriteBytesLittleEndian(LogGuid, _data, 48);
+            EndianUtilities.WriteBytesLittleEndian(LogVersion, _data, 64);
+            EndianUtilities.WriteBytesLittleEndian(Version, _data, 66);
+            EndianUtilities.WriteBytesLittleEndian(LogLength, _data, 68);
+            EndianUtilities.WriteBytesLittleEndian(LogOffset, _data, 72);
         }
     }
 }

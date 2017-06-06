@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Security.AccessControl;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -70,7 +71,7 @@ namespace DiscUtils.Ntfs
                 _nextId++;
             }
 
-            _nextSpace = Utilities.RoundUp(_nextSpace, 16);
+            _nextSpace = MathUtilities.RoundUp(_nextSpace, 16);
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -79,7 +80,7 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
-                byte[] buffer = Utilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = StreamUtilities.ReadFully(s, (int)s.Length);
 
                 foreach (KeyValuePair<IdIndexKey, IdIndexData> entry in _idIndex.Entries)
                 {
@@ -161,7 +162,7 @@ namespace DiscUtils.Ntfs
             // start of the next block
             if ((offset + record.Size) / BlockSize % 2 == 1)
             {
-                _nextSpace = Utilities.RoundUp(offset, BlockSize * 2);
+                _nextSpace = MathUtilities.RoundUp(offset, BlockSize * 2);
                 offset = _nextSpace;
             }
 
@@ -179,7 +180,7 @@ namespace DiscUtils.Ntfs
             }
 
             // Make the next descriptor land at the end of this one
-            _nextSpace = Utilities.RoundUp(_nextSpace + buffer.Length, 16);
+            _nextSpace = MathUtilities.RoundUp(_nextSpace + buffer.Length, 16);
             _nextId++;
 
             // Update the indexes
@@ -216,7 +217,7 @@ namespace DiscUtils.Ntfs
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
                 s.Position = data.SdsOffset;
-                byte[] buffer = Utilities.ReadFully(s, data.SdsLength);
+                byte[] buffer = StreamUtilities.ReadFully(s, data.SdsLength);
 
                 SecurityDescriptorRecord record = new SecurityDescriptorRecord();
                 record.Read(buffer, 0);
@@ -251,15 +252,15 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-                Id = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
+                Hash = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+                Id = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
                 return 8;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0);
-                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 4);
+                EndianUtilities.WriteBytesLittleEndian(Hash, buffer, offset + 0);
+                EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset + 4);
             }
 
             public override string ToString()
@@ -277,19 +278,19 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
-                Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
-                SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
-                SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
+                Hash = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+                Id = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x04);
+                SdsOffset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x08);
+                SdsLength = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x10);
                 return 0x14;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
-                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
-                Utilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
-                Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
+                EndianUtilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+                EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+                EndianUtilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
+                EndianUtilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
                 ////Array.Copy(new byte[] { (byte)'I', 0, (byte)'I', 0 }, 0, buffer, offset + 0x14, 4);
             }
         }
@@ -312,13 +313,13 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
+                Id = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
                 return 4;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
+                EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset + 0);
             }
 
             public override string ToString()
@@ -336,19 +337,19 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Hash = Utilities.ToUInt32LittleEndian(buffer, offset + 0x00);
-                Id = Utilities.ToUInt32LittleEndian(buffer, offset + 0x04);
-                SdsOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
-                SdsLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
+                Hash = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x00);
+                Id = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x04);
+                SdsOffset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x08);
+                SdsLength = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x10);
                 return 0x14;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
-                Utilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
-                Utilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
-                Utilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
+                EndianUtilities.WriteBytesLittleEndian(Hash, buffer, offset + 0x00);
+                EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset + 0x04);
+                EndianUtilities.WriteBytesLittleEndian(SdsOffset, buffer, offset + 0x08);
+                EndianUtilities.WriteBytesLittleEndian(SdsLength, buffer, offset + 0x10);
             }
         }
 

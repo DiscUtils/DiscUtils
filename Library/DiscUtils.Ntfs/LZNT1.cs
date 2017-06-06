@@ -30,7 +30,7 @@
 
 using System;
 using DiscUtils.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -122,7 +122,7 @@ namespace DiscUtils.Ntfs
                             int convertedSize = (rawLength - 3) & ((1 << lengthMask) - 1);
 
                             ushort convertedData = (ushort)(convertedOffset | convertedSize);
-                            Utilities.WriteBytesLittleEndian(convertedData, compressed,
+                            EndianUtilities.WriteBytesLittleEndian(convertedData, compressed,
                                 compressedOffset + (int)destPointer);
 
                             lzDictionary.AddEntryRange(source, sourceOffset + subBlock, (int)(sourcePointer - subBlock),
@@ -169,7 +169,7 @@ namespace DiscUtils.Ntfs
                 if (compressedSize >= BlockSize)
                 {
                     // Set the header to indicate non-compressed block
-                    Utilities.WriteBytesLittleEndian((ushort)(0x3000 | (BlockSize - 1)), compressed,
+                    EndianUtilities.WriteBytesLittleEndian((ushort)(0x3000 | (BlockSize - 1)), compressed,
                         compressedOffset + (int)headerPosition);
 
                     Array.Copy(source, (int)(sourceOffset + sourceCurrentBlock), compressed,
@@ -184,7 +184,7 @@ namespace DiscUtils.Ntfs
                 else
                 {
                     // Set the header to indicate compressed and the right length
-                    Utilities.WriteBytesLittleEndian((ushort)(0xb000 | (compressedSize - 1)), compressed,
+                    EndianUtilities.WriteBytesLittleEndian((ushort)(0xb000 | (compressedSize - 1)), compressed,
                         compressedOffset + (int)headerPosition);
                 }
 
@@ -213,7 +213,7 @@ namespace DiscUtils.Ntfs
 
             while (sourceIdx < sourceLength)
             {
-                ushort header = Utilities.ToUInt16LittleEndian(source, sourceOffset + sourceIdx);
+                ushort header = EndianUtilities.ToUInt16LittleEndian(source, sourceOffset + sourceIdx);
                 sourceIdx += 2;
 
                 // Look for null-terminating sub-block header
@@ -264,7 +264,7 @@ namespace DiscUtils.Ntfs
                                 ushort lengthBits = (ushort)(16 - _compressionBits[destIdx - destSubBlockStart]);
                                 ushort lengthMask = (ushort)((1 << lengthBits) - 1);
 
-                                ushort phraseToken = Utilities.ToUInt16LittleEndian(source, sourceOffset + sourceIdx);
+                                ushort phraseToken = EndianUtilities.ToUInt16LittleEndian(source, sourceOffset + sourceIdx);
                                 sourceIdx += 2;
 
                                 int destBackAddr = destIdx - (phraseToken >> lengthBits) - 1;

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -51,14 +51,14 @@ namespace DiscUtils.Iscsi
                                                    " was " + Header.OpCode);
             }
 
-            Lun = Utilities.ToUInt64BigEndian(headerData, headerOffset + 8);
-            TargetTransferTag = Utilities.ToUInt32BigEndian(headerData, headerOffset + 20);
-            StatusSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 24);
-            ExpectedCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 28);
-            MaxCommandSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 32);
-            ReadyToTransferSequenceNumber = Utilities.ToUInt32BigEndian(headerData, headerOffset + 36);
-            BufferOffset = Utilities.ToUInt32BigEndian(headerData, headerOffset + 40);
-            DesiredTransferLength = Utilities.ToUInt32BigEndian(headerData, headerOffset + 44);
+            Lun = EndianUtilities.ToUInt64BigEndian(headerData, headerOffset + 8);
+            TargetTransferTag = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 20);
+            StatusSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 24);
+            ExpectedCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 28);
+            MaxCommandSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 32);
+            ReadyToTransferSequenceNumber = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 36);
+            BufferOffset = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 40);
+            DesiredTransferLength = EndianUtilities.ToUInt32BigEndian(headerData, headerOffset + 44);
         }
     }
 }

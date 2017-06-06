@@ -22,7 +22,7 @@
 
 using System;
 using System.Globalization;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.BootConfig
 {
@@ -36,7 +36,7 @@ namespace DiscUtils.BootConfig
             byte[] buffer = new byte[8];
             Array.Copy(value, buffer, value.Length);
 
-            _value = Utilities.ToUInt64LittleEndian(buffer, 0);
+            _value = EndianUtilities.ToUInt64LittleEndian(buffer, 0);
         }
 
         public IntegerElementValue(ulong value)
@@ -57,7 +57,7 @@ namespace DiscUtils.BootConfig
         internal byte[] GetBytes()
         {
             byte[] bytes = new byte[8];
-            Utilities.WriteBytesLittleEndian(_value, bytes, 0);
+            EndianUtilities.WriteBytesLittleEndian(_value, bytes, 0);
             return bytes;
         }
     }

@@ -25,7 +25,7 @@ namespace DiscUtils.Xfs
 {
     using System.IO;
     using DiscUtils.Vfs;
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
 
     internal class Symlink : File, IVfsSymlink<DirEntry, File>
     {
@@ -43,7 +43,7 @@ namespace DiscUtils.Xfs
                     throw new IOException("invalid Inode format for symlink");
                 }
                 IBuffer content = FileContent;
-                byte[] data = Utilities.ReadFully(content, 0, (int) content.Capacity);
+                byte[] data = StreamUtilities.ReadFully(content, 0, (int) content.Capacity);
                 return Context.Options.FileNameEncoding.GetString(data, 0, data.Length).Replace('/', '\\');
             }
         }

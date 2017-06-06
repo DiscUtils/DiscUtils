@@ -23,7 +23,7 @@
 
 namespace DiscUtils.Xfs
 {
-    using DiscUtils.Internal;
+    using DiscUtils.Streams;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -47,19 +47,19 @@ namespace DiscUtils.Xfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Level = Utilities.ToUInt16BigEndian(buffer, offset);
-            NumberOfRecords = Utilities.ToUInt16BigEndian(buffer, offset + 0x2);
+            Level = EndianUtilities.ToUInt16BigEndian(buffer, offset);
+            NumberOfRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x2);
             offset += 0x4;
             Keys = new ulong[NumberOfRecords];
             Pointer = new ulong[NumberOfRecords];
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                Keys[i] = Utilities.ToUInt64BigEndian(buffer, offset + i * 0x8);
+                Keys[i] = EndianUtilities.ToUInt64BigEndian(buffer, offset + i * 0x8);
             }
             offset += ((buffer.Length - offset)/16)*8;
             for (int i = 0; i < NumberOfRecords; i++)
             {
-                Pointer[i] = Utilities.ToUInt64BigEndian(buffer, offset + i * 0x8);
+                Pointer[i] = EndianUtilities.ToUInt64BigEndian(buffer, offset + i * 0x8);
             }
             return Size;
         }
@@ -79,7 +79,7 @@ namespace DiscUtils.Xfs
                 BTreeExtentHeader child;
                 if (Level == 1)
                 {
-                    child = new BTreeExtentLeave();
+                    child = new BTreeExtentLeaf();
                 }
                 else
                 {
@@ -87,7 +87,7 @@ namespace DiscUtils.Xfs
                 }
                 var data = context.RawStream;
                 data.Position = Extent.GetOffset(context, Pointer[i]);
-                var buffer = Utilities.ReadFully(data, (int)context.SuperBlock.Blocksize);
+                var buffer = StreamUtilities.ReadFully(data, (int)context.SuperBlock.Blocksize);
                 child.ReadFrom(buffer, 0);
                 if (child.Magic != BTreeExtentHeader.BtreeMagic)
                 {
