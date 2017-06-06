@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Swap
@@ -82,7 +82,7 @@ namespace DiscUtils.Swap
                 return null;
             }
             stream.Position = 0;
-            byte[] headerData = Utilities.ReadFully(stream, SwapHeader.PageSize);
+            byte[] headerData = StreamUtilities.ReadFully(stream, SwapHeader.PageSize);
             SwapHeader header = new SwapHeader();
             header.ReadFrom(headerData, 0);
             return header;

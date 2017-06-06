@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Swap
 {
@@ -52,13 +52,13 @@ namespace DiscUtils.Swap
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Version = Utilities.ToUInt32LittleEndian(buffer, 0x400);
-            LastPage = Utilities.ToUInt32LittleEndian(buffer, 0x404);
-            BadPages = Utilities.ToUInt32LittleEndian(buffer, 0x408);
-            Uuid = Utilities.ToGuidLittleEndian(buffer, 0x40c);
-            var volume = Utilities.ToByteArray(buffer, 0x41c, 16);
+            Version = EndianUtilities.ToUInt32LittleEndian(buffer, 0x400);
+            LastPage = EndianUtilities.ToUInt32LittleEndian(buffer, 0x404);
+            BadPages = EndianUtilities.ToUInt32LittleEndian(buffer, 0x408);
+            Uuid = EndianUtilities.ToGuidLittleEndian(buffer, 0x40c);
+            var volume = EndianUtilities.ToByteArray(buffer, 0x41c, 16);
             Volume = Encoding.UTF8.GetString(volume, 0, Array.IndexOf(volume, (byte) 0));
-            Magic = Utilities.BytesToString(buffer, PageSize - 10, 10);
+            Magic = EndianUtilities.BytesToString(buffer, PageSize - 10, 10);
             return Size;
         }
 
