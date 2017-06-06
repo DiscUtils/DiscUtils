@@ -45,6 +45,7 @@ namespace DiscUtils.Complete
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(RegistryHive)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(SdiFile)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(SquashFileSystemBuilder)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Swap.SwapFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(UdfReader)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Vdi.Disk)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Vhd.Disk)));
