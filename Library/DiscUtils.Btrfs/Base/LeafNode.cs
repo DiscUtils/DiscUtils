@@ -50,7 +50,15 @@ namespace DiscUtils.Btrfs.Base
             {
                 Items[i] = new NodeItem();
                 itemOffset += Items[i].ReadFrom(buffer, itemOffset);
-                NodeData[i] = CreateItem(Items[i], buffer, Length + offset);
+                switch (Items[i].Key.ObjectId)
+                {
+                    case (ulong)ReservedObjectId.CsumItem:
+                    case (ulong)ReservedObjectId.TreeReloc:
+                        continue;
+                    default:
+                        NodeData[i] = CreateItem(Items[i], buffer, Length + offset);
+                        break;
+                }
             }
             return Size;
         }
@@ -78,6 +86,9 @@ namespace DiscUtils.Btrfs.Base
                     break;
                 case ItemType.DirItem:
                     result = new DirItem();
+                    break;
+                case ItemType.ExtentData:
+                    result = new ExtentData();
                     break;
                 default:
                     throw new IOException($"Unsupported item type {item.Key.ItemType}");
