@@ -37,7 +37,16 @@ namespace DiscUtils
 #if !NETCORE
             xmlDoc.XmlResolver = null;
 #endif
-            xmlDoc.Load(stream);
+
+            XmlReaderSettings settings = new XmlReaderSettings();
+#if !NET20
+            settings.DtdProcessing = DtdProcessing.Ignore;
+#endif
+
+            using (XmlReader reader = XmlReader.Create(stream, settings))
+            {
+                xmlDoc.Load(reader);
+            }
 
             XmlElement root = xmlDoc.DocumentElement;
             if (root.Name != "plist")
