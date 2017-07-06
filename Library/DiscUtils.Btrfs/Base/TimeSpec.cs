@@ -46,6 +46,11 @@ namespace DiscUtils.Btrfs.Base
             get { return Length; }
         }
 
+        public DateTimeOffset DateTime
+        {
+            get { return Seconds.FromUnixTimeSeconds().AddTicks(Nanoseconds / 100); }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Seconds = Utilities.ToInt64LittleEndian(buffer, offset);

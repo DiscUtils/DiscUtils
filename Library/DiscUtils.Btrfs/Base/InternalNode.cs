@@ -59,19 +59,24 @@ namespace DiscUtils.Btrfs.Base
             return Size;
         }
 
-        public override BaseItem Find(Key key)
+        public override IEnumerable<BaseItem> Find(Key key)
         {
             if (KeyPointers[0].Key.ObjectId > key.ObjectId)
-                return null;
-            var i = 0;
+                yield break;
+            var i = 1;
             while (KeyPointers[i].Key.ObjectId < key.ObjectId && i < KeyPointers.Length)
             {
                 i++;
             }
-            if (KeyPointers[i].Key.ObjectId < key.ObjectId)
-                return Nodes[i].Find(key);
-            else
-                return Nodes[i - 1].Find(key);
+            for (int j = i-1; j < KeyPointers.Length; j++)
+            {
+                if (KeyPointers[j].Key.ObjectId > key.ObjectId)
+                    yield break;
+                foreach (var item in Nodes[j].Find(key))
+                {
+                    yield return item;
+                }
+            }
         }
     }
 }

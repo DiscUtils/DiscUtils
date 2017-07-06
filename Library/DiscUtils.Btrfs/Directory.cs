@@ -22,6 +22,8 @@
 
 using System;
 using System.Collections.Generic;
+using DiscUtils.Btrfs.Base;
+using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
@@ -43,7 +45,12 @@ namespace DiscUtils.Btrfs
                     return _allEntries.Values;
                 var result = new Dictionary<string, DirEntry>();
                 var tree = Context.GetFsTree(TreeId);
-                throw new NotImplementedException();
+                var items = tree.Find<DirIndex>(new Key { ItemType = ItemType.DirIndex, ObjectId = ObjectId });
+                foreach (var item in items)
+                {
+                    var inode = tree.FindFirst(item.ChildLocation);
+                    result.Add(item.Name, new DirEntry(item, (InodeItem)inode));
+                }
                 _allEntries = result;
                 return result.Values;
             }

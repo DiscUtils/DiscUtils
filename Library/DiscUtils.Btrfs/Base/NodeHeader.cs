@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Internal;
 
@@ -117,6 +118,34 @@ namespace DiscUtils.Btrfs.Base
             return result;
         }
 
-        public abstract BaseItem Find(Key key);
+        public abstract IEnumerable<BaseItem> Find(Key key);
+
+        public BaseItem FindFirst(Key key)
+        {
+            foreach (var item in Find(key))
+            {
+                return item;
+            }
+            return null;
+        }
+
+        public T FindFirst<T>(Key key) where T : BaseItem
+        {
+            foreach (var item in Find<T>(key))
+            {
+                return item;
+            }
+            return null;
+        }
+
+        public IEnumerable<T> Find<T>(Key key) where T : BaseItem
+        {
+            foreach (var item in Find(key))
+            {
+                var typed = item as T;
+                if (typed != null)
+                    yield return typed;
+            }
+        }
     }
 }

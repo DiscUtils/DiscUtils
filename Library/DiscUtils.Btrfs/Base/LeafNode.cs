@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Internal;
@@ -112,16 +113,15 @@ namespace DiscUtils.Btrfs.Base
             return result;
         }
 
-        public override BaseItem Find(Key key)
+        public override IEnumerable<BaseItem> Find(Key key)
         {
             for (int i = 0; i < Items.Length; i++)
             {
                 if (Items[i].Key.ObjectId > key.ObjectId)
                     break;
                 if (Items[i].Key.ObjectId == key.ObjectId && Items[i].Key.ItemType == key.ItemType)
-                    return NodeData[i];
+                    yield return NodeData[i];
             }
-            return null;
         }
     }
 }

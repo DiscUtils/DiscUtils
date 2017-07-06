@@ -22,23 +22,44 @@
 
 using System;
 using System.IO;
+using DiscUtils.Btrfs.Base;
+using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
 {
     internal class DirEntry : VfsDirEntry
     {
+        private readonly InodeItem _inode;
+        private readonly DirIndex _item;
+
+        public DirEntry(DirIndex item, InodeItem inode)
+        {
+            _inode = inode;
+            _item = item;
+        }
+
         public override DateTime CreationTimeUtc
         {
-            get { throw new NotImplementedException(); }
+            get { return _inode.CTime.DateTime.DateTime; }
+        }
+
+        public override DateTime LastAccessTimeUtc
+        {
+            get { return _inode.ATime.DateTime.DateTime; }
+        }
+
+        public override DateTime LastWriteTimeUtc
+        {
+            get { return _inode.MTime.DateTime.DateTime; }
+        }
+
+        public override bool HasVfsTimeInfo
+        {
+            get { return true; }
         }
 
         public override FileAttributes FileAttributes
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override string FileName
         {
             get { throw new NotImplementedException(); }
         }
@@ -48,34 +69,33 @@ namespace DiscUtils.Btrfs
             get { throw new NotImplementedException(); }
         }
 
-        public override bool HasVfsTimeInfo
+        public override string FileName
         {
-            get { throw new NotImplementedException(); }
+            get { return _item.Name; }
         }
 
         public override bool IsDirectory
         {
-            get { throw new NotImplementedException(); }
+            get { return _item.ChildType == DirItemChildType.Directory; }
         }
 
         public override bool IsSymlink
         {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override DateTime LastAccessTimeUtc
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override DateTime LastWriteTimeUtc
-        {
-            get { throw new NotImplementedException(); }
+            get { return _item.ChildType == DirItemChildType.Symlink; }
         }
 
         public override long UniqueCacheId
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                unchecked
+                {
+                    long result = (long)_inode.TransId;
+                    result = (result * 397) ^ (long)_item.TransId;
+                    result = (result * 397) ^ (long)_item.ChildLocation.ObjectId;
+                    return result;
+                }
+            }
         }
     }
 }

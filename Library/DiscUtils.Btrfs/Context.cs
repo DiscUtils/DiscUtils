@@ -113,15 +113,15 @@ namespace DiscUtils.Btrfs
             switch (key.ItemType)
             {
                 case ItemType.RootItem:
-                    return RootTreeRoot.Find(key);
+                    return RootTreeRoot.FindFirst(key);
                 case ItemType.DirItem:
-                    return RootTreeRoot.Find(key);
+                    return RootTreeRoot.FindFirst(key);
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        internal BaseItem FindKey(ulong treeId, Key key)
+        internal IEnumerable<BaseItem> FindKey(ulong treeId, Key key)
         {
             var tree = GetFsTree(treeId);
             switch (key.ItemType)
