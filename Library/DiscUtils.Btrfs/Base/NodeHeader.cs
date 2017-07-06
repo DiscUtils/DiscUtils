@@ -21,6 +21,7 @@
 //
 
 using System;
+using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Internal;
 
 namespace DiscUtils.Btrfs.Base
@@ -115,5 +116,7 @@ namespace DiscUtils.Btrfs.Base
             result.ReadFrom(buffer, offset);
             return result;
         }
+
+        public abstract BaseItem Find(Key key);
     }
 }

@@ -21,42 +21,15 @@
 //
 
 using System;
+using System.Text;
 using DiscUtils.Internal;
 
-namespace DiscUtils.Btrfs.Base
+namespace DiscUtils.Btrfs.Base.Items
 {
-    internal class NodeItem : IByteArraySerializable
+    /// <summary>
+    /// From an inode to a name in a directory
+    /// </summary>
+    internal class DirIndex : DirItem
     {
-        public static readonly int Length = Key.Length + 0x8;
-        
-        public Key Key { get; set; }
-
-        public uint DataOffset { get; set; }
-
-        public uint DataSize { get; set; }
-        
-        public virtual int Size
-        {
-            get { return Length; }
-        }
-
-        public virtual int ReadFrom(byte[] buffer, int offset)
-        {
-            Key = new Key();
-            offset += Key.ReadFrom(buffer, offset);
-            DataOffset = Utilities.ToUInt32LittleEndian(buffer, offset);
-            DataSize = Utilities.ToUInt32LittleEndian(buffer, offset+0x4);
-            return Size;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            return Key.ToString();
-        }
     }
 }

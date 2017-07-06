@@ -23,40 +23,21 @@
 using System;
 using DiscUtils.Internal;
 
-namespace DiscUtils.Btrfs.Base
+namespace DiscUtils.Btrfs.Base.Items
 {
-    internal class NodeItem : IByteArraySerializable
+    /// <summary>
+    /// Maps logical address to physical
+    /// </summary>
+    internal class OrphanItem : BaseItem
     {
-        public static readonly int Length = Key.Length + 0x8;
-        
-        public Key Key { get; set; }
-
-        public uint DataOffset { get; set; }
-
-        public uint DataSize { get; set; }
-        
-        public virtual int Size
+        public override int Size
         {
-            get { return Length; }
+            get { return 0; }
         }
 
-        public virtual int ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
-            Key = new Key();
-            offset += Key.ReadFrom(buffer, offset);
-            DataOffset = Utilities.ToUInt32LittleEndian(buffer, offset);
-            DataSize = Utilities.ToUInt32LittleEndian(buffer, offset+0x4);
             return Size;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            return Key.ToString();
         }
     }
 }

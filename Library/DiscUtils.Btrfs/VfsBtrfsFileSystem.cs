@@ -23,12 +23,13 @@
 using System;
 using System.IO;
 using DiscUtils.Btrfs.Base;
+using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Internal;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
 {
-    internal sealed class VfsBtrfsFileSystem :VfsReadOnlyFileSystem<VfsDirEntry, IVfsFile, IVfsDirectory<VfsDirEntry,IVfsFile>, Context>
+    internal sealed class VfsBtrfsFileSystem :VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
         public VfsBtrfsFileSystem(Stream stream)
             :base(new DiscFileSystemOptions())
@@ -58,6 +59,11 @@ namespace DiscUtils.Btrfs
                 throw new IOException("No Superblock detected");
             Context.ChunkTreeRoot = ReadTree(Context.SuperBlock.ChunkRoot, Context.SuperBlock.ChunkRootLevel);
             Context.RootTreeRoot = ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
+            var rootDir = (DirItem)Context.FindKey(Context.SuperBlock.RootDirObjectid, ItemType.DirItem);
+            var fsTreeLocation = (RootItem)Context.FindKey(rootDir.ChildLocation.ObjectId, rootDir.ChildLocation.ItemType);
+            var rootDirObjectId = fsTreeLocation.RootDirId;
+            Context.FsTrees.Add(rootDir.ChildLocation.ObjectId, ReadTree(fsTreeLocation.ByteNr, fsTreeLocation.Level));
+            RootDirectory = new Directory(rootDir.ChildLocation.ObjectId, rootDirObjectId, Context);
         }
         
         public override string FriendlyName
@@ -92,7 +98,7 @@ namespace DiscUtils.Btrfs
             get { return Size - UsedSpace; }
         }
 
-        protected override IVfsFile ConvertDirEntryToFile(VfsDirEntry dirEntry)
+        protected override File ConvertDirEntryToFile(DirEntry dirEntry)
         {
             throw new NotImplementedException();
         }
@@ -104,7 +110,22 @@ namespace DiscUtils.Btrfs
             var dataSize = level > 0 ? Context.SuperBlock.NodeSize : Context.SuperBlock.LeafSize;
             var buffer = new byte[dataSize];
             Context.RawStream.Read(buffer, 0, buffer.Length);
-            return NodeHeader.Create(buffer, 0);
+            var result = NodeHeader.Create(buffer, 0);
+            var internalNode = result as InternalNode;
+            if (internalNode != null)
+            {
+                for (int i = 0; i < internalNode.KeyPointers.Length; i++)
+                {
+                    var keyPtr = internalNode.KeyPointers[i];
+                    internalNode.Nodes[i] = ReadTree(keyPtr.BlockNumber, (byte)(level - 1));
+                }
+            }
+            return result;
+        }
+
+        public UnixFileSystemInfo GetUnixFileInfo(string path)
+        {
+            throw new NotImplementedException();
         }
     }
 }

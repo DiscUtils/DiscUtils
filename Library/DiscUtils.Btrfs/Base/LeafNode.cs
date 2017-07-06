@@ -87,14 +87,41 @@ namespace DiscUtils.Btrfs.Base
                 case ItemType.DirItem:
                     result = new DirItem();
                     break;
+                case ItemType.DirIndex:
+                    result = new DirIndex();
+                    break;
                 case ItemType.ExtentData:
                     result = new ExtentData();
+                    break;
+                case ItemType.RootRef:
+                    result = new RootRef();
+                    break;
+                case ItemType.RootBackref:
+                    result = new RootBackref();
+                    break;
+                case ItemType.XattrItem:
+                    result = new XattrItem();
+                    break;
+                case ItemType.OrphanItem:
+                    result = new OrphanItem();
                     break;
                 default:
                     throw new IOException($"Unsupported item type {item.Key.ItemType}");
             }
             result.ReadFrom(data, 0);
             return result;
+        }
+
+        public override BaseItem Find(Key key)
+        {
+            for (int i = 0; i < Items.Length; i++)
+            {
+                if (Items[i].Key.ObjectId > key.ObjectId)
+                    break;
+                if (Items[i].Key.ObjectId == key.ObjectId && Items[i].Key.ItemType == key.ItemType)
+                    return NodeData[i];
+            }
+            return null;
         }
     }
 }

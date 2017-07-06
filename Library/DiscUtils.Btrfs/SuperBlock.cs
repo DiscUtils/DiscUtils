@@ -178,11 +178,13 @@ namespace DiscUtils.Btrfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
+            Magic = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
+            if (Magic != BtrfsMagic) return Size;
+
             Checksum = Utilities.ToByteArray(buffer, offset, 0x20);
             FsUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x20);
             PhysicalAddress = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
             Flags = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
-            Magic = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
             Generation = Utilities.ToUInt64LittleEndian(buffer, offset + 0x48);
             Root = Utilities.ToUInt64LittleEndian(buffer, offset + 0x50);
             

@@ -21,42 +21,55 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using System.Collections.Generic;
+using DiscUtils.Vfs;
 
-namespace DiscUtils.Btrfs.Base
+namespace DiscUtils.Btrfs
 {
-    internal class NodeItem : IByteArraySerializable
+    internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
-        public static readonly int Length = Key.Length + 0x8;
-        
-        public Key Key { get; set; }
-
-        public uint DataOffset { get; set; }
-
-        public uint DataSize { get; set; }
-        
-        public virtual int Size
+        public Directory(ulong treeId, ulong objectId, Context context):base(treeId, objectId, context)
         {
-            get { return Length; }
+            
         }
 
-        public virtual int ReadFrom(byte[] buffer, int offset)
+        private Dictionary<string, DirEntry> _allEntries;
+
+        public ICollection<DirEntry> AllEntries
         {
-            Key = new Key();
-            offset += Key.ReadFrom(buffer, offset);
-            DataOffset = Utilities.ToUInt32LittleEndian(buffer, offset);
-            DataSize = Utilities.ToUInt32LittleEndian(buffer, offset+0x4);
-            return Size;
+            get
+            {
+                if (_allEntries != null)
+                    return _allEntries.Values;
+                var result = new Dictionary<string, DirEntry>();
+                var tree = Context.GetFsTree(TreeId);
+                throw new NotImplementedException();
+                _allEntries = result;
+                return result.Values;
+            }
         }
 
-        public void WriteTo(byte[] buffer, int offset)
+        public DirEntry Self
+        {
+            get { return null; }
+        }
+
+        public DirEntry GetEntryByName(string name)
+        {
+            foreach (DirEntry entry in AllEntries)
+            {
+                if (entry.FileName == name)
+                {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        public DirEntry CreateNewFile(string name)
         {
             throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            return Key.ToString();
         }
     }
 }

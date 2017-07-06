@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Btrfs.Base;
 using DiscUtils.Btrfs.Base.Items;
@@ -30,6 +31,11 @@ namespace DiscUtils.Btrfs
 {
     internal class Context : VfsContext
     {
+        public Context()
+        {
+            FsTrees = new Dictionary<ulong, NodeHeader>();
+        }
+
         public Stream RawStream { get; set; }
 
         public SuperBlock SuperBlock { get; set; }
@@ -38,11 +44,18 @@ namespace DiscUtils.Btrfs
 
         internal NodeHeader RootTreeRoot { get; set; }
 
+        internal Dictionary<ulong, NodeHeader> FsTrees { get; }
+
+        internal NodeHeader GetFsTree(ulong treeId)
+        {
+            return FsTrees[treeId];
+        }
+
         internal ulong MapToPhysical(ulong logical)
         {
             if (ChunkTreeRoot != null)
             {
-                var node = (LeafNode)ChunkTreeRoot;
+                var node = (LeafNode)ChunkTreeRoot;//todo use FindKey
                 for (int i = 0; i < node.Items.Length; i++)
                 {
                     var chunkKey = node.Items[i].Key;
@@ -82,6 +95,42 @@ namespace DiscUtils.Btrfs
                 throw new IOException("Raid5 not supported");
             if ((flags & BlockGroupFlag.Raid6) == BlockGroupFlag.Raid0)
                 throw new IOException("Raid6 not supported");
+        }
+
+        internal BaseItem FindKey(ReservedObjectId objectId, ItemType type)
+        {
+            return FindKey((ulong)objectId, type);
+        }
+
+        internal BaseItem FindKey(ulong objectId, ItemType type)
+        {
+            var key = new Key { ObjectId = objectId, ItemType = type };
+            return FindKey(key);
+        }
+
+        internal BaseItem FindKey(Key key)
+        {
+            switch (key.ItemType)
+            {
+                case ItemType.RootItem:
+                    return RootTreeRoot.Find(key);
+                case ItemType.DirItem:
+                    return RootTreeRoot.Find(key);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal BaseItem FindKey(ulong treeId, Key key)
+        {
+            var tree = GetFsTree(treeId);
+            switch (key.ItemType)
+            {
+                case ItemType.DirItem:
+                    return tree.Find(key);
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 }

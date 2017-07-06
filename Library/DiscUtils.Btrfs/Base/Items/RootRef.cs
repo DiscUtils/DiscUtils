@@ -21,54 +21,48 @@
 //
 
 using System;
+using System.Text;
 using DiscUtils.Internal;
 
-namespace DiscUtils.Btrfs.Base
+namespace DiscUtils.Btrfs.Base.Items
 {
-    internal class Key : IByteArraySerializable
+    /// <summary>
+    /// From an inode to a name in a directory
+    /// </summary>
+    internal class RootRef : BaseItem
     {
-        public static readonly int Length = 0x11;
+        /// <summary>
+        /// ID of directory in [tree id] that contains the subtree  
+        /// </summary>
+        public ulong DirectoryId { get; private set; }
 
         /// <summary>
-        /// Object ID. Each tree has its own set of Object IDs.
+        /// Sequence (index in tree) (even, starting at 2?)
         /// </summary>
-        public ulong ObjectId { get; internal set; }
-
-        public ReservedObjectId ReservedObjectId { get { return (ReservedObjectId)ObjectId; } }
+        public ulong Sequence { get; private set; }
 
         /// <summary>
-        /// Item type.
+        /// (n)
         /// </summary>
-        public ItemType ItemType { get; internal set; }
+        public ushort NameLength { get; private set; }
 
         /// <summary>
-        /// Offset. The meaning depends on the item type. 
+        /// name
         /// </summary>
-        public ulong Offset { get; internal set; }
-
-        public int Size
+        public string Name { get; private set; }
+        
+        public override int Size
         {
-            get { return Length; }
+            get { return 0x12+NameLength; }
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
-            ObjectId = Utilities.ToUInt64LittleEndian(buffer, offset);
-            ItemType = (ItemType)buffer[offset +0x8];
-            Offset = Utilities.ToUInt64LittleEndian(buffer, offset + 0x9);
+            DirectoryId = Utilities.ToUInt64LittleEndian(buffer, offset);
+            Sequence = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            NameLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
+            Name = Encoding.UTF8.GetString(buffer, offset + 0x12, NameLength);
             return Size;
-        }
-
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            if (Enum.IsDefined(typeof(ReservedObjectId), ObjectId))
-                return $"{ReservedObjectId}|{ItemType}|{Offset}";
-            return $"{ObjectId}|{ItemType}|{Offset}";
         }
     }
 }
