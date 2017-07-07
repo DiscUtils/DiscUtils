@@ -64,7 +64,7 @@ namespace DiscUtils.Btrfs.Base
             if (KeyPointers[0].Key.ObjectId > key.ObjectId)
                 yield break;
             var i = 1;
-            while (KeyPointers[i].Key.ObjectId < key.ObjectId && i < KeyPointers.Length)
+            while (i < KeyPointers.Length && KeyPointers[i].Key.ObjectId < key.ObjectId)
             {
                 i++;
             }

@@ -29,26 +29,24 @@ namespace DiscUtils.Btrfs
 {
     internal class File : IVfsFile
     {
-        protected readonly ulong TreeId;
-        protected readonly ulong ObjectId;
+        protected readonly DirEntry DirEntry;
         protected readonly Context Context;
 
-        public File(ulong treeId, ulong objectId, Context context)
+        public File(DirEntry dirEntry, Context context)
         {
-            TreeId = treeId;
-            ObjectId = objectId;
+            DirEntry = dirEntry;
             Context = context;
         }
 
         public DateTime CreationTimeUtc
         {
-            get { throw new NotImplementedException(); }
+            get { return DirEntry.CreationTimeUtc; }
             set { throw new NotImplementedException(); }
         }
 
         public FileAttributes FileAttributes
         {
-            get { throw new NotImplementedException(); }
+            get { return DirEntry.FileAttributes; }
             set { throw new NotImplementedException(); }
         }
 
@@ -64,13 +62,13 @@ namespace DiscUtils.Btrfs
 
         public DateTime LastAccessTimeUtc
         {
-            get { throw new NotImplementedException(); }
+            get { return DirEntry.LastAccessTimeUtc; }
             set { throw new NotImplementedException(); }
         }
 
         public DateTime LastWriteTimeUtc
         {
-            get { throw new NotImplementedException(); }
+            get { return DirEntry.LastWriteTimeUtc; }
             set { throw new NotImplementedException(); }
         }
     }

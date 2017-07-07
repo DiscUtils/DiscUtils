@@ -30,7 +30,7 @@ namespace DiscUtils.Btrfs
 {
     internal class Directory : File, IVfsDirectory<DirEntry, File>
     {
-        public Directory(ulong treeId, ulong objectId, Context context):base(treeId, objectId, context)
+        public Directory(DirEntry dirEntry, Context context) : base(dirEntry, context)
         {
             
         }
@@ -44,12 +44,12 @@ namespace DiscUtils.Btrfs
                 if (_allEntries != null)
                     return _allEntries.Values;
                 var result = new Dictionary<string, DirEntry>();
-                var tree = Context.GetFsTree(TreeId);
-                var items = tree.Find<DirIndex>(new Key { ItemType = ItemType.DirIndex, ObjectId = ObjectId });
+                var tree = Context.GetFsTree(DirEntry.TreeId);
+                var items = tree.Find<DirIndex>(new Key { ItemType = ItemType.DirIndex, ObjectId = DirEntry.ObjectId });
                 foreach (var item in items)
                 {
                     var inode = tree.FindFirst(item.ChildLocation);
-                    result.Add(item.Name, new DirEntry(item, (InodeItem)inode));
+                    result.Add(item.Name, new DirEntry(DirEntry.TreeId, item, (InodeItem)inode));
                 }
                 _allEntries = result;
                 return result.Values;

@@ -32,8 +32,16 @@ namespace DiscUtils.Btrfs
     {
         private readonly InodeItem _inode;
         private readonly DirIndex _item;
+        private readonly ulong _treeId;
 
-        public DirEntry(DirIndex item, InodeItem inode)
+        public DirEntry(ulong treeId, ulong objectId)
+        {
+            _treeId = treeId;
+            ObjectId = objectId;
+        }
+
+        public DirEntry(ulong treeId, DirIndex item, InodeItem inode)
+            :this(treeId, item.ChildLocation.ObjectId)
         {
             _inode = inode;
             _item = item;
@@ -97,5 +105,13 @@ namespace DiscUtils.Btrfs
                 }
             }
         }
+
+        internal Directory CachedDirectory { get; set; }
+
+        internal DirItemChildType Type { get { return _item.ChildType; } }
+
+        internal ulong ObjectId { get; private set; }
+
+        internal ulong TreeId { get { return _treeId; } }
     }
 }

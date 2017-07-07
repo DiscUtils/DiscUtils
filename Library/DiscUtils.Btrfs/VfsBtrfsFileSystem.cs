@@ -63,7 +63,8 @@ namespace DiscUtils.Btrfs
             var fsTreeLocation = (RootItem)Context.FindKey(rootDir.ChildLocation.ObjectId, rootDir.ChildLocation.ItemType);
             var rootDirObjectId = fsTreeLocation.RootDirId;
             Context.FsTrees.Add(rootDir.ChildLocation.ObjectId, ReadTree(fsTreeLocation.ByteNr, fsTreeLocation.Level));
-            RootDirectory = new Directory(rootDir.ChildLocation.ObjectId, rootDirObjectId, Context);
+            var dirEntry = new DirEntry(rootDir.ChildLocation.ObjectId, rootDirObjectId);
+            RootDirectory = new Directory(dirEntry, Context);
         }
         
         public override string FriendlyName
@@ -100,7 +101,23 @@ namespace DiscUtils.Btrfs
 
         protected override File ConvertDirEntryToFile(DirEntry dirEntry)
         {
-            throw new NotImplementedException();
+            if (dirEntry.IsDirectory)
+            {
+                return dirEntry.CachedDirectory ?? (dirEntry.CachedDirectory = new Directory(dirEntry, Context));
+            }
+            else if (dirEntry.IsSymlink)
+            {
+                //return new Symlink(Context, dirEntry.Inode);
+                throw new NotImplementedException("Symlinks are not implemented yet");
+            }
+            else if (dirEntry.Type == DirItemChildType.RegularFile)
+            {
+                return new File(dirEntry, Context);
+            }
+            else
+            {
+                throw new NotSupportedException(String.Format("Type {0} is not supported in btrfs", dirEntry.Type));
+            }
         }
 
         private NodeHeader ReadTree(ulong logical, byte level)
