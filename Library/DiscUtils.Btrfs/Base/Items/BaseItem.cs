@@ -30,6 +30,13 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal abstract class BaseItem : IByteArraySerializable
     {
+        public BaseItem(Key key)
+        {
+            Key = key;
+        }
+
+        public Key Key { get; private set; }
+
         public abstract int Size { get; }
 
         public abstract int ReadFrom(byte[] buffer, int offset);

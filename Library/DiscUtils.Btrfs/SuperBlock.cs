@@ -225,7 +225,7 @@ namespace DiscUtils.Btrfs
             {
                 var key = new Key();
                 offset += key.ReadFrom(buffer, offset);
-                var chunkItem = new ChunkItem();
+                var chunkItem = new ChunkItem(key);
                 offset += chunkItem.ReadFrom(buffer, offset);
                 systemChunks.Add(new Tuple<Key, ChunkItem>(key, chunkItem));
                 n = n - (uint)key.Size - (uint)chunkItem.Size;

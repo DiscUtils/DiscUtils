@@ -31,6 +31,8 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class DirItem : BaseItem
     {
+        public DirItem(Key key) : base(key) { }
+
         /// <summary>
         ///  location of child  
         /// </summary>

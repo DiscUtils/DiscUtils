@@ -71,40 +71,40 @@ namespace DiscUtils.Btrfs.Base
             switch (item.Key.ItemType)
             {
                 case ItemType.ChunkItem:
-                    result = new ChunkItem();
+                    result = new ChunkItem(item.Key);
                     break;
                 case ItemType.DevItem:
-                    result = new DevItem();
+                    result = new DevItem(item.Key);
                     break;
                 case ItemType.RootItem:
-                    result = new RootItem();
+                    result = new RootItem(item.Key);
                     break;
                 case ItemType.InodeRef:
-                    result = new InodeRef();
+                    result = new InodeRef(item.Key);
                     break;
                 case ItemType.InodeItem:
-                    result = new InodeItem();
+                    result = new InodeItem(item.Key);
                     break;
                 case ItemType.DirItem:
-                    result = new DirItem();
+                    result = new DirItem(item.Key);
                     break;
                 case ItemType.DirIndex:
-                    result = new DirIndex();
+                    result = new DirIndex(item.Key);
                     break;
                 case ItemType.ExtentData:
-                    result = new ExtentData();
+                    result = new ExtentData(item.Key);
                     break;
                 case ItemType.RootRef:
-                    result = new RootRef();
+                    result = new RootRef(item.Key);
                     break;
                 case ItemType.RootBackref:
-                    result = new RootBackref();
+                    result = new RootBackref(item.Key);
                     break;
                 case ItemType.XattrItem:
-                    result = new XattrItem();
+                    result = new XattrItem(item.Key);
                     break;
                 case ItemType.OrphanItem:
-                    result = new OrphanItem();
+                    result = new OrphanItem(item.Key);
                     break;
                 default:
                     throw new IOException($"Unsupported item type {item.Key.ItemType}");

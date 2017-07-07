@@ -30,6 +30,8 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class OrphanItem : BaseItem
     {
+        public OrphanItem(Key key) : base(key) { }
+
         public override int Size
         {
             get { return 0; }

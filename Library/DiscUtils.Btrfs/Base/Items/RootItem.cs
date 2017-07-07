@@ -32,6 +32,8 @@ namespace DiscUtils.Btrfs.Base.Items
     {
         public static readonly int Length = 375;
 
+        public RootItem(Key key) : base(key) { }
+
         /// <summary>
         /// Several fields are initialized but only flags is interpreted at runtime.
         /// generation=1, size=3,nlink=1, nbytes=<leafsize>, mode=040755

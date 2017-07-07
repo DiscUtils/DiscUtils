@@ -30,6 +30,8 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class ChunkItem : BaseItem
     {
+        public ChunkItem(Key key) : base(key) {}
+
         /// <summary>
         /// size of chunk (bytes)
         /// </summary>

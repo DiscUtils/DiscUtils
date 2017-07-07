@@ -31,6 +31,8 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class RootRef : BaseItem
     {
+        public RootRef(Key key) : base(key) { }
+
         /// <summary>
         /// ID of directory in [tree id] that contains the subtree  
         /// </summary>

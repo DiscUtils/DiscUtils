@@ -22,15 +22,26 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
+using DiscUtils.Vfs;
 
-namespace DiscUtils.Btrfs.Base.Items
+namespace DiscUtils.Btrfs
 {
-    /// <summary>
-    /// From an inode to a name in a directory
-    /// </summary>
-    internal class RootBackref : RootRef
+    internal class Symlink : File, IVfsSymlink<DirEntry, File>
     {
-        public RootBackref(Key key) : base(key) {}
+        public Symlink(DirEntry dirEntry, Context context) : base(dirEntry, context)
+        {
+            
+        }
+
+        public string TargetPath
+        {
+            get
+            {
+                IBuffer content = FileContent;
+                byte[] data = StreamUtilities.ReadFully(content, 0, (int)content.Capacity);
+                return Encoding.UTF8.GetString(data, 0, data.Length).Replace('/', '\\');
+            }
+        }
     }
 }

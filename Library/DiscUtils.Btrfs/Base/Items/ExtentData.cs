@@ -30,6 +30,8 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class ExtentData : BaseItem
     {
+        public ExtentData(Key key) : base(key) { }
+
         /// <summary>
         ///  generation 
         /// </summary>

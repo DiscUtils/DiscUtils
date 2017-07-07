@@ -21,7 +21,11 @@
 //
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Btrfs.Base;
+using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
@@ -52,7 +56,43 @@ namespace DiscUtils.Btrfs
 
         public IBuffer FileContent
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                var extents = Context.FindKey<ExtentData>(DirEntry.TreeId, new Key { ItemType = ItemType.ExtentData, ObjectId = DirEntry.ObjectId });
+                return BufferFromExtentList(new List<ExtentData>(extents));
+            }
+        }
+
+        private IBuffer BufferFromExtentList(IList<ExtentData> extents)
+        {
+            var builderExtents = new List<BuilderExtent>(extents.Count);
+
+            foreach (var extent in extents)
+            {
+                if (extent.Encryption)
+                    throw new IOException("Extent encryption is not supported");
+                if (extent.Compression != ExtentDataCompression.None)
+                    throw new IOException("Extent compression is not supported");
+
+                BuilderExtent builderExtent;
+                switch (extent.Type)
+                {
+                    case ExtentDataType.Inline:
+                        builderExtent = new BuilderBytesExtent((long)extent.Key.Offset, extent.InlineData);
+                        break;
+                    case ExtentDataType.Regular:
+                        builderExtent = null;
+                        break;
+                    case ExtentDataType.PreAlloc:
+                        builderExtent = null;
+                        break;
+                    default:
+                        throw new IOException("invalid extent type");
+                }
+                builderExtents.Add(builderExtent);
+            }
+
+            return new StreamBuffer(new BuiltStream((long)DirEntry.FileSize, builderExtents), Ownership.Dispose);
         }
 
         public long FileLength

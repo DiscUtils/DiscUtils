@@ -31,6 +31,8 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class InodeRef : BaseItem
     {
+        public InodeRef(Key key) : base(key) { }
+
         /// <summary>
         ///  index in the directory  
         /// </summary>

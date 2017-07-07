@@ -58,7 +58,7 @@ namespace DiscUtils.Btrfs
 
         public DirEntry Self
         {
-            get { return null; }
+            get { return DirEntry; }
         }
 
         public DirEntry GetEntryByName(string name)

@@ -21,8 +21,6 @@
 //
 
 using System;
-using System.Text;
-using DiscUtils.Internal;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -31,5 +29,6 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class DirIndex : DirItem
     {
+        public DirIndex(Key key) : base(key) {}
     }
 }

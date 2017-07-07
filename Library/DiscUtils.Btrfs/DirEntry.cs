@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using DiscUtils.Btrfs.Base;
 using DiscUtils.Btrfs.Base.Items;
+using DiscUtils.Internal;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
@@ -69,12 +70,53 @@ namespace DiscUtils.Btrfs
 
         public override FileAttributes FileAttributes
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                UnixFileType unixFileType;
+                switch (_item.ChildType)
+                {
+                    case DirItemChildType.Unknown:
+                        unixFileType = UnixFileType.None;
+                        break;
+                    case DirItemChildType.RegularFile:
+                        unixFileType = UnixFileType.Regular;
+                        break;
+                    case DirItemChildType.Directory:
+                        unixFileType = UnixFileType.Directory;
+                        break;
+                    case DirItemChildType.CharDevice:
+                        unixFileType = UnixFileType.Character;
+                        break;
+                    case DirItemChildType.BlockDevice:
+                        unixFileType = UnixFileType.Block;
+                        break;
+                    case DirItemChildType.Fifo:
+                        unixFileType = UnixFileType.Fifo;
+                        break;
+                    case DirItemChildType.Socket:
+                        unixFileType = UnixFileType.Socket;
+                        break;
+                    case DirItemChildType.Symlink:
+                        unixFileType = UnixFileType.Link;
+                        break;
+                    case DirItemChildType.ExtendedAttribute:
+                        unixFileType = UnixFileType.None;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                var result = Utilities.FileAttributesFromUnixFileType(unixFileType);
+
+                if ((_inode.Flags & InodeFlag.Readonly) == InodeFlag.Readonly)
+                    result |= FileAttributes.ReadOnly;
+
+                return result;
+            }
         }
 
         public override bool HasVfsFileAttributes
         {
-            get { throw new NotImplementedException(); }
+            get { return _item != null; }
         }
 
         public override string FileName
@@ -113,5 +155,7 @@ namespace DiscUtils.Btrfs
         internal ulong ObjectId { get; private set; }
 
         internal ulong TreeId { get { return _treeId; } }
+
+        internal ulong FileSize { get { return _inode.FileSize; } }
     }
 }

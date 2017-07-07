@@ -132,5 +132,18 @@ namespace DiscUtils.Btrfs
                     throw new NotImplementedException();
             }
         }
+
+        internal IEnumerable<T> FindKey<T>(ulong treeId, Key key) where T:BaseItem
+        {
+            var tree = GetFsTree(treeId);
+            switch (key.ItemType)
+            {
+                case ItemType.DirItem:
+                case ItemType.ExtentData:
+                    return tree.Find<T>(key);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 }

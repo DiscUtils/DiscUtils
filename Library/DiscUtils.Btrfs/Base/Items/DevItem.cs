@@ -31,6 +31,7 @@ namespace DiscUtils.Btrfs.Base.Items
     internal class DevItem : BaseItem
     {
         public static readonly int Length = 0x62;
+        public DevItem(Key key) : base(key) { }
 
         /// <summary>
         ///  the internal btrfs device id  

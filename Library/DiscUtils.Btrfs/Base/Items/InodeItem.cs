@@ -30,6 +30,10 @@ namespace DiscUtils.Btrfs.Base.Items
     /// </summary>
     internal class InodeItem : BaseItem
     {
+        public InodeItem(Key key) : base(key) { }
+
+        public InodeItem() : this(null) { }
+
         public static readonly int Length = 160;
 
         public ulong Generation { get; private set; }

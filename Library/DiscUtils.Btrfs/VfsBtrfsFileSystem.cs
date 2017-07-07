@@ -59,10 +59,12 @@ namespace DiscUtils.Btrfs
                 throw new IOException("No Superblock detected");
             Context.ChunkTreeRoot = ReadTree(Context.SuperBlock.ChunkRoot, Context.SuperBlock.ChunkRootLevel);
             Context.RootTreeRoot = ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
+
             var rootDir = (DirItem)Context.FindKey(Context.SuperBlock.RootDirObjectid, ItemType.DirItem);
             var fsTreeLocation = (RootItem)Context.FindKey(rootDir.ChildLocation.ObjectId, rootDir.ChildLocation.ItemType);
             var rootDirObjectId = fsTreeLocation.RootDirId;
             Context.FsTrees.Add(rootDir.ChildLocation.ObjectId, ReadTree(fsTreeLocation.ByteNr, fsTreeLocation.Level));
+
             var dirEntry = new DirEntry(rootDir.ChildLocation.ObjectId, rootDirObjectId);
             RootDirectory = new Directory(dirEntry, Context);
         }
@@ -107,8 +109,7 @@ namespace DiscUtils.Btrfs
             }
             else if (dirEntry.IsSymlink)
             {
-                //return new Symlink(Context, dirEntry.Inode);
-                throw new NotImplementedException("Symlinks are not implemented yet");
+                return new Symlink(dirEntry, Context);
             }
             else if (dirEntry.Type == DirItemChildType.RegularFile)
             {
