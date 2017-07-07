@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base
 {
@@ -53,8 +53,8 @@ namespace DiscUtils.Btrfs.Base
         {
             Key = new Key();
             offset += Key.ReadFrom(buffer, offset);
-            BlockNumber = Utilities.ToUInt64LittleEndian(buffer, offset);
-            Generation = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            BlockNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
             return Size;
         }
 

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -110,20 +110,20 @@ namespace DiscUtils.Btrfs.Base.Items
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            DeviceId = Utilities.ToUInt64LittleEndian(buffer, offset);
-            DeviceSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
-            DeviceSizeUsed = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
-            OptimalIoAlignment = Utilities.ToUInt32LittleEndian(buffer, offset + 0x18);
-            OptimalIoWidth = Utilities.ToUInt32LittleEndian(buffer, offset + 0x1c);
-            MinimalIoSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x20);
-            Type = (BlockGroupFlag)Utilities.ToUInt64LittleEndian(buffer, offset + 0x24);
-            Generation = Utilities.ToUInt64LittleEndian(buffer, offset + 0x2c);
-            StartOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 0x34);
-            DevGroup = Utilities.ToUInt32LittleEndian(buffer, offset + 0x3c);
+            DeviceId = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            DeviceSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            DeviceSizeUsed = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            OptimalIoAlignment = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x18);
+            OptimalIoWidth = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x1c);
+            MinimalIoSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x20);
+            Type = (BlockGroupFlag)EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x24);
+            Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x2c);
+            StartOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x34);
+            DevGroup = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x3c);
             SeekSpeed = buffer[offset + 0x40];
             Bandwidth = buffer[offset + 0x41];
-            DeviceUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x42);
-            FsUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x52);
+            DeviceUuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x42);
+            FsUuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x52);
             return Size;
         }
     }

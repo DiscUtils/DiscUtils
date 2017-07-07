@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -84,15 +84,15 @@ namespace DiscUtils.Btrfs.Base.Items
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            ChunkSize = Utilities.ToUInt64LittleEndian(buffer, offset);
-            ObjectId = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
-            StripeLength = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            Type = (BlockGroupFlag)Utilities.ToUInt64LittleEndian(buffer, offset + 0x18);
-            OptimalIoAlignment = Utilities.ToUInt32LittleEndian(buffer, offset + 0x20);
-            OptimalIoWidth = Utilities.ToUInt32LittleEndian(buffer, offset + 0x24);
-            MinimalIoSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x28);
-            StripeCount = Utilities.ToUInt16LittleEndian(buffer, offset + 0x2c);
-            SubStripes = Utilities.ToUInt16LittleEndian(buffer, offset + 0x2e);
+            ChunkSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            ObjectId = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            StripeLength = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x10);
+            Type = (BlockGroupFlag)EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x18);
+            OptimalIoAlignment = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x20);
+            OptimalIoWidth = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x24);
+            MinimalIoSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x28);
+            StripeCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2c);
+            SubStripes = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2e);
             Stripes = new Stripe[StripeCount];
             offset += 0x30;
             for (int i = 0; i < StripeCount; i++)

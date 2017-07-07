@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using DiscUtils.Btrfs.Base;
 using DiscUtils.Btrfs.Base.Items;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
@@ -43,7 +43,7 @@ namespace DiscUtils.Btrfs
                 if (offset + SuperBlock.Length > stream.Length) break;
 
                 stream.Position = offset;
-                var superblockData = Utilities.ReadFully(stream, SuperBlock.Length);
+                var superblockData = StreamUtilities.ReadFully(stream, SuperBlock.Length);
                 var superblock = new SuperBlock();
                 superblock.ReadFrom(superblockData, 0);
 

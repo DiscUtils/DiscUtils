@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -73,13 +73,13 @@ namespace DiscUtils.Btrfs.Base.Items
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            ChildLocation = Utilities.ToStruct<Key>(buffer, offset);
-            TransId = Utilities.ToUInt64LittleEndian(buffer, offset+0x11);
-            DataLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x19);
-            NameLength = Utilities.ToUInt16LittleEndian(buffer, offset + 0x1b);
+            ChildLocation = EndianUtilities.ToStruct<Key>(buffer, offset);
+            TransId = EndianUtilities.ToUInt64LittleEndian(buffer, offset+0x11);
+            DataLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x19);
+            NameLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x1b);
             ChildType = (DirItemChildType)buffer[offset + 0x1d];
             Name = Encoding.UTF8.GetString(buffer, offset + 0x1e, NameLength);
-            Data = Utilities.ToByteArray(buffer, offset + 0x1e + NameLength, DataLength);
+            Data = EndianUtilities.ToByteArray(buffer, offset + 0x1e + NameLength, DataLength);
             return Size;
         }
     }

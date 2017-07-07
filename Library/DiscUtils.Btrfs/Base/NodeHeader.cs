@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using DiscUtils.Btrfs.Base.Items;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base
 {
@@ -86,17 +86,17 @@ namespace DiscUtils.Btrfs.Base
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            Checksum = Utilities.ToByteArray(buffer, offset, 0x20);
-            FsUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x20);
-            LogicalAddress = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
+            Checksum = EndianUtilities.ToByteArray(buffer, offset, 0x20);
+            FsUuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x20);
+            LogicalAddress = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x30);
             //todo validate shift
-            Flags = Utilities.ToInt64LittleEndian(buffer, offset + 0x38)>>8;
+            Flags = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x38)>>8;
             BackrefRevision = buffer[offset + 0x3f];
-            ChunkTreeUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x40);
-            Generation = Utilities.ToUInt64LittleEndian(buffer, offset + 0x50);
+            ChunkTreeUuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x40);
+            Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x50);
 
-            TreeId = Utilities.ToUInt64LittleEndian(buffer, offset + 0x58);
-            ItemCount = Utilities.ToUInt32LittleEndian(buffer, offset + 0x60);
+            TreeId = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x58);
+            ItemCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x60);
             Level = buffer[offset + 0x64];
             return Length;
         }

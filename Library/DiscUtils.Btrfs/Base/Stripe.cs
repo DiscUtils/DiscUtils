@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base
 {
@@ -67,9 +67,9 @@ namespace DiscUtils.Btrfs.Base
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            DeviceId = Utilities.ToUInt64LittleEndian(buffer, offset);
-            Offset = Utilities.ToUInt64LittleEndian(buffer, offset + 0x8);
-            DeviceUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x10);
+            DeviceId = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            Offset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x8);
+            DeviceUuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x10);
             return Size;
         }
 

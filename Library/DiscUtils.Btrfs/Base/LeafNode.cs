@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Btrfs.Base.Items;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base
 {
@@ -66,7 +66,7 @@ namespace DiscUtils.Btrfs.Base
 
         private BaseItem CreateItem(NodeItem item, byte[] buffer, int offset)
         {
-            var data = Utilities.ToByteArray(buffer, (int)(offset + item.DataOffset), (int)item.DataSize);
+            var data = EndianUtilities.ToByteArray(buffer, (int)(offset + item.DataOffset), (int)item.DataSize);
             BaseItem result;
             switch (item.Key.ItemType)
             {

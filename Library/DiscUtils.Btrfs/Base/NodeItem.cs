@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base
 {
@@ -44,8 +44,8 @@ namespace DiscUtils.Btrfs.Base
         {
             Key = new Key();
             offset += Key.ReadFrom(buffer, offset);
-            DataOffset = Utilities.ToUInt32LittleEndian(buffer, offset);
-            DataSize = Utilities.ToUInt32LittleEndian(buffer, offset+0x4);
+            DataOffset = EndianUtilities.ToUInt32LittleEndian(buffer, offset);
+            DataSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset+0x4);
             return Size;
         }
 

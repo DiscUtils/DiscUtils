@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
@@ -50,7 +50,7 @@ namespace DiscUtils.Btrfs
             }
 
             stream.Position = SuperblockOffsets[0];
-            byte[] superblockData = Utilities.ReadFully(stream, SuperBlock.Length);
+            byte[] superblockData = StreamUtilities.ReadFully(stream, SuperBlock.Length);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

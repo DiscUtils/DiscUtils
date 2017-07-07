@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs

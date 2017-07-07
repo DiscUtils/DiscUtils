@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base
 {
@@ -53,8 +53,8 @@ namespace DiscUtils.Btrfs.Base
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Seconds = Utilities.ToInt64LittleEndian(buffer, offset);
-            Nanoseconds = Utilities.ToUInt32LittleEndian(buffer, offset + 0x8);
+            Seconds = EndianUtilities.ToInt64LittleEndian(buffer, offset);
+            Nanoseconds = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x8);
             return Size;
         }
 

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -87,8 +87,8 @@ namespace DiscUtils.Btrfs.Base.Items
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            Generation = Utilities.ToUInt64LittleEndian(buffer, offset);
-            DecodedSize = Utilities.ToUInt64LittleEndian(buffer, offset+0x8);
+            Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
+            DecodedSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset+0x8);
             Compression = (ExtentDataCompression)buffer[offset + 0x10];
             Encryption = buffer[offset + 0x10] != 0;
             //12 	2 	UINT 	other encoding (0=none)
@@ -96,14 +96,14 @@ namespace DiscUtils.Btrfs.Base.Items
 
             if (Type == ExtentDataType.Inline)
             {
-                InlineData = Utilities.ToByteArray(buffer, offset + 0x15, buffer.Length - (offset + 0x15));
+                InlineData = EndianUtilities.ToByteArray(buffer, offset + 0x15, buffer.Length - (offset + 0x15));
             }
             else
             {
-                ExtentAddress = Utilities.ToUInt64LittleEndian(buffer, offset + 0x15);
-                ExtentSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x1d);
-                ExtentOffset = Utilities.ToUInt64LittleEndian(buffer, offset + 0x25);
-                LogicalSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x2d);
+                ExtentAddress = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x15);
+                ExtentSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x1d);
+                ExtentOffset = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x25);
+                LogicalSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x2d);
             }
 
             return Size;

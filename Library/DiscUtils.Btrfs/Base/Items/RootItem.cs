@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -101,15 +101,15 @@ namespace DiscUtils.Btrfs.Base.Items
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            Inode = Utilities.ToStruct<InodeItem>(buffer, offset);
-            RootDirId = Utilities.ToUInt64LittleEndian(buffer, offset+ 168);
-            ByteNr = Utilities.ToUInt64LittleEndian(buffer, offset + 176);
-            ByteLimit = Utilities.ToUInt64LittleEndian(buffer, offset + 184);
-            BytesUsed = Utilities.ToUInt64LittleEndian(buffer, offset + 192);
-            LastSnapshot = Utilities.ToUInt64LittleEndian(buffer, offset + 200);
-            Flags = Utilities.ToUInt64LittleEndian(buffer, offset + 208);
-            Refs = Utilities.ToUInt32LittleEndian(buffer, offset + 216);
-            DropProgress = Utilities.ToStruct<Key>(buffer, offset+220);
+            Inode = EndianUtilities.ToStruct<InodeItem>(buffer, offset);
+            RootDirId = EndianUtilities.ToUInt64LittleEndian(buffer, offset+ 168);
+            ByteNr = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 176);
+            ByteLimit = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 184);
+            BytesUsed = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 192);
+            LastSnapshot = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 200);
+            Flags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 208);
+            Refs = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 216);
+            DropProgress = EndianUtilities.ToStruct<Key>(buffer, offset+220);
             DropLevel = buffer[offset+237];
             Level = buffer[offset+238];
 

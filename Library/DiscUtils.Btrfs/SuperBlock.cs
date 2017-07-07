@@ -26,6 +26,7 @@ using System.Text;
 using DiscUtils.Btrfs.Base;
 using DiscUtils.Btrfs.Base.Items;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs
 {
@@ -178,38 +179,38 @@ namespace DiscUtils.Btrfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Magic = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
+            Magic = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x40);
             if (Magic != BtrfsMagic) return Size;
 
-            Checksum = Utilities.ToByteArray(buffer, offset, 0x20);
-            FsUuid = Utilities.ToGuidLittleEndian(buffer, offset + 0x20);
-            PhysicalAddress = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
-            Flags = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
-            Generation = Utilities.ToUInt64LittleEndian(buffer, offset + 0x48);
-            Root = Utilities.ToUInt64LittleEndian(buffer, offset + 0x50);
+            Checksum = EndianUtilities.ToByteArray(buffer, offset, 0x20);
+            FsUuid = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x20);
+            PhysicalAddress = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x30);
+            Flags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x38);
+            Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x48);
+            Root = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x50);
             
-            ChunkRoot = Utilities.ToUInt64LittleEndian(buffer, offset + 0x58);
-            LogRoot = Utilities.ToUInt64LittleEndian(buffer, offset + 0x60);
-            LogRootTransId = Utilities.ToUInt64LittleEndian(buffer, offset + 0x68);
-            TotalBytes = Utilities.ToUInt64LittleEndian(buffer, offset + 0x70);
-            BytesUsed = Utilities.ToUInt64LittleEndian(buffer, offset + 0x78);
-            RootDirObjectid = Utilities.ToUInt64LittleEndian(buffer, offset + 0x80);
-            NumDevices = Utilities.ToUInt64LittleEndian(buffer, offset + 0x88);
-            SectorSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x90);
-            NodeSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x94);
-            LeafSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x98);
-            StripeSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0x9c);
+            ChunkRoot = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x58);
+            LogRoot = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x60);
+            LogRootTransId = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x68);
+            TotalBytes = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x70);
+            BytesUsed = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x78);
+            RootDirObjectid = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x80);
+            NumDevices = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x88);
+            SectorSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x90);
+            NodeSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x94);
+            LeafSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x98);
+            StripeSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x9c);
             
-            ChunkRootGeneration = Utilities.ToUInt64LittleEndian(buffer, offset + 0xa4);
-            CompatFlags = Utilities.ToUInt64LittleEndian(buffer, offset + 0xac);
-            CompatRoFlags = Utilities.ToUInt64LittleEndian(buffer, offset + 0xb4);
-            IncompatFlags = Utilities.ToUInt64LittleEndian(buffer, offset + 0xbc);
-            ChecksumType = Utilities.ToUInt16LittleEndian(buffer, offset + 0xc4);
+            ChunkRootGeneration = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xa4);
+            CompatFlags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xac);
+            CompatRoFlags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xb4);
+            IncompatFlags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xbc);
+            ChecksumType = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0xc4);
             RootLevel = buffer[offset + 0xc6];
             ChunkRootLevel = buffer[offset + 0xc7];
             LogRootLevel = buffer[offset + 0xc8];
             //c9 	62 		DEV_ITEM data for this device
-            var labelData = Utilities.ToByteArray(buffer, offset + 0x12b, 0x100);
+            var labelData = EndianUtilities.ToByteArray(buffer, offset + 0x12b, 0x100);
             int eos = Array.IndexOf(labelData, (byte) 0);
             if (eos != -1)
             {
@@ -217,7 +218,7 @@ namespace DiscUtils.Btrfs
             }
 
             //22b 	100 		reserved
-            var n = Utilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
+            var n = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
             offset += 0x32b;
             var systemChunks = new List<Tuple<Key, ChunkItem>>();
             while (n > 0)
