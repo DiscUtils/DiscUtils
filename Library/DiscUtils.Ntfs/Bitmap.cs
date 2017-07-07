@@ -201,6 +201,16 @@ namespace DiscUtils.Ntfs
             return 0;
         }
 
+        public int GetBytes(byte[] buffer, long index, int count)
+        {
+            if (index + count >= _bitmap.Length)
+                count = (int)(_bitmap.Length - index);
+            if (count <= 0)
+                return 0;
+            _bitmap.Position = index;
+            return _bitmap.Read(buffer, 0, count);
+        }
+
         private void SetByte(long index, byte value)
         {
             byte[] buffer = { value };
