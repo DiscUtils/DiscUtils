@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2016-2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -44,7 +44,9 @@ namespace DiscUtils.Xfs
                 }
                 IBuffer content = FileContent;
                 byte[] data = StreamUtilities.ReadFully(content, 0, (int) content.Capacity);
-                return Context.Options.FileNameEncoding.GetString(data, 0, data.Length).Replace('/', '\\');
+                var result = Context.Options.FileNameEncoding.GetString(data, 0, data.Length).Replace('/', '\\').TrimEnd('\0');
+                var parts = result.Split('\0');
+                return parts[0];
             }
         }
     }
