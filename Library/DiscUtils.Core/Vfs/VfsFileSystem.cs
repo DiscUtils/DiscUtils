@@ -708,7 +708,10 @@ namespace DiscUtils.Vfs
         {
             TDirEntry currentEntry = entry;
             string currentPath = path;
-
+            if (path.Length > 0 && path[0] != '\\')
+            {
+                path = '\\' + path;
+            }
             int resolvesLeft = 20;
             while (currentEntry.IsSymlink && resolvesLeft > 0)
             {
