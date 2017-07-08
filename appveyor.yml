@@ -10,7 +10,7 @@ build_script:
 - cmd: msbuild /t:Build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal 
 test_script:
 - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
-- cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx
+- cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx -f netcoreapp1.1
 install:
 - msbuild /t:Restore /Verbosity:Minimal
 artifacts:
