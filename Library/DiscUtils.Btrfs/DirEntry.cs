@@ -107,7 +107,7 @@ namespace DiscUtils.Btrfs
                 }
                 var result = Utilities.FileAttributesFromUnixFileType(unixFileType);
 
-                if ((_inode.Flags & InodeFlag.Readonly) == InodeFlag.Readonly)
+                if (_inode != null && (_inode.Flags & InodeFlag.Readonly) == InodeFlag.Readonly)
                     result |= FileAttributes.ReadOnly;
 
                 return result;
@@ -140,7 +140,7 @@ namespace DiscUtils.Btrfs
             {
                 unchecked
                 {
-                    long result = (long)_inode.TransId;
+                    long result = _inode == null?0:(long)_inode.TransId;
                     result = (result * 397) ^ (long)_item.TransId;
                     result = (result * 397) ^ (long)_item.ChildLocation.ObjectId;
                     return result;
