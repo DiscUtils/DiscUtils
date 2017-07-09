@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Btrfs.Base;
 using DiscUtils.Btrfs.Base.Items;
@@ -115,6 +116,17 @@ namespace DiscUtils.Btrfs
         public override long AvailableSpace
         {
             get { return Size - UsedSpace; }
+        }
+
+        public Subvolume[] GetSubvolumes()
+        {
+            var volumes = Context.RootTreeRoot.Find<RootRef>(new Key(ReservedObjectId.FsTree, ItemType.RootRef), Context);
+            var result = new List<Subvolume>();
+            foreach (var volume in volumes)
+            {
+                result.Add(new Subvolume{Id = volume.Key.Offset, Name = volume.Name});
+            }
+            return result.ToArray();
         }
 
         protected override File ConvertDirEntryToFile(DirEntry dirEntry)

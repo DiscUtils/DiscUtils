@@ -68,5 +68,14 @@ namespace DiscUtils.Btrfs
 
             return superblock.Magic == SuperBlock.BtrfsMagic;
         }
+
+        /// <summary>
+        /// retrieve all subvolumes
+        /// </summary>
+        /// <returns>a list of subvolumes with id and name</returns>
+        public Subvolume[] GetSubvolumes()
+        {
+            return GetRealFileSystem<VfsBtrfsFileSystem>().GetSubvolumes();
+        }
     }
 }

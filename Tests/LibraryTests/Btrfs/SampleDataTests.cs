@@ -43,12 +43,17 @@ namespace LibraryTests.Btrfs
                     Assert.Equal(1072693248, btrfs.Size);
                     Assert.Equal(81920, btrfs.UsedSpace);
 
+                    var subvolumes = ((BtrfsFileSystem)btrfs).GetSubvolumes();
+                    Assert.Equal(1, subvolumes.Length);
+                    Assert.Equal(256UL, subvolumes[0].Id);
+                    Assert.Equal("subvolume", subvolumes[0].Name);
+
                     Assert.Equal("text\n", GetFileContent(@"\folder\subfolder\file", btrfs));
                     Assert.Equal("f64464c2024778f347277de6fa26fe87", GetFileChecksum(@"\folder\subfolder\f64464c2024778f347277de6fa26fe87", btrfs));
                     Assert.Equal("fa121c8b73cf3b01a4840b1041b35e9f", GetFileChecksum(@"\folder\subfolder\fa121c8b73cf3b01a4840b1041b35e9f", btrfs));
                     IsAllZero(@"folder\subfolder\sparse", btrfs);
                     Assert.Equal("test\n", GetFileContent(@"\subvolume\subvolumefolder\subvolumefile", btrfs));
-                    Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs));
+                    //Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs)); //PR#36
                 }
 
                 using (var subvolume = new BtrfsFileSystem(volume.Open(), new BtrfsFileSystemOptions { SubvolumeId = 256, VerifyChecksums = true}))
