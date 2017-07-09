@@ -75,17 +75,27 @@ namespace DiscUtils.Btrfs
                     throw new IOException("Extent compression is not supported");
 
                 BuilderExtent builderExtent;
+                long offset = (long)extent.Key.Offset;
                 switch (extent.Type)
                 {
                     case ExtentDataType.Inline:
-                        builderExtent = new BuilderBytesExtent((long)extent.Key.Offset, extent.InlineData);
+                        builderExtent = new BuilderBytesExtent(offset, extent.InlineData);
                         break;
                     case ExtentDataType.Regular:
-                        builderExtent = null;
+                        var address = extent.ExtentAddress;
+                        if (address == 0)
+                        {
+                            builderExtent = new BuilderSparseStreamExtent(offset, new ZeroStream((long)extent.LogicalSize));
+                        }
+                        else
+                        {
+                            var physicalAddress = Context.MapToPhysical(address);
+                            var substream = new SubStream(Context.RawStream, Ownership.None, (long)(physicalAddress + extent.ExtentOffset), (long)extent.ExtentSize);
+                            builderExtent = new BuilderSparseStreamExtent(offset, substream, Ownership.Dispose);
+                        }
                         break;
                     case ExtentDataType.PreAlloc:
-                        builderExtent = null;
-                        break;
+                        throw new NotImplementedException();
                     default:
                         throw new IOException("invalid extent type");
                 }
