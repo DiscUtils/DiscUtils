@@ -147,7 +147,7 @@ namespace DiscUtils.Btrfs
         /// <summary>
         /// csum_type - Btrfs currently uses the CRC32c little-endian hash function with seed -1.
         /// </summary>
-        public ushort ChecksumType { get; private set; }
+        public ChecksumType ChecksumType { get; private set; }
 
         /// <summary>
         /// root_level
@@ -204,7 +204,7 @@ namespace DiscUtils.Btrfs
             CompatFlags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xac);
             CompatRoFlags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xb4);
             IncompatFlags = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0xbc);
-            ChecksumType = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0xc4);
+            ChecksumType = (ChecksumType)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0xc4);
             RootLevel = buffer[offset + 0xc6];
             ChunkRootLevel = buffer[offset + 0xc7];
             LogRootLevel = buffer[offset + 0xc8];

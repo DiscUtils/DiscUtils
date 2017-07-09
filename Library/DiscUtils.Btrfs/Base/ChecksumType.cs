@@ -20,29 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Btrfs
+namespace DiscUtils.Btrfs.Base
 {
-    public class BtrfsFileSystemOptions : DiscFileSystemOptions
+    internal enum ChecksumType:ushort
     {
-        private ulong _subvolumeId;
-
-        public BtrfsFileSystemOptions()
-        {
-            UseDefaultSubvolume = true;
-        }
-
-        public ulong SubvolumeId
-        {
-            get { return _subvolumeId; }
-            set
-            {
-                _subvolumeId = value;
-                UseDefaultSubvolume = false;
-            }
-        }
-
-        public bool VerifyChecksums { get; set; }
-
-        internal bool UseDefaultSubvolume { get; private set; }
+        Crc32C = 0
     }
 }

@@ -25,16 +25,21 @@ using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Btrfs.Base;
 using DiscUtils.Btrfs.Base.Items;
+using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Btrfs
 {
     internal class Context : VfsContext
     {
-        public Context()
+        public Context(BtrfsFileSystemOptions options)
         {
             FsTrees = new Dictionary<ulong, NodeHeader>();
+            Options = options;
         }
+
+        public BtrfsFileSystemOptions Options { get; private set; }
 
         public Stream RawStream { get; set; }
 
@@ -99,7 +104,25 @@ namespace DiscUtils.Btrfs
             var buffer = new byte[dataSize];
             RawStream.Read(buffer, 0, buffer.Length);
             var result = NodeHeader.Create(buffer, 0);
+            VerifyChecksum(result.Checksum, buffer, 0x20, (int)dataSize-0x20);
             return result;
+        }
+
+        internal void VerifyChecksum(byte[] checksum, byte[] data, int offset, int count)
+        {
+            if (!Options.VerifyChecksums)
+                return;
+            if (SuperBlock.ChecksumType != ChecksumType.Crc32C)
+                throw new NotImplementedException($"Unsupported ChecksumType {SuperBlock.ChecksumType}");
+            var crc = new Crc32LittleEndian(Crc32Algorithm.Castagnoli);
+            crc.Process(data, offset, count);
+            var calculated = new byte[4];
+            EndianUtilities.WriteBytesLittleEndian(crc.Value, calculated, 0);
+            for (int i = 0; i < calculated.Length; i++)
+            {
+                if (calculated[i] != checksum[i])
+                    throw new IOException("Invalid checksum");
+            }
         }
 
         private void CheckStriping(BlockGroupFlag flags)

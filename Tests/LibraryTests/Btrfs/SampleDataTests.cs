@@ -51,7 +51,7 @@ namespace LibraryTests.Btrfs
                     Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs));
                 }
 
-                using (var subvolume = new BtrfsFileSystem(volume.Open(), new BtrfsFileSystemOptions { SubvolumeId = 256 }))
+                using (var subvolume = new BtrfsFileSystem(volume.Open(), new BtrfsFileSystemOptions { SubvolumeId = 256, VerifyChecksums = true}))
                 {
                     Assert.Equal("test\n", GetFileContent(@"\subvolumefolder\subvolumefile", subvolume));
                 }

@@ -40,7 +40,7 @@ namespace DiscUtils.Btrfs
         public VfsBtrfsFileSystem(Stream stream, BtrfsFileSystemOptions options)
             :base(options)
         {
-            Context = new Context
+            Context = new Context(options)
             {
                 RawStream = stream,
             };
@@ -60,6 +60,8 @@ namespace DiscUtils.Btrfs
                     Context.SuperBlock = superblock;
                 else if (Context.SuperBlock.Generation < superblock.Generation)
                     Context.SuperBlock = superblock;
+
+                Context.VerifyChecksum(superblock.Checksum, superblockData, 0x20, 0x1000 - 0x20);
             }
             if (Context.SuperBlock == null)
                 throw new IOException("No Superblock detected");
