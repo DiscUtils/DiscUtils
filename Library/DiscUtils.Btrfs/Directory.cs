@@ -49,11 +49,11 @@ namespace DiscUtils.Btrfs
                 if (DirEntry.IsSubtree)
                 {
                     treeId = objectId;
-                    var rootItem = Context.RootTreeRoot.FindFirst<RootItem>(new Key { ItemType = ItemType.RootItem, ObjectId = treeId });
+                    var rootItem = Context.RootTreeRoot.FindFirst<RootItem>(new Key(treeId, ItemType.RootItem));
                     objectId = rootItem.RootDirId;
                 }
                 var tree = Context.GetFsTree(treeId);
-                var items = tree.Find<DirIndex>(new Key { ItemType = ItemType.DirIndex, ObjectId = objectId });
+                var items = tree.Find<DirIndex>(new Key(objectId, ItemType.DirIndex));
                 foreach (var item in items)
                 {
                     var inode = tree.FindFirst(item.ChildLocation);

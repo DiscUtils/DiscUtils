@@ -104,5 +104,12 @@ namespace DiscUtils.Btrfs.Base
         Orphan = UInt64.MaxValue - 5UL,
         
         CsumItem = UInt64.MaxValue - 10UL,
+
+        /// <summary>
+        /// This objectid indicates the first available objectid in this CHUNK_TREE.
+        /// In practice, it is the only objectid used in the tree.
+        /// The offset field of the key is the only component used to distinguish separate CHUNK_ITEM items. 
+        /// </summary>
+        FirstChunkTree = 256,
     }
 }

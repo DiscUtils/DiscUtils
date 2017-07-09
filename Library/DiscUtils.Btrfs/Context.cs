@@ -51,7 +51,7 @@ namespace DiscUtils.Btrfs
             NodeHeader tree;
             if (FsTrees.TryGetValue(treeId, out tree))
                 return tree;
-            var rootItem = RootTreeRoot.FindFirst<RootItem>(new Key { ItemType = ItemType.RootItem, ObjectId = treeId });
+            var rootItem = RootTreeRoot.FindFirst<RootItem>(new Key(treeId, ItemType.RootItem));
             if (rootItem == null)
                 return null;
             tree = ReadTree(rootItem.ByteNr, rootItem.Level);
@@ -63,32 +63,30 @@ namespace DiscUtils.Btrfs
         {
             if (ChunkTreeRoot != null)
             {
-                var node = (LeafNode)ChunkTreeRoot;//todo use FindKey
-                for (int i = 0; i < node.Items.Length; i++)
+                var nodes = ChunkTreeRoot.Find<ChunkItem>(new Key(ReservedObjectId.FirstChunkTree, ItemType.ChunkItem));
+                foreach(var chunk in nodes)
                 {
-                    var chunkKey = node.Items[i].Key;
-                    if (chunkKey.ItemType != ItemType.ChunkItem) continue;
-                    if (chunkKey.Offset > logical) continue;
-                    var chunk = (ChunkItem)node.NodeData[i];
-                    if (chunkKey.Offset + chunk.ChunkSize < logical) continue;
+                    if (chunk.Key.ItemType != ItemType.ChunkItem) continue;
+                    if (chunk.Key.Offset > logical) continue;
+                    if (chunk.Key.Offset + chunk.ChunkSize < logical) continue;
                     CheckStriping(chunk.Type);
                     if (chunk.StripeCount < 1)
                         throw new IOException("Invalid stripe count in ChunkItem");
                     var stripe = chunk.Stripes[0];
-                    return stripe.Offset + (logical - chunkKey.Offset);
+                    return stripe.Offset + (logical - chunk.Key.Offset);
                 }
             }
-            foreach (Tuple<Key, ChunkItem> tuple in SuperBlock.SystemChunkArray)
+            foreach (var chunk in SuperBlock.SystemChunkArray)
             {
-                if (tuple.Item1.ItemType != ItemType.ChunkItem) continue;
-                if (tuple.Item1.Offset > logical) continue;
-                if (tuple.Item1.Offset  + tuple.Item2.ChunkSize < logical) continue;
+                if (chunk.Key.ItemType != ItemType.ChunkItem) continue;
+                if (chunk.Key.Offset > logical) continue;
+                if (chunk.Key.Offset  + chunk.ChunkSize < logical) continue;
 
-                CheckStriping(tuple.Item2.Type);
-                if (tuple.Item2.StripeCount <1)
+                CheckStriping(chunk.Type);
+                if (chunk.StripeCount <1)
                     throw new IOException("Invalid stripe count in ChunkItem");
-                var stripe = tuple.Item2.Stripes[0];
-                return stripe.Offset;
+                var stripe = chunk.Stripes[0];
+                return stripe.Offset + (logical - chunk.Key.Offset);
             }
             throw new IOException("no matching ChunkItem found");
         }
@@ -132,7 +130,7 @@ namespace DiscUtils.Btrfs
 
         internal BaseItem FindKey(ulong objectId, ItemType type)
         {
-            var key = new Key { ObjectId = objectId, ItemType = type };
+            var key = new Key(objectId,type);
             return FindKey(key);
         }
 

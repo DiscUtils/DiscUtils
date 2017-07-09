@@ -29,22 +29,44 @@ namespace DiscUtils.Btrfs.Base
     {
         public static readonly int Length = 0x11;
 
+        public Key()
+        {
+        }
+
+        public Key(ulong objectId, ItemType type, ulong offset) : this()
+        {
+            ObjectId = objectId;
+            ItemType = type;
+            Offset = offset;
+        }
+
+        public Key(ulong objectId, ItemType type) : this(objectId, type, 0UL)
+        {
+        }
+
+        public Key(ReservedObjectId objectId, ItemType type) : this((ulong)objectId, type)
+        {
+        }
+
         /// <summary>
         /// Object ID. Each tree has its own set of Object IDs.
         /// </summary>
-        public ulong ObjectId { get; internal set; }
+        public ulong ObjectId { get; private set; }
 
-        public ReservedObjectId ReservedObjectId { get { return (ReservedObjectId)ObjectId; } }
+        public ReservedObjectId ReservedObjectId
+        {
+            get { return (ReservedObjectId)ObjectId; }
+        }
 
         /// <summary>
         /// Item type.
         /// </summary>
-        public ItemType ItemType { get; internal set; }
+        public ItemType ItemType { get; private set; }
 
         /// <summary>
         /// Offset. The meaning depends on the item type. 
         /// </summary>
-        public ulong Offset { get; internal set; }
+        public ulong Offset { get; private set; }
 
         public int Size
         {

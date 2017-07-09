@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Btrfs.Base;
@@ -58,7 +57,7 @@ namespace DiscUtils.Btrfs
         {
             get
             {
-                var extents = Context.FindKey<ExtentData>(DirEntry.TreeId, new Key { ItemType = ItemType.ExtentData, ObjectId = DirEntry.ObjectId });
+                var extents = Context.FindKey<ExtentData>(DirEntry.TreeId, new Key(DirEntry.ObjectId, ItemType.ExtentData));
                 return BufferFromExtentList(new List<ExtentData>(extents));
             }
         }

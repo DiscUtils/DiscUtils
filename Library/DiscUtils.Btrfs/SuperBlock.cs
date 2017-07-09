@@ -170,7 +170,7 @@ namespace DiscUtils.Btrfs
         /// </summary>
         public string Label { get; private set; }
 
-        public Tuple<Key,ChunkItem>[] SystemChunkArray { get; private set; }
+        public ChunkItem[] SystemChunkArray { get; private set; }
 
         public int Size
         {
@@ -220,14 +220,14 @@ namespace DiscUtils.Btrfs
             //22b 	100 		reserved
             var n = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0xa0);
             offset += 0x32b;
-            var systemChunks = new List<Tuple<Key, ChunkItem>>();
+            var systemChunks = new List<ChunkItem>();
             while (n > 0)
             {
                 var key = new Key();
                 offset += key.ReadFrom(buffer, offset);
                 var chunkItem = new ChunkItem(key);
                 offset += chunkItem.ReadFrom(buffer, offset);
-                systemChunks.Add(new Tuple<Key, ChunkItem>(key, chunkItem));
+                systemChunks.Add(chunkItem);
                 n = n - (uint)key.Size - (uint)chunkItem.Size;
             }
             SystemChunkArray = systemChunks.ToArray();

@@ -56,12 +56,7 @@ namespace DiscUtils.Btrfs.Base
         {
             get
             {
-                return new Key
-                {
-                    ObjectId = DeviceId,
-                    ItemType = ItemType.DevItem,
-                    Offset = Offset,
-                };
+                return new Key(DeviceId,ItemType.DevItem,Offset);
             }
         }
 
