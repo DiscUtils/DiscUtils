@@ -118,29 +118,29 @@ namespace DiscUtils.Btrfs.Base
             return result;
         }
 
-        public abstract IEnumerable<BaseItem> Find(Key key);
+        public abstract IEnumerable<BaseItem> Find(Key key, Context context);
 
-        public BaseItem FindFirst(Key key)
+        public BaseItem FindFirst(Key key, Context context)
         {
-            foreach (var item in Find(key))
+            foreach (var item in Find(key, context))
             {
                 return item;
             }
             return null;
         }
 
-        public T FindFirst<T>(Key key) where T : BaseItem
+        public T FindFirst<T>(Key key, Context context) where T : BaseItem
         {
-            foreach (var item in Find<T>(key))
+            foreach (var item in Find<T>(key, context))
             {
                 return item;
             }
             return null;
         }
 
-        public IEnumerable<T> Find<T>(Key key) where T : BaseItem
+        public IEnumerable<T> Find<T>(Key key, Context context) where T : BaseItem
         {
-            foreach (var item in Find(key))
+            foreach (var item in Find(key, context))
             {
                 var typed = item as T;
                 if (typed != null)

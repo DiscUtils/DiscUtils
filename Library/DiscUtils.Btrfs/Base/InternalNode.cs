@@ -59,7 +59,7 @@ namespace DiscUtils.Btrfs.Base
             return Size;
         }
 
-        public override IEnumerable<BaseItem> Find(Key key)
+        public override IEnumerable<BaseItem> Find(Key key, Context context)
         {
             if (KeyPointers[0].Key.ObjectId > key.ObjectId)
                 yield break;
@@ -70,9 +70,12 @@ namespace DiscUtils.Btrfs.Base
             }
             for (int j = i-1; j < KeyPointers.Length; j++)
             {
-                if (KeyPointers[j].Key.ObjectId > key.ObjectId)
+                var keyPtr = KeyPointers[j];
+                if (keyPtr.Key.ObjectId > key.ObjectId)
                     yield break;
-                foreach (var item in Nodes[j].Find(key))
+                if (Nodes[j] == null)
+                    Nodes[j] = context.ReadTree(keyPtr.BlockNumber, Level);
+                foreach (var item in Nodes[j].Find(key, context))
                 {
                     yield return item;
                 }

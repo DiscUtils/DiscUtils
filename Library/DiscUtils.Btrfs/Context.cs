@@ -51,7 +51,7 @@ namespace DiscUtils.Btrfs
             NodeHeader tree;
             if (FsTrees.TryGetValue(treeId, out tree))
                 return tree;
-            var rootItem = RootTreeRoot.FindFirst<RootItem>(new Key(treeId, ItemType.RootItem));
+            var rootItem = RootTreeRoot.FindFirst<RootItem>(new Key(treeId, ItemType.RootItem), this);
             if (rootItem == null)
                 return null;
             tree = ReadTree(rootItem.ByteNr, rootItem.Level);
@@ -63,7 +63,7 @@ namespace DiscUtils.Btrfs
         {
             if (ChunkTreeRoot != null)
             {
-                var nodes = ChunkTreeRoot.Find<ChunkItem>(new Key(ReservedObjectId.FirstChunkTree, ItemType.ChunkItem));
+                var nodes = ChunkTreeRoot.Find<ChunkItem>(new Key(ReservedObjectId.FirstChunkTree, ItemType.ChunkItem), this);
                 foreach(var chunk in nodes)
                 {
                     if (chunk.Key.ItemType != ItemType.ChunkItem) continue;
@@ -99,15 +99,6 @@ namespace DiscUtils.Btrfs
             var buffer = new byte[dataSize];
             RawStream.Read(buffer, 0, buffer.Length);
             var result = NodeHeader.Create(buffer, 0);
-            var internalNode = result as InternalNode;
-            if (internalNode != null)
-            {
-                for (int i = 0; i < internalNode.KeyPointers.Length; i++)
-                {
-                    var keyPtr = internalNode.KeyPointers[i];
-                    internalNode.Nodes[i] = ReadTree(keyPtr.BlockNumber, (byte)(level - 1));
-                }
-            }
             return result;
         }
 
@@ -139,9 +130,9 @@ namespace DiscUtils.Btrfs
             switch (key.ItemType)
             {
                 case ItemType.RootItem:
-                    return RootTreeRoot.FindFirst(key);
+                    return RootTreeRoot.FindFirst(key, this);
                 case ItemType.DirItem:
-                    return RootTreeRoot.FindFirst(key);
+                    return RootTreeRoot.FindFirst(key, this);
                 default:
                     throw new NotImplementedException();
             }
@@ -153,7 +144,7 @@ namespace DiscUtils.Btrfs
             switch (key.ItemType)
             {
                 case ItemType.DirItem:
-                    return tree.Find(key);
+                    return tree.Find(key, this);
                 default:
                     throw new NotImplementedException();
             }
@@ -166,7 +157,7 @@ namespace DiscUtils.Btrfs
             {
                 case ItemType.DirItem:
                 case ItemType.ExtentData:
-                    return tree.Find<T>(key);
+                    return tree.Find<T>(key, this);
                 default:
                     throw new NotImplementedException();
             }

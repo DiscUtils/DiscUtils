@@ -113,7 +113,7 @@ namespace DiscUtils.Btrfs.Base
             return result;
         }
 
-        public override IEnumerable<BaseItem> Find(Key key)
+        public override IEnumerable<BaseItem> Find(Key key, Context context)
         {
             for (int i = 0; i < Items.Length; i++)
             {
