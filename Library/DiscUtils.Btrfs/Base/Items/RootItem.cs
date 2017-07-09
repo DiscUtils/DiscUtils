@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
@@ -36,7 +35,7 @@ namespace DiscUtils.Btrfs.Base.Items
 
         /// <summary>
         /// Several fields are initialized but only flags is interpreted at runtime.
-        /// generation=1, size=3,nlink=1, nbytes=<leafsize>, mode=040755
+        /// generation=1, size=3,nlink=1, nbytes=leafsize, mode=040755
         /// flags depends on kernel version.
         /// </summary>
         public InodeItem Inode { get; private set; }
@@ -104,6 +103,7 @@ namespace DiscUtils.Btrfs.Base.Items
         public override int ReadFrom(byte[] buffer, int offset)
         {
             Inode = EndianUtilities.ToStruct<InodeItem>(buffer, offset);
+            Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset+ 160);
             RootDirId = EndianUtilities.ToUInt64LittleEndian(buffer, offset+ 168);
             ByteNr = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 176);
             ByteLimit = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 184);

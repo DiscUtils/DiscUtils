@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items

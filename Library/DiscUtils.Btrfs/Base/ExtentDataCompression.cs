@@ -20,8 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Btrfs.Base
 {
     internal enum ExtentDataCompression : byte

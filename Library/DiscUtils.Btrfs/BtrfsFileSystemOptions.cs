@@ -20,8 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace DiscUtils.Btrfs
 {
     public class BtrfsFileSystemOptions : DiscFileSystemOptions

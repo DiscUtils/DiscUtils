@@ -14,13 +14,6 @@ namespace LibraryTests.Btrfs
 {
     public class SampleDataTests
     {
-        //private ITestOutputHelper _output;
-
-        //public SampleDataTests(ITestOutputHelper output)
-        //{
-        //    _output = output;
-        //}
-
         [Fact]
         public void BtrfsVhdxZip()
         {

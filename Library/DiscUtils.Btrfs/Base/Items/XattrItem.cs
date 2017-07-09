@@ -20,9 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using DiscUtils.Internal;
-
 namespace DiscUtils.Btrfs.Base.Items
 {
     /// <summary>

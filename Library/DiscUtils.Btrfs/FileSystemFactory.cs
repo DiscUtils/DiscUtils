@@ -28,14 +28,14 @@ namespace DiscUtils.Btrfs
     [VfsFileSystemFactory]
     internal class FileSystemFactory : VfsFileSystemFactory
     {
-        public override DiscUtils.FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
+        public override FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
         {
             if (BtrfsFileSystem.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("btrfs", "Btrfs filesystem", Open) };
+                return new FileSystemInfo[] { new VfsFileSystemInfo("btrfs", "Btrfs filesystem", Open) };
             }
 
-            return new DiscUtils.FileSystemInfo[0];
+            return new FileSystemInfo[0];
         }
 
         private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
