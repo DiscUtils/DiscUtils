@@ -31,8 +31,14 @@ namespace DiscUtils.Btrfs
 {
     internal sealed class VfsBtrfsFileSystem :VfsReadOnlyFileSystem<DirEntry, File, Directory, Context>, IUnixFileSystem
     {
-        public VfsBtrfsFileSystem(Stream stream)
-            :base(new DiscFileSystemOptions())
+        public VfsBtrfsFileSystem(Stream stream) 
+            :this(stream, new BtrfsFileSystemOptions())
+        {
+            
+        }
+
+        public VfsBtrfsFileSystem(Stream stream, BtrfsFileSystemOptions options)
+            :base(options)
         {
             Context = new Context
             {
@@ -61,7 +67,15 @@ namespace DiscUtils.Btrfs
             Context.RootTreeRoot = Context.ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
 
             var rootDir = (DirItem)Context.FindKey(Context.SuperBlock.RootDirObjectid, ItemType.DirItem);
-            var fsTreeLocation = (RootItem)Context.FindKey(rootDir.ChildLocation.ObjectId, rootDir.ChildLocation.ItemType);
+            RootItem fsTreeLocation;
+            if (!options.UseDefaultSubvolume)
+            {
+                fsTreeLocation = (RootItem)Context.FindKey(options.SubvolumeId, ItemType.RootItem);
+            }
+            else
+            {
+                fsTreeLocation = (RootItem)Context.FindKey(rootDir.ChildLocation.ObjectId, rootDir.ChildLocation.ItemType);
+            }
             var rootDirObjectId = fsTreeLocation.RootDirId;
             Context.FsTrees.Add(rootDir.ChildLocation.ObjectId, Context.ReadTree(fsTreeLocation.ByteNr, fsTreeLocation.Level));
 

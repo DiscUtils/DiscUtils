@@ -42,6 +42,17 @@ namespace DiscUtils.Btrfs
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the BtrfsFileSystem class.
+        /// </summary>
+        /// <param name="stream">The stream containing the btrfs file system.</param>
+        /// <param name="options">Options for opening the file system</param>
+        public BtrfsFileSystem(Stream stream, BtrfsFileSystemOptions options)
+            :base(new VfsBtrfsFileSystem(stream, options))
+        {
+            
+        }
+
         internal static bool Detect(Stream stream)
         {
             if (stream.Length < SuperBlock.Length + SuperblockOffsets[0])
