@@ -157,5 +157,7 @@ namespace DiscUtils.Btrfs
         internal ulong TreeId { get { return _treeId; } }
 
         internal ulong FileSize { get { return _inode.FileSize; } }
+
+        internal bool IsSubtree { get { return _item != null && _item.ChildLocation.ItemType == ItemType.RootItem; } }
     }
 }

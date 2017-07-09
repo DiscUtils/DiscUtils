@@ -48,7 +48,15 @@ namespace DiscUtils.Btrfs
 
         internal NodeHeader GetFsTree(ulong treeId)
         {
-            return FsTrees[treeId];
+            NodeHeader tree;
+            if (FsTrees.TryGetValue(treeId, out tree))
+                return tree;
+            var rootItem = RootTreeRoot.FindFirst<RootItem>(new Key { ItemType = ItemType.RootItem, ObjectId = treeId });
+            if (rootItem == null)
+                return null;
+            tree = ReadTree(rootItem.ByteNr, rootItem.Level);
+            FsTrees[treeId] = tree;
+            return tree;
         }
 
         internal ulong MapToPhysical(ulong logical)
@@ -83,6 +91,26 @@ namespace DiscUtils.Btrfs
                 return stripe.Offset;
             }
             throw new IOException("no matching ChunkItem found");
+        }
+
+        internal NodeHeader ReadTree(ulong logical, byte level)
+        {
+            var physical = MapToPhysical(logical);
+            RawStream.Seek((long)physical, SeekOrigin.Begin);
+            var dataSize = level > 0 ? SuperBlock.NodeSize : SuperBlock.LeafSize;
+            var buffer = new byte[dataSize];
+            RawStream.Read(buffer, 0, buffer.Length);
+            var result = NodeHeader.Create(buffer, 0);
+            var internalNode = result as InternalNode;
+            if (internalNode != null)
+            {
+                for (int i = 0; i < internalNode.KeyPointers.Length; i++)
+                {
+                    var keyPtr = internalNode.KeyPointers[i];
+                    internalNode.Nodes[i] = ReadTree(keyPtr.BlockNumber, (byte)(level - 1));
+                }
+            }
+            return result;
         }
 
         private void CheckStriping(BlockGroupFlag flags)

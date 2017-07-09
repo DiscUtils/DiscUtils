@@ -44,12 +44,20 @@ namespace DiscUtils.Btrfs
                 if (_allEntries != null)
                     return _allEntries.Values;
                 var result = new Dictionary<string, DirEntry>();
-                var tree = Context.GetFsTree(DirEntry.TreeId);
-                var items = tree.Find<DirIndex>(new Key { ItemType = ItemType.DirIndex, ObjectId = DirEntry.ObjectId });
+                var treeId = DirEntry.TreeId;
+                ulong objectId = DirEntry.ObjectId;
+                if (DirEntry.IsSubtree)
+                {
+                    treeId = objectId;
+                    var rootItem = Context.RootTreeRoot.FindFirst<RootItem>(new Key { ItemType = ItemType.RootItem, ObjectId = treeId });
+                    objectId = rootItem.RootDirId;
+                }
+                var tree = Context.GetFsTree(treeId);
+                var items = tree.Find<DirIndex>(new Key { ItemType = ItemType.DirIndex, ObjectId = objectId });
                 foreach (var item in items)
                 {
                     var inode = tree.FindFirst(item.ChildLocation);
-                    result.Add(item.Name, new DirEntry(DirEntry.TreeId, item, (InodeItem)inode));
+                    result.Add(item.Name, new DirEntry(treeId, item, (InodeItem)inode));
                 }
                 _allEntries = result;
                 return result.Values;

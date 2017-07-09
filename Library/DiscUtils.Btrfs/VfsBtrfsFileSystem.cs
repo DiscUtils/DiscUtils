@@ -57,13 +57,13 @@ namespace DiscUtils.Btrfs
             }
             if (Context.SuperBlock == null)
                 throw new IOException("No Superblock detected");
-            Context.ChunkTreeRoot = ReadTree(Context.SuperBlock.ChunkRoot, Context.SuperBlock.ChunkRootLevel);
-            Context.RootTreeRoot = ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
+            Context.ChunkTreeRoot = Context.ReadTree(Context.SuperBlock.ChunkRoot, Context.SuperBlock.ChunkRootLevel);
+            Context.RootTreeRoot = Context.ReadTree(Context.SuperBlock.Root, Context.SuperBlock.RootLevel);
 
             var rootDir = (DirItem)Context.FindKey(Context.SuperBlock.RootDirObjectid, ItemType.DirItem);
             var fsTreeLocation = (RootItem)Context.FindKey(rootDir.ChildLocation.ObjectId, rootDir.ChildLocation.ItemType);
             var rootDirObjectId = fsTreeLocation.RootDirId;
-            Context.FsTrees.Add(rootDir.ChildLocation.ObjectId, ReadTree(fsTreeLocation.ByteNr, fsTreeLocation.Level));
+            Context.FsTrees.Add(rootDir.ChildLocation.ObjectId, Context.ReadTree(fsTreeLocation.ByteNr, fsTreeLocation.Level));
 
             var dirEntry = new DirEntry(rootDir.ChildLocation.ObjectId, rootDirObjectId);
             RootDirectory = new Directory(dirEntry, Context);
@@ -119,26 +119,6 @@ namespace DiscUtils.Btrfs
             {
                 throw new NotSupportedException(String.Format("Type {0} is not supported in btrfs", dirEntry.Type));
             }
-        }
-
-        private NodeHeader ReadTree(ulong logical, byte level)
-        {
-            var physical = Context.MapToPhysical(logical);
-            Context.RawStream.Seek((long)physical, SeekOrigin.Begin);
-            var dataSize = level > 0 ? Context.SuperBlock.NodeSize : Context.SuperBlock.LeafSize;
-            var buffer = new byte[dataSize];
-            Context.RawStream.Read(buffer, 0, buffer.Length);
-            var result = NodeHeader.Create(buffer, 0);
-            var internalNode = result as InternalNode;
-            if (internalNode != null)
-            {
-                for (int i = 0; i < internalNode.KeyPointers.Length; i++)
-                {
-                    var keyPtr = internalNode.KeyPointers[i];
-                    internalNode.Nodes[i] = ReadTree(keyPtr.BlockNumber, (byte)(level - 1));
-                }
-            }
-            return result;
         }
 
         public UnixFileSystemInfo GetUnixFileInfo(string path)

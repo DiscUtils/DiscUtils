@@ -34,7 +34,8 @@ namespace DiscUtils.Btrfs.Base.Items
         public DirItem(Key key) : base(key) { }
 
         /// <summary>
-        ///  location of child  
+        /// Key for the <see cref="InodeItem"/> or <see cref="RootItem"/> associated with this entry.
+        /// Unused and zeroed out when the entry describes an extended attribute.
         /// </summary>
         public Key ChildLocation { get; private set; }
 
