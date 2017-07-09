@@ -68,36 +68,9 @@ namespace DiscUtils.Btrfs
 
             foreach (var extent in extents)
             {
-                if (extent.Encryption)
-                    throw new IOException("Extent encryption is not supported");
-                if (extent.Compression != ExtentDataCompression.None)
-                    throw new IOException("Extent compression is not supported");
-
-                BuilderExtent builderExtent;
                 long offset = (long)extent.Key.Offset;
-                switch (extent.Type)
-                {
-                    case ExtentDataType.Inline:
-                        builderExtent = new BuilderBytesExtent(offset, extent.InlineData);
-                        break;
-                    case ExtentDataType.Regular:
-                        var address = extent.ExtentAddress;
-                        if (address == 0)
-                        {
-                            builderExtent = new BuilderSparseStreamExtent(offset, new ZeroStream((long)extent.LogicalSize));
-                        }
-                        else
-                        {
-                            var physicalAddress = Context.MapToPhysical(address);
-                            var substream = new SubStream(Context.RawStream, Ownership.None, (long)(physicalAddress + extent.ExtentOffset), (long)extent.ExtentSize);
-                            builderExtent = new BuilderSparseStreamExtent(offset, substream, Ownership.Dispose);
-                        }
-                        break;
-                    case ExtentDataType.PreAlloc:
-                        throw new NotImplementedException();
-                    default:
-                        throw new IOException("invalid extent type");
-                }
+
+                BuilderExtent builderExtent = new BuilderStreamExtent(offset, extent.GetStream(Context), Ownership.Dispose);
                 builderExtents.Add(builderExtent);
             }
 

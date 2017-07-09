@@ -20,6 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+using System.IO.Compression;
+using DiscUtils.Compression;
 using DiscUtils.Streams;
 
 namespace DiscUtils.Btrfs.Base.Items
@@ -91,7 +95,7 @@ namespace DiscUtils.Btrfs.Base.Items
             Generation = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
             DecodedSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset+0x8);
             Compression = (ExtentDataCompression)buffer[offset + 0x10];
-            Encryption = buffer[offset + 0x10] != 0;
+            Encryption = buffer[offset + 0x11] != 0;
             //12 	2 	UINT 	other encoding (0=none)
             Type = (ExtentDataType)buffer[offset + 0x14];
 
@@ -108,6 +112,50 @@ namespace DiscUtils.Btrfs.Base.Items
             }
 
             return Size;
+        }
+
+        public Stream GetStream(Context context)
+        {
+            if (Encryption)
+                throw new IOException("Extent encryption is not supported");
+            Stream stream;
+            switch (Type)
+            {
+                case ExtentDataType.Inline:
+                    byte[] data = InlineData;
+                    stream = new MemoryStream(data);
+                    break;
+                case ExtentDataType.Regular:
+                    var address = ExtentAddress;
+                    if (address == 0)
+                    {
+                        stream = new ZeroStream((long)LogicalSize);
+                    }
+                    else
+                    {
+                        var physicalAddress = context.MapToPhysical(address);
+                        stream = new SubStream(context.RawStream, Ownership.None, (long)(physicalAddress + ExtentOffset), (long)ExtentSize);
+                    }
+                    break;
+                case ExtentDataType.PreAlloc:
+                    throw new NotImplementedException();
+                default:
+                    throw new IOException("invalid extent type");
+            }
+            switch (Compression)
+            {
+                case ExtentDataCompression.None:
+                    break;
+                case ExtentDataCompression.Zlib:
+                    var zlib = new ZlibStream(stream, CompressionMode.Decompress, false);
+                    var sparse = SparseStream.FromStream(zlib, Ownership.Dispose);
+                    var length = new LengthWrappingStream(sparse, (long)LogicalSize, Ownership.Dispose);
+                    stream = new PositionWrappingStream(length, 0, Ownership.Dispose);
+                    break;
+                default:
+                    throw new IOException($"Unsupported extent compression ({Compression})");
+            }
+            return stream;
         }
     }
 }

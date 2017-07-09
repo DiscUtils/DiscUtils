@@ -39,9 +39,9 @@ namespace LibraryTests.Btrfs
                 {
                     Assert.IsType<BtrfsFileSystem>(btrfs);
 
-                    Assert.Equal(1072611328, btrfs.AvailableSpace);
+                    Assert.Equal(1072599040, btrfs.AvailableSpace);
                     Assert.Equal(1072693248, btrfs.Size);
-                    Assert.Equal(81920, btrfs.UsedSpace);
+                    Assert.Equal(94208, btrfs.UsedSpace);
 
                     var subvolumes = ((BtrfsFileSystem)btrfs).GetSubvolumes();
                     Assert.Equal(1, subvolumes.Length);
@@ -53,6 +53,7 @@ namespace LibraryTests.Btrfs
                     Assert.Equal("fa121c8b73cf3b01a4840b1041b35e9f", GetFileChecksum(@"\folder\subfolder\fa121c8b73cf3b01a4840b1041b35e9f", btrfs));
                     IsAllZero(@"folder\subfolder\sparse", btrfs);
                     Assert.Equal("test\n", GetFileContent(@"\subvolume\subvolumefolder\subvolumefile", btrfs));
+                    Assert.Equal("b0d5fae237588b6641f974459404d197", GetFileChecksum(@"\folder\subfolder\compressed", btrfs));
                     //Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs)); //PR#36
                 }
 
