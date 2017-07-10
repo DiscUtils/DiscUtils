@@ -198,7 +198,7 @@ namespace DiscUtils
         public override bool Equals(object obj)
         {
             DiscFileSystemInfo asInfo = obj as DiscFileSystemInfo;
-            if (obj == null)
+            if (asInfo == null)
             {
                 return false;
             }
