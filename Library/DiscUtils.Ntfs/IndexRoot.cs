@@ -168,21 +168,23 @@ namespace DiscUtils.Ntfs
         {
             public int Compare(byte[] x, byte[] y)
             {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+
+                if (y == null)
+                {
+                    return -1;
+                }
+
+                if (x == null)
+                {
+                    return 1;
+                }
+
                 for (int i = 0; i < x.Length / 4; ++i)
                 {
-                    if (x == null && y == null)
-                    {
-                        return 0;
-                    }
-                    if (y == null)
-                    {
-                        return -1;
-                    }
-                    if (x == null)
-                    {
-                        return 1;
-                    }
-
                     uint xVal = EndianUtilities.ToUInt32LittleEndian(x, i * 4);
                     uint yVal = EndianUtilities.ToUInt32LittleEndian(y, i * 4);
 
