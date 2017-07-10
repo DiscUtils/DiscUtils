@@ -250,14 +250,16 @@ namespace DiscUtils.Internal
         /// <returns>The combined path.</returns>
         public static string CombinePaths(string a, string b)
         {
-            if (string.IsNullOrEmpty(a) || (b.Length > 0 && b[0] == '\\'))
-            {
-                return b;
-            }
             if (string.IsNullOrEmpty(b))
             {
                 return a;
             }
+
+            if (string.IsNullOrEmpty(a) || (b.Length > 0 && b[0] == '\\'))
+            {
+                return b;
+            }
+
             return a.TrimEnd('\\') + '\\' + b.TrimStart('\\');
         }
 
