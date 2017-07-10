@@ -591,7 +591,7 @@ namespace DiscUtils.Partitions
             int entriesSoFar = 0;
             int position = 0;
 
-            while (!found && position < _primaryHeader.PartitionEntryCount)
+            while (position < _primaryHeader.PartitionEntryCount)
             {
                 GptEntry entry = new GptEntry();
                 entry.ReadFrom(_entryBuffer, position * _primaryHeader.PartitionEntrySize);

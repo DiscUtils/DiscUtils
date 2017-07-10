@@ -62,7 +62,7 @@ namespace DiskClone
             {
                 Marshal.FreeHGlobal(_bufferAllocHandle);
                 _bufferAllocHandle = IntPtr.Zero;
-                _bufferAllocHandle = IntPtr.Zero;
+                _buffer = IntPtr.Zero;
             }
 
             if (!_handle.IsClosed)
