@@ -312,7 +312,6 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
                     "NoSuchRegistryKey",
                     ErrorCategory.ObjectNotFound,
                     path));
-                return;
             }
 
             foreach (var prop in propertyValue.Properties)
@@ -360,7 +359,6 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
                     "NoSuchRegistryKey",
                     ErrorCategory.ObjectNotFound,
                     path));
-                return;
             }
 
             RegistryValueType type;
@@ -399,7 +397,6 @@ namespace DiscUtils.PowerShell.VirtualRegistryProvider
                     "NoSuchRegistryKey",
                     ErrorCategory.ObjectNotFound,
                     path));
-                return;
             }
 
             if (string.Compare(propertyName, DefaultValueName, StringComparison.OrdinalIgnoreCase) == 0)
