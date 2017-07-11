@@ -185,7 +185,7 @@ namespace DiscUtils.Ntfs
 
         internal long Size { get { return _bitmap.Length; } }
 
-        public byte GetByte(long index)
+        internal byte GetByte(long index)
         {
             if (index >= _bitmap.Length)
             {
@@ -200,15 +200,15 @@ namespace DiscUtils.Ntfs
             }
             return 0;
         }
-
-        public int GetBytes(byte[] buffer, long index, int count)
+        
+        internal int GetBytes(long index, byte[] buffer, int offset, int count)
         {
             if (index + count >= _bitmap.Length)
                 count = (int)(_bitmap.Length - index);
             if (count <= 0)
                 return 0;
             _bitmap.Position = index;
-            return _bitmap.Read(buffer, 0, count);
+            return _bitmap.Read(buffer, offset, count);
         }
 
         private void SetByte(long index, byte value)

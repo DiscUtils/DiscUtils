@@ -2431,8 +2431,8 @@ namespace DiscUtils.Ntfs
                 while (processed < bitmap.Size)
                 {
                     byte[] buffer = new byte[4*Sizes.OneKiB];
-                    var count = bitmap.GetBytes(buffer, processed, buffer.Length);
-                    usedCluster += BitCounter.Count(buffer,0 , count);
+                    var count = bitmap.GetBytes(processed, buffer, 0, buffer.Length);
+                    usedCluster += BitCounter.Count(buffer, 0, count);
                     processed += count;
                 }
                 return (usedCluster* ClusterSize);

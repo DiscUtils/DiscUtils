@@ -20,8 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Streams
 {
+    /// <summary>
+    /// Helper to count the number of bits set in a byte or byte[]
+    /// </summary>
     public static class BitCounter
     {
         private static readonly byte[] _lookupTable;
@@ -42,18 +47,29 @@ namespace DiscUtils.Streams
             }
         }
 
+        /// <summary>
+        /// count the number of bits set in <paramref name="value"/>
+        /// </summary>
+        /// <returns>the number of bits set in <paramref name="value"/></returns>
         public static byte Count(byte value)
         {
             return _lookupTable[value];
         }
 
-        public static long Count(byte[] values, int start, int count)
+        /// <summary>
+        /// count the number of bits set in each entry of <paramref name="values"/>
+        /// </summary>
+        /// <param name="values">the <see cref="Array"/> to process</param>
+        /// <param name="offset">the values offset to start from</param>
+        /// <param name="count">the number of bytes to count</param>
+        /// <returns></returns>
+        public static long Count(byte[] values, int offset, int count)
         {
-            var end = start + count;
+            var end = offset + count;
             if (end > values.Length)
-                return 0;
+                throw new ArgumentOutOfRangeException(nameof(count), "can't count after end of values");
             var result = 0L;
-            for (int i = start; i < end; i++)
+            for (int i = offset; i < end; i++)
             {
                 var value = values[i];
                 result += _lookupTable[value];
