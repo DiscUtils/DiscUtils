@@ -36,6 +36,7 @@ namespace LibraryTests.Xfs
         {
             var inodeBuffer = new byte[0x70];
             inodeBuffer[0x5] = (byte)InodeFormat.Local;
+            inodeBuffer[0x3F] = 6;//Length (di_size)
             inodeBuffer[0x52] = 14;//Forkoff
             inodeBuffer[0X64] = (byte)'i';
             inodeBuffer[0X65] = (byte)'n';
