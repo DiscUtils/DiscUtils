@@ -49,12 +49,12 @@ namespace DiscUtils.Registry
             _streamPos = stream.Position;
 
             stream.Position = _streamPos;
-            byte[] buffer = StreamUtilities.ReadFully(stream, 0x20);
+            byte[] buffer = StreamUtilities.ReadExact(stream, 0x20);
             _header = new BinHeader();
             _header.ReadFrom(buffer, 0);
 
             _fileStream.Position = _streamPos;
-            _buffer = StreamUtilities.ReadFully(_fileStream, _header.BinSize);
+            _buffer = StreamUtilities.ReadExact(_fileStream, _header.BinSize);
 
             // Gather list of all free cells.
             _freeCells = new List<Range<int, int>>();

@@ -53,7 +53,7 @@ namespace DiscUtils.Vdi
 
         public void Read(Stream s)
         {
-            byte[] buffer = StreamUtilities.ReadFully(s, 72);
+            byte[] buffer = StreamUtilities.ReadExact(s, 72);
             Read(buffer, 0);
         }
 

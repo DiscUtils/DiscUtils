@@ -369,7 +369,7 @@ namespace DiscUtils.Vmdk
 
             _globalDirectory = new uint[numGTs];
             _fileStream.Position = _header.GdOffset * Sizes.Sector;
-            byte[] gdAsBytes = StreamUtilities.ReadFully(_fileStream, numGTs * 4);
+            byte[] gdAsBytes = StreamUtilities.ReadExact(_fileStream, numGTs * 4);
             for (int i = 0; i < _globalDirectory.Length; ++i)
             {
                 _globalDirectory[i] = EndianUtilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
@@ -401,7 +401,7 @@ namespace DiscUtils.Vmdk
 
             // Not cached, so read
             _fileStream.Position = (long)_globalDirectory[index] * Sizes.Sector;
-            byte[] newGrainTable = StreamUtilities.ReadFully(_fileStream, (int)_header.NumGTEsPerGT * 4);
+            byte[] newGrainTable = StreamUtilities.ReadExact(_fileStream, (int)_header.NumGTEsPerGT * 4);
             _currentGrainTable = index;
             _grainTable = newGrainTable;
 

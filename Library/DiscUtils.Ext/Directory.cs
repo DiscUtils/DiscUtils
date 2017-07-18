@@ -47,7 +47,7 @@ namespace DiscUtils.Ext
                 long pos = 0;
                 while (pos < Inode.FileSize)
                 {
-                    StreamUtilities.ReadFully(content, blockSize * (long)relBlock, blockData, 0, (int)blockSize);
+                    StreamUtilities.ReadMaximum(content, blockSize * (long)relBlock, blockData, 0, (int)blockSize);
 
                     int blockPos = 0;
                     while (blockPos < blockSize)

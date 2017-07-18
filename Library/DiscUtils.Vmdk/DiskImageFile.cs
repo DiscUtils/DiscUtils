@@ -984,7 +984,7 @@ namespace DiscUtils.Vmdk
         private void LoadDescriptor(Stream s)
         {
             s.Position = 0;
-            byte[] header = StreamUtilities.ReadFully(s, (int)Math.Min(Sizes.Sector, s.Length));
+            byte[] header = StreamUtilities.ReadExact(s, (int)Math.Min(Sizes.Sector, s.Length));
             if (header.Length < Sizes.Sector ||
                 EndianUtilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
             {

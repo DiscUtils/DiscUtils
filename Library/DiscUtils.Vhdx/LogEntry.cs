@@ -100,7 +100,7 @@ namespace DiscUtils.Vhdx
             long position = logStream.Position;
 
             byte[] sectorBuffer = new byte[LogSectorSize];
-            StreamUtilities.ReadFully(logStream, sectorBuffer, 0, sectorBuffer.Length);
+            StreamUtilities.ReadExact(logStream, sectorBuffer, 0, sectorBuffer.Length);
 
             uint sig = EndianUtilities.ToUInt32LittleEndian(sectorBuffer, 0);
             if (sig != LogEntryHeader.LogEntrySignature)
@@ -121,7 +121,7 @@ namespace DiscUtils.Vhdx
             byte[] logEntryBuffer = new byte[header.EntryLength];
             Array.Copy(sectorBuffer, logEntryBuffer, LogSectorSize);
 
-            StreamUtilities.ReadFully(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
+            StreamUtilities.ReadExact(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
 
             EndianUtilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
             if (header.Checksum !=

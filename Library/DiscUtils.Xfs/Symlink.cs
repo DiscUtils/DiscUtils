@@ -42,8 +42,10 @@ namespace DiscUtils.Xfs
                 {
                     throw new IOException("invalid Inode format for symlink");
                 }
+
                 IBuffer content = FileContent;
-                byte[] data = StreamUtilities.ReadFully(content, 0, (int)Inode.Length);
+                byte[] data = StreamUtilities.ReadExact(content, 0, (int)Inode.Length);
+
                 return Context.Options.FileNameEncoding.GetString(data, 0, data.Length).Replace('/', '\\');
             }
         }

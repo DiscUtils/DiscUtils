@@ -38,7 +38,7 @@ namespace DiscUtils.ApplePartitionMap
 
             s.Position = 0;
 
-            byte[] initialBytes = StreamUtilities.ReadFully(s, 1024);
+            byte[] initialBytes = StreamUtilities.ReadExact(s, 1024);
 
             BlockZero b0 = new BlockZero();
             b0.ReadFrom(initialBytes, 0);

@@ -52,7 +52,7 @@ namespace DiscUtils.Compression
             if (mode == CompressionMode.Decompress)
             {
                 // We just sanity check against expected header values...
-                byte[] headerBuffer = StreamUtilities.ReadFully(stream, 2);
+                byte[] headerBuffer = StreamUtilities.ReadExact(stream, 2);
                 ushort header = EndianUtilities.ToUInt16BigEndian(headerBuffer, 0);
 
                 if (header % 31 != 0)
@@ -140,7 +140,7 @@ namespace DiscUtils.Compression
                 if (_stream.CanSeek)
                 {
                     _stream.Seek(-4, SeekOrigin.End);
-                    byte[] footerBuffer = StreamUtilities.ReadFully(_stream, 4);
+                    byte[] footerBuffer = StreamUtilities.ReadExact(_stream, 4);
                     if (EndianUtilities.ToInt32BigEndian(footerBuffer, 0) != _adler32.Value)
                     {
                         throw new InvalidDataException("Corrupt decompressed data detected");

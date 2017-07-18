@@ -41,7 +41,7 @@ namespace DiscUtils.Udf
 
             _entries = new List<FileIdentifier>();
 
-            byte[] contentBytes = StreamUtilities.ReadFully(FileContent, 0, (int)FileContent.Capacity);
+            byte[] contentBytes = StreamUtilities.ReadExact(FileContent, 0, (int)FileContent.Capacity);
 
             int pos = 0;
             while (pos < contentBytes.Length)

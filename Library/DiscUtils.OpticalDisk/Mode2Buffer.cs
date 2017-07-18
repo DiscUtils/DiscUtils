@@ -76,12 +76,7 @@ namespace DiscUtils.OpticalDisk
                 long sector = thisPos / DiscImageFile.Mode1SectorSize;
                 int sectorOffset = (int)(thisPos - sector * DiscImageFile.Mode1SectorSize);
 
-                int numRead = StreamUtilities.ReadFully(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0,
-                    DiscImageFile.Mode2SectorSize);
-                if (numRead < DiscImageFile.Mode2SectorSize)
-                {
-                    throw new IOException("Failed to read entire sector");
-                }
+                StreamUtilities.ReadExact(_wrapped, sector * DiscImageFile.Mode2SectorSize, _iobuffer, 0, DiscImageFile.Mode2SectorSize);
 
                 int bytesToCopy = Math.Min(DiscImageFile.Mode1SectorSize - sectorOffset, totalToRead - totalRead);
                 Array.Copy(_iobuffer, 24 + sectorOffset, buffer, offset + totalRead, bytesToCopy);

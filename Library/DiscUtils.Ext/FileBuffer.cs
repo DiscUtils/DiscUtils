@@ -83,7 +83,7 @@ namespace DiscUtils.Ext
                         if (_inode.IndirectBlock != 0)
                         {
                             _context.RawStream.Position = _inode.IndirectBlock * (long)blockSize + logicalBlock * 4;
-                            byte[] indirectData = StreamUtilities.ReadFully(_context.RawStream, 4);
+                            byte[] indirectData = StreamUtilities.ReadExact(_context.RawStream, 4);
                             physicalBlock = EndianUtilities.ToUInt32LittleEndian(indirectData, 0);
                         }
                     }
@@ -96,14 +96,14 @@ namespace DiscUtils.Ext
                             {
                                 _context.RawStream.Position = _inode.DoubleIndirectBlock * (long)blockSize +
                                                               logicalBlock / (blockSize / 4) * 4;
-                                byte[] indirectData = StreamUtilities.ReadFully(_context.RawStream, 4);
+                                byte[] indirectData = StreamUtilities.ReadExact(_context.RawStream, 4);
                                 uint indirectBlock = EndianUtilities.ToUInt32LittleEndian(indirectData, 0);
 
                                 if (indirectBlock != 0)
                                 {
                                     _context.RawStream.Position = indirectBlock * (long)blockSize +
                                                                   logicalBlock % (blockSize / 4) * 4;
-                                    StreamUtilities.ReadFully(_context.RawStream, indirectData, 0, 4);
+                                    StreamUtilities.ReadExact(_context.RawStream, indirectData, 0, 4);
                                     physicalBlock = EndianUtilities.ToUInt32LittleEndian(indirectData, 0);
                                 }
                             }

@@ -38,11 +38,11 @@ namespace DiscUtils.Nfs
 
         public override byte[] ReadBytes(int count)
         {
-            byte[] buffer = StreamUtilities.ReadFully(_stream, count);
+            byte[] buffer = StreamUtilities.ReadExact(_stream, count);
 
             if ((count & 0x3) != 0)
             {
-                StreamUtilities.ReadFully(_stream, 4 - (count & 0x3));
+                StreamUtilities.ReadExact(_stream, 4 - (count & 0x3));
             }
 
             return buffer;

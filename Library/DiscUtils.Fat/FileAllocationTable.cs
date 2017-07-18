@@ -40,7 +40,7 @@ namespace DiscUtils.Fat
             _numFats = numFats;
 
             _stream.Position = (firstFatSector + fatSize * activeFat) * Sizes.Sector;
-            _buffer = new FatBuffer(type, StreamUtilities.ReadFully(_stream, (int)(fatSize * Sizes.Sector)));
+            _buffer = new FatBuffer(type, StreamUtilities.ReadExact(_stream, (int)(fatSize * Sizes.Sector)));
         }
 
         internal bool IsFree(uint val)

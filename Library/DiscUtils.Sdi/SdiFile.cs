@@ -55,13 +55,13 @@ namespace DiscUtils.Sdi
             _stream = stream;
             _ownership = ownership;
 
-            byte[] page = StreamUtilities.ReadFully(_stream, 512);
+            byte[] page = StreamUtilities.ReadExact(_stream, 512);
 
             _header = new FileHeader();
             _header.ReadFrom(page, 0);
 
             _stream.Position = _header.PageAlignment * 512;
-            byte[] toc = StreamUtilities.ReadFully(_stream, (int)(_header.PageAlignment * 512));
+            byte[] toc = StreamUtilities.ReadExact(_stream, (int)(_header.PageAlignment * 512));
 
             _sections = new List<SectionRecord>();
             int pos = 0;

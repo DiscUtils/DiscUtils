@@ -40,7 +40,7 @@ namespace DiscUtils.Udf
             PhysicalPartition physical = context.PhysicalPartitions[partitionMap.PartitionNumber];
             long fileEntryPos = partitionMap.MetadataFileLocation * (long)volumeDescriptor.LogicalBlockSize;
 
-            byte[] entryData = StreamUtilities.ReadFully(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
+            byte[] entryData = StreamUtilities.ReadExact(physical.Content, fileEntryPos, _context.PhysicalSectorSize);
             if (!DescriptorTag.IsValid(entryData, 0))
             {
                 throw new IOException("Invalid descriptor tag looking for Metadata file entry");

@@ -80,7 +80,7 @@ namespace DiscUtils.Xfs
         /// Deprecated and not used, it's always set to NULL (-1).
         /// </summary>
         [Obsolete]
-        public int DirInode { get; private set; }
+        public int DirInode => -1;
 
         /// <summary>
         /// Hash table of unlinked (deleted) inodes that are still being referenced.
@@ -122,7 +122,6 @@ namespace DiscUtils.Xfs
             Level = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x18);
             FreeCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x1c);
             NewInode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x20);
-            DirInode = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x24);
             Unlinked = new int[64];
             for (int i = 0; i < Unlinked.Length; i++)
             {
@@ -149,7 +148,7 @@ namespace DiscUtils.Xfs
             {
                 RootInodeBtree = new BTreeInodeNode(SbVersion);
             }
-            var buffer = StreamUtilities.ReadFully(data, (int) context.SuperBlock.Blocksize);
+            var buffer = StreamUtilities.ReadExact(data, (int) context.SuperBlock.Blocksize);
             RootInodeBtree.ReadFrom(buffer, 0);
         }
 

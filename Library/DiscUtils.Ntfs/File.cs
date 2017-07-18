@@ -654,7 +654,7 @@ namespace DiscUtils.Ntfs
             AttributeRecord newAttrRecord = _records[0].GetAttribute(id);
 
             IBuffer attrBuffer = attr.GetDataBuffer();
-            byte[] tempData = StreamUtilities.ReadFully(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
+            byte[] tempData = StreamUtilities.ReadExact(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
 
             RemoveAttributeExtents(attr);
             attr.SetExtent(_records[0].Reference, newAttrRecord);
@@ -1075,7 +1075,7 @@ namespace DiscUtils.Ntfs
             AttributeRecord newAttrRecord = _records[0].GetAttribute(id);
 
             IBuffer attrBuffer = attr.GetDataBuffer();
-            byte[] tempData = StreamUtilities.ReadFully(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
+            byte[] tempData = StreamUtilities.ReadExact(attrBuffer, 0, (int)Math.Min(maxData, attrBuffer.Capacity));
 
             RemoveAttributeExtents(attr);
             attr.SetExtent(_records[0].Reference, newAttrRecord);

@@ -634,7 +634,7 @@ namespace DiscUtils.Vhdx
         private IEnumerable<StreamExtent> BatControlledFileExtents()
         {
             _batStream.Position = 0;
-            byte[] batData = StreamUtilities.ReadFully(_batStream, (int)_batStream.Length);
+            byte[] batData = StreamUtilities.ReadExact(_batStream, (int)_batStream.Length);
 
             uint blockSize = _metadata.FileParameters.BlockSize;
             long chunkSize = (1L << 23) * _metadata.LogicalSectorSize;

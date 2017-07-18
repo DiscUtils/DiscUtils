@@ -40,7 +40,7 @@ namespace DiscUtils.Vmdk
             _ownsParentDiskStream = ownsParentDiskStream;
 
             file.Position = 0;
-            byte[] firstSectors = StreamUtilities.ReadFully(file, Sizes.Sector * 4);
+            byte[] firstSectors = StreamUtilities.ReadExact(file, Sizes.Sector * 4);
             _serverHeader = ServerSparseExtentHeader.Read(firstSectors, 0);
             _header = _serverHeader;
 
@@ -110,7 +110,7 @@ namespace DiscUtils.Vmdk
             _parentDiskStream.Position = _diskOffset +
                                          (grain + _header.NumGTEsPerGT * grainTable) * _header.GrainSize *
                                          Sizes.Sector;
-            byte[] content = StreamUtilities.ReadFully(_parentDiskStream, (int)(_header.GrainSize * Sizes.Sector * count));
+            byte[] content = StreamUtilities.ReadExact(_parentDiskStream, (int)(_header.GrainSize * Sizes.Sector * count));
             _fileStream.Position = grainStartPos;
             _fileStream.Write(content, 0, content.Length);
 

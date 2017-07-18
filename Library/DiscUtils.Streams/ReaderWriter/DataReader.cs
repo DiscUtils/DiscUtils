@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Streams
@@ -29,7 +30,11 @@ namespace DiscUtils.Streams
     /// </summary>
     public abstract class DataReader
     {
-        protected Stream _stream;
+        private const int _bufferSize = sizeof(UInt64);
+
+        protected readonly Stream _stream;
+
+        protected byte[] _buffer;
 
         public DataReader(Stream stream)
         {
@@ -61,6 +66,19 @@ namespace DiscUtils.Streams
 
         public abstract ulong ReadUInt64();
 
-        public abstract byte[] ReadBytes(int count);
+        public virtual byte[] ReadBytes(int count)
+        {
+            return StreamUtilities.ReadExact(_stream, count);
+        }
+
+        protected void ReadToBuffer(int count)
+        {
+            if (_buffer == null)
+            {
+                _buffer = new byte[_bufferSize];
+            }
+
+            StreamUtilities.ReadExact(_stream, _buffer, 0, count);
+        }
     }
 }

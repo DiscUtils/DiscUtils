@@ -105,7 +105,7 @@ namespace DiscUtils.Ntfs
             _context.Options = new NtfsOptions();
 
             _context.RawStream.Position = 0;
-            byte[] bytes = StreamUtilities.ReadFully(_context.RawStream, 512);
+            byte[] bytes = StreamUtilities.ReadExact(_context.RawStream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
@@ -123,7 +123,7 @@ namespace DiscUtils.Ntfs
         private void DoCheck()
         {
             _context.RawStream.Position = 0;
-            byte[] bytes = StreamUtilities.ReadFully(_context.RawStream, 512);
+            byte[] bytes = StreamUtilities.ReadExact(_context.RawStream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
 
@@ -315,7 +315,7 @@ namespace DiscUtils.Ntfs
             byte[] rootBuffer;
             using (Stream s = file.OpenStream(AttributeType.IndexRoot, name, FileAccess.Read))
             {
-                rootBuffer = StreamUtilities.ReadFully(s, (int)s.Length);
+                rootBuffer = StreamUtilities.ReadExact(s, (int)s.Length);
             }
 
             Bitmap indexBitmap = null;
@@ -423,7 +423,7 @@ namespace DiscUtils.Ntfs
                 long index = 0;
                 while (mftStream.Position < mftStream.Length)
                 {
-                    byte[] recordData = StreamUtilities.ReadFully(mftStream, recordLength);
+                    byte[] recordData = StreamUtilities.ReadExact(mftStream, recordLength);
 
                     string magic = EndianUtilities.BytesToString(recordData, 0, 4);
                     if (magic != "FILE")

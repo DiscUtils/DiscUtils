@@ -83,7 +83,7 @@ namespace DiscUtils.Vhd
 
             // Detect where next block should go (cope if the footer is missing)
             _fileStream.Position = MathUtilities.RoundDown(_fileStream.Length, Sizes.Sector) - Sizes.Sector;
-            byte[] footerBytes = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] footerBytes = StreamUtilities.ReadExact(_fileStream, Sizes.Sector);
             Footer footer = Footer.FromBytes(footerBytes, 0);
             _nextBlockStart = _fileStream.Position - (footer.IsValid() ? Sizes.Sector : 0);
         }
@@ -277,15 +277,12 @@ namespace DiscUtils.Vhd
                         {
                             _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) *
                                                    Sizes.Sector + _blockBitmapSize + offsetInSector;
-                            if (StreamUtilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
-                            {
-                                throw new IOException("Failed to read entire sector");
-                            }
+                            StreamUtilities.ReadExact(_fileStream, buffer, offset + numRead, toRead);
                         }
                         else
                         {
                             _parentStream.Position = _position;
-                            StreamUtilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
+                            StreamUtilities.ReadExact(_parentStream, buffer, offset + numRead, toRead);
                         }
 
                         numRead += toRead;
@@ -316,16 +313,13 @@ namespace DiscUtils.Vhd
                         if (readFromParent)
                         {
                             _parentStream.Position = _position;
-                            StreamUtilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
+                            StreamUtilities.ReadExact(_parentStream, buffer, offset + numRead, toRead);
                         }
                         else
                         {
                             _fileStream.Position = (_blockAllocationTable[block] + sectorInBlock) *
                                                    Sizes.Sector + _blockBitmapSize;
-                            if (StreamUtilities.ReadFully(_fileStream, buffer, offset + numRead, toRead) != toRead)
-                            {
-                                throw new IOException("Failed to read entire chunk");
-                            }
+                            StreamUtilities.ReadExact(_fileStream, buffer, offset + numRead, toRead);
                         }
 
                         numRead += toRead;
@@ -336,7 +330,7 @@ namespace DiscUtils.Vhd
                 {
                     int toRead = Math.Min(maxToRead - numRead, (int)(_dynamicHeader.BlockSize - offsetInBlock));
                     _parentStream.Position = _position;
-                    StreamUtilities.ReadFully(_parentStream, buffer, offset + numRead, toRead);
+                    StreamUtilities.ReadExact(_parentStream, buffer, offset + numRead, toRead);
                     numRead += toRead;
                     _position += toRead;
                 }
@@ -424,12 +418,12 @@ namespace DiscUtils.Vhd
                     if ((_blockBitmaps[block][sectorInBlock / 8] & sectorMask) != 0)
                     {
                         _fileStream.Position = sectorStart;
-                        sectorBuffer = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
+                        sectorBuffer = StreamUtilities.ReadExact(_fileStream, Sizes.Sector);
                     }
                     else
                     {
                         _parentStream.Position = _position / Sizes.Sector * Sizes.Sector;
-                        sectorBuffer = StreamUtilities.ReadFully(_parentStream, Sizes.Sector);
+                        sectorBuffer = StreamUtilities.ReadExact(_parentStream, Sizes.Sector);
                     }
 
                     // Overlay as much data as we have for this sector
@@ -611,7 +605,7 @@ namespace DiscUtils.Vhd
         private void ReadBlockAllocationTable()
         {
             _fileStream.Position = _dynamicHeader.TableOffset;
-            byte[] data = StreamUtilities.ReadFully(_fileStream, _dynamicHeader.MaxTableEntries * 4);
+            byte[] data = StreamUtilities.ReadExact(_fileStream, _dynamicHeader.MaxTableEntries * 4);
 
             uint[] bat = new uint[_dynamicHeader.MaxTableEntries];
             for (int i = 0; i < _dynamicHeader.MaxTableEntries; ++i)
@@ -638,7 +632,7 @@ namespace DiscUtils.Vhd
 
             // Read in bitmap
             _fileStream.Position = (long)_blockAllocationTable[block] * Sizes.Sector;
-            _blockBitmaps[block] = StreamUtilities.ReadFully(_fileStream, _blockBitmapSize);
+            _blockBitmaps[block] = StreamUtilities.ReadExact(_fileStream, _blockBitmapSize);
             return true;
         }
 
@@ -699,7 +693,7 @@ namespace DiscUtils.Vhd
                 if (_footerCache == null)
                 {
                     _fileStream.Position = 0;
-                    _footerCache = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
+                    _footerCache = StreamUtilities.ReadExact(_fileStream, Sizes.Sector);
                 }
 
                 _fileStream.Position = _nextBlockStart;

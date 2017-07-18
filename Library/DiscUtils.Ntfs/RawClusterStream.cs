@@ -312,13 +312,7 @@ namespace DiscUtils.Ntfs
                 {
                     long lcn = _cookedRuns[runIdx].StartLcn + (focusVcn - run.StartVcn);
                     _fsStream.Position = lcn * _bytesPerCluster;
-                    int numRead = StreamUtilities.ReadFully(_fsStream, buffer, offset + totalRead * _bytesPerCluster,
-                        toRead * _bytesPerCluster);
-                    if (numRead != toRead * _bytesPerCluster)
-                    {
-                        throw new IOException(string.Format(CultureInfo.InvariantCulture,
-                            "Short read, reading {0} clusters starting at LCN {1}", toRead, lcn));
-                    }
+                    StreamUtilities.ReadExact(_fsStream, buffer, offset + totalRead * _bytesPerCluster, toRead * _bytesPerCluster);
                 }
 
                 totalRead += toRead;

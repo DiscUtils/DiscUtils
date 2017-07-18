@@ -94,7 +94,7 @@ namespace DiscUtils.Ntfs
             {
                 using (Stream s = Open(FileAccess.Read))
                 {
-                    byte[] buffer = StreamUtilities.ReadFully(s, (int)Length);
+                    byte[] buffer = StreamUtilities.ReadExact(s, (int)Length);
                     _structure.ReadFrom(buffer, 0);
                     _hasContent = s.Length != 0;
                 }

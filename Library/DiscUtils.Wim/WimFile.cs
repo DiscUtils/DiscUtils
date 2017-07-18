@@ -45,7 +45,7 @@ namespace DiscUtils.Wim
         {
             _fileStream = stream;
 
-            byte[] buffer = StreamUtilities.ReadFully(stream, 512);
+            byte[] buffer = StreamUtilities.ReadExact(stream, 512);
             _fileHeader = new FileHeader();
             _fileHeader.Read(buffer, 0);
 
@@ -129,7 +129,7 @@ namespace DiscUtils.Wim
                 long numRead = 0;
                 while (numRead < s.Length)
                 {
-                    byte[] resBuffer = StreamUtilities.ReadFully(s, ResourceInfo.Size);
+                    byte[] resBuffer = StreamUtilities.ReadExact(s, ResourceInfo.Size);
                     numRead += ResourceInfo.Size;
 
                     ResourceInfo info = new ResourceInfo();
@@ -191,7 +191,7 @@ namespace DiscUtils.Wim
                 long numRead = 0;
                 while (numRead < s.Length)
                 {
-                    byte[] resBuffer = StreamUtilities.ReadFully(s, ResourceInfo.Size);
+                    byte[] resBuffer = StreamUtilities.ReadExact(s, ResourceInfo.Size);
                     numRead += ResourceInfo.Size;
 
                     ResourceInfo info = new ResourceInfo();
