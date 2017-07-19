@@ -309,7 +309,7 @@ namespace DiscUtils.Xfs
             foreach (var extent in extents)
             {
                 var blockOffset = extent.GetOffset(context);
-                var substream = new SubStream(context.RawStream, blockOffset, extent.BlockCount*context.SuperBlock.Blocksize);
+                var substream = new SubStream(context.RawStream, blockOffset, (long)extent.BlockCount*context.SuperBlock.Blocksize);
                 builderExtents.Add(new BuilderSparseStreamExtent((long) extent.StartOffset * context.SuperBlock.Blocksize, substream));
             }
             return new StreamBuffer(new ExtentStream((long) this.Length, builderExtents), Ownership.Dispose);

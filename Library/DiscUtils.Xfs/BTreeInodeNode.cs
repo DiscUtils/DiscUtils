@@ -78,7 +78,7 @@ namespace DiscUtils.Xfs
                     child = new BTreeInodeNode(base.SbVersion);
                 }
                 var data = ag.Context.RawStream;
-                data.Position = (Pointer[i] * ag.Context.SuperBlock.Blocksize) + ag.Offset;
+                data.Position = ((long)Pointer[i] * ag.Context.SuperBlock.Blocksize) + ag.Offset;
                 var buffer = StreamUtilities.ReadFully(data, (int)ag.Context.SuperBlock.Blocksize);
                 child.ReadFrom(buffer, 0);
                 child.LoadBtree(ag);

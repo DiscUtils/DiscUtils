@@ -95,7 +95,7 @@ namespace DiscUtils.Xfs
             {
                 if (extent.StartOffset < leafOffset)
                 {
-                    for (int i = 0; i < extent.BlockCount; i++)
+                    for (long i = 0; i < extent.BlockCount; i++)
                     {
                         var buffer = extent.GetData(Context, i* Context.SuperBlock.DirBlockSize, Context.SuperBlock.DirBlockSize);
                         var leafDir = new LeafDirectory();
