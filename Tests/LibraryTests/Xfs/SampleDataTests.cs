@@ -9,6 +9,7 @@ using DiscUtils.Xfs;
 using DiscUtils.Vhdx;
 using LibraryTests.Utilities;
 using Xunit;
+using File=System.IO.File;
 
 namespace LibraryTests.Xfs
 {
