@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.AccessControl;
+using DiscUtils.Internal;
 using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
@@ -188,7 +189,8 @@ namespace DiscUtils.Registry
         /// <returns>The new hive.</returns>
         public static RegistryHive Create(string path)
         {
-            return Create(new FileStream(path, FileMode.Create, FileAccess.ReadWrite), Ownership.Dispose);
+            var locator = new LocalFileLocator(string.Empty);
+            return Create(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None), Ownership.Dispose);
         }
 
         internal K GetCell<K>(int index)

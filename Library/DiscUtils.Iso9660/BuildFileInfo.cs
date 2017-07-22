@@ -25,6 +25,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using DiscUtils.CoreCompat;
+using DiscUtils.Internal;
 
 namespace DiscUtils.Iso9660
 {
@@ -82,7 +83,8 @@ namespace DiscUtils.Iso9660
             }
             if (_contentPath != null)
             {
-                return new FileStream(_contentPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var locator = new LocalFileLocator(string.Empty);
+                return locator.Open(_contentPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             }
             return _contentStream;
         }

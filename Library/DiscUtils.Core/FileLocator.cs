@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Setup;
 
 namespace DiscUtils
 {
@@ -30,7 +31,16 @@ namespace DiscUtils
     {
         public abstract bool Exists(string fileName);
 
-        public abstract Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share);
+        public Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
+        {
+            var args = new FileOpenEventArgs(fileName, mode, access, share, OpenFile);
+            SetupHelper.OnOpeningFile(this, args);
+            if (args.Result != null)
+                return args.Result;
+            return OpenFile(args.FileName, args.FileMode, args.FileAccess, args.FileShare);
+        }
+
+        protected abstract Stream OpenFile(string fileName, FileMode mode, FileAccess access, FileShare share);
 
         public abstract FileLocator GetRelativeLocator(string path);
 

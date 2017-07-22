@@ -69,10 +69,11 @@ namespace DiscUtils.Vmdk
                 fileShare = FileShare.None;
             }
 
-            FileStream fileStream = null;
+            Stream fileStream = null;
+            _fileLocator = new LocalFileLocator(Path.GetDirectoryName(path));
             try
             {
-                fileStream = new FileStream(path, FileMode.Open, fileAccess, fileShare);
+                fileStream = _fileLocator.Open(Path.GetFileName(path), FileMode.Open, fileAccess, fileShare);
                 LoadDescriptor(fileStream);
 
                 // For monolithic disks, keep hold of the stream - we won't try to use the file name
@@ -94,7 +95,6 @@ namespace DiscUtils.Vmdk
                 }
             }
 
-            _fileLocator = new LocalFileLocator(Path.GetDirectoryName(path));
         }
 
         /// <summary>

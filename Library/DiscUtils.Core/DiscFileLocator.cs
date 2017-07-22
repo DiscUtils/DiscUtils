@@ -42,7 +42,7 @@ namespace DiscUtils
             return _fileSystem.FileExists(Utilities.CombinePaths(_basePath, fileName));
         }
 
-        public override Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
+        protected override Stream OpenFile(string fileName, FileMode mode, FileAccess access, FileShare share)
         {
             return _fileSystem.OpenFile(Utilities.CombinePaths(_basePath, fileName), mode, access);
         }
