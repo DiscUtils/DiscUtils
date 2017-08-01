@@ -39,9 +39,9 @@ namespace LibraryTests.Btrfs
                 {
                     Assert.IsType<BtrfsFileSystem>(btrfs);
 
-                    Assert.Equal(1072599040, btrfs.AvailableSpace);
+                    Assert.Equal(1072594944, btrfs.AvailableSpace);
                     Assert.Equal(1072693248, btrfs.Size);
-                    Assert.Equal(94208, btrfs.UsedSpace);
+                    Assert.Equal(98304, btrfs.UsedSpace);
 
                     var subvolumes = ((BtrfsFileSystem)btrfs).GetSubvolumes();
                     Assert.Equal(1, subvolumes.Length);
@@ -55,6 +55,7 @@ namespace LibraryTests.Btrfs
                     Assert.Equal("test\n", GetFileContent(@"\subvolume\subvolumefolder\subvolumefile", btrfs));
                     Assert.Equal("b0d5fae237588b6641f974459404d197", GetFileChecksum(@"\folder\subfolder\compressed", btrfs));
                     //Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs)); //PR#36
+                    Assert.Equal("b0d5fae237588b6641f974459404d197", GetFileChecksum(@"\folder\subfolder\lzo", btrfs));
                 }
 
                 using (var subvolume = new BtrfsFileSystem(volume.Open(), new BtrfsFileSystemOptions { SubvolumeId = 256, VerifyChecksums = true}))

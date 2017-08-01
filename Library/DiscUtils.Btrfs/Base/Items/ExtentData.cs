@@ -21,10 +21,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using DiscUtils.Compression;
 using DiscUtils.Streams;
+using lzo.net;
 
 namespace DiscUtils.Btrfs.Base.Items
 {
@@ -147,11 +149,36 @@ namespace DiscUtils.Btrfs.Base.Items
                 case ExtentDataCompression.None:
                     break;
                 case ExtentDataCompression.Zlib:
+                {
                     var zlib = new ZlibStream(stream, CompressionMode.Decompress, false);
                     var sparse = SparseStream.FromStream(zlib, Ownership.Dispose);
                     var length = new LengthWrappingStream(sparse, (long)LogicalSize, Ownership.Dispose);
                     stream = new PositionWrappingStream(length, 0, Ownership.Dispose);
                     break;
+                }
+                case ExtentDataCompression.Lzo:
+                {
+                    var buffer = StreamUtilities.ReadFully(stream, sizeof(uint));
+                    var totalLength = EndianUtilities.ToUInt32LittleEndian(buffer, 0);
+                    long processed = sizeof(uint);
+                    var parts = new List<SparseStream>();
+                    var remaining = (long)LogicalSize;
+                    while (processed < totalLength)
+                    {
+                        stream.Position = processed;
+                        StreamUtilities.ReadFully(stream, buffer, 0, sizeof(uint));
+                        var partLength = EndianUtilities.ToUInt32LittleEndian(buffer, 0);
+                        processed += sizeof(uint);
+                        var part = new SubStream(stream, Ownership.Dispose, processed, partLength);
+                        var uncompressed = new SeekableLzoStream(part, CompressionMode.Decompress, false);
+                        uncompressed.SetLength(Math.Min(Sizes.OneKiB*4, remaining));
+                        remaining -= uncompressed.Length;
+                        parts.Add(SparseStream.FromStream(uncompressed, Ownership.Dispose));
+                        processed +=  partLength;
+                    }
+                    stream = new ConcatStream(Ownership.Dispose, parts.ToArray());
+                    break;
+                }
                 default:
                     throw new IOException($"Unsupported extent compression ({Compression})");
             }

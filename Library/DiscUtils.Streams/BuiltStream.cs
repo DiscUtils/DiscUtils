@@ -144,6 +144,8 @@ namespace DiscUtils.Streams
 
                 _position += numRead;
                 totalRead += numRead;
+                if (numRead == 0)
+                    break;
             }
 
             return totalRead;
