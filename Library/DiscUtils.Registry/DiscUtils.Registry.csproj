@@ -6,7 +6,6 @@
     <VersionPrefix>0.12.2-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
-    <PublicSign>true</PublicSign>
     <AssemblyName>DiscUtils.Registry</AssemblyName>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
