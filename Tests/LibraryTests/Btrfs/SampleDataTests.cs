@@ -54,7 +54,7 @@ namespace LibraryTests.Btrfs
                     IsAllZero(@"folder\subfolder\sparse", btrfs);
                     Assert.Equal("test\n", GetFileContent(@"\subvolume\subvolumefolder\subvolumefile", btrfs));
                     Assert.Equal("b0d5fae237588b6641f974459404d197", GetFileChecksum(@"\folder\subfolder\compressed", btrfs));
-                    //Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs)); //PR#36
+                    Assert.Equal("test\n", GetFileContent(@"\folder\symlink", btrfs)); //PR#36
                     Assert.Equal("b0d5fae237588b6641f974459404d197", GetFileChecksum(@"\folder\subfolder\lzo", btrfs));
                 }
 
