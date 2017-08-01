@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2016-2017, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -43,7 +43,7 @@ namespace DiscUtils.Xfs
                     throw new IOException("invalid Inode format for symlink");
                 }
                 IBuffer content = FileContent;
-                byte[] data = StreamUtilities.ReadFully(content, 0, (int) content.Capacity);
+                byte[] data = StreamUtilities.ReadFully(content, 0, (int)Inode.Length);
                 return Context.Options.FileNameEncoding.GetString(data, 0, data.Length).Replace('/', '\\');
             }
         }

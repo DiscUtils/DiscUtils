@@ -57,7 +57,9 @@ namespace DiscUtils.Swap
             BadPages = EndianUtilities.ToUInt32LittleEndian(buffer, 0x408);
             Uuid = EndianUtilities.ToGuidLittleEndian(buffer, 0x40c);
             var volume = EndianUtilities.ToByteArray(buffer, 0x41c, 16);
-            Volume = Encoding.UTF8.GetString(volume, 0, Array.IndexOf(volume, (byte) 0));
+            var nullIndex = Array.IndexOf(volume, (byte)0);
+            if (nullIndex > 0)
+                Volume = Encoding.UTF8.GetString(volume, 0, nullIndex);
             Magic = EndianUtilities.BytesToString(buffer, PageSize - 10, 10);
             return Size;
         }

@@ -34,6 +34,7 @@ namespace DiscUtils.Lvm
         public string Contents;
         public int Version;
         public MetadataVolumeGroupSection[] VolumeGroupSections;
+        private static readonly double _maxSeconds = DateTime.MaxValue.Subtract(DateTimeOffsetExtensions.UnixEpoch).TotalSeconds;
 
         public static Metadata Parse(string metadata)
         {
@@ -112,8 +113,11 @@ namespace DiscUtils.Lvm
         internal static DateTime ParseDateTimeValue(string value)
         {
             var numeric = ParseNumericValue(value);
-            return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(numeric);
+            if (numeric > _maxSeconds)
+                return DateTime.MaxValue;
+            return DateTimeOffsetExtensions.UnixEpoch.AddSeconds(numeric);
         }
+
         internal static ulong ParseNumericValue(string value)
         {
             return UInt64.Parse(value.Trim());

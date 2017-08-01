@@ -39,7 +39,7 @@ namespace DiscUtils.Internal
             return File.Exists(Path.Combine(_dir, fileName));
         }
 
-        public override Stream Open(string fileName, FileMode mode, FileAccess access, FileShare share)
+        protected override Stream OpenFile(string fileName, FileMode mode, FileAccess access, FileShare share)
         {
             return new FileStream(Path.Combine(_dir, fileName), mode, access, share);
         }

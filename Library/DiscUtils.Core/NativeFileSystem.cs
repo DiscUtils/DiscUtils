@@ -25,6 +25,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Internal;
 using DiscUtils.Streams;
 
 namespace DiscUtils
@@ -504,7 +505,8 @@ namespace DiscUtils
                 fileShare = FileShare.Read;
             }
 
-            return SparseStream.FromStream(File.Open(Path.Combine(BasePath, path), mode, access, fileShare),
+            var locator = new LocalFileLocator(BasePath);
+            return SparseStream.FromStream(locator.Open(path, mode, access, fileShare),
                 Ownership.Dispose);
         }
 

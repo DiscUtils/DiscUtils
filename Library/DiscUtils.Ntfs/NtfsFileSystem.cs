@@ -2427,14 +2427,13 @@ namespace DiscUtils.Ntfs
             {
                 long usedCluster = 0;
                 var bitmap = _context.ClusterBitmap.Bitmap;
-                for (long i = 0; i<bitmap.Size; i++)
+                var processed = 0L;
+                while (processed < bitmap.Size)
                 {
-                    var value = bitmap.GetByte(i);
-                    while (value != 0)
-                    {
-                        usedCluster++;
-                        value &= (byte) (value - 1);
-                    }
+                    byte[] buffer = new byte[4*Sizes.OneKiB];
+                    var count = bitmap.GetBytes(processed, buffer, 0, buffer.Length);
+                    usedCluster += BitCounter.Count(buffer, 0, count);
+                    processed += count;
                 }
                 return (usedCluster* ClusterSize);
             }

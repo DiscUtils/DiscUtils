@@ -93,6 +93,10 @@ namespace DiscUtils.Streams
             {
                 return 0;
             }
+            if (_position + count > _length)
+            {
+                count = (int)(_length - _position);
+            }
 
             int totalRead = 0;
             while (totalRead < count && _position < _length)

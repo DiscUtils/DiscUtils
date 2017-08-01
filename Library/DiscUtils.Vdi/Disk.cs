@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Internal;
 using DiscUtils.Streams;
 
 namespace DiscUtils.Vdi
@@ -41,7 +42,11 @@ namespace DiscUtils.Vdi
         /// <param name="path">The path to the disk.</param>
         /// <param name="access">The access requested to the disk.</param>
         public Disk(string path, FileAccess access)
-            : this(new FileStream(path, FileMode.Open, access), Ownership.Dispose) {}
+        {
+            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
+            var locator = new LocalFileLocator(string.Empty);
+            _diskImage = new DiskImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose);
+        }
 
         /// <summary>
         /// Initializes a new instance of the Disk class.

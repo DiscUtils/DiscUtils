@@ -281,6 +281,9 @@ namespace DiscUtils.Internal
                 return relativePath;
             }
 
+            if (!basePath.EndsWith(@"\"))
+                basePath = Path.GetDirectoryName(basePath);
+
             string merged = Path.GetFullPath(Path.Combine(basePath, relativePath));
 
             if (basePath.StartsWith(@"\") && merged.Length > 2 && merged[1].Equals(':'))

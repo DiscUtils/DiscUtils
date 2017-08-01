@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Internal;
 using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
@@ -77,7 +78,8 @@ namespace DiscUtils.SquashFs
             {
                 if (_source == null)
                 {
-                    _source = new FileStream(_sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    var locator = new LocalFileLocator(string.Empty);
+                    _source = locator.Open(_sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     disposeSource = true;
                 }
 

@@ -335,7 +335,8 @@ namespace DiscUtils.SquashFs
         /// <param name="outputFile">The file to write to.</param>
         public void Build(string outputFile)
         {
-            using (FileStream destStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+            var locator = new LocalFileLocator(string.Empty);
+            using (Stream destStream = locator.Open(outputFile, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 Build(destStream);
             }
