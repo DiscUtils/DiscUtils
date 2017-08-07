@@ -100,7 +100,11 @@ namespace DiscUtils.Vhdx
             long position = logStream.Position;
 
             byte[] sectorBuffer = new byte[LogSectorSize];
-            StreamUtilities.ReadExact(logStream, sectorBuffer, 0, sectorBuffer.Length);
+            if (StreamUtilities.ReadMaximum(logStream, sectorBuffer, 0, sectorBuffer.Length) != sectorBuffer.Length)
+            {
+                entry = null;
+                return false;
+            }
 
             uint sig = EndianUtilities.ToUInt32LittleEndian(sectorBuffer, 0);
             if (sig != LogEntryHeader.LogEntrySignature)
