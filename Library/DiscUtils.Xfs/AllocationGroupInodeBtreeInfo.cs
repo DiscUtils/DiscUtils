@@ -140,7 +140,7 @@ namespace DiscUtils.Xfs
         public void LoadBtree(Context context, long offset)
         {
             var data = context.RawStream;
-            data.Position = offset + context.SuperBlock.Blocksize*Root;
+            data.Position = offset + context.SuperBlock.Blocksize*(long)Root;
             if (Level == 1)
             {
                 RootInodeBtree = new BTreeInodeLeaf(SbVersion);

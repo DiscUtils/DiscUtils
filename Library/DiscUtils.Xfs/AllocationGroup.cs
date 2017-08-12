@@ -79,7 +79,7 @@ namespace DiscUtils.Xfs
 
         public void LoadInode(Inode inode)
         {
-            var offset = Offset + (inode.AgBlock*Context.SuperBlock.Blocksize) + (inode.BlockOffset * Context.SuperBlock.InodeSize);
+            var offset = Offset + ((long)inode.AgBlock*Context.SuperBlock.Blocksize) + ((long)inode.BlockOffset * Context.SuperBlock.InodeSize);
             Context.RawStream.Position = offset;
             var data = StreamUtilities.ReadFully(Context.RawStream, (int) Context.SuperBlock.InodeSize);
             inode.ReadFrom(data, 0);
