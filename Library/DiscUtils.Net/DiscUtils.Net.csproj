@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>DiscUtils NET</Description>
     <AssemblyTitle>DiscUtils.Net</AssemblyTitle>
-    <VersionPrefix>0.12.2-alpha</VersionPrefix>
+    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Net</AssemblyName>
