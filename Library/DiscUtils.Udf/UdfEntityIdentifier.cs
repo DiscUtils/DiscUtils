@@ -21,7 +21,7 @@
 //
 
 using System.Globalization;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -32,7 +32,7 @@ namespace DiscUtils.Udf
             string major = ((uint)Suffix[1]).ToString("X", CultureInfo.InvariantCulture);
             string minor = ((uint)Suffix[0]).ToString("X", CultureInfo.InvariantCulture);
             OSClass osClass = (OSClass)Suffix[2];
-            OSIdentifier osId = (OSIdentifier)Utilities.ToUInt16BigEndian(Suffix, 2);
+            OSIdentifier osId = (OSIdentifier)EndianUtilities.ToUInt16BigEndian(Suffix, 2);
             return string.Format(CultureInfo.InvariantCulture, "{0} [UDF {1}.{2} : OS {3} {4}]", Identifier, major,
                 minor, osClass, osId);
         }

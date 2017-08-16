@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -343,12 +344,12 @@ namespace DiscUtils.Vmdk
 
         protected uint GetGrainTableEntry(int grain)
         {
-            return Utilities.ToUInt32LittleEndian(_grainTable, grain * 4);
+            return EndianUtilities.ToUInt32LittleEndian(_grainTable, grain * 4);
         }
 
         protected void SetGrainTableEntry(int grain, uint value)
         {
-            Utilities.WriteBytesLittleEndian(value, _grainTable, grain * 4);
+            EndianUtilities.WriteBytesLittleEndian(value, _grainTable, grain * 4);
         }
 
         protected virtual int ReadGrain(byte[] buffer, int bufferOffset, long grainStart, int grainOffset, int numToRead)
@@ -364,14 +365,14 @@ namespace DiscUtils.Vmdk
 
         protected virtual void LoadGlobalDirectory()
         {
-            int numGTs = (int)Utilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
+            int numGTs = (int)MathUtilities.Ceil(_header.Capacity * Sizes.Sector, _gtCoverage);
 
             _globalDirectory = new uint[numGTs];
             _fileStream.Position = _header.GdOffset * Sizes.Sector;
-            byte[] gdAsBytes = Utilities.ReadFully(_fileStream, numGTs * 4);
+            byte[] gdAsBytes = StreamUtilities.ReadFully(_fileStream, numGTs * 4);
             for (int i = 0; i < _globalDirectory.Length; ++i)
             {
-                _globalDirectory[i] = Utilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
+                _globalDirectory[i] = EndianUtilities.ToUInt32LittleEndian(gdAsBytes, i * 4);
             }
         }
 
@@ -400,7 +401,7 @@ namespace DiscUtils.Vmdk
 
             // Not cached, so read
             _fileStream.Position = (long)_globalDirectory[index] * Sizes.Sector;
-            byte[] newGrainTable = Utilities.ReadFully(_fileStream, (int)_header.NumGTEsPerGT * 4);
+            byte[] newGrainTable = StreamUtilities.ReadFully(_fileStream, (int)_header.NumGTEsPerGT * 4);
             _currentGrainTable = index;
             _grainTable = newGrainTable;
 
@@ -420,7 +421,7 @@ namespace DiscUtils.Vmdk
         private IEnumerable<StreamExtent> LayerExtents(long start, long count)
         {
             long maxPos = start + count;
-            long pos = FindNextPresentGrain(Utilities.RoundDown(start, _header.GrainSize * Sizes.Sector), maxPos);
+            long pos = FindNextPresentGrain(MathUtilities.RoundDown(start, _header.GrainSize * Sizes.Sector), maxPos);
             while (pos < maxPos)
             {
                 long end = FindNextAbsentGrain(pos, maxPos);

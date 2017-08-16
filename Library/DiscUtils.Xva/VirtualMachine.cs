@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.XPath;
 using DiscUtils.Archives;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Xva
 {

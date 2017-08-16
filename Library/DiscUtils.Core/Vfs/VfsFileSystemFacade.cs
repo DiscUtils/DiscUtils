@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vfs
 {
@@ -508,6 +509,30 @@ namespace DiscUtils.Vfs
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);
+        }
+
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get { return _wrapped.Size; }
+        }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { return _wrapped.UsedSpace; }
+        }
+ 
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get { return _wrapped.AvailableSpace; }
         }
 
         /// <summary>

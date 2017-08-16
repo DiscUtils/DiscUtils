@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -77,7 +78,8 @@ namespace DiscUtils.SquashFs
             {
                 if (_source == null)
                 {
-                    _source = new FileStream(_sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    var locator = new LocalFileLocator(string.Empty);
+                    _source = locator.Open(_sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     disposeSource = true;
                 }
 
@@ -87,7 +89,7 @@ namespace DiscUtils.SquashFs
                 }
 
                 long startPos = outStream.Position;
-                int bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
+                int bufferedBytes = StreamUtilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
 
                 if (bufferedBytes < context.DataBlockSize)
                 {
@@ -108,7 +110,7 @@ namespace DiscUtils.SquashFs
                     while (bufferedBytes > 0)
                     {
                         _lengths.Add(context.WriteDataBlock(context.IoBuffer, 0, bufferedBytes));
-                        bufferedBytes = Utilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
+                        bufferedBytes = StreamUtilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
                         _inode.FileSize += (uint)bufferedBytes;
                     }
                 }
@@ -140,7 +142,7 @@ namespace DiscUtils.SquashFs
             {
                 for (int i = 0; i < _lengths.Count; ++i)
                 {
-                    Utilities.WriteBytesLittleEndian(_lengths[i], context.IoBuffer, _inode.Size + i * 4);
+                    EndianUtilities.WriteBytesLittleEndian(_lengths[i], context.IoBuffer, _inode.Size + i * 4);
                 }
 
                 totalSize += _lengths.Count * 4;

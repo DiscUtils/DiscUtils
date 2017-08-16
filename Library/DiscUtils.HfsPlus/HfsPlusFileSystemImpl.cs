@@ -20,8 +20,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.HfsPlus
@@ -33,7 +34,7 @@ namespace DiscUtils.HfsPlus
         {
             s.Position = 1024;
 
-            byte[] headerBuf = Utilities.ReadFully(s, 512);
+            byte[] headerBuf = StreamUtilities.ReadFully(s, 512);
             VolumeHeader hdr = new VolumeHeader();
             hdr.ReadFrom(headerBuf, 0);
 
@@ -103,6 +104,29 @@ namespace DiscUtils.HfsPlus
                 return new Symlink(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
             }
             return new File(Context, dirEntry.NodeId, dirEntry.CatalogFileInfo);
+        }
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
         }
     }
 }

@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
@@ -53,23 +53,23 @@ namespace DiscUtils.Vmdk
         public static HostedSparseExtentHeader Read(byte[] buffer, int offset)
         {
             HostedSparseExtentHeader hdr = new HostedSparseExtentHeader();
-            hdr.MagicNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            hdr.Version = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            hdr.Flags = (HostedSparseExtentFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-            hdr.Capacity = Utilities.ToInt64LittleEndian(buffer, offset + 0x0C);
-            hdr.GrainSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x14);
-            hdr.DescriptorOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x1C);
-            hdr.DescriptorSize = Utilities.ToInt64LittleEndian(buffer, offset + 0x24);
-            hdr.NumGTEsPerGT = Utilities.ToUInt32LittleEndian(buffer, offset + 0x2C);
-            hdr.RgdOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x30);
-            hdr.GdOffset = Utilities.ToInt64LittleEndian(buffer, offset + 0x38);
-            hdr.Overhead = Utilities.ToInt64LittleEndian(buffer, offset + 0x40);
+            hdr.MagicNumber = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            hdr.Version = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+            hdr.Flags = (HostedSparseExtentFlags)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+            hdr.Capacity = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x0C);
+            hdr.GrainSize = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x14);
+            hdr.DescriptorOffset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x1C);
+            hdr.DescriptorSize = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x24);
+            hdr.NumGTEsPerGT = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x2C);
+            hdr.RgdOffset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x30);
+            hdr.GdOffset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x38);
+            hdr.Overhead = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x40);
             hdr.UncleanShutdown = buffer[offset + 0x48];
             hdr.SingleEndLineChar = buffer[offset + 0x49];
             hdr.NonEndLineChar = buffer[offset + 0x4A];
             hdr.DoubleEndLineChar1 = buffer[offset + 0x4B];
             hdr.DoubleEndLineChar2 = buffer[offset + 0x4C];
-            hdr.CompressAlgorithm = Utilities.ToUInt16LittleEndian(buffer, offset + 0x4D);
+            hdr.CompressAlgorithm = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x4D);
 
             return hdr;
         }
@@ -77,23 +77,23 @@ namespace DiscUtils.Vmdk
         public byte[] GetBytes()
         {
             byte[] buffer = new byte[Sizes.Sector];
-            Utilities.WriteBytesLittleEndian(MagicNumber, buffer, 0x00);
-            Utilities.WriteBytesLittleEndian(Version, buffer, 0x04);
-            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, 0x08);
-            Utilities.WriteBytesLittleEndian(Capacity, buffer, 0x0C);
-            Utilities.WriteBytesLittleEndian(GrainSize, buffer, 0x14);
-            Utilities.WriteBytesLittleEndian(DescriptorOffset, buffer, 0x1C);
-            Utilities.WriteBytesLittleEndian(DescriptorSize, buffer, 0x24);
-            Utilities.WriteBytesLittleEndian(NumGTEsPerGT, buffer, 0x2C);
-            Utilities.WriteBytesLittleEndian(RgdOffset, buffer, 0x30);
-            Utilities.WriteBytesLittleEndian(GdOffset, buffer, 0x38);
-            Utilities.WriteBytesLittleEndian(Overhead, buffer, 0x40);
+            EndianUtilities.WriteBytesLittleEndian(MagicNumber, buffer, 0x00);
+            EndianUtilities.WriteBytesLittleEndian(Version, buffer, 0x04);
+            EndianUtilities.WriteBytesLittleEndian((uint)Flags, buffer, 0x08);
+            EndianUtilities.WriteBytesLittleEndian(Capacity, buffer, 0x0C);
+            EndianUtilities.WriteBytesLittleEndian(GrainSize, buffer, 0x14);
+            EndianUtilities.WriteBytesLittleEndian(DescriptorOffset, buffer, 0x1C);
+            EndianUtilities.WriteBytesLittleEndian(DescriptorSize, buffer, 0x24);
+            EndianUtilities.WriteBytesLittleEndian(NumGTEsPerGT, buffer, 0x2C);
+            EndianUtilities.WriteBytesLittleEndian(RgdOffset, buffer, 0x30);
+            EndianUtilities.WriteBytesLittleEndian(GdOffset, buffer, 0x38);
+            EndianUtilities.WriteBytesLittleEndian(Overhead, buffer, 0x40);
             buffer[0x48] = UncleanShutdown;
             buffer[0x49] = SingleEndLineChar;
             buffer[0x4A] = NonEndLineChar;
             buffer[0x4B] = DoubleEndLineChar1;
             buffer[0x4C] = DoubleEndLineChar2;
-            Utilities.WriteBytesLittleEndian(CompressAlgorithm, buffer, 0x4D);
+            EndianUtilities.WriteBytesLittleEndian(CompressAlgorithm, buffer, 0x4D);
             return buffer;
         }
     }

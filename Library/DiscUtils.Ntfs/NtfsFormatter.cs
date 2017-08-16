@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -72,7 +72,7 @@ namespace DiscUtils.Ntfs
 
                 // Allocate a minimum of 8KB for the boot loader, but allow for more
                 int numBootClusters =
-                    Utilities.Ceil(Math.Max((int)(8 * Sizes.OneKiB), BootCode == null ? 0 : BootCode.Length),
+                    MathUtilities.Ceil(Math.Max((int)(8 * Sizes.OneKiB), BootCode == null ? 0 : BootCode.Length),
                         _clusterSize);
 
                 // Place MFT mirror in the middle of the volume
@@ -81,7 +81,7 @@ namespace DiscUtils.Ntfs
 
                 // The bitmap is also near the middle
                 _bitmapCluster = _mftMirrorCluster + 13;
-                int numBitmapClusters = (int)Utilities.Ceil(totalClusters / 8, _clusterSize);
+                int numBitmapClusters = (int)MathUtilities.Ceil(totalClusters / 8, _clusterSize);
 
                 // The MFT bitmap goes 'near' the start - approx 10% in - but ensure we avoid the bootloader
                 long mftBitmapCluster = Math.Max(3 + totalClusters / 10, numBootClusters);

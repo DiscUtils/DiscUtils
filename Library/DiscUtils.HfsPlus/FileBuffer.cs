@@ -23,6 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.HfsPlus
 {

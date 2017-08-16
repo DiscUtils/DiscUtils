@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iscsi
 {
@@ -55,11 +55,11 @@ namespace DiscUtils.Iscsi
                 throw new InvalidProtocolException("Data truncated too far");
             }
 
-            _availableLuns = Utilities.ToUInt32BigEndian(buffer, offset) / 8;
+            _availableLuns = EndianUtilities.ToUInt32BigEndian(buffer, offset) / 8;
             int pos = 8;
             while (pos <= count - 8 && Luns.Count < _availableLuns)
             {
-                Luns.Add(Utilities.ToUInt64BigEndian(buffer, offset + pos));
+                Luns.Add(EndianUtilities.ToUInt64BigEndian(buffer, offset + pos));
                 pos += 8;
             }
         }

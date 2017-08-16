@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -36,8 +36,8 @@ namespace DiscUtils.Udf
 
         protected override int Parse(byte[] buffer, int offset)
         {
-            VolumeSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            PartitionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
+            VolumeSequenceNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 2);
+            PartitionNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
             return 6;
         }
     }

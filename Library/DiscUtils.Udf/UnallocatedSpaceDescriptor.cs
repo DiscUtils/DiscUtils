@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -34,14 +34,14 @@ namespace DiscUtils.Udf
 
         public override int Parse(byte[] buffer, int offset)
         {
-            VolumeDescriptorSequenceNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
+            VolumeDescriptorSequenceNumber = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
 
-            uint numDescriptors = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
+            uint numDescriptors = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
             Extents = new ExtentAllocationDescriptor[numDescriptors];
 
             for (int i = 0; i < numDescriptors; ++i)
             {
-                Extents[i] = Utilities.ToStruct<ExtentAllocationDescriptor>(buffer, offset + 24 + i * 8);
+                Extents[i] = EndianUtilities.ToStruct<ExtentAllocationDescriptor>(buffer, offset + 24 + i * 8);
             }
 
             return (int)(24 + numDescriptors * 8);

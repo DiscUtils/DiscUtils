@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -54,7 +54,7 @@ namespace DiscUtils.HfsPlus
                 ++keySize;
             }
 
-            ChildId = Utilities.ToUInt32BigEndian(buffer, offset + keySize);
+            ChildId = EndianUtilities.ToUInt32BigEndian(buffer, offset + keySize);
 
             return _size;
         }

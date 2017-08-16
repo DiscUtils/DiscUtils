@@ -22,7 +22,7 @@
 
 using System;
 using System.Security.AccessControl;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -60,10 +60,10 @@ namespace DiscUtils.Registry
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            PreviousIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-            NextIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
-            UsageCount = Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
-            int secDescSize = Utilities.ToInt32LittleEndian(buffer, offset + 0x10);
+            PreviousIndex = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            NextIndex = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            UsageCount = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x0C);
+            int secDescSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x10);
 
             byte[] secDesc = new byte[secDescSize];
             Array.Copy(buffer, offset + 0x14, secDesc, 0, secDescSize);
@@ -77,11 +77,11 @@ namespace DiscUtils.Registry
         {
             byte[] sd = SecurityDescriptor.GetSecurityDescriptorBinaryForm();
 
-            Utilities.StringToBytes("sk", buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian(PreviousIndex, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(NextIndex, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(UsageCount, buffer, offset + 0x0C);
-            Utilities.WriteBytesLittleEndian(sd.Length, buffer, offset + 0x10);
+            EndianUtilities.StringToBytes("sk", buffer, offset, 2);
+            EndianUtilities.WriteBytesLittleEndian(PreviousIndex, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian(NextIndex, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(UsageCount, buffer, offset + 0x0C);
+            EndianUtilities.WriteBytesLittleEndian(sd.Length, buffer, offset + 0x10);
             Array.Copy(sd, 0, buffer, offset + 0x14, sd.Length);
         }
 

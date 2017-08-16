@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Vfs;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {

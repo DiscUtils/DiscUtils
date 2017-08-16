@@ -23,7 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
+using Buffer=DiscUtils.Streams.Buffer;
 
 namespace DiscUtils.Ext
 {
@@ -192,8 +193,8 @@ namespace DiscUtils.Ext
         {
             uint blockSize = _context.SuperBlock.BlockSize;
             _context.RawStream.Position = idxEntry.LeafPhysicalBlock * blockSize;
-            byte[] buffer = Utilities.ReadFully(_context.RawStream, (int)blockSize);
-            ExtentBlock subBlock = Utilities.ToStruct<ExtentBlock>(buffer, 0);
+            byte[] buffer = StreamUtilities.ReadFully(_context.RawStream, (int)blockSize);
+            ExtentBlock subBlock = EndianUtilities.ToStruct<ExtentBlock>(buffer, 0);
             return subBlock;
         }
     }

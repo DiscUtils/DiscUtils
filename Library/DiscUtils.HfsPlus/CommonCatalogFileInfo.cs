@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -41,8 +41,8 @@ namespace DiscUtils.HfsPlus
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            RecordType = (CatalogRecordType)Utilities.ToInt16BigEndian(buffer, offset + 0);
-            FileId = Utilities.ToUInt32BigEndian(buffer, offset + 8);
+            RecordType = (CatalogRecordType)EndianUtilities.ToInt16BigEndian(buffer, offset + 0);
+            FileId = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
             CreateTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 12);
             ContentModifyTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 16);
             AttributeModifyTime = HfsPlusUtilities.ReadHFSPlusDate(DateTimeKind.Utc, buffer, offset + 20);

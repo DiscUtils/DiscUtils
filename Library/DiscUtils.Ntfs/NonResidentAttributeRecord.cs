@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -111,7 +111,7 @@ namespace DiscUtils.Ntfs
         public int CompressionUnitSize
         {
             get { return 1 << _compressionUnitSize; }
-            set { _compressionUnitSize = (ushort)Utilities.Log2(value); }
+            set { _compressionUnitSize = (ushort)MathUtilities.Log2(value); }
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace DiscUtils.Ntfs
                     nameLength = (byte)Name.Length;
                 }
 
-                ushort dataOffset = (ushort)Utilities.RoundUp(nameOffset + nameLength * 2, 8);
+                ushort dataOffset = (ushort)MathUtilities.RoundUp(nameOffset + nameLength * 2, 8);
 
                 // Write out data first, since we know where it goes...
                 int dataLen = 0;
@@ -163,7 +163,7 @@ namespace DiscUtils.Ntfs
 
                 dataLen++; // NULL terminator
 
-                return Utilities.RoundUp(dataOffset + dataLen, 8);
+                return MathUtilities.RoundUp(dataOffset + dataLen, 8);
             }
         }
 
@@ -249,7 +249,7 @@ namespace DiscUtils.Ntfs
                 nameLength = (byte)Name.Length;
             }
 
-            ushort dataOffset = (ushort)Utilities.RoundUp(headerLength + nameLength * 2, 8);
+            ushort dataOffset = (ushort)MathUtilities.RoundUp(headerLength + nameLength * 2, 8);
 
             // Write out data first, since we know where it goes...
             int dataLen = 0;
@@ -261,27 +261,27 @@ namespace DiscUtils.Ntfs
             buffer[offset + dataOffset + dataLen] = 0; // NULL terminator
             dataLen++;
 
-            int length = Utilities.RoundUp(dataOffset + dataLen, 8);
+            int length = MathUtilities.RoundUp(dataOffset + dataLen, 8);
 
-            Utilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian(length, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian((uint)_type, buffer, offset + 0x00);
+            EndianUtilities.WriteBytesLittleEndian(length, buffer, offset + 0x04);
             buffer[offset + 0x08] = _nonResidentFlag;
             buffer[offset + 0x09] = nameLength;
-            Utilities.WriteBytesLittleEndian(nameOffset, buffer, offset + 0x0A);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
-            Utilities.WriteBytesLittleEndian(_attributeId, buffer, offset + 0x0E);
+            EndianUtilities.WriteBytesLittleEndian(nameOffset, buffer, offset + 0x0A);
+            EndianUtilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x0C);
+            EndianUtilities.WriteBytesLittleEndian(_attributeId, buffer, offset + 0x0E);
 
-            Utilities.WriteBytesLittleEndian(_startingVCN, buffer, offset + 0x10);
-            Utilities.WriteBytesLittleEndian(_lastVCN, buffer, offset + 0x18);
-            Utilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x20);
-            Utilities.WriteBytesLittleEndian(_compressionUnitSize, buffer, offset + 0x22);
-            Utilities.WriteBytesLittleEndian((uint)0, buffer, offset + 0x24); // Padding
-            Utilities.WriteBytesLittleEndian(_dataAllocatedSize, buffer, offset + 0x28);
-            Utilities.WriteBytesLittleEndian(_dataRealSize, buffer, offset + 0x30);
-            Utilities.WriteBytesLittleEndian(_initializedDataSize, buffer, offset + 0x38);
+            EndianUtilities.WriteBytesLittleEndian(_startingVCN, buffer, offset + 0x10);
+            EndianUtilities.WriteBytesLittleEndian(_lastVCN, buffer, offset + 0x18);
+            EndianUtilities.WriteBytesLittleEndian(dataOffset, buffer, offset + 0x20);
+            EndianUtilities.WriteBytesLittleEndian(_compressionUnitSize, buffer, offset + 0x22);
+            EndianUtilities.WriteBytesLittleEndian((uint)0, buffer, offset + 0x24); // Padding
+            EndianUtilities.WriteBytesLittleEndian(_dataAllocatedSize, buffer, offset + 0x28);
+            EndianUtilities.WriteBytesLittleEndian(_dataRealSize, buffer, offset + 0x30);
+            EndianUtilities.WriteBytesLittleEndian(_initializedDataSize, buffer, offset + 0x38);
             if ((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0)
             {
-                Utilities.WriteBytesLittleEndian(_compressedSize, buffer, offset + 0x40);
+                EndianUtilities.WriteBytesLittleEndian(_compressedSize, buffer, offset + 0x40);
             }
 
             if (Name != null)
@@ -368,16 +368,16 @@ namespace DiscUtils.Ntfs
 
             base.Read(buffer, offset, out length);
 
-            _startingVCN = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
-            _lastVCN = Utilities.ToUInt64LittleEndian(buffer, offset + 0x18);
-            _dataRunsOffset = Utilities.ToUInt16LittleEndian(buffer, offset + 0x20);
-            _compressionUnitSize = Utilities.ToUInt16LittleEndian(buffer, offset + 0x22);
-            _dataAllocatedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x28);
-            _dataRealSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x30);
-            _initializedDataSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x38);
+            _startingVCN = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x10);
+            _lastVCN = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x18);
+            _dataRunsOffset = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x20);
+            _compressionUnitSize = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x22);
+            _dataAllocatedSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x28);
+            _dataRealSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x30);
+            _initializedDataSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x38);
             if ((Flags & (AttributeFlags.Compressed | AttributeFlags.Sparse)) != 0 && _dataRunsOffset > 0x40)
             {
-                _compressedSize = Utilities.ToUInt64LittleEndian(buffer, offset + 0x40);
+                _compressedSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x40);
             }
 
             DataRuns = new List<DataRun>();

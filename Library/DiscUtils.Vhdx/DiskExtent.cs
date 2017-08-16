@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Streams;
+
 namespace DiscUtils.Vhdx
 {
     internal sealed class DiskExtent : VirtualDiskExtent

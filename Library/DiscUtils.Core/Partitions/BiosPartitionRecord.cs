@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Partitions
 {
@@ -43,8 +43,8 @@ namespace DiscUtils.Partitions
             EndHead = data[offset + 5];
             EndSector = (byte)(data[offset + 6] & 0x3F);
             EndCylinder = (ushort)(data[offset + 7] | ((data[offset + 6] & 0xC0) << 2));
-            LBAStart = Utilities.ToUInt32LittleEndian(data, offset + 8);
-            LBALength = Utilities.ToUInt32LittleEndian(data, offset + 12);
+            LBAStart = EndianUtilities.ToUInt32LittleEndian(data, offset + 8);
+            LBALength = EndianUtilities.ToUInt32LittleEndian(data, offset + 12);
             Index = index;
         }
 
@@ -100,8 +100,8 @@ namespace DiscUtils.Partitions
             buffer[offset + 5] = EndHead;
             buffer[offset + 6] = (byte)((EndSector & 0x3F) | ((EndCylinder >> 2) & 0xC0));
             buffer[offset + 7] = (byte)EndCylinder;
-            Utilities.WriteBytesLittleEndian(LBAStart, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(LBALength, buffer, offset + 12);
+            EndianUtilities.WriteBytesLittleEndian(LBAStart, buffer, offset + 8);
+            EndianUtilities.WriteBytesLittleEndian(LBALength, buffer, offset + 12);
         }
     }
 }

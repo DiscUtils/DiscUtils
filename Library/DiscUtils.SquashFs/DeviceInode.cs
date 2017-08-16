@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -37,8 +37,8 @@ namespace DiscUtils.SquashFs
         {
             base.ReadFrom(buffer, offset);
 
-            NumLinks = Utilities.ToInt32LittleEndian(buffer, offset + 16);
-            DeviceId = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
+            NumLinks = EndianUtilities.ToInt32LittleEndian(buffer, offset + 16);
+            DeviceId = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
 
             return 24;
         }

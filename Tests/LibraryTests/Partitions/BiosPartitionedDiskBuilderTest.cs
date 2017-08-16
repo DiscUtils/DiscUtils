@@ -23,6 +23,7 @@
 using System.IO;
 using DiscUtils;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 using Xunit;
 
 namespace LibraryTests.Partitions

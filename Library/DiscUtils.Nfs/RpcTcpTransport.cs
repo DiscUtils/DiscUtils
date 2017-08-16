@@ -26,7 +26,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Nfs
 {
@@ -142,7 +142,7 @@ namespace DiscUtils.Nfs
                     try
                     {
                         byte[] header = new byte[4];
-                        Utilities.WriteBytesBigEndian(0x80000000 | (uint)message.Length, header, 0);
+                        EndianUtilities.WriteBytesBigEndian(0x80000000 | (uint)message.Length, header, 0);
                         _tcpStream.Write(header, 0, 4);
                         _tcpStream.Write(message, 0, message.Length);
                         _tcpStream.Flush();
@@ -184,11 +184,11 @@ namespace DiscUtils.Nfs
 
             while (!lastFragFound)
             {
-                byte[] header = Utilities.ReadFully(_tcpStream, 4);
-                uint headerVal = Utilities.ToUInt32BigEndian(header, 0);
+                byte[] header = StreamUtilities.ReadFully(_tcpStream, 4);
+                uint headerVal = EndianUtilities.ToUInt32BigEndian(header, 0);
 
                 lastFragFound = (headerVal & 0x80000000) != 0;
-                byte[] frag = Utilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
+                byte[] frag = StreamUtilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
 
                 if (ms != null)
                 {

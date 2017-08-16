@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -43,13 +43,13 @@ namespace DiscUtils.Udf
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            TagIdentifier = (TagIdentifier)Utilities.ToUInt16LittleEndian(buffer, offset);
-            DescriptorVersion = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
+            TagIdentifier = (TagIdentifier)EndianUtilities.ToUInt16LittleEndian(buffer, offset);
+            DescriptorVersion = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 2);
             TagChecksum = buffer[offset + 4];
-            TagSerialNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            DescriptorCrc = Utilities.ToUInt16LittleEndian(buffer, offset + 8);
-            DescriptorCrcLength = Utilities.ToUInt16LittleEndian(buffer, offset + 10);
-            TagLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
+            TagSerialNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 6);
+            DescriptorCrc = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 8);
+            DescriptorCrcLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 10);
+            TagLocation = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 12);
 
             return 16;
         }
@@ -63,7 +63,7 @@ namespace DiscUtils.Udf
         {
             byte checkSum = 0;
 
-            if (Utilities.ToUInt16LittleEndian(buffer, offset) == 0)
+            if (EndianUtilities.ToUInt16LittleEndian(buffer, offset) == 0)
             {
                 return false;
             }
@@ -83,7 +83,7 @@ namespace DiscUtils.Udf
 
         public static bool TryFromStream(Stream stream, out DescriptorTag result)
         {
-            byte[] next = Utilities.ReadFully(stream, 512);
+            byte[] next = StreamUtilities.ReadFully(stream, 512);
             if (!IsValid(next, 0))
             {
                 result = null;

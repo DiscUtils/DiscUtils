@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.LogicalDiskManager
 {
@@ -43,7 +43,7 @@ namespace DiscUtils.LogicalDiskManager
 
             stream.Position = dbStart + _vmdb.HeaderSize;
 
-            buffer = Utilities.ReadFully(stream, (int)(_vmdb.BlockSize * _vmdb.NumVBlks));
+            buffer = StreamUtilities.ReadFully(stream, (int)(_vmdb.BlockSize * _vmdb.NumVBlks));
 
             _records = new Dictionary<ulong, DatabaseRecord>();
             for (int i = 0; i < _vmdb.NumVBlks; ++i)

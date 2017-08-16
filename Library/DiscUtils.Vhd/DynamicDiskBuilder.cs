@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhd
 {
@@ -40,7 +40,7 @@ namespace DiscUtils.Vhd
             _blockSize = blockSize;
         }
 
-        internal override List<BuilderExtent> FixExtents(out long totalLength)
+        protected override List<BuilderExtent> FixExtents(out long totalLength)
         {
             const int FooterSize = 512;
             const int DynHeaderSize = 1024;
@@ -98,7 +98,7 @@ namespace DiscUtils.Vhd
             private readonly uint[] _entries;
 
             public BlockAllocationTableExtent(long start, int maxEntries)
-                : base(start, Utilities.RoundUp(maxEntries * 4, 512))
+                : base(start, MathUtilities.RoundUp(maxEntries * 4, 512))
             {
                 _entries = new uint[Length / 4];
                 for (int i = 0; i < _entries.Length; ++i)
@@ -121,25 +121,25 @@ namespace DiscUtils.Vhd
                 _entries[index] = fileSector;
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 byte[] buffer = new byte[Length];
 
                 for (int i = 0; i < _entries.Length; ++i)
                 {
-                    Utilities.WriteBytesBigEndian(_entries[i], buffer, i * 4);
+                    EndianUtilities.WriteBytesBigEndian(_entries[i], buffer, i * 4);
                 }
 
                 _dataStream = new MemoryStream(buffer, false);
             }
 
-            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            public override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 _dataStream.Position = diskOffset - Start;
                 return _dataStream.Read(block, offset, count);
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 if (_dataStream != null)
                 {
@@ -161,8 +161,8 @@ namespace DiscUtils.Vhd
             public DataBlockExtent(long start, SparseStream content, Ownership ownership)
                 : base(
                     start,
-                    Utilities.RoundUp(Utilities.Ceil(content.Length, Sizes.Sector) / 8, Sizes.Sector) +
-                    Utilities.RoundUp(content.Length, Sizes.Sector))
+                    MathUtilities.RoundUp(MathUtilities.Ceil(content.Length, Sizes.Sector) / 8, Sizes.Sector) +
+                    MathUtilities.RoundUp(content.Length, Sizes.Sector))
             {
                 _content = content;
                 _ownership = ownership;
@@ -183,10 +183,10 @@ namespace DiscUtils.Vhd
                 }
             }
 
-            internal override void PrepareForRead()
+            public override void PrepareForRead()
             {
                 byte[] bitmap =
-                    new byte[Utilities.RoundUp(Utilities.Ceil(_content.Length, Sizes.Sector) / 8, Sizes.Sector)];
+                    new byte[MathUtilities.RoundUp(MathUtilities.Ceil(_content.Length, Sizes.Sector) / 8, Sizes.Sector)];
 
                 foreach (Range<long, long> range in StreamExtent.Blocks(_content.Extents, Sizes.Sector))
                 {
@@ -200,7 +200,7 @@ namespace DiscUtils.Vhd
                 _bitmapStream = new MemoryStream(bitmap, false);
             }
 
-            internal override int Read(long diskOffset, byte[] block, int offset, int count)
+            public override int Read(long diskOffset, byte[] block, int offset, int count)
             {
                 long position = diskOffset - Start;
                 if (position < _bitmapStream.Length)
@@ -212,7 +212,7 @@ namespace DiscUtils.Vhd
                 return _content.Read(block, offset, count);
             }
 
-            internal override void DisposeReadState()
+            public override void DisposeReadState()
             {
                 if (_bitmapStream != null)
                 {

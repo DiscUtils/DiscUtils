@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils;
+using DiscUtils.Streams;
 
 namespace LibraryTests
 {
@@ -48,6 +49,12 @@ namespace LibraryTests
         {
             get { throw new NotImplementedException(); }
         }
+
+        public override long Size => throw new NotImplementedException();
+
+        public override long UsedSpace => throw new NotImplementedException();
+
+        public override long AvailableSpace => throw new NotImplementedException();
 
         public override void CopyFile(string sourceFile, string destinationFile, bool overwrite)
         {

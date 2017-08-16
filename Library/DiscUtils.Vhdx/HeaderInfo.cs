@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -116,8 +116,8 @@ namespace DiscUtils.Vhdx
             get
             {
                 byte[] buffer = new byte[4];
-                Utilities.WriteBytesLittleEndian(_header.Signature, buffer, 0);
-                return Utilities.BytesToString(buffer, 0, 4);
+                EndianUtilities.WriteBytesLittleEndian(_header.Signature, buffer, 0);
+                return EndianUtilities.BytesToString(buffer, 0, 4);
             }
         }
 

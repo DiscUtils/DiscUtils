@@ -22,12 +22,13 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
     internal class CompressionAttribute
     {
+        #pragma warning disable CS0169 // Unused fields.
         private byte _attrData1;
         private byte _attrData2;
         private uint _compressionMagic;
@@ -35,6 +36,7 @@ namespace DiscUtils.HfsPlus
         private uint _reserved1;
         private uint _reserved2;
         private uint _reserved3;
+        #pragma warning restore CS0169
 
         public uint AttrSize { get; private set; }
 
@@ -54,14 +56,14 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            _recordType = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            _reserved1 = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            _reserved1 = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            AttrSize = Utilities.ToUInt32BigEndian(buffer, offset + 12);
-            _compressionMagic = Utilities.ToUInt32BigEndian(buffer, offset + 16);
-            CompressionType = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            UncompressedSize = Utilities.ToUInt32LittleEndian(buffer, offset + 24);
-            _reserved3 = Utilities.ToUInt32BigEndian(buffer, offset + 28);
+            _recordType = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            _reserved1 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            _reserved1 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
+            AttrSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
+            _compressionMagic = EndianUtilities.ToUInt32BigEndian(buffer, offset + 16);
+            CompressionType = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
+            UncompressedSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 24);
+            _reserved3 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 28);
 
             return Size;
         }

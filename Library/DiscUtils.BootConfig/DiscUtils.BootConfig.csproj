@@ -3,10 +3,9 @@
   <PropertyGroup>
     <Description>DiscUtils BootConfig parser</Description>
     <AssemblyTitle>DiscUtils.BootConfig</AssemblyTitle>
-    <VersionPrefix>0.12.2-alpha</VersionPrefix>
+    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
-    <PublicSign>true</PublicSign>
     <AssemblyName>DiscUtils.BootConfig</AssemblyName>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

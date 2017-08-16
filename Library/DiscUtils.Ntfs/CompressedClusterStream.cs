@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -67,12 +67,12 @@ namespace DiscUtils.Ntfs
 
         public override void ExpandToClusters(long numVirtualClusters, NonResidentAttributeRecord extent, bool allocate)
         {
-            _rawStream.ExpandToClusters(Utilities.RoundUp(numVirtualClusters, _attr.CompressionUnitSize), extent, false);
+            _rawStream.ExpandToClusters(MathUtilities.RoundUp(numVirtualClusters, _attr.CompressionUnitSize), extent, false);
         }
 
         public override void TruncateToClusters(long numVirtualClusters)
         {
-            long alignedNum = Utilities.RoundUp(numVirtualClusters, _attr.CompressionUnitSize);
+            long alignedNum = MathUtilities.RoundUp(numVirtualClusters, _attr.CompressionUnitSize);
             _rawStream.TruncateToClusters(alignedNum);
             if (alignedNum != numVirtualClusters)
             {
@@ -209,7 +209,7 @@ namespace DiscUtils.Ntfs
             else if (result == CompressionResult.Compressed &&
                      _attr.CompressionUnitSize * _bytesPerCluster - compressedLength > _bytesPerCluster)
             {
-                int compClusters = Utilities.Ceil(compressedLength, _bytesPerCluster);
+                int compClusters = MathUtilities.Ceil(compressedLength, _bytesPerCluster);
                 totalAllocated += _rawStream.AllocateClusters(focusVcn, compClusters);
                 totalAllocated += _rawStream.WriteClusters(focusVcn, compClusters, _ioBuffer, 0);
                 totalAllocated -= _rawStream.ReleaseClusters(focusVcn + compClusters,
@@ -226,7 +226,7 @@ namespace DiscUtils.Ntfs
 
         private long CompressionStart(long vcn)
         {
-            return Utilities.RoundDown(vcn, _attr.CompressionUnitSize);
+            return MathUtilities.RoundDown(vcn, _attr.CompressionUnitSize);
         }
 
         private void LoadCache(long vcn)

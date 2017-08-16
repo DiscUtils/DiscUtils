@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhdx
 {
@@ -40,16 +40,16 @@ namespace DiscUtils.Vhdx
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            BlockSize = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            Flags = (FileParametersFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 4);
+            BlockSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            Flags = (FileParametersFlags)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
 
             return 8;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(BlockSize, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 4);
+            EndianUtilities.WriteBytesLittleEndian(BlockSize, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian((uint)Flags, buffer, offset + 4);
         }
     }
 }

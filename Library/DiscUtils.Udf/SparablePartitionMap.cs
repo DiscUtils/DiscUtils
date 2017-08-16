@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -40,15 +40,15 @@ namespace DiscUtils.Udf
 
         protected override int Parse(byte[] buffer, int offset)
         {
-            VolumeSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
-            PartitionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 38);
-            PacketLength = Utilities.ToUInt16LittleEndian(buffer, offset + 40);
+            VolumeSequenceNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 36);
+            PartitionNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 38);
+            PacketLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 40);
             NumSparingTables = buffer[offset + 42];
-            SparingTableSize = Utilities.ToUInt32LittleEndian(buffer, offset + 44);
+            SparingTableSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 44);
             LocationsOfSparingTables = new uint[NumSparingTables];
             for (int i = 0; i < NumSparingTables; ++i)
             {
-                LocationsOfSparingTables[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 48 + 4 * i);
+                LocationsOfSparingTables[i] = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 48 + 4 * i);
             }
 
             return 64;

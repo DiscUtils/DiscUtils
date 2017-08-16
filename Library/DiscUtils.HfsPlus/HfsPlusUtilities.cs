@@ -22,7 +22,7 @@
 
 using System;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -390,13 +390,13 @@ namespace DiscUtils.HfsPlus
 
         public static string ReadUniStr255(byte[] buffer, int offset)
         {
-            int len = Utilities.ToUInt16BigEndian(buffer, offset + 0);
+            int len = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0);
             return Encoding.BigEndianUnicode.GetString(buffer, offset + 2, len * 2);
         }
 
         public static DateTime ReadHFSPlusDate(DateTimeKind kind, byte[] buffer, int offset)
         {
-            uint val = Utilities.ToUInt32BigEndian(buffer, offset);
+            uint val = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             DateTime epoch = new DateTime(1904, 1, 1, 0, 0, 0, 0, kind);
             DateTime result = epoch.AddSeconds(val);
 
@@ -406,14 +406,14 @@ namespace DiscUtils.HfsPlus
         public static UnixFileSystemInfo ReadBsdInfo(byte[] buffer, int offset, out uint special)
         {
             UnixFileSystemInfo result = new UnixFileSystemInfo();
-            result.UserId = Utilities.ToInt32BigEndian(buffer, offset + 0);
-            result.GroupId = Utilities.ToInt32BigEndian(buffer, offset + 4);
+            result.UserId = EndianUtilities.ToInt32BigEndian(buffer, offset + 0);
+            result.GroupId = EndianUtilities.ToInt32BigEndian(buffer, offset + 4);
 
-            ushort fileMode = Utilities.ToUInt16BigEndian(buffer, offset + 8);
+            ushort fileMode = EndianUtilities.ToUInt16BigEndian(buffer, offset + 8);
             result.FileType = (UnixFileType)((fileMode >> 12) & 0xF);
             result.Permissions = (UnixFilePermissions)(fileMode & 0xFFF);
 
-            special = Utilities.ToUInt32BigEndian(buffer, offset + 10);
+            special = EndianUtilities.ToUInt32BigEndian(buffer, offset + 10);
             if (result.FileType == UnixFileType.Block || result.FileType == UnixFileType.Character)
             {
                 result.DeviceId = special;

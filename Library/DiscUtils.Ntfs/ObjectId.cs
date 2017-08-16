@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -37,13 +37,13 @@ namespace DiscUtils.Ntfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Id = Utilities.ToGuidLittleEndian(buffer, offset);
+            Id = EndianUtilities.ToGuidLittleEndian(buffer, offset);
             return 16;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(Id, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian(Id, buffer, offset);
         }
 
         public void Dump(TextWriter writer, string indent)

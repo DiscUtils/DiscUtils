@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vdi
 {
@@ -45,15 +45,15 @@ namespace DiscUtils.Vdi
 
         public int Read(byte[] buffer, int offset)
         {
-            FileInfo = Utilities.BytesToString(buffer, offset + 0, 64).TrimEnd('\0');
-            Signature = Utilities.ToUInt32LittleEndian(buffer, offset + 64);
-            Version = new FileVersion(Utilities.ToUInt32LittleEndian(buffer, offset + 68));
+            FileInfo = EndianUtilities.BytesToString(buffer, offset + 0, 64).TrimEnd('\0');
+            Signature = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 64);
+            Version = new FileVersion(EndianUtilities.ToUInt32LittleEndian(buffer, offset + 68));
             return Size;
         }
 
         public void Read(Stream s)
         {
-            byte[] buffer = Utilities.ReadFully(s, 72);
+            byte[] buffer = StreamUtilities.ReadFully(s, 72);
             Read(buffer, 0);
         }
 
@@ -66,9 +66,9 @@ namespace DiscUtils.Vdi
 
         public void Write(byte[] buffer, int offset)
         {
-            Utilities.StringToBytes(FileInfo, buffer, offset + 0, 64);
-            Utilities.WriteBytesLittleEndian(Signature, buffer, offset + 64);
-            Utilities.WriteBytesLittleEndian(Version.Value, buffer, offset + 68);
+            EndianUtilities.StringToBytes(FileInfo, buffer, offset + 0, 64);
+            EndianUtilities.WriteBytesLittleEndian(Signature, buffer, offset + 64);
+            EndianUtilities.WriteBytesLittleEndian(Version.Value, buffer, offset + 68);
         }
     }
 }

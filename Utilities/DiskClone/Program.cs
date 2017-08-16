@@ -29,6 +29,7 @@ using DiscUtils;
 using DiscUtils.Common;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiskClone
 {

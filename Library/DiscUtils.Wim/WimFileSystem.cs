@@ -27,6 +27,7 @@ using System.IO;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -499,6 +500,30 @@ namespace DiscUtils.Wim
 
             return dirEntry.GetStreamHash(altStreamPart);
         }
+ 
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+ 
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
 
         /// <summary>
         /// Disposes of this instance.
@@ -583,7 +608,7 @@ namespace DiscUtils.Wim
                 reader.Skip((int)(startPos + totalLength - reader.Position));
             }
 
-            _rootDirPos = Utilities.RoundUp(startPos + totalLength, 8);
+            _rootDirPos = MathUtilities.RoundUp(startPos + totalLength, 8);
         }
 
         private DirectoryEntry GetEntry(string path)

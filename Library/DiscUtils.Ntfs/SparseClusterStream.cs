@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -86,7 +86,7 @@ namespace DiscUtils.Ntfs
 
         private long CompressionStart(long vcn)
         {
-            return Utilities.RoundUp(vcn, _attr.CompressionUnitSize);
+            return MathUtilities.RoundUp(vcn, _attr.CompressionUnitSize);
         }
     }
 }

@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Iso9660
 {
@@ -38,7 +38,7 @@ namespace DiscUtils.Iso9660
             {
                 context.DataStream.Position = contEntry.Block * (long)context.VolumeDescriptor.LogicalBlockSize +
                                               contEntry.BlockOffset;
-                byte[] contData = Utilities.ReadFully(context.DataStream, (int)contEntry.Length);
+                byte[] contData = StreamUtilities.ReadFully(context.DataStream, (int)contEntry.Length);
 
                 contEntry = Parse(context, contData, 0);
             }

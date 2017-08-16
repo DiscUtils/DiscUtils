@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -53,17 +53,17 @@ namespace DiscUtils.Ntfs
             ModificationTime = ReadDateTime(buffer, 0x08);
             MftChangedTime = ReadDateTime(buffer, 0x10);
             LastAccessTime = ReadDateTime(buffer, 0x18);
-            FileAttributes = (FileAttributeFlags)Utilities.ToUInt32LittleEndian(buffer, 0x20);
-            MaxVersions = Utilities.ToUInt32LittleEndian(buffer, 0x24);
-            Version = Utilities.ToUInt32LittleEndian(buffer, 0x28);
-            ClassId = Utilities.ToUInt32LittleEndian(buffer, 0x2C);
+            FileAttributes = (FileAttributeFlags)EndianUtilities.ToUInt32LittleEndian(buffer, 0x20);
+            MaxVersions = EndianUtilities.ToUInt32LittleEndian(buffer, 0x24);
+            Version = EndianUtilities.ToUInt32LittleEndian(buffer, 0x28);
+            ClassId = EndianUtilities.ToUInt32LittleEndian(buffer, 0x2C);
 
             if (buffer.Length > 0x30)
             {
-                OwnerId = Utilities.ToUInt32LittleEndian(buffer, 0x30);
-                SecurityId = Utilities.ToUInt32LittleEndian(buffer, 0x34);
-                QuotaCharged = Utilities.ToUInt64LittleEndian(buffer, 0x38);
-                UpdateSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, 0x40);
+                OwnerId = EndianUtilities.ToUInt32LittleEndian(buffer, 0x30);
+                SecurityId = EndianUtilities.ToUInt32LittleEndian(buffer, 0x34);
+                QuotaCharged = EndianUtilities.ToUInt64LittleEndian(buffer, 0x38);
+                UpdateSequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, 0x40);
                 _haveExtraFields = true;
                 return 0x48;
             }
@@ -73,21 +73,21 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(CreationTime.ToFileTimeUtc(), buffer, 0x00);
-            Utilities.WriteBytesLittleEndian(ModificationTime.ToFileTimeUtc(), buffer, 0x08);
-            Utilities.WriteBytesLittleEndian(MftChangedTime.ToFileTimeUtc(), buffer, 0x10);
-            Utilities.WriteBytesLittleEndian(LastAccessTime.ToFileTimeUtc(), buffer, 0x18);
-            Utilities.WriteBytesLittleEndian((uint)FileAttributes, buffer, 0x20);
-            Utilities.WriteBytesLittleEndian(MaxVersions, buffer, 0x24);
-            Utilities.WriteBytesLittleEndian(Version, buffer, 0x28);
-            Utilities.WriteBytesLittleEndian(ClassId, buffer, 0x2C);
+            EndianUtilities.WriteBytesLittleEndian(CreationTime.ToFileTimeUtc(), buffer, 0x00);
+            EndianUtilities.WriteBytesLittleEndian(ModificationTime.ToFileTimeUtc(), buffer, 0x08);
+            EndianUtilities.WriteBytesLittleEndian(MftChangedTime.ToFileTimeUtc(), buffer, 0x10);
+            EndianUtilities.WriteBytesLittleEndian(LastAccessTime.ToFileTimeUtc(), buffer, 0x18);
+            EndianUtilities.WriteBytesLittleEndian((uint)FileAttributes, buffer, 0x20);
+            EndianUtilities.WriteBytesLittleEndian(MaxVersions, buffer, 0x24);
+            EndianUtilities.WriteBytesLittleEndian(Version, buffer, 0x28);
+            EndianUtilities.WriteBytesLittleEndian(ClassId, buffer, 0x2C);
 
             if (_haveExtraFields)
             {
-                Utilities.WriteBytesLittleEndian(OwnerId, buffer, 0x30);
-                Utilities.WriteBytesLittleEndian(SecurityId, buffer, 0x34);
-                Utilities.WriteBytesLittleEndian(QuotaCharged, buffer, 0x38);
-                Utilities.WriteBytesLittleEndian(UpdateSequenceNumber, buffer, 0x38);
+                EndianUtilities.WriteBytesLittleEndian(OwnerId, buffer, 0x30);
+                EndianUtilities.WriteBytesLittleEndian(SecurityId, buffer, 0x34);
+                EndianUtilities.WriteBytesLittleEndian(QuotaCharged, buffer, 0x38);
+                EndianUtilities.WriteBytesLittleEndian(UpdateSequenceNumber, buffer, 0x38);
             }
         }
 
@@ -143,7 +143,7 @@ namespace DiscUtils.Ntfs
         {
             try
             {
-                return DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset));
+                return DateTime.FromFileTimeUtc(EndianUtilities.ToInt64LittleEndian(buffer, offset));
             }
             catch (ArgumentException)
             {

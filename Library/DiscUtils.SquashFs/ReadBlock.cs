@@ -1,4 +1,4 @@
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {

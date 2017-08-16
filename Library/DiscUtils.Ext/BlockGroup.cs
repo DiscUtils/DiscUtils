@@ -21,10 +21,38 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
+    internal class BlockGroup64 : BlockGroup
+    {
+        public const int DescriptorSize64 = 64;
+
+        public uint BlockBitmapBlockHigh;
+        public uint InodeBitmapBlockHigh;
+        public uint InodeTableBlockHigh;
+        public ushort FreeBlocksCountHigh;
+        public ushort FreeInodesCountHigh;
+        public ushort UsedDirsCountHigh;
+
+        public override int Size { get { return DescriptorSize64; } }
+
+        public override int ReadFrom(byte[] buffer, int offset)
+        {
+            base.ReadFrom(buffer, offset);
+
+            BlockBitmapBlockHigh = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x20);
+            InodeBitmapBlockHigh = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x24);
+            InodeTableBlockHigh = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0x28);
+            FreeBlocksCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2C);
+            FreeInodesCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2E);
+            UsedDirsCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x30);
+
+            return DescriptorSize64;
+        }
+    }
+
     internal class BlockGroup : IByteArraySerializable
     {
         public const int DescriptorSize = 32;
@@ -36,19 +64,19 @@ namespace DiscUtils.Ext
         public uint InodeTableBlock;
         public ushort UsedDirsCount;
 
-        public int Size
+        public virtual int Size
         {
             get { return DescriptorSize; }
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
+        public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            BlockBitmapBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 0);
-            InodeBitmapBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            InodeTableBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-            FreeBlocksCount = Utilities.ToUInt16LittleEndian(buffer, offset + 12);
-            FreeInodesCount = Utilities.ToUInt16LittleEndian(buffer, offset + 14);
-            UsedDirsCount = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
+            BlockBitmapBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            InodeBitmapBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+            InodeTableBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+            FreeBlocksCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 12);
+            FreeInodesCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 14);
+            UsedDirsCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 16);
 
             return DescriptorSize;
         }

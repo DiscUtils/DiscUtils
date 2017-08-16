@@ -27,6 +27,7 @@ using System.IO;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -69,7 +70,7 @@ namespace DiscUtils.Ntfs
             _fileCache = new ObjectCache<long, File>();
 
             stream.Position = 0;
-            byte[] bytes = Utilities.ReadFully(stream, 512);
+            byte[] bytes = StreamUtilities.ReadFully(stream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
             if (!IsValidBPB(_context.BiosParameterBlock, stream.Length))
@@ -188,7 +189,7 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return Utilities.Ceil(_context.BiosParameterBlock.TotalSectors64,
+                return MathUtilities.Ceil(_context.BiosParameterBlock.TotalSectors64,
                     _context.BiosParameterBlock.SectorsPerCluster);
             }
         }
@@ -1002,7 +1003,7 @@ namespace DiscUtils.Ntfs
         {
             using (Stream s = OpenFile(@"\$Boot", FileMode.Open))
             {
-                return Utilities.ReadFully(s, (int)s.Length);
+                return StreamUtilities.ReadFully(s, (int)s.Length);
             }
         }
 
@@ -1151,7 +1152,7 @@ namespace DiscUtils.Ntfs
                     // If there's an existing reparse point, unhook it.
                     using (Stream contentStream = stream.Open(FileAccess.Read))
                     {
-                        byte[] oldRpBuffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                        byte[] oldRpBuffer = StreamUtilities.ReadFully(contentStream, (int)contentStream.Length);
                         ReparsePointRecord rp = new ReparsePointRecord();
                         rp.ReadFrom(oldRpBuffer, 0);
                         _context.ReparsePoints.Remove(rp.Tag, dirEntry.Reference);
@@ -1216,7 +1217,7 @@ namespace DiscUtils.Ntfs
 
                     using (Stream contentStream = stream.Open(FileAccess.Read))
                     {
-                        byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                        byte[] buffer = StreamUtilities.ReadFully(contentStream, (int)contentStream.Length);
                         rp.ReadFrom(buffer, 0);
                         return new ReparsePoint((int)rp.Tag, rp.Content);
                     }
@@ -1631,7 +1632,7 @@ namespace DiscUtils.Ntfs
             }
 
             stream.Position = 0;
-            byte[] bytes = Utilities.ReadFully(stream, 512);
+            byte[] bytes = StreamUtilities.ReadFully(stream, 512);
             BiosParameterBlock bpb = BiosParameterBlock.FromBytes(bytes, 0);
 
             return IsValidBPB(bpb, stream.Length);
@@ -1900,7 +1901,7 @@ namespace DiscUtils.Ntfs
             _context.BiosParameterBlock.NumHeads = (ushort)geometry.HeadsPerCylinder;
 
             _context.RawStream.Position = 0;
-            byte[] bpbSector = Utilities.ReadFully(_context.RawStream, 512);
+            byte[] bpbSector = StreamUtilities.ReadFully(_context.RawStream, 512);
 
             _context.BiosParameterBlock.ToBytes(bpbSector, 0);
 
@@ -2171,7 +2172,7 @@ namespace DiscUtils.Ntfs
 
                 using (Stream contentStream = stream.Open(FileAccess.Read))
                 {
-                    byte[] buffer = Utilities.ReadFully(contentStream, (int)contentStream.Length);
+                    byte[] buffer = StreamUtilities.ReadFully(contentStream, (int)contentStream.Length);
                     rp.ReadFrom(buffer, 0);
                 }
 
@@ -2408,5 +2409,39 @@ namespace DiscUtils.Ntfs
         }
 
         #endregion
+ 
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get { return TotalClusters* ClusterSize;  }
+        }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get
+            {
+                long usedCluster = 0;
+                var bitmap = _context.ClusterBitmap.Bitmap;
+                var processed = 0L;
+                while (processed < bitmap.Size)
+                {
+                    byte[] buffer = new byte[4*Sizes.OneKiB];
+                    var count = bitmap.GetBytes(processed, buffer, 0, buffer.Length);
+                    usedCluster += BitCounter.Count(buffer, 0, count);
+                    processed += count;
+                }
+                return (usedCluster* ClusterSize);
+            }
+        }
+ 
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace { get { return Size - UsedSpace; } }
     }
 }

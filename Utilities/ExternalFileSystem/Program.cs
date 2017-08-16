@@ -26,6 +26,7 @@ using System.IO;
 using System.Text;
 using DiscUtils;
 using DiscUtils.Setup;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace ExternalFileSystem
@@ -295,6 +296,12 @@ namespace ExternalFileSystem
         {
             get { return false; }
         }
+
+        public override long Size => throw new NotImplementedException();
+
+        public override long UsedSpace => throw new NotImplementedException();
+
+        public override long AvailableSpace => throw new NotImplementedException();
     }
 
     [VfsFileSystemFactory]

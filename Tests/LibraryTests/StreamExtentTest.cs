@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using DiscUtils;
+using DiscUtils.Streams;
 using Xunit;
 
 namespace LibraryTests

@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhd
 {
@@ -154,7 +154,7 @@ namespace DiscUtils.Vhd
                         || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
                     {
                         _vhdStream.Position = pl.PlatformDataOffset;
-                        byte[] buffer = Utilities.ReadFully(_vhdStream, pl.PlatformDataLength);
+                        byte[] buffer = StreamUtilities.ReadFully(_vhdStream, pl.PlatformDataLength);
                         vals.Add(Encoding.Unicode.GetString(buffer));
                     }
                 }

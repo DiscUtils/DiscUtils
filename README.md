@@ -11,7 +11,7 @@ Note: this is a fork of https://github.com/quamotion/DiscUtils, which itself is 
 
 ### Wiki
 
-See more up to date documentation at the [Wiki](https://github.com/LordMike/DiscUtils/wiki)
+See more up to date documentation at the [Wiki](https://github.com/DiscUtils/DiscUtils/wiki)
 
 ### Implementation in this repository
 
@@ -21,10 +21,10 @@ The DiscUtils library has been split into 25 independent projects, which can fun
 
 To work with this, four Meta packages have been created:
 
-* LordMike.DiscUtils.Complete: Everything, like before
-* LordMike.DiscUtils.Containers: such as VMDK, VHD, VHDX
-* LordMike.DiscUtils.FileSystems: such as NTFS, FAT, EXT
-* LordMike.DiscUtils.Transports: such as NFS
+* DiscUtils.Complete: Everything, like before
+* DiscUtils.Containers: such as VMDK, VHD, VHDX
+* DiscUtils.FileSystems: such as NTFS, FAT, EXT
+* DiscUtils.Transports: such as NFS
 
 #### Note on detections
 
@@ -34,10 +34,10 @@ DiscUtils has a number of detection helpers. These provide services like "which 
 
 Where `assembly` is the assembly you wish to register. Note that the metapackages have helpers:
 
-    SetupHelper.SetupComplete(); // From LordMike.DiscUtils.Complete
-    SetupHelper.SetupContainers(); // From LordMike.DiscUtils.Containers
-    SetupHelper.SetupFileSystems(); // From LordMike.DiscUtils.FileSystems
-    SetupHelper.SetupTransports(); // From LordMike.DiscUtils.Transports
+    SetupHelper.SetupComplete(); // From DiscUtils.Complete
+    SetupHelper.SetupContainers(); // From DiscUtils.Containers
+    SetupHelper.SetupFileSystems(); // From DiscUtils.FileSystems
+    SetupHelper.SetupTransports(); // From DiscUtils.Transports
 
 ## How to use the Library
 

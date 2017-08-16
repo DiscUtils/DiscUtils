@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -64,7 +64,7 @@ namespace DiscUtils.Ntfs
 
             if (byteIdx >= _bitmap.Length)
             {
-                _bitmap.Position = Utilities.RoundUp(byteIdx + 1, 8) - 1;
+                _bitmap.Position = MathUtilities.RoundUp(byteIdx + 1, 8) - 1;
                 _bitmap.WriteByte(0);
             }
 
@@ -83,7 +83,7 @@ namespace DiscUtils.Ntfs
 
             if (lastByte >= _bitmap.Length)
             {
-                _bitmap.Position = Utilities.RoundUp(lastByte + 1, 8) - 1;
+                _bitmap.Position = MathUtilities.RoundUp(lastByte + 1, 8) - 1;
                 _bitmap.WriteByte(0);
             }
 
@@ -132,7 +132,7 @@ namespace DiscUtils.Ntfs
             long lastByte = (index + count - 1) / 8;
             if (lastByte >= _bitmap.Length)
             {
-                _bitmap.Position = Utilities.RoundUp(lastByte + 1, 8) - 1;
+                _bitmap.Position = MathUtilities.RoundUp(lastByte + 1, 8) - 1;
                 _bitmap.WriteByte(0);
             }
 
@@ -178,12 +178,14 @@ namespace DiscUtils.Ntfs
 
         internal long SetTotalEntries(long numEntries)
         {
-            long length = Utilities.RoundUp(Utilities.Ceil(numEntries, 8), 8);
+            long length = MathUtilities.RoundUp(MathUtilities.Ceil(numEntries, 8), 8);
             _stream.SetLength(length);
             return length * 8;
         }
 
-        private byte GetByte(long index)
+        internal long Size { get { return _bitmap.Length; } }
+
+        internal byte GetByte(long index)
         {
             if (index >= _bitmap.Length)
             {
@@ -197,6 +199,16 @@ namespace DiscUtils.Ntfs
                 return buffer[0];
             }
             return 0;
+        }
+        
+        internal int GetBytes(long index, byte[] buffer, int offset, int count)
+        {
+            if (index + count >= _bitmap.Length)
+                count = (int)(_bitmap.Length - index);
+            if (count <= 0)
+                return 0;
+            _bitmap.Position = index;
+            return _bitmap.Read(buffer, offset, count);
         }
 
         private void SetByte(long index, byte value)

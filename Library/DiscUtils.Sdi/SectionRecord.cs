@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Sdi
 {
@@ -36,11 +36,11 @@ namespace DiscUtils.Sdi
 
         public void ReadFrom(byte[] buffer, int offset)
         {
-            SectionType = Utilities.BytesToString(buffer, offset, 8).TrimEnd('\0');
-            Attr = Utilities.ToUInt64LittleEndian(buffer, offset + 8);
-            Offset = Utilities.ToInt64LittleEndian(buffer, offset + 16);
-            Size = Utilities.ToInt64LittleEndian(buffer, offset + 24);
-            PartitionType = Utilities.ToUInt64LittleEndian(buffer, offset + 32);
+            SectionType = EndianUtilities.BytesToString(buffer, offset, 8).TrimEnd('\0');
+            Attr = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 8);
+            Offset = EndianUtilities.ToInt64LittleEndian(buffer, offset + 16);
+            Size = EndianUtilities.ToInt64LittleEndian(buffer, offset + 24);
+            PartitionType = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 32);
         }
     }
 }

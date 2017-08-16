@@ -20,10 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
 using DiscUtils.Iso9660;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Udf
@@ -71,7 +72,7 @@ namespace DiscUtils.Udf
             while (validDescriptor)
             {
                 data.Position = vdpos;
-                int numRead = Utilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
+                int numRead = StreamUtilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
                 if (numRead != IsoUtilities.SectorSize)
                 {
                     break;
@@ -199,6 +200,30 @@ namespace DiscUtils.Udf
 
                 return result.ToArray();
             }
+ 
+            /// <summary>
+            /// Size of the Filesystem in bytes
+            /// </summary>
+            public override long Size
+            {
+                get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+            }
+
+            /// <summary>
+            /// Used space of the Filesystem in bytes
+            /// </summary>
+            public override long UsedSpace
+            {
+                 get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+            }
+
+            /// <summary>
+            /// Available space of the Filesystem in bytes
+            /// </summary>
+            public override long AvailableSpace
+            {
+                get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+            }
 
             protected override File ConvertDirEntryToFile(FileIdentifier dirEntry)
             {
@@ -281,7 +306,7 @@ namespace DiscUtils.Udf
                 byte[] fsdBuffer = UdfUtilities.ReadExtent(Context, _lvd.FileSetDescriptorLocation);
                 if (DescriptorTag.IsValid(fsdBuffer, 0))
                 {
-                    FileSetDescriptor fsd = Utilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
+                    FileSetDescriptor fsd = EndianUtilities.ToStruct<FileSetDescriptor>(fsdBuffer, 0);
                     RootDirectory = (Directory)File.FromDescriptor(Context, fsd.RootDirectoryIcb);
                 }
             }

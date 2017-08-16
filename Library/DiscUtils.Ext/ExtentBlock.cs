@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
@@ -39,7 +39,7 @@ namespace DiscUtils.Ext
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Header = Utilities.ToStruct<ExtentHeader>(buffer, offset + 0);
+            Header = EndianUtilities.ToStruct<ExtentHeader>(buffer, offset + 0);
             if (Header.Magic != ExtentHeader.HeaderMagic)
             {
                 throw new IOException("Invalid extent header reading inode");
@@ -51,7 +51,7 @@ namespace DiscUtils.Ext
                 Extents = new Extent[Header.Entries];
                 for (int i = 0; i < Extents.Length; ++i)
                 {
-                    Extents[i] = Utilities.ToStruct<Extent>(buffer, offset + 12 + i * 12);
+                    Extents[i] = EndianUtilities.ToStruct<Extent>(buffer, offset + 12 + i * 12);
                 }
             }
             else
@@ -60,7 +60,7 @@ namespace DiscUtils.Ext
                 Index = new ExtentIndex[Header.Entries];
                 for (int i = 0; i < Index.Length; ++i)
                 {
-                    Index[i] = Utilities.ToStruct<ExtentIndex>(buffer, offset + 12 + i * 12);
+                    Index[i] = EndianUtilities.ToStruct<ExtentIndex>(buffer, offset + 12 + i * 12);
                 }
             }
 

@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {
@@ -52,7 +53,8 @@ namespace DiscUtils.Dmg
 
         public override VirtualDisk OpenDisk(string path, FileAccess access)
         {
-            return new Disk(new FileStream(path, FileMode.Open, access), Ownership.Dispose);
+            var locator = new LocalFileLocator(string.Empty);
+            return OpenDisk(locator, path, access);
         }
 
         public override VirtualDisk OpenDisk(FileLocator locator, string path, FileAccess access)

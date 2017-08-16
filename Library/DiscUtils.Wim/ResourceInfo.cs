@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -38,8 +38,8 @@ namespace DiscUtils.Wim
         {
             Header = new ShortResourceHeader();
             Header.Read(buffer, offset);
-            PartNumber = Utilities.ToUInt16LittleEndian(buffer, offset + ShortResourceHeader.Size);
-            RefCount = Utilities.ToUInt32LittleEndian(buffer, offset + ShortResourceHeader.Size + 2);
+            PartNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + ShortResourceHeader.Size);
+            RefCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + ShortResourceHeader.Size + 2);
             Hash = new byte[20];
             Array.Copy(buffer, offset + ShortResourceHeader.Size + 6, Hash, 0, 20);
         }

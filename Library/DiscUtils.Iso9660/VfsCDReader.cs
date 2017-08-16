@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
@@ -284,6 +284,30 @@ namespace DiscUtils.Iso9660
             return offset / ClusterSize;
         }
 
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+  
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get { throw new NotSupportedException("Filesystem size is not (yet) supported"); }
+        }
+
         public Range<long, long>[] PathToClusters(string path)
         {
             ReaderDirEntry entry = GetDirectoryEntry(path);
@@ -300,7 +324,7 @@ namespace DiscUtils.Iso9660
             return new[]
             {
                 new Range<long, long>(entry.Record.LocationOfExtent,
-                    Utilities.Ceil(entry.Record.DataLength, IsoUtilities.SectorSize))
+                    MathUtilities.Ceil(entry.Record.DataLength, IsoUtilities.SectorSize))
             };
         }
 
@@ -355,7 +379,7 @@ namespace DiscUtils.Iso9660
                         throw new NotSupportedException("Non-contiguous extents not supported");
                     }
 
-                    long clusters = Utilities.Ceil(entry.Record.DataLength, IsoUtilities.SectorSize);
+                    long clusters = MathUtilities.Ceil(entry.Record.DataLength, IsoUtilities.SectorSize);
                     for (long i = 0; i < clusters; ++i)
                     {
                         clusterToRole[i + entry.Record.LocationOfExtent] = ClusterRoles.DataFile;
@@ -461,7 +485,7 @@ namespace DiscUtils.Iso9660
         {
             context.DataStream.Position = context.VolumeDescriptor.RootDirectory.LocationOfExtent *
                                           context.VolumeDescriptor.LogicalBlockSize;
-            byte[] firstSector = Utilities.ReadFully(context.DataStream, context.VolumeDescriptor.LogicalBlockSize);
+            byte[] firstSector = StreamUtilities.ReadFully(context.DataStream, context.VolumeDescriptor.LogicalBlockSize);
 
             DirectoryRecord rootSelfRecord;
             DirectoryRecord.ReadFrom(firstSector, 0, context.VolumeDescriptor.CharacterEncoding, out rootSelfRecord);
@@ -490,7 +514,7 @@ namespace DiscUtils.Iso9660
             if (_bootCatalog == null && _bootVolDesc != null)
             {
                 _data.Position = _bootVolDesc.CatalogSector * IsoUtilities.SectorSize;
-                _bootCatalog = Utilities.ReadFully(_data, IsoUtilities.SectorSize);
+                _bootCatalog = StreamUtilities.ReadFully(_data, IsoUtilities.SectorSize);
             }
 
             return _bootCatalog;

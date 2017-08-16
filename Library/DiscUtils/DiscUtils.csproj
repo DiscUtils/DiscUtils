@@ -3,10 +3,9 @@
   <PropertyGroup>
     <Description>DiscUtils, complete meta-package</Description>
     <AssemblyTitle>DiscUtils</AssemblyTitle>
-    <VersionPrefix>0.12.2-alpha</VersionPrefix>
+    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
-    <PublicSign>true</PublicSign>
     <AssemblyName>DiscUtils</AssemblyName>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -31,18 +30,21 @@
     <ProjectReference Include="..\DiscUtils.HfsPlus\DiscUtils.HfsPlus.csproj" />
     <ProjectReference Include="..\DiscUtils.Iscsi\DiscUtils.Iscsi.csproj" />
     <ProjectReference Include="..\DiscUtils.Iso9660\DiscUtils.Iso9660.csproj" />
+    <ProjectReference Include="..\DiscUtils.Lvm\DiscUtils.Lvm.csproj" />
     <ProjectReference Include="..\DiscUtils.Nfs\DiscUtils.Nfs.csproj" />
     <ProjectReference Include="..\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDisk\DiscUtils.OpticalDisk.csproj" />
     <ProjectReference Include="..\DiscUtils.Registry\DiscUtils.Registry.csproj" />
     <ProjectReference Include="..\DiscUtils.Sdi\DiscUtils.Sdi.csproj" />
     <ProjectReference Include="..\DiscUtils.SquashFs\DiscUtils.SquashFs.csproj" />
+    <ProjectReference Include="..\DiscUtils.Swap\DiscUtils.Swap.csproj" />
     <ProjectReference Include="..\DiscUtils.Udf\DiscUtils.Udf.csproj" />
     <ProjectReference Include="..\DiscUtils.Vdi\DiscUtils.Vdi.csproj" />
     <ProjectReference Include="..\DiscUtils.Vhd\DiscUtils.Vhd.csproj" />
     <ProjectReference Include="..\DiscUtils.Vhdx\DiscUtils.Vhdx.csproj" />
     <ProjectReference Include="..\DiscUtils.Vmdk\DiscUtils.Vmdk.csproj" />
     <ProjectReference Include="..\DiscUtils.Wim\DiscUtils.Wim.csproj" />
+    <ProjectReference Include="..\DiscUtils.Xfs\DiscUtils.Xfs.csproj" />
     <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
   </ItemGroup>
 

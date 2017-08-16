@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -115,9 +115,9 @@ namespace DiscUtils.SquashFs
             {
                 byte[] buffer = new byte[4];
                 Read(buffer, 0, 4);
-                return Utilities.ToUInt32LittleEndian(buffer, 0);
+                return EndianUtilities.ToUInt32LittleEndian(buffer, 0);
             }
-            uint result = Utilities.ToUInt32LittleEndian(block.Data, _currentOffset);
+            uint result = EndianUtilities.ToUInt32LittleEndian(block.Data, _currentOffset);
             _currentOffset += 4;
             return result;
         }
@@ -130,9 +130,9 @@ namespace DiscUtils.SquashFs
             {
                 byte[] buffer = new byte[4];
                 Read(buffer, 0, 4);
-                return Utilities.ToInt32LittleEndian(buffer, 0);
+                return EndianUtilities.ToInt32LittleEndian(buffer, 0);
             }
-            int result = Utilities.ToInt32LittleEndian(block.Data, _currentOffset);
+            int result = EndianUtilities.ToInt32LittleEndian(block.Data, _currentOffset);
             _currentOffset += 4;
             return result;
         }
@@ -145,9 +145,9 @@ namespace DiscUtils.SquashFs
             {
                 byte[] buffer = new byte[2];
                 Read(buffer, 0, 2);
-                return Utilities.ToUInt16LittleEndian(buffer, 0);
+                return EndianUtilities.ToUInt16LittleEndian(buffer, 0);
             }
-            ushort result = Utilities.ToUInt16LittleEndian(block.Data, _currentOffset);
+            ushort result = EndianUtilities.ToUInt16LittleEndian(block.Data, _currentOffset);
             _currentOffset += 2;
             return result;
         }
@@ -160,9 +160,9 @@ namespace DiscUtils.SquashFs
             {
                 byte[] buffer = new byte[2];
                 Read(buffer, 0, 2);
-                return Utilities.ToInt16LittleEndian(buffer, 0);
+                return EndianUtilities.ToInt16LittleEndian(buffer, 0);
             }
-            short result = Utilities.ToInt16LittleEndian(block.Data, _currentOffset);
+            short result = EndianUtilities.ToInt16LittleEndian(block.Data, _currentOffset);
             _currentOffset += 2;
             return result;
         }
@@ -175,9 +175,9 @@ namespace DiscUtils.SquashFs
             {
                 byte[] buffer = new byte[len];
                 Read(buffer, 0, len);
-                return Utilities.BytesToString(buffer, 0, len);
+                return EndianUtilities.BytesToString(buffer, 0, len);
             }
-            string result = Utilities.BytesToString(block.Data, _currentOffset, len);
+            string result = EndianUtilities.BytesToString(block.Data, _currentOffset, len);
             _currentOffset += len;
             return result;
         }

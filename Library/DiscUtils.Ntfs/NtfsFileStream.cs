@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -141,7 +141,7 @@ namespace DiscUtils.Ntfs
         public override int Read(byte[] buffer, int offset, int count)
         {
             AssertOpen();
-            Utilities.AssertBufferParameters(buffer, offset, count);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count);
 
             using (new NtfsTransaction())
             {
@@ -174,7 +174,7 @@ namespace DiscUtils.Ntfs
         public override void Write(byte[] buffer, int offset, int count)
         {
             AssertOpen();
-            Utilities.AssertBufferParameters(buffer, offset, count);
+            StreamUtilities.AssertBufferParameters(buffer, offset, count);
 
             using (new NtfsTransaction())
             {

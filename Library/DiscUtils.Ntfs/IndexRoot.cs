@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -46,19 +46,19 @@ namespace DiscUtils.Ntfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            AttributeType = Utilities.ToUInt32LittleEndian(buffer, 0x00);
-            CollationRule = (AttributeCollationRule)Utilities.ToUInt32LittleEndian(buffer, 0x04);
-            IndexAllocationSize = Utilities.ToUInt32LittleEndian(buffer, 0x08);
+            AttributeType = EndianUtilities.ToUInt32LittleEndian(buffer, 0x00);
+            CollationRule = (AttributeCollationRule)EndianUtilities.ToUInt32LittleEndian(buffer, 0x04);
+            IndexAllocationSize = EndianUtilities.ToUInt32LittleEndian(buffer, 0x08);
             RawClustersPerIndexRecord = buffer[0x0C];
             return 16;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(AttributeType, buffer, 0);
-            Utilities.WriteBytesLittleEndian((uint)CollationRule, buffer, 0x04);
-            Utilities.WriteBytesLittleEndian(IndexAllocationSize, buffer, 0x08);
-            Utilities.WriteBytesLittleEndian(RawClustersPerIndexRecord, buffer, 0x0C);
+            EndianUtilities.WriteBytesLittleEndian(AttributeType, buffer, 0);
+            EndianUtilities.WriteBytesLittleEndian((uint)CollationRule, buffer, 0x04);
+            EndianUtilities.WriteBytesLittleEndian(IndexAllocationSize, buffer, 0x08);
+            EndianUtilities.WriteBytesLittleEndian(RawClustersPerIndexRecord, buffer, 0x0C);
         }
 
         public void Dump(TextWriter writer, string indent)
@@ -105,8 +105,8 @@ namespace DiscUtils.Ntfs
                     return 1;
                 }
 
-                uint xHash = Utilities.ToUInt32LittleEndian(x, 0);
-                uint yHash = Utilities.ToUInt32LittleEndian(y, 0);
+                uint xHash = EndianUtilities.ToUInt32LittleEndian(x, 0);
+                uint yHash = EndianUtilities.ToUInt32LittleEndian(y, 0);
 
                 if (xHash < yHash)
                 {
@@ -117,8 +117,8 @@ namespace DiscUtils.Ntfs
                     return 1;
                 }
 
-                uint xId = Utilities.ToUInt32LittleEndian(x, 4);
-                uint yId = Utilities.ToUInt32LittleEndian(y, 4);
+                uint xId = EndianUtilities.ToUInt32LittleEndian(x, 4);
+                uint yId = EndianUtilities.ToUInt32LittleEndian(y, 4);
                 if (xId < yId)
                 {
                     return -1;
@@ -148,8 +148,8 @@ namespace DiscUtils.Ntfs
                     return 1;
                 }
 
-                uint xVal = Utilities.ToUInt32LittleEndian(x, 0);
-                uint yVal = Utilities.ToUInt32LittleEndian(y, 0);
+                uint xVal = EndianUtilities.ToUInt32LittleEndian(x, 0);
+                uint yVal = EndianUtilities.ToUInt32LittleEndian(y, 0);
 
                 if (xVal < yVal)
                 {
@@ -168,23 +168,25 @@ namespace DiscUtils.Ntfs
         {
             public int Compare(byte[] x, byte[] y)
             {
+                if (x == null && y == null)
+                {
+                    return 0;
+                }
+
+                if (y == null)
+                {
+                    return -1;
+                }
+
+                if (x == null)
+                {
+                    return 1;
+                }
+
                 for (int i = 0; i < x.Length / 4; ++i)
                 {
-                    if (x == null && y == null)
-                    {
-                        return 0;
-                    }
-                    if (y == null)
-                    {
-                        return -1;
-                    }
-                    if (x == null)
-                    {
-                        return 1;
-                    }
-
-                    uint xVal = Utilities.ToUInt32LittleEndian(x, i * 4);
-                    uint yVal = Utilities.ToUInt32LittleEndian(y, i * 4);
+                    uint xVal = EndianUtilities.ToUInt32LittleEndian(x, i * 4);
+                    uint yVal = EndianUtilities.ToUInt32LittleEndian(y, i * 4);
 
                     if (xVal < yVal)
                     {

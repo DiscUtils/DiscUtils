@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Diagnostics
 {
@@ -1361,6 +1362,12 @@ namespace DiscUtils.Diagnostics
                 return (string)PerformActivity(fn);
             }
         }
+
+        public override long Size => throw new NotImplementedException();
+
+        public override long UsedSpace => throw new NotImplementedException();
+
+        public override long AvailableSpace => throw new NotImplementedException();
         #endregion
     }
 }

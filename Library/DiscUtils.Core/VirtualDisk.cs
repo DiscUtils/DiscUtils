@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using DiscUtils.Internal;
 using DiscUtils.Partitions;
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {
@@ -124,12 +125,12 @@ namespace DiscUtils
         /// </summary>
         public virtual int Signature
         {
-            get { return Utilities.ToInt32LittleEndian(GetMasterBootRecord(), 0x01B8); }
+            get { return EndianUtilities.ToInt32LittleEndian(GetMasterBootRecord(), 0x01B8); }
 
             set
             {
                 byte[] mbr = GetMasterBootRecord();
-                Utilities.WriteBytesLittleEndian(value, mbr, 0x01B8);
+                EndianUtilities.WriteBytesLittleEndian(value, mbr, 0x01B8);
                 SetMasterBootRecord(mbr);
             }
         }
@@ -522,7 +523,7 @@ namespace DiscUtils
 
             long oldPos = Content.Position;
             Content.Position = 0;
-            Utilities.ReadFully(Content, sector, 0, Sizes.Sector);
+            StreamUtilities.ReadFully(Content, sector, 0, Sizes.Sector);
             Content.Position = oldPos;
 
             return sector;

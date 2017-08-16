@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -38,16 +38,16 @@ namespace DiscUtils.SquashFs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            StartBlock = Utilities.ToInt64LittleEndian(buffer, offset + 0);
-            CompressedSize = Utilities.ToInt32LittleEndian(buffer, offset + 8);
+            StartBlock = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0);
+            CompressedSize = EndianUtilities.ToInt32LittleEndian(buffer, offset + 8);
             return RecordSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(CompressedSize, buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(0, buffer, offset + 12);
+            EndianUtilities.WriteBytesLittleEndian(StartBlock, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian(CompressedSize, buffer, offset + 8);
+            EndianUtilities.WriteBytesLittleEndian(0, buffer, offset + 12);
         }
     }
 }

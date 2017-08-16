@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -50,7 +50,7 @@ namespace DiscUtils.Ntfs
             Stream stream = index.AllocationStream;
             _streamPosition = index.IndexBlockVcnToPosition(parentEntry.ChildrenVirtualCluster);
             stream.Position = _streamPosition;
-            byte[] buffer = Utilities.ReadFully(stream, (int)index.IndexBufferSize);
+            byte[] buffer = StreamUtilities.ReadFully(stream, (int)index.IndexBufferSize);
             FromBytes(buffer, 0);
         }
 
@@ -91,15 +91,15 @@ namespace DiscUtils.Ntfs
         protected override void Read(byte[] buffer, int offset)
         {
             // Skip FixupRecord fields...
-            _logSequenceNumber = Utilities.ToUInt64LittleEndian(buffer, offset + 0x08);
-            _indexBlockVcn = Utilities.ToUInt64LittleEndian(buffer, offset + 0x10);
+            _logSequenceNumber = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x08);
+            _indexBlockVcn = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 0x10);
             Node = new IndexNode(WriteToDisk, UpdateSequenceSize, _index, _isRoot, buffer, offset + FieldSize);
         }
 
         protected override ushort Write(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(_logSequenceNumber, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(_indexBlockVcn, buffer, offset + 0x10);
+            EndianUtilities.WriteBytesLittleEndian(_logSequenceNumber, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(_indexBlockVcn, buffer, offset + 0x10);
             return (ushort)(FieldSize + Node.WriteTo(buffer, offset + FieldSize));
         }
 

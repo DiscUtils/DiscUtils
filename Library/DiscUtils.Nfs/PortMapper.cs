@@ -45,7 +45,7 @@ namespace DiscUtils.Nfs
         public int GetPort(int program, int version, PortMapperProtocol protocol)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, 3);
+            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Lookup);
             writer.Write(program);
             writer.Write(version);
             writer.Write((uint)protocol);

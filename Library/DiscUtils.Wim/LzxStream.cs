@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Compression;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -189,7 +189,7 @@ namespace DiscUtils.Wim
                 if (_buffer[i] == 0xE8)
                 {
                     Array.Copy(_buffer, i + 1, temp, 0, 4);
-                    int absoluteValue = Utilities.ToInt32LittleEndian(_buffer, i + 1);
+                    int absoluteValue = EndianUtilities.ToInt32LittleEndian(_buffer, i + 1);
 
                     if (absoluteValue >= -i && absoluteValue < _fileSize)
                     {
@@ -203,7 +203,7 @@ namespace DiscUtils.Wim
                             offsetValue = absoluteValue + _fileSize;
                         }
 
-                        Utilities.WriteBytesLittleEndian(offsetValue, _buffer, i + 1);
+                        EndianUtilities.WriteBytesLittleEndian(offsetValue, _buffer, i + 1);
                     }
 
                     i += 4;
@@ -216,9 +216,9 @@ namespace DiscUtils.Wim
         private void DecodeUncompressedBlock(int blockSize)
         {
             _bitStream.Align(16);
-            _repeatedOffsets[0] = Utilities.ToUInt32LittleEndian(_bitStream.ReadBytes(4), 0);
-            _repeatedOffsets[1] = Utilities.ToUInt32LittleEndian(_bitStream.ReadBytes(4), 0);
-            _repeatedOffsets[2] = Utilities.ToUInt32LittleEndian(_bitStream.ReadBytes(4), 0);
+            _repeatedOffsets[0] = EndianUtilities.ToUInt32LittleEndian(_bitStream.ReadBytes(4), 0);
+            _repeatedOffsets[1] = EndianUtilities.ToUInt32LittleEndian(_bitStream.ReadBytes(4), 0);
+            _repeatedOffsets[2] = EndianUtilities.ToUInt32LittleEndian(_bitStream.ReadBytes(4), 0);
             int numRead = _bitStream.ReadBytes(_buffer, _bufferCount, blockSize);
             _bufferCount += numRead;
 

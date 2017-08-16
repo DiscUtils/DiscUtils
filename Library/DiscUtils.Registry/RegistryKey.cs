@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using Microsoft.Win32;
 
 namespace DiscUtils.Registry
@@ -154,7 +154,7 @@ namespace DiscUtils.Registry
 
                     for (int i = 0; i < _cell.NumValues; ++i)
                     {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                        int valueIndex = EndianUtilities.ToInt32LittleEndian(valueList, i * 4);
                         yield return new RegistryValue(_hive, _hive.GetCell<ValueCell>(valueIndex));
                     }
                 }
@@ -396,7 +396,7 @@ namespace DiscUtils.Registry
                 int i = 0;
                 while (i < _cell.NumValues)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    int valueIndex = EndianUtilities.ToInt32LittleEndian(valueList, i * 4);
                     ValueCell valueCell = _hive.GetCell<ValueCell>(valueIndex);
                     if (string.Compare(valueCell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -415,8 +415,8 @@ namespace DiscUtils.Registry
                 {
                     while (i < _cell.NumValues)
                     {
-                        int valueIndex = Utilities.ToInt32LittleEndian(valueList, (i + 1) * 4);
-                        Utilities.WriteBytesLittleEndian(valueIndex, valueList, i * 4);
+                        int valueIndex = EndianUtilities.ToInt32LittleEndian(valueList, (i + 1) * 4);
+                        EndianUtilities.WriteBytesLittleEndian(valueIndex, valueList, i * 4);
 
                         ++i;
                     }
@@ -643,7 +643,7 @@ namespace DiscUtils.Registry
 
                 for (int i = 0; i < _cell.NumValues; ++i)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    int valueIndex = EndianUtilities.ToInt32LittleEndian(valueList, i * 4);
                     ValueCell cell = _hive.GetCell<ValueCell>(valueIndex);
                     if (string.Compare(cell.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
                     {
@@ -666,7 +666,7 @@ namespace DiscUtils.Registry
             int insertIdx = 0;
             while (insertIdx < _cell.NumValues)
             {
-                int valueCellIndex = Utilities.ToInt32LittleEndian(valueList, insertIdx * 4);
+                int valueCellIndex = EndianUtilities.ToInt32LittleEndian(valueList, insertIdx * 4);
                 ValueCell cell = _hive.GetCell<ValueCell>(valueCellIndex);
                 if (string.Compare(name, cell.Name, StringComparison.OrdinalIgnoreCase) < 0)
                 {
@@ -683,12 +683,12 @@ namespace DiscUtils.Registry
             // Update the value list, re-allocating if necessary
             byte[] newValueList = new byte[_cell.NumValues * 4 + 4];
             Array.Copy(valueList, 0, newValueList, 0, insertIdx * 4);
-            Utilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
+            EndianUtilities.WriteBytesLittleEndian(valueCell.Index, newValueList, insertIdx * 4);
             Array.Copy(valueList, insertIdx * 4, newValueList, insertIdx * 4 + 4, (_cell.NumValues - insertIdx) * 4);
             if (_cell.ValueListIndex == -1 ||
                 !_hive.WriteRawCellData(_cell.ValueListIndex, newValueList, 0, newValueList.Length))
             {
-                int newListCellIndex = _hive.AllocateRawCell(Utilities.RoundUp(newValueList.Length, 8));
+                int newListCellIndex = _hive.AllocateRawCell(MathUtilities.RoundUp(newValueList.Length, 8));
                 _hive.WriteRawCellData(newListCellIndex, newValueList, 0, newValueList.Length);
 
                 if (_cell.ValueListIndex != -1)
@@ -792,7 +792,7 @@ namespace DiscUtils.Registry
 
                 for (int i = 0; i < cell.NumValues; ++i)
                 {
-                    int valueIndex = Utilities.ToInt32LittleEndian(valueList, i * 4);
+                    int valueIndex = EndianUtilities.ToInt32LittleEndian(valueList, i * 4);
                     _hive.FreeCell(valueIndex);
                 }
 

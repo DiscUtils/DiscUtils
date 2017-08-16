@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.SquashFs

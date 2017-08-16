@@ -22,7 +22,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -59,7 +59,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer;
             using (Stream s = Open(FileAccess.Read))
             {
-                buffer = Utilities.ReadFully(s, (int)s.Length);
+                buffer = StreamUtilities.ReadFully(s, (int)s.Length);
             }
 
             T value = new T();

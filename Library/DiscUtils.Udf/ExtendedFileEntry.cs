@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -38,33 +38,33 @@ namespace DiscUtils.Udf
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            DescriptorTag = Utilities.ToStruct<DescriptorTag>(buffer, offset);
-            InformationControlBlock = Utilities.ToStruct<InformationControlBlock>(buffer, offset + 16);
-            Uid = Utilities.ToUInt32LittleEndian(buffer, offset + 36);
-            Gid = Utilities.ToUInt32LittleEndian(buffer, offset + 40);
-            Permissions = (FilePermissions)Utilities.ToUInt32LittleEndian(buffer, offset + 44);
-            FileLinkCount = Utilities.ToUInt16LittleEndian(buffer, offset + 48);
+            DescriptorTag = EndianUtilities.ToStruct<DescriptorTag>(buffer, offset);
+            InformationControlBlock = EndianUtilities.ToStruct<InformationControlBlock>(buffer, offset + 16);
+            Uid = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 36);
+            Gid = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 40);
+            Permissions = (FilePermissions)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 44);
+            FileLinkCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 48);
             RecordFormat = buffer[offset + 50];
             RecordDisplayAttributes = buffer[offset + 51];
-            RecordLength = Utilities.ToUInt16LittleEndian(buffer, offset + 52);
-            InformationLength = Utilities.ToUInt64LittleEndian(buffer, offset + 56);
-            ObjectSize = Utilities.ToUInt64LittleEndian(buffer, offset + 64);
-            LogicalBlocksRecorded = Utilities.ToUInt64LittleEndian(buffer, offset + 72);
+            RecordLength = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 52);
+            InformationLength = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 56);
+            ObjectSize = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 64);
+            LogicalBlocksRecorded = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 72);
             AccessTime = UdfUtilities.ParseTimestamp(buffer, offset + 80);
             ModificationTime = UdfUtilities.ParseTimestamp(buffer, offset + 92);
             CreationTime = UdfUtilities.ParseTimestamp(buffer, offset + 104);
             AttributeTime = UdfUtilities.ParseTimestamp(buffer, offset + 116);
-            Checkpoint = Utilities.ToUInt32LittleEndian(buffer, offset + 128);
-            ExtendedAttributeIcb = Utilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 136);
-            StreamDirectoryIcb = Utilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 152);
-            ImplementationIdentifier = Utilities.ToStruct<ImplementationEntityIdentifier>(buffer, offset + 168);
-            UniqueId = Utilities.ToUInt64LittleEndian(buffer, offset + 200);
-            ExtendedAttributesLength = Utilities.ToInt32LittleEndian(buffer, offset + 208);
-            AllocationDescriptorsLength = Utilities.ToInt32LittleEndian(buffer, offset + 212);
-            AllocationDescriptors = Utilities.ToByteArray(buffer, offset + 216 + ExtendedAttributesLength,
+            Checkpoint = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 128);
+            ExtendedAttributeIcb = EndianUtilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 136);
+            StreamDirectoryIcb = EndianUtilities.ToStruct<LongAllocationDescriptor>(buffer, offset + 152);
+            ImplementationIdentifier = EndianUtilities.ToStruct<ImplementationEntityIdentifier>(buffer, offset + 168);
+            UniqueId = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 200);
+            ExtendedAttributesLength = EndianUtilities.ToInt32LittleEndian(buffer, offset + 208);
+            AllocationDescriptorsLength = EndianUtilities.ToInt32LittleEndian(buffer, offset + 212);
+            AllocationDescriptors = EndianUtilities.ToByteArray(buffer, offset + 216 + ExtendedAttributesLength,
                 AllocationDescriptorsLength);
 
-            byte[] eaData = Utilities.ToByteArray(buffer, offset + 216, ExtendedAttributesLength);
+            byte[] eaData = EndianUtilities.ToByteArray(buffer, offset + 216, ExtendedAttributesLength);
             ExtendedAttributes = ReadExtendedAttributes(eaData);
 
             return 216 + ExtendedAttributesLength + AllocationDescriptorsLength;

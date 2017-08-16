@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Wim
 {
@@ -61,13 +61,13 @@ namespace DiscUtils.Wim
                 throw new NotImplementedException("Large files >4GB");
             }
 
-            int numChunks = (int)Utilities.Ceil(header.OriginalSize, _chunkSize);
+            int numChunks = (int)MathUtilities.Ceil(header.OriginalSize, _chunkSize);
 
             _chunkOffsets = new long[numChunks];
             _chunkLength = new long[numChunks];
             for (int i = 1; i < numChunks; ++i)
             {
-                _chunkOffsets[i] = Utilities.ToUInt32LittleEndian(Utilities.ReadFully(_baseStream, 4), 0);
+                _chunkOffsets[i] = EndianUtilities.ToUInt32LittleEndian(StreamUtilities.ReadFully(_baseStream, 4), 0);
                 _chunkLength[i - 1] = _chunkOffsets[i] - _chunkOffsets[i - 1];
             }
 

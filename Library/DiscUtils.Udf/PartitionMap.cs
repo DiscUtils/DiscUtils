@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -54,7 +54,7 @@ namespace DiscUtils.Udf
             }
             else if (type == 2)
             {
-                EntityIdentifier id = Utilities.ToStruct<UdfEntityIdentifier>(buffer, offset + 4);
+                EntityIdentifier id = EndianUtilities.ToStruct<UdfEntityIdentifier>(buffer, offset + 4);
                 switch (id.Identifier)
                 {
                     case "*UDF Virtual Partition":

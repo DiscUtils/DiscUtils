@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using DiscUtils.CoreCompat;
 
@@ -32,7 +33,23 @@ namespace DiscUtils.Setup
 
                 FileSystemManager.RegisterFileSystems(assembly);
                 VirtualDiskManager.RegisterVirtualDiskTypes(assembly);
+                VolumeManager.RegisterLogicalVolumeFactory(assembly);
             }
+        }
+
+        /// <summary>
+        /// Allows intercepting any file open operation
+        /// </summary>
+        /// <remarks>
+        /// Can be used to wrap the opened file for special use cases,
+        /// modify the parameters for opening files, validate file names 
+        /// and many more.
+        /// </remarks>
+        public static event EventHandler<FileOpenEventArgs> OpeningFile;
+
+        internal static void OnOpeningFile(object sender, FileOpenEventArgs e)
+        {
+            OpeningFile?.Invoke(sender, e);
         }
     }
 }

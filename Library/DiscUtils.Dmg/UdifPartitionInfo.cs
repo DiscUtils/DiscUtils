@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Partitions;
 
 namespace DiscUtils.Dmg

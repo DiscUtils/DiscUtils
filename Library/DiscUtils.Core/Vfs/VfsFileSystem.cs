@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vfs
 {
@@ -706,8 +707,11 @@ namespace DiscUtils.Vfs
         private TDirEntry ResolveSymlink(TDirEntry entry, string path)
         {
             TDirEntry currentEntry = entry;
+            if (path.Length > 0 && path[0] != '\\')
+            {
+                path = '\\' + path;
+            }
             string currentPath = path;
-
             int resolvesLeft = 20;
             while (currentEntry.IsSymlink && resolvesLeft > 0)
             {

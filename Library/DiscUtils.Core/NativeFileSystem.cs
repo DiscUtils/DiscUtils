@@ -25,6 +25,8 @@
 
 using System;
 using System.IO;
+using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {
@@ -503,7 +505,8 @@ namespace DiscUtils
                 fileShare = FileShare.Read;
             }
 
-            return SparseStream.FromStream(File.Open(Path.Combine(BasePath, path), mode, access, fileShare),
+            var locator = new LocalFileLocator(BasePath);
+            return SparseStream.FromStream(locator.Open(path, mode, access, fileShare),
                 Ownership.Dispose);
         }
 
@@ -753,6 +756,38 @@ namespace DiscUtils
         public override DiscFileSystemInfo GetFileSystemInfo(string path)
         {
             return new DiscFileSystemInfo(this, path);
+        }
+         
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get
+            {
+                DriveInfo info = new DriveInfo(BasePath);
+                return info.TotalSize;
+            }
+        }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { return Size - AvailableSpace; }
+        }
+ 
+        /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get
+            {
+                DriveInfo info = new DriveInfo(BasePath);
+                return info.AvailableFreeSpace;
+            }
         }
 
         private string[] CleanItems(string[] dirtyItems)

@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 using DiscUtils.Vfs;
 
 namespace DiscUtils.SquashFs
@@ -68,7 +68,7 @@ namespace DiscUtils.SquashFs
                 return false;
             }
 
-            byte[] buffer = Utilities.ReadFully(stream, superBlock.Size);
+            byte[] buffer = StreamUtilities.ReadFully(stream, superBlock.Size);
             superBlock.ReadFrom(buffer, 0);
 
             return superBlock.Magic == SuperBlock.SquashFsMagic;

@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vdi
 {
@@ -132,7 +132,7 @@ namespace DiscUtils.Vdi
             byte[] blockTable = new byte[header.BlockCount * 4];
             for (int i = 0; i < header.BlockCount; ++i)
             {
-                Utilities.WriteBytesLittleEndian((uint)i, blockTable, i * 4);
+                EndianUtilities.WriteBytesLittleEndian((uint)i, blockTable, i * 4);
             }
 
             header.BlocksAllocated = header.BlockCount;

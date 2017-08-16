@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -42,13 +42,13 @@ namespace DiscUtils.Udf
 
         protected override int Parse(byte[] buffer, int offset)
         {
-            VolumeSequenceNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 36);
-            PartitionNumber = Utilities.ToUInt16LittleEndian(buffer, offset + 38);
-            MetadataFileLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 40);
-            MetadataMirrorFileLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 44);
-            MetadataBitmapFileLocation = Utilities.ToUInt32LittleEndian(buffer, offset + 48);
-            AllocationUnitSize = Utilities.ToUInt32LittleEndian(buffer, offset + 52);
-            AlignmentUnitSize = Utilities.ToUInt16LittleEndian(buffer, offset + 56);
+            VolumeSequenceNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 36);
+            PartitionNumber = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 38);
+            MetadataFileLocation = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 40);
+            MetadataMirrorFileLocation = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 44);
+            MetadataBitmapFileLocation = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 48);
+            AllocationUnitSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 52);
+            AlignmentUnitSize = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 56);
             Flags = buffer[offset + 58];
 
             return 64;

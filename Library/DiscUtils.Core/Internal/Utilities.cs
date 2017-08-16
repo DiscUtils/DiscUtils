@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -30,72 +30,6 @@ namespace DiscUtils.Internal
 {
     internal static class Utilities
     {
-        /// <summary>
-        /// Round up a value to a multiple of a unit size.
-        /// </summary>
-        /// <param name="value">The value to round up.</param>
-        /// <param name="unit">The unit (the returned value will be a multiple of this number).</param>
-        /// <returns>The rounded-up value.</returns>
-        public static long RoundUp(long value, long unit)
-        {
-            return (value + (unit - 1)) / unit * unit;
-        }
-
-        /// <summary>
-        /// Round up a value to a multiple of a unit size.
-        /// </summary>
-        /// <param name="value">The value to round up.</param>
-        /// <param name="unit">The unit (the returned value will be a multiple of this number).</param>
-        /// <returns>The rounded-up value.</returns>
-        public static int RoundUp(int value, int unit)
-        {
-            return (value + (unit - 1)) / unit * unit;
-        }
-
-        /// <summary>
-        /// Round down a value to a multiple of a unit size.
-        /// </summary>
-        /// <param name="value">The value to round down.</param>
-        /// <param name="unit">The unit (the returned value will be a multiple of this number).</param>
-        /// <returns>The rounded-down value.</returns>
-        public static long RoundDown(long value, long unit)
-        {
-            return value / unit * unit;
-        }
-
-        /// <summary>
-        /// Calculates the CEIL function.
-        /// </summary>
-        /// <param name="numerator">The value to divide.</param>
-        /// <param name="denominator">The value to divide by.</param>
-        /// <returns>The value of CEIL(numerator/denominator).</returns>
-        public static int Ceil(int numerator, int denominator)
-        {
-            return (numerator + (denominator - 1)) / denominator;
-        }
-
-        /// <summary>
-        /// Calculates the CEIL function.
-        /// </summary>
-        /// <param name="numerator">The value to divide.</param>
-        /// <param name="denominator">The value to divide by.</param>
-        /// <returns>The value of CEIL(numerator/denominator).</returns>
-        public static uint Ceil(uint numerator, uint denominator)
-        {
-            return (numerator + (denominator - 1)) / denominator;
-        }
-
-        /// <summary>
-        /// Calculates the CEIL function.
-        /// </summary>
-        /// <param name="numerator">The value to divide.</param>
-        /// <param name="denominator">The value to divide by.</param>
-        /// <returns>The value of CEIL(numerator/denominator).</returns>
-        public static long Ceil(long numerator, long denominator)
-        {
-            return (numerator + (denominator - 1)) / denominator;
-        }
-
         /// <summary>
         /// Converts between two arrays.
         /// </summary>
@@ -172,36 +106,7 @@ namespace DiscUtils.Internal
         {
             return !((xLast.CompareTo(yFirst) <= 0) || (xFirst.CompareTo(yLast) >= 0));
         }
-
-        /// <summary>
-        /// Validates standard buffer, offset, count parameters to a method.
-        /// </summary>
-        /// <param name="buffer">The byte array to read from / write to.</param>
-        /// <param name="offset">The starting offset in <c>buffer</c>.</param>
-        /// <param name="count">The number of bytes to read / write.</param>
-        public static void AssertBufferParameters(byte[] buffer, int offset, int count)
-        {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset), offset, "Offset is negative");
-            }
-
-            if (count < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count), count, "Count is negative");
-            }
-
-            if (buffer.Length < offset + count)
-            {
-                throw new ArgumentException("buffer is too small", nameof(buffer));
-            }
-        }
-
+        
         #region Bit Twiddling
 
         public static bool IsAllZeros(byte[] buffer, int offset, int count)
@@ -246,48 +151,6 @@ namespace DiscUtils.Internal
             }
 
             return val == 1;
-        }
-
-        public static int Log2(uint val)
-        {
-            if (val == 0)
-            {
-                throw new ArgumentException("Cannot calculate log of Zero", nameof(val));
-            }
-
-            int result = 0;
-            while ((val & 1) != 1)
-            {
-                val >>= 1;
-                ++result;
-            }
-
-            if (val == 1)
-            {
-                return result;
-            }
-            throw new ArgumentException("Input is not a power of Two", nameof(val));
-        }
-
-        public static int Log2(int val)
-        {
-            if (val == 0)
-            {
-                throw new ArgumentException("Cannot calculate log of Zero", nameof(val));
-            }
-
-            int result = 0;
-            while ((val & 1) != 1)
-            {
-                val >>= 1;
-                ++result;
-            }
-
-            if (val == 1)
-            {
-                return result;
-            }
-            throw new ArgumentException("Input is not a power of Two", nameof(val));
         }
 
         public static bool AreEqual(byte[] a, byte[] b)
@@ -338,280 +201,7 @@ namespace DiscUtils.Internal
         {
             return (long)BitSwap((ulong)value);
         }
-
-        public static void WriteBytesLittleEndian(ushort val, byte[] buffer, int offset)
-        {
-            buffer[offset] = (byte)(val & 0xFF);
-            buffer[offset + 1] = (byte)((val >> 8) & 0xFF);
-        }
-
-        public static void WriteBytesLittleEndian(uint val, byte[] buffer, int offset)
-        {
-            buffer[offset] = (byte)(val & 0xFF);
-            buffer[offset + 1] = (byte)((val >> 8) & 0xFF);
-            buffer[offset + 2] = (byte)((val >> 16) & 0xFF);
-            buffer[offset + 3] = (byte)((val >> 24) & 0xFF);
-        }
-
-        public static void WriteBytesLittleEndian(ulong val, byte[] buffer, int offset)
-        {
-            buffer[offset] = (byte)(val & 0xFF);
-            buffer[offset + 1] = (byte)((val >> 8) & 0xFF);
-            buffer[offset + 2] = (byte)((val >> 16) & 0xFF);
-            buffer[offset + 3] = (byte)((val >> 24) & 0xFF);
-            buffer[offset + 4] = (byte)((val >> 32) & 0xFF);
-            buffer[offset + 5] = (byte)((val >> 40) & 0xFF);
-            buffer[offset + 6] = (byte)((val >> 48) & 0xFF);
-            buffer[offset + 7] = (byte)((val >> 56) & 0xFF);
-        }
-
-        public static void WriteBytesLittleEndian(short val, byte[] buffer, int offset)
-        {
-            WriteBytesLittleEndian((ushort)val, buffer, offset);
-        }
-
-        public static void WriteBytesLittleEndian(int val, byte[] buffer, int offset)
-        {
-            WriteBytesLittleEndian((uint)val, buffer, offset);
-        }
-
-        public static void WriteBytesLittleEndian(long val, byte[] buffer, int offset)
-        {
-            WriteBytesLittleEndian((ulong)val, buffer, offset);
-        }
-
-        public static void WriteBytesLittleEndian(Guid val, byte[] buffer, int offset)
-        {
-            byte[] le = val.ToByteArray();
-            Array.Copy(le, 0, buffer, offset, 16);
-        }
-
-        public static void WriteBytesBigEndian(ushort val, byte[] buffer, int offset)
-        {
-            buffer[offset] = (byte)(val >> 8);
-            buffer[offset + 1] = (byte)(val & 0xFF);
-        }
-
-        public static void WriteBytesBigEndian(uint val, byte[] buffer, int offset)
-        {
-            buffer[offset] = (byte)((val >> 24) & 0xFF);
-            buffer[offset + 1] = (byte)((val >> 16) & 0xFF);
-            buffer[offset + 2] = (byte)((val >> 8) & 0xFF);
-            buffer[offset + 3] = (byte)(val & 0xFF);
-        }
-
-        public static void WriteBytesBigEndian(ulong val, byte[] buffer, int offset)
-        {
-            buffer[offset] = (byte)((val >> 56) & 0xFF);
-            buffer[offset + 1] = (byte)((val >> 48) & 0xFF);
-            buffer[offset + 2] = (byte)((val >> 40) & 0xFF);
-            buffer[offset + 3] = (byte)((val >> 32) & 0xFF);
-            buffer[offset + 4] = (byte)((val >> 24) & 0xFF);
-            buffer[offset + 5] = (byte)((val >> 16) & 0xFF);
-            buffer[offset + 6] = (byte)((val >> 8) & 0xFF);
-            buffer[offset + 7] = (byte)(val & 0xFF);
-        }
-
-        public static void WriteBytesBigEndian(short val, byte[] buffer, int offset)
-        {
-            WriteBytesBigEndian((ushort)val, buffer, offset);
-        }
-
-        public static void WriteBytesBigEndian(int val, byte[] buffer, int offset)
-        {
-            WriteBytesBigEndian((uint)val, buffer, offset);
-        }
-
-        public static void WriteBytesBigEndian(long val, byte[] buffer, int offset)
-        {
-            WriteBytesBigEndian((ulong)val, buffer, offset);
-        }
-
-        public static void WriteBytesBigEndian(Guid val, byte[] buffer, int offset)
-        {
-            byte[] le = val.ToByteArray();
-            WriteBytesBigEndian(ToUInt32LittleEndian(le, 0), buffer, offset + 0);
-            WriteBytesBigEndian(ToUInt16LittleEndian(le, 4), buffer, offset + 4);
-            WriteBytesBigEndian(ToUInt16LittleEndian(le, 6), buffer, offset + 6);
-            Array.Copy(le, 8, buffer, offset + 8, 8);
-        }
-
-        public static ushort ToUInt16LittleEndian(byte[] buffer, int offset)
-        {
-            return (ushort)(((buffer[offset + 1] << 8) & 0xFF00) | ((buffer[offset + 0] << 0) & 0x00FF));
-        }
-
-        public static uint ToUInt32LittleEndian(byte[] buffer, int offset)
-        {
-            return (uint)(((buffer[offset + 3] << 24) & 0xFF000000U) | ((buffer[offset + 2] << 16) & 0x00FF0000U)
-                          | ((buffer[offset + 1] << 8) & 0x0000FF00U) | ((buffer[offset + 0] << 0) & 0x000000FFU));
-        }
-
-        public static ulong ToUInt64LittleEndian(byte[] buffer, int offset)
-        {
-            return ((ulong)ToUInt32LittleEndian(buffer, offset + 4) << 32) | ToUInt32LittleEndian(buffer, offset + 0);
-        }
-
-        public static short ToInt16LittleEndian(byte[] buffer, int offset)
-        {
-            return (short)ToUInt16LittleEndian(buffer, offset);
-        }
-
-        public static int ToInt32LittleEndian(byte[] buffer, int offset)
-        {
-            return (int)ToUInt32LittleEndian(buffer, offset);
-        }
-
-        public static long ToInt64LittleEndian(byte[] buffer, int offset)
-        {
-            return (long)ToUInt64LittleEndian(buffer, offset);
-        }
-
-        public static ushort ToUInt16BigEndian(byte[] buffer, int offset)
-        {
-            return (ushort)(((buffer[offset] << 8) & 0xFF00) | ((buffer[offset + 1] << 0) & 0x00FF));
-        }
-
-        public static uint ToUInt32BigEndian(byte[] buffer, int offset)
-        {
-            uint val = (uint)(((buffer[offset + 0] << 24) & 0xFF000000U) | ((buffer[offset + 1] << 16) & 0x00FF0000U)
-                              | ((buffer[offset + 2] << 8) & 0x0000FF00U) | ((buffer[offset + 3] << 0) & 0x000000FFU));
-            return val;
-        }
-
-        public static ulong ToUInt64BigEndian(byte[] buffer, int offset)
-        {
-            return ((ulong)ToUInt32BigEndian(buffer, offset + 0) << 32) | ToUInt32BigEndian(buffer, offset + 4);
-        }
-
-        public static short ToInt16BigEndian(byte[] buffer, int offset)
-        {
-            return (short)ToUInt16BigEndian(buffer, offset);
-        }
-
-        public static int ToInt32BigEndian(byte[] buffer, int offset)
-        {
-            return (int)ToUInt32BigEndian(buffer, offset);
-        }
-
-        public static long ToInt64BigEndian(byte[] buffer, int offset)
-        {
-            return (long)ToUInt64BigEndian(buffer, offset);
-        }
-
-        public static Guid ToGuidLittleEndian(byte[] buffer, int offset)
-        {
-            byte[] temp = new byte[16];
-            Array.Copy(buffer, offset, temp, 0, 16);
-            return new Guid(temp);
-        }
-
-        public static Guid ToGuidBigEndian(byte[] buffer, int offset)
-        {
-            return new Guid(
-                ToUInt32BigEndian(buffer, offset + 0),
-                ToUInt16BigEndian(buffer, offset + 4),
-                ToUInt16BigEndian(buffer, offset + 6),
-                buffer[offset + 8],
-                buffer[offset + 9],
-                buffer[offset + 10],
-                buffer[offset + 11],
-                buffer[offset + 12],
-                buffer[offset + 13],
-                buffer[offset + 14],
-                buffer[offset + 15]);
-        }
-
-        public static byte[] ToByteArray(byte[] buffer, int offset, int length)
-        {
-            byte[] result = new byte[length];
-            Array.Copy(buffer, offset, result, 0, length);
-            return result;
-        }
-
-        public static T ToStruct<T>(byte[] buffer, int offset)
-            where T : IByteArraySerializable, new()
-        {
-            T result = new T();
-            result.ReadFrom(buffer, offset);
-            return result;
-        }
-
-        /// <summary>
-        /// Primitive conversion from Unicode to ASCII that preserves special characters.
-        /// </summary>
-        /// <param name="value">The string to convert.</param>
-        /// <param name="dest">The buffer to fill.</param>
-        /// <param name="offset">The start of the string in the buffer.</param>
-        /// <param name="count">The number of characters to convert.</param>
-        /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
-        /// this preserves those code points by removing the top 16 bits of each character.</remarks>
-        public static void StringToBytes(string value, byte[] dest, int offset, int count)
-        {
-            char[] chars = value.ToCharArray();
-
-            int i = 0;
-            while (i < chars.Length)
-            {
-                dest[i + offset] = (byte)chars[i];
-                ++i;
-            }
-
-            while (i < count)
-            {
-                dest[i + offset] = 0;
-                ++i;
-            }
-        }
-
-        /// <summary>
-        /// Primitive conversion from ASCII to Unicode that preserves special characters.
-        /// </summary>
-        /// <param name="data">The data to convert.</param>
-        /// <param name="offset">The first byte to convert.</param>
-        /// <param name="count">The number of bytes to convert.</param>
-        /// <returns>The string.</returns>
-        /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
-        /// this preserves those code points.</remarks>
-        public static string BytesToString(byte[] data, int offset, int count)
-        {
-            char[] result = new char[count];
-
-            for (int i = 0; i < count; ++i)
-            {
-                result[i] = (char)data[i + offset];
-            }
-
-            return new string(result);
-        }
-
-        /// <summary>
-        /// Primitive conversion from ASCII to Unicode that stops at a null-terminator.
-        /// </summary>
-        /// <param name="data">The data to convert.</param>
-        /// <param name="offset">The first byte to convert.</param>
-        /// <param name="count">The number of bytes to convert.</param>
-        /// <returns>The string.</returns>
-        /// <remarks>The built-in ASCIIEncoding converts characters of codepoint > 127 to ?,
-        /// this preserves those code points.</remarks>
-        public static string BytesToZString(byte[] data, int offset, int count)
-        {
-            char[] result = new char[count];
-
-            for (int i = 0; i < count; ++i)
-            {
-                byte ch = data[i + offset];
-                if (ch == 0)
-                {
-                    return new string(result, 0, i);
-                }
-
-                result[i] = (char)ch;
-            }
-
-            return new string(result);
-        }
-
+        
         #endregion
 
         #region Path Manipulation
@@ -676,53 +266,29 @@ namespace DiscUtils.Internal
         /// </summary>
         /// <param name="basePath">The base path to resolve from.</param>
         /// <param name="relativePath">The relative path.</param>
-        /// <returns>The absolute path, so far as it can be resolved.  If the
-        /// <paramref name="relativePath"/> contains more '..' characters than the
-        /// base path contains levels of directory, the resultant string will be relative.
-        /// For example: (TEMP\Foo.txt, ..\..\Bar.txt) gives (..\Bar.txt).</returns>
+        /// <returns>The absolute path. If no <paramref name="basePath"/> is specified
+        /// then relativePath is returned as-is. If <paramref name="relativePath"/>
+        /// contains more '..' characters than the base path contains levels of 
+        /// directory, the resultant string be the root drive followed by the file name.
+        /// If no the basePath starts with '\' (no drive specified) then the returned
+        /// path will also start with '\'.
+        /// For example: (\TEMP\Foo.txt, ..\..\Bar.txt) gives (\Bar.txt).
+        /// </returns>
         public static string ResolveRelativePath(string basePath, string relativePath)
         {
-            List<string> pathElements =
-                new List<string>(basePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
-            if (!basePath.EndsWith(@"\", StringComparison.Ordinal) && pathElements.Count > 0)
+            if (string.IsNullOrEmpty(basePath))
             {
-                pathElements.RemoveAt(pathElements.Count - 1);
+                return relativePath;
             }
 
-            pathElements.AddRange(relativePath.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+            if (!basePath.EndsWith(@"\"))
+                basePath = Path.GetDirectoryName(basePath);
 
-            int pos = 1;
-            while (pos < pathElements.Count)
-            {
-                if (pathElements[pos] == ".")
-                {
-                    pathElements.RemoveAt(pos);
-                }
-                else if (pathElements[pos] == ".." && pos > 0 && pathElements[pos - 1][0] != '.')
-                {
-                    pathElements.RemoveAt(pos);
-                    pathElements.RemoveAt(pos - 1);
-                    pos--;
-                }
-                else
-                {
-                    pos++;
-                }
-            }
+            string merged = Path.GetFullPath(Path.Combine(basePath, relativePath));
 
-            string merged = string.Join(@"\", pathElements.ToArray());
-            if (relativePath.EndsWith(@"\", StringComparison.Ordinal))
+            if (basePath.StartsWith(@"\") && merged.Length > 2 && merged[1].Equals(':'))
             {
-                merged += @"\";
-            }
-
-            if (basePath.StartsWith(@"\\", StringComparison.Ordinal))
-            {
-                merged = @"\\" + merged;
-            }
-            else if (basePath.StartsWith(@"\", StringComparison.Ordinal))
-            {
-                merged = @"\" + merged;
+                return merged.Substring(2);
             }
 
             return merged;
@@ -794,180 +360,7 @@ namespace DiscUtils.Internal
         }
 
         #endregion
-
-        #region Stream Manipulation
-
-        /// <summary>
-        /// Read bytes until buffer filled or EOF.
-        /// </summary>
-        /// <param name="stream">The stream to read.</param>
-        /// <param name="buffer">The buffer to populate.</param>
-        /// <param name="offset">Offset in the buffer to start.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <returns>The number of bytes actually read.</returns>
-        public static int ReadFully(Stream stream, byte[] buffer, int offset, int length)
-        {
-            int totalRead = 0;
-            int numRead = stream.Read(buffer, offset, length);
-            while (numRead > 0)
-            {
-                totalRead += numRead;
-                if (totalRead == length)
-                {
-                    break;
-                }
-
-                numRead = stream.Read(buffer, offset + totalRead, length - totalRead);
-            }
-
-            return totalRead;
-        }
-
-        /// <summary>
-        /// Read bytes until buffer filled or throw IOException.
-        /// </summary>
-        /// <param name="stream">The stream to read.</param>
-        /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The data read from the stream.</returns>
-        public static byte[] ReadFully(Stream stream, int count)
-        {
-            byte[] buffer = new byte[count];
-            if (ReadFully(stream, buffer, 0, count) == count)
-            {
-                return buffer;
-            }
-            throw new IOException("Unable to complete read of " + count + " bytes");
-        }
-
-        /// <summary>
-        /// Read bytes until buffer filled or EOF.
-        /// </summary>
-        /// <param name="buffer">The stream to read.</param>
-        /// <param name="pos">The position in buffer to read from.</param>
-        /// <param name="data">The buffer to populate.</param>
-        /// <param name="offset">Offset in the buffer to start.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <returns>The number of bytes actually read.</returns>
-        public static int ReadFully(IBuffer buffer, long pos, byte[] data, int offset, int length)
-        {
-            int totalRead = 0;
-            int numRead = buffer.Read(pos, data, offset, length);
-            while (numRead > 0)
-            {
-                totalRead += numRead;
-                if (totalRead == length)
-                {
-                    break;
-                }
-
-                numRead = buffer.Read(pos, data, offset + totalRead, length - totalRead);
-            }
-
-            return totalRead;
-        }
-
-        /// <summary>
-        /// Read bytes until buffer filled or throw IOException.
-        /// </summary>
-        /// <param name="buffer">The buffer to read.</param>
-        /// <param name="pos">The position in buffer to read from.</param>
-        /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The data read from the stream.</returns>
-        public static byte[] ReadFully(IBuffer buffer, long pos, int count)
-        {
-            byte[] result = new byte[count];
-            if (ReadFully(buffer, pos, result, 0, count) == count)
-            {
-                return result;
-            }
-            throw new IOException("Unable to complete read of " + count + " bytes");
-        }
-
-        /// <summary>
-        /// Read bytes until buffer filled or throw IOException.
-        /// </summary>
-        /// <param name="buffer">The buffer to read.</param>
-        /// <returns>The data read from the stream.</returns>
-        public static byte[] ReadAll(IBuffer buffer)
-        {
-            return ReadFully(buffer, 0, (int)buffer.Capacity);
-        }
-
-        /// <summary>
-        /// Reads a disk sector (512 bytes).
-        /// </summary>
-        /// <param name="stream">The stream to read.</param>
-        /// <returns>The sector data as a byte array.</returns>
-        public static byte[] ReadSector(Stream stream)
-        {
-            return ReadFully(stream, Sizes.Sector);
-        }
-
-        /// <summary>
-        /// Reads a structure from a stream.
-        /// </summary>
-        /// <typeparam name="T">The type of the structure.</typeparam>
-        /// <param name="stream">The stream to read.</param>
-        /// <returns>The structure.</returns>
-        public static T ReadStruct<T>(Stream stream)
-            where T : IByteArraySerializable, new()
-        {
-            T result = new T();
-            byte[] buffer = ReadFully(stream, result.Size);
-            result.ReadFrom(buffer, 0);
-            return result;
-        }
-
-        /// <summary>
-        /// Reads a structure from a stream.
-        /// </summary>
-        /// <typeparam name="T">The type of the structure.</typeparam>
-        /// <param name="stream">The stream to read.</param>
-        /// <param name="length">The number of bytes to read.</param>
-        /// <returns>The structure.</returns>
-        public static T ReadStruct<T>(Stream stream, int length)
-            where T : IByteArraySerializable, new()
-        {
-            T result = new T();
-            byte[] buffer = ReadFully(stream, length);
-            result.ReadFrom(buffer, 0);
-            return result;
-        }
-
-        /// <summary>
-        /// Writes a structure to a stream.
-        /// </summary>
-        /// <typeparam name="T">The type of the structure.</typeparam>
-        /// <param name="stream">The stream to write to.</param>
-        /// <param name="obj">The structure to write.</param>
-        public static void WriteStruct<T>(Stream stream, T obj)
-            where T : IByteArraySerializable
-        {
-            byte[] buffer = new byte[obj.Size];
-            obj.WriteTo(buffer, 0);
-            stream.Write(buffer, 0, buffer.Length);
-        }
-
-        /// <summary>
-        /// Copies the contents of one stream to another.
-        /// </summary>
-        /// <param name="source">The stream to copy from.</param>
-        /// <param name="dest">The destination stream.</param>
-        /// <remarks>Copying starts at the current stream positions.</remarks>
-        public static void PumpStreams(Stream source, Stream dest)
-        {
-            byte[] buffer = new byte[64 * 1024];
-
-            int numRead = source.Read(buffer, 0, buffer.Length);
-            while (numRead != 0)
-            {
-                dest.Write(buffer, 0, numRead);
-                numRead = source.Read(buffer, 0, buffer.Length);
-            }
-        }
-
-        #endregion
-
+        
         #region Filesystem Support
 
         /// <summary>
@@ -1023,7 +416,7 @@ namespace DiscUtils.Internal
 
         public static bool Is8Dot3Char(char ch)
         {
-            return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || "_^$~!#%�-{}()@'`&".IndexOf(ch) != -1;
+            return (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || "_^$~!#%£-{}()@'`&".IndexOf(ch) != -1;
         }
 
         /// <summary>

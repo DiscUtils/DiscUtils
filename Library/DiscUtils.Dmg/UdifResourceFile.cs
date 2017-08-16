@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Dmg
 {
@@ -61,26 +61,26 @@ namespace DiscUtils.Dmg
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.ToUInt32BigEndian(buffer, offset + 0);
-            Version = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            HeaderSize = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            Flags = Utilities.ToUInt32BigEndian(buffer, offset + 12);
-            RunningDataForkOffset = Utilities.ToUInt64BigEndian(buffer, offset + 16);
-            DataForkOffset = Utilities.ToUInt64BigEndian(buffer, offset + 24);
-            DataForkLength = Utilities.ToUInt64BigEndian(buffer, offset + 32);
-            RsrcForkOffset = Utilities.ToUInt64BigEndian(buffer, offset + 40);
-            RsrcForkLength = Utilities.ToUInt64BigEndian(buffer, offset + 48);
-            SegmentNumber = Utilities.ToUInt32BigEndian(buffer, offset + 56);
-            SegmentCount = Utilities.ToUInt32BigEndian(buffer, offset + 60);
-            SegmentGuid = Utilities.ToGuidBigEndian(buffer, offset + 64);
+            Signature = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0);
+            Version = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            HeaderSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
+            Flags = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
+            RunningDataForkOffset = EndianUtilities.ToUInt64BigEndian(buffer, offset + 16);
+            DataForkOffset = EndianUtilities.ToUInt64BigEndian(buffer, offset + 24);
+            DataForkLength = EndianUtilities.ToUInt64BigEndian(buffer, offset + 32);
+            RsrcForkOffset = EndianUtilities.ToUInt64BigEndian(buffer, offset + 40);
+            RsrcForkLength = EndianUtilities.ToUInt64BigEndian(buffer, offset + 48);
+            SegmentNumber = EndianUtilities.ToUInt32BigEndian(buffer, offset + 56);
+            SegmentCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 60);
+            SegmentGuid = EndianUtilities.ToGuidBigEndian(buffer, offset + 64);
 
-            DataForkChecksum = Utilities.ToStruct<UdifChecksum>(buffer, offset + 80);
-            XmlOffset = Utilities.ToUInt64BigEndian(buffer, offset + 216);
-            XmlLength = Utilities.ToUInt64BigEndian(buffer, offset + 224);
+            DataForkChecksum = EndianUtilities.ToStruct<UdifChecksum>(buffer, offset + 80);
+            XmlOffset = EndianUtilities.ToUInt64BigEndian(buffer, offset + 216);
+            XmlLength = EndianUtilities.ToUInt64BigEndian(buffer, offset + 224);
 
-            MasterChecksum = Utilities.ToStruct<UdifChecksum>(buffer, offset + 352);
-            ImageVariant = Utilities.ToUInt32BigEndian(buffer, offset + 488);
-            SectorCount = Utilities.ToInt64BigEndian(buffer, offset + 492);
+            MasterChecksum = EndianUtilities.ToStruct<UdifChecksum>(buffer, offset + 352);
+            ImageVariant = EndianUtilities.ToUInt32BigEndian(buffer, offset + 488);
+            SectorCount = EndianUtilities.ToInt64BigEndian(buffer, offset + 492);
 
             return Size;
         }

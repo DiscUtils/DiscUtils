@@ -3,10 +3,9 @@
   <PropertyGroup>
     <Description>DiscUtils, meta-package with container formats such as WIM, DMG, VHD, VHDX, XVA, VMDK</Description>
     <AssemblyTitle>DiscUtils.Containers</AssemblyTitle>
-    <VersionPrefix>0.12.2-alpha</VersionPrefix>
+    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
-    <PublicSign>true</PublicSign>
     <AssemblyName>DiscUtils.Containers</AssemblyName>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

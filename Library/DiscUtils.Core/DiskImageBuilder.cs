@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils
 {

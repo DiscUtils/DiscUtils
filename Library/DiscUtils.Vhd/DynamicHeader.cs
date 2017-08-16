@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 using System.Text;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Vhd
 {
@@ -86,15 +86,15 @@ namespace DiscUtils.Vhd
         public static DynamicHeader FromBytes(byte[] data, int offset)
         {
             DynamicHeader result = new DynamicHeader();
-            result.Cookie = Utilities.BytesToString(data, offset, 8);
-            result.DataOffset = Utilities.ToInt64BigEndian(data, offset + 8);
-            result.TableOffset = Utilities.ToInt64BigEndian(data, offset + 16);
-            result.HeaderVersion = Utilities.ToUInt32BigEndian(data, offset + 24);
-            result.MaxTableEntries = Utilities.ToInt32BigEndian(data, offset + 28);
-            result.BlockSize = Utilities.ToUInt32BigEndian(data, offset + 32);
-            result.Checksum = Utilities.ToUInt32BigEndian(data, offset + 36);
-            result.ParentUniqueId = Utilities.ToGuidBigEndian(data, offset + 40);
-            result.ParentTimestamp = Footer.EpochUtc.AddSeconds(Utilities.ToUInt32BigEndian(data, offset + 56));
+            result.Cookie = EndianUtilities.BytesToString(data, offset, 8);
+            result.DataOffset = EndianUtilities.ToInt64BigEndian(data, offset + 8);
+            result.TableOffset = EndianUtilities.ToInt64BigEndian(data, offset + 16);
+            result.HeaderVersion = EndianUtilities.ToUInt32BigEndian(data, offset + 24);
+            result.MaxTableEntries = EndianUtilities.ToInt32BigEndian(data, offset + 28);
+            result.BlockSize = EndianUtilities.ToUInt32BigEndian(data, offset + 32);
+            result.Checksum = EndianUtilities.ToUInt32BigEndian(data, offset + 36);
+            result.ParentUniqueId = EndianUtilities.ToGuidBigEndian(data, offset + 40);
+            result.ParentTimestamp = Footer.EpochUtc.AddSeconds(EndianUtilities.ToUInt32BigEndian(data, offset + 56));
             result.ParentUnicodeName = Encoding.BigEndianUnicode.GetString(data, offset + 64, 512).TrimEnd('\0');
 
             result.ParentLocators = new ParentLocator[8];
@@ -108,16 +108,16 @@ namespace DiscUtils.Vhd
 
         public void ToBytes(byte[] data, int offset)
         {
-            Utilities.StringToBytes(Cookie, data, offset, 8);
-            Utilities.WriteBytesBigEndian(DataOffset, data, offset + 8);
-            Utilities.WriteBytesBigEndian(TableOffset, data, offset + 16);
-            Utilities.WriteBytesBigEndian(HeaderVersion, data, offset + 24);
-            Utilities.WriteBytesBigEndian(MaxTableEntries, data, offset + 28);
-            Utilities.WriteBytesBigEndian(BlockSize, data, offset + 32);
-            Utilities.WriteBytesBigEndian(Checksum, data, offset + 36);
-            Utilities.WriteBytesBigEndian(ParentUniqueId, data, offset + 40);
-            Utilities.WriteBytesBigEndian((uint)(ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
-            Utilities.WriteBytesBigEndian((uint)0, data, offset + 60);
+            EndianUtilities.StringToBytes(Cookie, data, offset, 8);
+            EndianUtilities.WriteBytesBigEndian(DataOffset, data, offset + 8);
+            EndianUtilities.WriteBytesBigEndian(TableOffset, data, offset + 16);
+            EndianUtilities.WriteBytesBigEndian(HeaderVersion, data, offset + 24);
+            EndianUtilities.WriteBytesBigEndian(MaxTableEntries, data, offset + 28);
+            EndianUtilities.WriteBytesBigEndian(BlockSize, data, offset + 32);
+            EndianUtilities.WriteBytesBigEndian(Checksum, data, offset + 36);
+            EndianUtilities.WriteBytesBigEndian(ParentUniqueId, data, offset + 40);
+            EndianUtilities.WriteBytesBigEndian((uint)(ParentTimestamp - Footer.EpochUtc).TotalSeconds, data, offset + 56);
+            EndianUtilities.WriteBytesBigEndian((uint)0, data, offset + 60);
             Array.Clear(data, offset + 64, 512);
             Encoding.BigEndianUnicode.GetBytes(ParentUnicodeName, 0, ParentUnicodeName.Length, data, offset + 64);
 
@@ -149,7 +149,7 @@ namespace DiscUtils.Vhd
 
         internal static DynamicHeader FromStream(Stream stream)
         {
-            return FromBytes(Utilities.ReadFully(stream, 1024), 0);
+            return FromBytes(StreamUtilities.ReadFully(stream, 1024), 0);
         }
 
         private uint CalculateChecksum()

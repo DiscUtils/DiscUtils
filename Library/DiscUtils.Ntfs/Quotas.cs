@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Security.Principal;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -138,13 +138,13 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                OwnerId = Utilities.ToInt32LittleEndian(buffer, offset);
+                OwnerId = EndianUtilities.ToInt32LittleEndian(buffer, offset);
                 return 4;
             }
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(OwnerId, buffer, offset);
+                EndianUtilities.WriteBytesLittleEndian(OwnerId, buffer, offset);
             }
 
             public override string ToString()
@@ -183,13 +183,13 @@ namespace DiscUtils.Ntfs
 
             public int ReadFrom(byte[] buffer, int offset)
             {
-                Version = Utilities.ToInt32LittleEndian(buffer, offset);
-                Flags = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-                BytesUsed = Utilities.ToInt64LittleEndian(buffer, offset + 0x08);
-                ChangeTime = DateTime.FromFileTimeUtc(Utilities.ToInt64LittleEndian(buffer, offset + 0x10));
-                WarningLimit = Utilities.ToInt64LittleEndian(buffer, offset + 0x18);
-                HardLimit = Utilities.ToInt64LittleEndian(buffer, offset + 0x20);
-                ExceededTime = Utilities.ToInt64LittleEndian(buffer, offset + 0x28);
+                Version = EndianUtilities.ToInt32LittleEndian(buffer, offset);
+                Flags = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x04);
+                BytesUsed = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x08);
+                ChangeTime = DateTime.FromFileTimeUtc(EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x10));
+                WarningLimit = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x18);
+                HardLimit = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x20);
+                ExceededTime = EndianUtilities.ToInt64LittleEndian(buffer, offset + 0x28);
                 if (buffer.Length - offset > 0x30)
                 {
                     Sid = new SecurityIdentifier(buffer, offset + 0x30);
@@ -201,13 +201,13 @@ namespace DiscUtils.Ntfs
 
             public void WriteTo(byte[] buffer, int offset)
             {
-                Utilities.WriteBytesLittleEndian(Version, buffer, offset);
-                Utilities.WriteBytesLittleEndian(Flags, buffer, offset + 0x04);
-                Utilities.WriteBytesLittleEndian(BytesUsed, buffer, offset + 0x08);
-                Utilities.WriteBytesLittleEndian(ChangeTime.ToFileTimeUtc(), buffer, offset + 0x10);
-                Utilities.WriteBytesLittleEndian(WarningLimit, buffer, offset + 0x18);
-                Utilities.WriteBytesLittleEndian(HardLimit, buffer, offset + 0x20);
-                Utilities.WriteBytesLittleEndian(ExceededTime, buffer, offset + 0x28);
+                EndianUtilities.WriteBytesLittleEndian(Version, buffer, offset);
+                EndianUtilities.WriteBytesLittleEndian(Flags, buffer, offset + 0x04);
+                EndianUtilities.WriteBytesLittleEndian(BytesUsed, buffer, offset + 0x08);
+                EndianUtilities.WriteBytesLittleEndian(ChangeTime.ToFileTimeUtc(), buffer, offset + 0x10);
+                EndianUtilities.WriteBytesLittleEndian(WarningLimit, buffer, offset + 0x18);
+                EndianUtilities.WriteBytesLittleEndian(HardLimit, buffer, offset + 0x20);
+                EndianUtilities.WriteBytesLittleEndian(ExceededTime, buffer, offset + 0x28);
                 if (Sid != null)
                 {
                     Sid.GetBinaryForm(buffer, offset + 0x30);

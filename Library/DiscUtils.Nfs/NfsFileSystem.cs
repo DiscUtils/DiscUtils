@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Nfs
 {
@@ -731,6 +732,30 @@ namespace DiscUtils.Nfs
             {
                 throw ConvertNfsException(ne);
             }
+        }
+ 
+        /// <summary>
+        /// Size of the Filesystem in bytes
+        /// </summary>
+        public override long Size
+        {
+            get { return (long) _client.FsStat(_client.RootHandle).TotalSizeBytes; }
+        }
+ 
+        /// <summary>
+        /// Used space of the Filesystem in bytes
+        /// </summary>
+        public override long UsedSpace
+        {
+            get { return Size - AvailableSpace; }
+        }
+
+         /// <summary>
+        /// Available space of the Filesystem in bytes
+        /// </summary>
+        public override long AvailableSpace
+        {
+            get { return (long) _client.FsStat(_client.RootHandle).FreeSpaceBytes; }
         }
 
         /// <summary>

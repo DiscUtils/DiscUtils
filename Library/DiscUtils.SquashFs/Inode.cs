@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.SquashFs
 {
@@ -46,23 +46,23 @@ namespace DiscUtils.SquashFs
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
-            Type = (InodeType)Utilities.ToUInt16LittleEndian(buffer, offset + 0);
-            Mode = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            UidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 4);
-            GidKey = Utilities.ToUInt16LittleEndian(buffer, offset + 6);
-            ModificationTime = ((long) Utilities.ToUInt32LittleEndian(buffer, offset + 8)).FromUnixTimeSeconds().DateTime;
-            InodeNumber = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
+            Type = (InodeType)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0);
+            Mode = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 2);
+            UidKey = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
+            GidKey = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 6);
+            ModificationTime = ((long) EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8)).FromUnixTimeSeconds().DateTime;
+            InodeNumber = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 12);
             return 16;
         }
 
         public virtual void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 0);
-            Utilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
-            Utilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
-            Utilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);
-            Utilities.WriteBytesLittleEndian(Convert.ToUInt32((new DateTimeOffset(ModificationTime)).ToUnixTimeSeconds()), buffer, offset + 8);
-            Utilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 12);
+            EndianUtilities.WriteBytesLittleEndian((ushort)Type, buffer, offset + 0);
+            EndianUtilities.WriteBytesLittleEndian(Mode, buffer, offset + 2);
+            EndianUtilities.WriteBytesLittleEndian(UidKey, buffer, offset + 4);
+            EndianUtilities.WriteBytesLittleEndian(GidKey, buffer, offset + 6);
+            EndianUtilities.WriteBytesLittleEndian(Convert.ToUInt32((new DateTimeOffset(ModificationTime)).ToUnixTimeSeconds()), buffer, offset + 8);
+            EndianUtilities.WriteBytesLittleEndian(InodeNumber, buffer, offset + 12);
         }
 
         public static Inode Read(MetablockReader inodeReader)
@@ -73,7 +73,7 @@ namespace DiscUtils.SquashFs
                 throw new IOException("Unable to read Inode type");
             }
 
-            InodeType type = (InodeType)Utilities.ToUInt16LittleEndian(typeData, 0);
+            InodeType type = (InodeType)EndianUtilities.ToUInt16LittleEndian(typeData, 0);
             Inode inode = InstantiateType(type);
 
             byte[] inodeData = new byte[inode.Size];

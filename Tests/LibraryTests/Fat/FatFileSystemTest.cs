@@ -27,6 +27,7 @@ using System.Text;
 using DiscUtils;
 using DiscUtils.Fat;
 using DiscUtils.Setup;
+using DiscUtils.Streams;
 using Xunit;
 using FileSystemInfo = DiscUtils.FileSystemInfo;
 

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -41,14 +41,14 @@ namespace DiscUtils.HfsPlus
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            LogicalSize = Utilities.ToUInt64BigEndian(buffer, offset + 0);
-            ClumpSize = Utilities.ToUInt32BigEndian(buffer, offset + 8);
-            TotalBlocks = Utilities.ToUInt32BigEndian(buffer, offset + 12);
+            LogicalSize = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0);
+            ClumpSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
+            TotalBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
 
             Extents = new ExtentDescriptor[8];
             for (int i = 0; i < 8; ++i)
             {
-                Extents[i] = Utilities.ToStruct<ExtentDescriptor>(buffer, offset + 16 + i * 8);
+                Extents[i] = EndianUtilities.ToStruct<ExtentDescriptor>(buffer, offset + 16 + i * 8);
             }
 
             return StructSize;

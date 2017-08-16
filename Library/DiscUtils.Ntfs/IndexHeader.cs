@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -40,17 +40,17 @@ namespace DiscUtils.Ntfs
 
         public IndexHeader(byte[] data, int offset)
         {
-            OffsetToFirstEntry = Utilities.ToUInt32LittleEndian(data, offset + 0x00);
-            TotalSizeOfEntries = Utilities.ToUInt32LittleEndian(data, offset + 0x04);
-            AllocatedSizeOfEntries = Utilities.ToUInt32LittleEndian(data, offset + 0x08);
+            OffsetToFirstEntry = EndianUtilities.ToUInt32LittleEndian(data, offset + 0x00);
+            TotalSizeOfEntries = EndianUtilities.ToUInt32LittleEndian(data, offset + 0x04);
+            AllocatedSizeOfEntries = EndianUtilities.ToUInt32LittleEndian(data, offset + 0x08);
             HasChildNodes = data[offset + 0x0C];
         }
 
         internal void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(OffsetToFirstEntry, buffer, offset + 0x00);
-            Utilities.WriteBytesLittleEndian(TotalSizeOfEntries, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(AllocatedSizeOfEntries, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(OffsetToFirstEntry, buffer, offset + 0x00);
+            EndianUtilities.WriteBytesLittleEndian(TotalSizeOfEntries, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian(AllocatedSizeOfEntries, buffer, offset + 0x08);
             buffer[offset + 0x0C] = HasChildNodes;
             buffer[offset + 0x0D] = 0;
             buffer[offset + 0x0E] = 0;

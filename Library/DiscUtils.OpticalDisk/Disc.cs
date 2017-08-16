@@ -23,6 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.OpticalDisk
 {
@@ -57,10 +59,7 @@ namespace DiscUtils.OpticalDisk
         /// </summary>
         /// <param name="path">The path to the disc image.</param>
         public Disc(string path)
-        {
-            _file = new DiscImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None),
-                Ownership.Dispose, OpticalFormat.None);
-        }
+            :this(path, FileAccess.ReadWrite) {}
 
         /// <summary>
         /// Initializes a new instance of the Disc class.
@@ -70,7 +69,8 @@ namespace DiscUtils.OpticalDisk
         public Disc(string path, FileAccess access)
         {
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
-            _file = new DiscImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose,
+            var locator = new LocalFileLocator(string.Empty);
+            _file = new DiscImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose,
                 OpticalFormat.None);
         }
 

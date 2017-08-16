@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -55,15 +55,15 @@ namespace DiscUtils.Registry
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            int nameLen = Utilities.ToUInt16LittleEndian(buffer, offset + 0x02);
-            DataLength = Utilities.ToInt32LittleEndian(buffer, offset + 0x04);
-            DataIndex = Utilities.ToInt32LittleEndian(buffer, offset + 0x08);
-            DataType = (RegistryValueType)Utilities.ToInt32LittleEndian(buffer, offset + 0x0C);
-            _flags = (ValueFlags)Utilities.ToUInt16LittleEndian(buffer, offset + 0x10);
+            int nameLen = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x02);
+            DataLength = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x04);
+            DataIndex = EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x08);
+            DataType = (RegistryValueType)EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x0C);
+            _flags = (ValueFlags)EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x10);
 
             if ((_flags & ValueFlags.Named) != 0)
             {
-                Name = Utilities.BytesToString(buffer, offset + 0x14, nameLen).Trim('\0');
+                Name = EndianUtilities.BytesToString(buffer, offset + 0x14, nameLen).Trim('\0');
             }
 
             return 0x14 + nameLen;
@@ -84,15 +84,15 @@ namespace DiscUtils.Registry
                 nameLen = Name.Length;
             }
 
-            Utilities.StringToBytes("vk", buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian(nameLen, buffer, offset + 0x02);
-            Utilities.WriteBytesLittleEndian(DataLength, buffer, offset + 0x04);
-            Utilities.WriteBytesLittleEndian(DataIndex, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian((int)DataType, buffer, offset + 0x0C);
-            Utilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x10);
+            EndianUtilities.StringToBytes("vk", buffer, offset, 2);
+            EndianUtilities.WriteBytesLittleEndian(nameLen, buffer, offset + 0x02);
+            EndianUtilities.WriteBytesLittleEndian(DataLength, buffer, offset + 0x04);
+            EndianUtilities.WriteBytesLittleEndian(DataIndex, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian((int)DataType, buffer, offset + 0x0C);
+            EndianUtilities.WriteBytesLittleEndian((ushort)_flags, buffer, offset + 0x10);
             if (nameLen != 0)
             {
-                Utilities.StringToBytes(Name, buffer, offset + 0x14, nameLen);
+                EndianUtilities.StringToBytes(Name, buffer, offset + 0x14, nameLen);
             }
         }
     }

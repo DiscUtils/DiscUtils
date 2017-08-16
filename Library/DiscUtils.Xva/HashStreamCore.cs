@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Xva
 {

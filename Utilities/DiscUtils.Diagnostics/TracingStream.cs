@@ -24,6 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Diagnostics
 {
@@ -153,7 +155,8 @@ namespace DiscUtils.Diagnostics
 
             if (!string.IsNullOrEmpty(path))
             {
-                _fileOut = new StreamWriter(new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
+                var locator = new LocalFileLocator(string.Empty);
+                _fileOut = new StreamWriter(locator.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
         }
 

@@ -22,7 +22,7 @@
 
 using System.Globalization;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Udf
 {
@@ -35,7 +35,7 @@ namespace DiscUtils.Udf
         public static T FromStream(Stream stream, uint sector, uint sectorSize)
         {
             stream.Position = sector * (long)sectorSize;
-            byte[] buffer = Utilities.ReadFully(stream, 512);
+            byte[] buffer = StreamUtilities.ReadFully(stream, 512);
 
             T result = new T();
             result.ReadFrom(buffer, 0);

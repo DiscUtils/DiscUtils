@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using DiscUtils;
 using DiscUtils.Common;
+using DiscUtils.Streams;
 using DiscUtils.Vhd;
 
 namespace VHDCreate

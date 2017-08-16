@@ -22,7 +22,7 @@
 
 using System;
 using System.Globalization;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -43,18 +43,18 @@ namespace DiscUtils.Ntfs
             MftReference = new FileRecordReference();
             MftReference.ReadFrom(buffer, offset);
 
-            BirthVolumeId = Utilities.ToGuidLittleEndian(buffer, offset + 0x08);
-            BirthObjectId = Utilities.ToGuidLittleEndian(buffer, offset + 0x18);
-            BirthDomainId = Utilities.ToGuidLittleEndian(buffer, offset + 0x28);
+            BirthVolumeId = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x08);
+            BirthObjectId = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x18);
+            BirthDomainId = EndianUtilities.ToGuidLittleEndian(buffer, offset + 0x28);
             return 0x38;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
             MftReference.WriteTo(buffer, offset);
-            Utilities.WriteBytesLittleEndian(BirthVolumeId, buffer, offset + 0x08);
-            Utilities.WriteBytesLittleEndian(BirthObjectId, buffer, offset + 0x18);
-            Utilities.WriteBytesLittleEndian(BirthDomainId, buffer, offset + 0x28);
+            EndianUtilities.WriteBytesLittleEndian(BirthVolumeId, buffer, offset + 0x08);
+            EndianUtilities.WriteBytesLittleEndian(BirthObjectId, buffer, offset + 0x18);
+            EndianUtilities.WriteBytesLittleEndian(BirthDomainId, buffer, offset + 0x28);
         }
 
         public override string ToString()

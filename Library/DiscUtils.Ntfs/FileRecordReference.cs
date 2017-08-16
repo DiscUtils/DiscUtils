@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
@@ -72,13 +72,13 @@ namespace DiscUtils.Ntfs
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Value = Utilities.ToUInt64LittleEndian(buffer, offset);
+            Value = EndianUtilities.ToUInt64LittleEndian(buffer, offset);
             return 8;
         }
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.WriteBytesLittleEndian(Value, buffer, offset);
+            EndianUtilities.WriteBytesLittleEndian(Value, buffer, offset);
         }
 
         public override bool Equals(object obj)

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.ApplePartitionMap
 {
@@ -42,13 +42,13 @@ namespace DiscUtils.ApplePartitionMap
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Signature = Utilities.ToUInt16BigEndian(buffer, offset + 0);
-            BlockSize = Utilities.ToUInt16BigEndian(buffer, offset + 2);
-            BlockCount = Utilities.ToUInt32BigEndian(buffer, offset + 4);
-            DeviceType = Utilities.ToUInt16BigEndian(buffer, offset + 8);
-            DeviceId = Utilities.ToUInt16BigEndian(buffer, offset + 10);
-            DriverData = Utilities.ToUInt32BigEndian(buffer, offset + 12);
-            DriverCount = Utilities.ToUInt16LittleEndian(buffer, offset + 16);
+            Signature = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0);
+            BlockSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 2);
+            BlockCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
+            DeviceType = EndianUtilities.ToUInt16BigEndian(buffer, offset + 8);
+            DeviceId = EndianUtilities.ToUInt16BigEndian(buffer, offset + 10);
+            DriverData = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
+            DriverCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 16);
 
             return 512;
         }

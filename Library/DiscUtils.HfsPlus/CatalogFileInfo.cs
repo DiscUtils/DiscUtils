@@ -21,7 +21,7 @@
 //
 
 using System;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.HfsPlus
 {
@@ -41,11 +41,11 @@ namespace DiscUtils.HfsPlus
         {
             base.ReadFrom(buffer, offset);
 
-            Flags = Utilities.ToUInt16BigEndian(buffer, offset + 2);
-            FileInfo = Utilities.ToStruct<FileInfo>(buffer, offset + 48);
+            Flags = EndianUtilities.ToUInt16BigEndian(buffer, offset + 2);
+            FileInfo = EndianUtilities.ToStruct<FileInfo>(buffer, offset + 48);
 
-            DataFork = Utilities.ToStruct<ForkData>(buffer, offset + 88);
-            ResourceFork = Utilities.ToStruct<ForkData>(buffer, offset + 168);
+            DataFork = EndianUtilities.ToStruct<ForkData>(buffer, offset + 88);
+            ResourceFork = EndianUtilities.ToStruct<ForkData>(buffer, offset + 168);
 
             return 0;
         }

@@ -23,6 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Raw
 {
@@ -58,10 +60,7 @@ namespace DiscUtils.Raw
         /// </summary>
         /// <param name="path">The path to the disk image.</param>
         public Disk(string path)
-        {
-            _file = new DiskImageFile(new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None),
-                Ownership.Dispose, null);
-        }
+            :this(path, FileAccess.ReadWrite) {}
 
         /// <summary>
         /// Initializes a new instance of the Disk class.
@@ -71,7 +70,8 @@ namespace DiscUtils.Raw
         public Disk(string path, FileAccess access)
         {
             FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
-            _file = new DiskImageFile(new FileStream(path, FileMode.Open, access, share), Ownership.Dispose, null);
+            var locator = new LocalFileLocator(string.Empty);
+            _file = new DiskImageFile(locator.Open(path, FileMode.Open, access, share), Ownership.Dispose, null);
         }
 
         /// <summary>

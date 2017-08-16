@@ -28,6 +28,7 @@ namespace DiscUtils.Nfs
     internal sealed class Nfs3Client : IDisposable
     {
         private readonly Dictionary<Nfs3FileHandle, Nfs3FileAttributes> _cachedAttributes;
+        private readonly Dictionary<Nfs3FileHandle, Nfs3FileSystemStat> _cachedStats;
         private readonly Nfs3Mount _mountClient;
         private readonly Nfs3 _nfsClient;
 
@@ -45,6 +46,7 @@ namespace DiscUtils.Nfs
             FileSystemInfo = fsiResult.FileSystemInfo;
             _cachedAttributes = new Dictionary<Nfs3FileHandle, Nfs3FileAttributes>();
             _cachedAttributes[RootHandle] = fsiResult.PostOpAttributes;
+            _cachedStats = new Dictionary<Nfs3FileHandle, Nfs3FileSystemStat>();
         }
 
         public Nfs3FileSystemInfo FileSystemInfo { get; }
@@ -215,6 +217,27 @@ namespace DiscUtils.Nfs
             if (result.Status != Nfs3Status.Ok)
             {
                 throw new Nfs3Exception(result.Status);
+            }
+        }
+
+        public Nfs3FileSystemStat FsStat(Nfs3FileHandle handle)
+        {
+            Nfs3FileSystemStat result;
+            if (_cachedStats.TryGetValue(handle, out result))
+            {
+                //increase caching to at least one second to prevent multiple RPC calls for single Size calculation
+                if (result.InvariantUntil > DateTime.Now.AddSeconds(-1))
+                    return result;
+            }
+            Nfs3FileSystemStatResult getResult = _nfsClient.FileSystemStat(handle);
+            if (getResult.Status == Nfs3Status.Ok)
+            {
+                _cachedStats[handle] = getResult.FileSystemStat;
+                return getResult.FileSystemStat;
+            }
+            else
+            {
+                throw new Nfs3Exception(getResult.Status);
             }
         }
 

@@ -22,6 +22,7 @@
 
 using System.IO;
 using DiscUtils.Vfs;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Fat
 {

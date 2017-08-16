@@ -22,7 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Registry
 {
@@ -70,13 +70,13 @@ namespace DiscUtils.Registry
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
-            ListType = Utilities.BytesToString(buffer, offset, 2);
-            int numElements = Utilities.ToInt16LittleEndian(buffer, offset + 2);
+            ListType = EndianUtilities.BytesToString(buffer, offset, 2);
+            int numElements = EndianUtilities.ToInt16LittleEndian(buffer, offset + 2);
             CellIndexes = new List<int>(numElements);
 
             for (int i = 0; i < numElements; ++i)
             {
-                CellIndexes.Add(Utilities.ToInt32LittleEndian(buffer, offset + 0x4 + i * 0x4));
+                CellIndexes.Add(EndianUtilities.ToInt32LittleEndian(buffer, offset + 0x4 + i * 0x4));
             }
 
             return 4 + CellIndexes.Count * 4;
@@ -84,11 +84,11 @@ namespace DiscUtils.Registry
 
         public override void WriteTo(byte[] buffer, int offset)
         {
-            Utilities.StringToBytes(ListType, buffer, offset, 2);
-            Utilities.WriteBytesLittleEndian((ushort)CellIndexes.Count, buffer, offset + 2);
+            EndianUtilities.StringToBytes(ListType, buffer, offset, 2);
+            EndianUtilities.WriteBytesLittleEndian((ushort)CellIndexes.Count, buffer, offset + 2);
             for (int i = 0; i < CellIndexes.Count; ++i)
             {
-                Utilities.WriteBytesLittleEndian(CellIndexes[i], buffer, offset + 4 + i * 4);
+                EndianUtilities.WriteBytesLittleEndian(CellIndexes[i], buffer, offset + 4 + i * 4);
             }
         }
 

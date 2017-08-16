@@ -21,6 +21,7 @@
 //
 
 using DiscUtils;
+using DiscUtils.Streams;
 using DiscUtils.Vhdx;
 using Xunit;
 using Xunit.Sdk;

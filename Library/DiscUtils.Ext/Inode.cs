@@ -22,7 +22,7 @@
 
 using System;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ext
 {
@@ -67,17 +67,17 @@ namespace DiscUtils.Ext
 
         public int ReadFrom(byte[] buffer, int offset)
         {
-            Mode = Utilities.ToUInt16LittleEndian(buffer, offset + 0);
-            UserIdLow = Utilities.ToUInt16LittleEndian(buffer, offset + 2);
-            FileSize = Utilities.ToUInt32LittleEndian(buffer, offset + 4);
-            AccessTime = Utilities.ToUInt32LittleEndian(buffer, offset + 8);
-            CreationTime = Utilities.ToUInt32LittleEndian(buffer, offset + 12);
-            ModificationTime = Utilities.ToUInt32LittleEndian(buffer, offset + 16);
-            DeletionTime = Utilities.ToUInt32LittleEndian(buffer, offset + 20);
-            GroupIdLow = Utilities.ToUInt16LittleEndian(buffer, offset + 24);
-            LinksCount = Utilities.ToUInt16LittleEndian(buffer, offset + 26);
-            BlocksCount = Utilities.ToUInt32LittleEndian(buffer, offset + 28);
-            Flags = (InodeFlags)Utilities.ToUInt32LittleEndian(buffer, offset + 32);
+            Mode = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0);
+            UserIdLow = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 2);
+            FileSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
+            AccessTime = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+            CreationTime = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 12);
+            ModificationTime = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 16);
+            DeletionTime = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
+            GroupIdLow = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 24);
+            LinksCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 26);
+            BlocksCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 28);
+            Flags = (InodeFlags)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 32);
 
             FastSymlink = null;
             Extents = null;
@@ -89,29 +89,29 @@ namespace DiscUtils.Ext
             }
             else if ((Flags & InodeFlags.ExtentsUsed) != 0)
             {
-                Extents = Utilities.ToStruct<ExtentBlock>(buffer, offset + 40);
+                Extents = EndianUtilities.ToStruct<ExtentBlock>(buffer, offset + 40);
             }
             else
             {
                 DirectBlocks = new uint[12];
                 for (int i = 0; i < 12; ++i)
                 {
-                    DirectBlocks[i] = Utilities.ToUInt32LittleEndian(buffer, offset + 40 + i * 4);
+                    DirectBlocks[i] = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 40 + i * 4);
                 }
 
-                IndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 88);
-                DoubleIndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 92);
-                TripleIndirectBlock = Utilities.ToUInt32LittleEndian(buffer, offset + 96);
+                IndirectBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 88);
+                DoubleIndirectBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 92);
+                TripleIndirectBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 96);
             }
 
-            FileVersion = Utilities.ToUInt32LittleEndian(buffer, offset + 100);
-            FileAcl = Utilities.ToUInt32LittleEndian(buffer, offset + 104);
-            DirAcl = Utilities.ToUInt32LittleEndian(buffer, offset + 108);
-            FragAddress = Utilities.ToUInt32LittleEndian(buffer, offset + 112);
+            FileVersion = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 100);
+            FileAcl = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 104);
+            DirAcl = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 108);
+            FragAddress = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 112);
             Fragment = buffer[offset + 116];
             FragmentSize = buffer[offset + 117];
-            UserIdHigh = Utilities.ToUInt16LittleEndian(buffer, offset + 120);
-            GroupIdHigh = Utilities.ToUInt16LittleEndian(buffer, offset + 122);
+            UserIdHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 120);
+            GroupIdHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 122);
 
             return 128;
         }

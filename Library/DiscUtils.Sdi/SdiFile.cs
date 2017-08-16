@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Sdi
 {
@@ -55,17 +55,17 @@ namespace DiscUtils.Sdi
             _stream = stream;
             _ownership = ownership;
 
-            byte[] page = Utilities.ReadFully(_stream, 512);
+            byte[] page = StreamUtilities.ReadFully(_stream, 512);
 
             _header = new FileHeader();
             _header.ReadFrom(page, 0);
 
             _stream.Position = _header.PageAlignment * 512;
-            byte[] toc = Utilities.ReadFully(_stream, (int)(_header.PageAlignment * 512));
+            byte[] toc = StreamUtilities.ReadFully(_stream, (int)(_header.PageAlignment * 512));
 
             _sections = new List<SectionRecord>();
             int pos = 0;
-            while (Utilities.ToUInt64LittleEndian(toc, pos) != 0)
+            while (EndianUtilities.ToUInt64LittleEndian(toc, pos) != 0)
             {
                 SectionRecord record = new SectionRecord();
                 record.ReadFrom(toc, pos);

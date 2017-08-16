@@ -23,7 +23,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using DiscUtils.Internal;
+using DiscUtils.Streams;
 
 namespace DiscUtils.Ntfs
 {
