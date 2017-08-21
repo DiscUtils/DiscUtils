@@ -150,7 +150,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the underlying partition (if any).
         /// </summary>
-        internal PartitionInfo Partition { get; }
+        public PartitionInfo Partition { get; }
 
         /// <summary>
         /// Gets the unique identity of the physical partition, if known.
