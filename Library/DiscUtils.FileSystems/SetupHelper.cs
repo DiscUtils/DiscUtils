@@ -5,6 +5,7 @@ using DiscUtils.HfsPlus;
 using DiscUtils.Ntfs;
 using DiscUtils.OpticalDisk;
 using DiscUtils.SquashFs;
+using DiscUtils.Xfs;
 
 namespace DiscUtils.FileSystems
 {
@@ -18,6 +19,7 @@ namespace DiscUtils.FileSystems
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(NtfsFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Disc)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(SquashFileSystemBuilder)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(XfsFileSystem)));
         }
     }
 }
