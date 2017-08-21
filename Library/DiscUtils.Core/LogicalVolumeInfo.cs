@@ -102,6 +102,11 @@ namespace DiscUtils
         /// Gets the status of the logical volume, indicating volume health.
         /// </summary>
         public LogicalVolumeStatus Status { get; }
+        
+        /// <summary>
+        /// Gets the underlying physical volume info
+        /// </summary>
+        public PhysicalVolumeInfo PhysicalVolume { get { return _physicalVol; } }
 
         /// <summary>
         /// Opens a stream with access to the content of the logical volume.
