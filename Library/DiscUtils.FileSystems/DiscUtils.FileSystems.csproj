@@ -29,6 +29,7 @@
     <ProjectReference Include="..\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDisk\DiscUtils.OpticalDisk.csproj" />
     <ProjectReference Include="..\DiscUtils.SquashFs\DiscUtils.SquashFs.csproj" />
+    <ProjectReference Include="..\DiscUtils.Xfs\DiscUtils.Xfs.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
