@@ -523,7 +523,7 @@ namespace DiscUtils
 
             long oldPos = Content.Position;
             Content.Position = 0;
-            StreamUtilities.ReadFully(Content, sector, 0, Sizes.Sector);
+            StreamUtilities.ReadExact(Content, sector, 0, Sizes.Sector);
             Content.Position = oldPos;
 
             return sector;

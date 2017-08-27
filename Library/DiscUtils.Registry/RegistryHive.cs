@@ -62,7 +62,7 @@ namespace DiscUtils.Registry
             _fileStream.Position = 0;
             _ownsStream = ownership;
 
-            byte[] buffer = StreamUtilities.ReadFully(_fileStream, HiveHeader.HeaderSize);
+            byte[] buffer = StreamUtilities.ReadExact(_fileStream, HiveHeader.HeaderSize);
 
             _header = new HiveHeader();
             _header.ReadFrom(buffer, 0);
@@ -72,7 +72,7 @@ namespace DiscUtils.Registry
             while (pos < _header.Length)
             {
                 _fileStream.Position = BinStart + pos;
-                byte[] headerBuffer = StreamUtilities.ReadFully(_fileStream, BinHeader.HeaderSize);
+                byte[] headerBuffer = StreamUtilities.ReadExact(_fileStream, BinHeader.HeaderSize);
                 BinHeader header = new BinHeader();
                 header.ReadFrom(headerBuffer, 0);
                 _bins.Add(header);
@@ -345,7 +345,7 @@ namespace DiscUtils.Registry
             _header.Sequence1++;
             _header.Sequence2++;
             _fileStream.Position = 0;
-            byte[] hiveHeader = StreamUtilities.ReadFully(_fileStream, _header.Size);
+            byte[] hiveHeader = StreamUtilities.ReadExact(_fileStream, _header.Size);
             _header.WriteTo(hiveHeader, 0);
             _fileStream.Position = 0;
             _fileStream.Write(hiveHeader, 0, hiveHeader.Length);

@@ -35,7 +35,7 @@ namespace DiscUtils.Ext
             get
             {
                 IBuffer content = FileContent;
-                byte[] data = StreamUtilities.ReadFully(content, 0, (int)content.Capacity);
+                byte[] data = StreamUtilities.ReadExact(content, 0, (int)content.Capacity);
                 return EndianUtilities.BytesToZString(data, 0, data.Length).Replace('/', '\\');
             }
         }

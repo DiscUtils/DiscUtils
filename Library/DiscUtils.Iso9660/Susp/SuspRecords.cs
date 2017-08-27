@@ -38,7 +38,7 @@ namespace DiscUtils.Iso9660
             {
                 context.DataStream.Position = contEntry.Block * (long)context.VolumeDescriptor.LogicalBlockSize +
                                               contEntry.BlockOffset;
-                byte[] contData = StreamUtilities.ReadFully(context.DataStream, (int)contEntry.Length);
+                byte[] contData = StreamUtilities.ReadExact(context.DataStream, (int)contEntry.Length);
 
                 contEntry = Parse(context, contData, 0);
             }

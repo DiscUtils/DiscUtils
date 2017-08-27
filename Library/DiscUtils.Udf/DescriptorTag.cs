@@ -83,7 +83,7 @@ namespace DiscUtils.Udf
 
         public static bool TryFromStream(Stream stream, out DescriptorTag result)
         {
-            byte[] next = StreamUtilities.ReadFully(stream, 512);
+            byte[] next = StreamUtilities.ReadExact(stream, 512);
             if (!IsValid(next, 0))
             {
                 result = null;

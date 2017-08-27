@@ -184,11 +184,11 @@ namespace DiscUtils.Nfs
 
             while (!lastFragFound)
             {
-                byte[] header = StreamUtilities.ReadFully(_tcpStream, 4);
+                byte[] header = StreamUtilities.ReadExact(_tcpStream, 4);
                 uint headerVal = EndianUtilities.ToUInt32BigEndian(header, 0);
 
                 lastFragFound = (headerVal & 0x80000000) != 0;
-                byte[] frag = StreamUtilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
+                byte[] frag = StreamUtilities.ReadExact(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
 
                 if (ms != null)
                 {

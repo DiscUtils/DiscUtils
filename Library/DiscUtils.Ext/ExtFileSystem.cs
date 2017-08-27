@@ -65,7 +65,7 @@ namespace DiscUtils.Ext
             }
 
             stream.Position = 1024;
-            byte[] superblockData = StreamUtilities.ReadFully(stream, 1024);
+            byte[] superblockData = StreamUtilities.ReadExact(stream, 1024);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

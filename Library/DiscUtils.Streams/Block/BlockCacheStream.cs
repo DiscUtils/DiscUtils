@@ -269,21 +269,17 @@ namespace DiscUtils.Streams
 
                     // Allow for the end of the stream not being block-aligned
                     long readPosition = (firstBlock + blocksRead) * blockSize;
-                    int bytesToRead = (int)Math.Min(blocksToRead * (long)blockSize, Length - readPosition);
+                    int bytesRead = (int)Math.Min(blocksToRead * (long)blockSize, Length - readPosition);
 
                     // Do the read
                     _stats.TotalReadsOut++;
                     _wrappedStream.Position = readPosition;
-                    int bytesRead = StreamUtilities.ReadFully(_wrappedStream, _readBuffer, 0, bytesToRead);
-                    if (bytesRead != bytesToRead)
-                    {
-                        throw new IOException("Short read before end of stream");
-                    }
+                    StreamUtilities.ReadExact(_wrappedStream, _readBuffer, 0, bytesRead);
 
                     // Cache the read blocks
                     for (int i = 0; i < blocksToRead; ++i)
                     {
-                        int copyBytes = Math.Min(blockSize, bytesToRead - i * blockSize);
+                        int copyBytes = Math.Min(blockSize, bytesRead - i * blockSize);
                         block = _cache.GetBlock(firstBlock + blocksRead + i);
                         Array.Copy(_readBuffer, i * blockSize, block.Data, 0, copyBytes);
                         block.Available = copyBytes;

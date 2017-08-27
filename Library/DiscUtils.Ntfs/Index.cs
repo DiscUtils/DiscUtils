@@ -55,7 +55,7 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.IndexRoot, _name, FileAccess.Read))
             {
-                byte[] buffer = StreamUtilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = StreamUtilities.ReadExact(s, (int)s.Length);
                 _rootNode = new IndexNode(WriteRootNodeToDisk, 0, this, true, buffer, IndexRoot.HeaderOffset);
 
                 // Give the attribute some room to breathe, so long as it doesn't squeeze others out

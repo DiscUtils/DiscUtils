@@ -175,7 +175,7 @@ namespace DiscUtils.Udf
         {
             LogicalPartition partition = context.LogicalPartitions[extent.ExtentLocation.Partition];
             long pos = extent.ExtentLocation.LogicalBlock * partition.LogicalBlockSize;
-            return StreamUtilities.ReadFully(partition.Content, pos, (int)extent.ExtentLength);
+            return StreamUtilities.ReadExact(partition.Content, pos, (int)extent.ExtentLength);
         }
 
         private static short ForceRange(short min, short max, short val)

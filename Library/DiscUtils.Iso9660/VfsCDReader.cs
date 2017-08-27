@@ -485,7 +485,7 @@ namespace DiscUtils.Iso9660
         {
             context.DataStream.Position = context.VolumeDescriptor.RootDirectory.LocationOfExtent *
                                           context.VolumeDescriptor.LogicalBlockSize;
-            byte[] firstSector = StreamUtilities.ReadFully(context.DataStream, context.VolumeDescriptor.LogicalBlockSize);
+            byte[] firstSector = StreamUtilities.ReadExact(context.DataStream, context.VolumeDescriptor.LogicalBlockSize);
 
             DirectoryRecord rootSelfRecord;
             DirectoryRecord.ReadFrom(firstSector, 0, context.VolumeDescriptor.CharacterEncoding, out rootSelfRecord);
@@ -514,7 +514,7 @@ namespace DiscUtils.Iso9660
             if (_bootCatalog == null && _bootVolDesc != null)
             {
                 _data.Position = _bootVolDesc.CatalogSector * IsoUtilities.SectorSize;
-                _bootCatalog = StreamUtilities.ReadFully(_data, IsoUtilities.SectorSize);
+                _bootCatalog = StreamUtilities.ReadExact(_data, IsoUtilities.SectorSize);
             }
 
             return _bootCatalog;

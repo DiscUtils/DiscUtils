@@ -193,7 +193,7 @@ namespace DiscUtils.Ext
         {
             uint blockSize = _context.SuperBlock.BlockSize;
             _context.RawStream.Position = idxEntry.LeafPhysicalBlock * blockSize;
-            byte[] buffer = StreamUtilities.ReadFully(_context.RawStream, (int)blockSize);
+            byte[] buffer = StreamUtilities.ReadExact(_context.RawStream, (int)blockSize);
             ExtentBlock subBlock = EndianUtilities.ToStruct<ExtentBlock>(buffer, 0);
             return subBlock;
         }

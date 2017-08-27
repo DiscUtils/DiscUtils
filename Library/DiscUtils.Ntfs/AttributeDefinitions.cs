@@ -63,7 +63,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer = new byte[AttributeDefinitionRecord.Size];
             using (Stream s = file.OpenStream(AttributeType.Data, null, FileAccess.Read))
             {
-                while (StreamUtilities.ReadFully(s, buffer, 0, buffer.Length) == buffer.Length)
+                while (StreamUtilities.ReadMaximum(s, buffer, 0, buffer.Length) == buffer.Length)
                 {
                     AttributeDefinitionRecord record = new AttributeDefinitionRecord();
                     record.Read(buffer, 0);

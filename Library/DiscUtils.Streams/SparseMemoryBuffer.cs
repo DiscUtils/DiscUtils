@@ -129,23 +129,24 @@ namespace DiscUtils.Streams
         {
             int totalRead = 0;
 
-            while (totalRead < count && pos < _capacity)
+            while (count > 0 && pos < _capacity)
             {
                 int chunk = (int)(pos / ChunkSize);
                 int chunkOffset = (int)(pos % ChunkSize);
-                int numToRead = (int)Math.Min(Math.Min(ChunkSize - chunkOffset, _capacity - pos), count - totalRead);
+                int numToRead = (int)Math.Min(Math.Min(ChunkSize - chunkOffset, _capacity - pos), count);
 
-                byte[] chunkBuffer;
-                if (!_buffers.TryGetValue(chunk, out chunkBuffer))
+                if (!_buffers.TryGetValue(chunk, out byte[] chunkBuffer))
                 {
-                    Array.Clear(buffer, offset + totalRead, numToRead);
+                    Array.Clear(buffer, offset, numToRead);
                 }
                 else
                 {
-                    Array.Copy(chunkBuffer, chunkOffset, buffer, offset + totalRead, numToRead);
+                    Array.Copy(chunkBuffer, chunkOffset, buffer, offset, numToRead);
                 }
 
                 totalRead += numToRead;
+                offset += numToRead;
+                count -= numToRead;
                 pos += numToRead;
             }
 
@@ -161,25 +162,55 @@ namespace DiscUtils.Streams
         /// <param name="count">The number of bytes to write.</param>
         public override void Write(long pos, byte[] buffer, int offset, int count)
         {
-            int totalWritten = 0;
-
-            while (totalWritten < count)
+            while (count > 0)
             {
                 int chunk = (int)(pos / ChunkSize);
                 int chunkOffset = (int)(pos % ChunkSize);
-                int numToWrite = Math.Min(ChunkSize - chunkOffset, count - totalWritten);
+                int numToWrite = Math.Min(ChunkSize - chunkOffset, count);
 
-                byte[] chunkBuffer;
-                if (!_buffers.TryGetValue(chunk, out chunkBuffer))
+                if (!_buffers.TryGetValue(chunk, out byte[] chunkBuffer))
                 {
                     chunkBuffer = new byte[ChunkSize];
                     _buffers[chunk] = chunkBuffer;
                 }
 
-                Array.Copy(buffer, offset + totalWritten, chunkBuffer, chunkOffset, numToWrite);
+                Array.Copy(buffer, offset, chunkBuffer, chunkOffset, numToWrite);
 
-                totalWritten += numToWrite;
+                offset += numToWrite;
+                count -= numToWrite;
                 pos += numToWrite;
+            }
+
+            _capacity = Math.Max(_capacity, pos);
+        }
+
+        /// <summary>
+        /// Clears bytes from the buffer.
+        /// </summary>
+        /// <param name="pos">The start offset within the buffer.</param>
+        /// <param name="count">The number of bytes to clear.</param>
+        public override void Clear(long pos, int count)
+        {
+            while (count > 0)
+            {
+                int chunk = (int)(pos / ChunkSize);
+                int chunkOffset = (int)(pos % ChunkSize);
+                int numToClear = Math.Min(ChunkSize - chunkOffset, count);
+
+                if (_buffers.TryGetValue(chunk, out byte[] chunkBuffer))
+                {
+                    if (chunkOffset == 0 && numToClear == ChunkSize)
+                    {
+                        _buffers.Remove(chunk);
+                    }
+                    else
+                    {
+                        Array.Clear(chunkBuffer, chunkOffset, numToClear);
+                    }
+                }
+
+                count -= numToClear;
+                pos += numToClear;
             }
 
             _capacity = Math.Max(_capacity, pos);

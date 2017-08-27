@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Glen Parker
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,44 +20,29 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
+using DiscUtils.Streams;
+using System.Linq;
+using Xunit;
 
-namespace DiscUtils.Streams
+namespace LibraryTests.Buffers
 {
-    public class BigEndianDataReader : DataReader
+    public class BufferTest
     {
-        public BigEndianDataReader(Stream stream)
-            : base(stream) {}
-
-        public override ushort ReadUInt16()
+        [Fact]
+        public void SparseMemoryBufferClear()
         {
-            ReadToBuffer(sizeof(UInt16));
-            return EndianUtilities.ToUInt16BigEndian(_buffer, 0);
-        }
+            SparseMemoryBuffer memoryBuffer = new SparseMemoryBuffer(10);
+            byte[] buffer = new byte[20];
 
-        public override int ReadInt32()
-        {
-            ReadToBuffer(sizeof(Int32));
-            return EndianUtilities.ToInt32BigEndian(_buffer, 0);
-        }
+            memoryBuffer.Write(0, buffer, 0, 20);
+            Assert.Equal(2, memoryBuffer.AllocatedChunks.Count());
+            memoryBuffer.Clear(0, 20);
+            Assert.Equal(0, memoryBuffer.AllocatedChunks.Count());
 
-        public override uint ReadUInt32()
-        {
-            ReadToBuffer(sizeof(UInt32));
-            return EndianUtilities.ToUInt32BigEndian(_buffer, 0);
-        }
-
-        public override long ReadInt64()
-        {
-            ReadToBuffer(sizeof(Int64));
-            return EndianUtilities.ToInt64BigEndian(_buffer, 0);
-        }
-
-        public override ulong ReadUInt64()
-        {
-            ReadToBuffer(sizeof(UInt64));
-            return EndianUtilities.ToUInt64BigEndian(_buffer, 0);
+            memoryBuffer.Write(0, buffer, 0, 15);
+            Assert.Equal(2, memoryBuffer.AllocatedChunks.Count());
+            memoryBuffer.Clear(0, 15);
+            Assert.Equal(1, memoryBuffer.AllocatedChunks.Count());
         }
     }
 }

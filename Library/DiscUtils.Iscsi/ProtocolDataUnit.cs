@@ -46,7 +46,7 @@ namespace DiscUtils.Iscsi
         {
             int numRead = 0;
 
-            byte[] headerData = StreamUtilities.ReadFully(stream, 48);
+            byte[] headerData = StreamUtilities.ReadExact(stream, 48);
             numRead += 48;
 
             byte[] contentData = null;
@@ -62,7 +62,7 @@ namespace DiscUtils.Iscsi
 
             if (bhs.DataSegmentLength > 0)
             {
-                contentData = StreamUtilities.ReadFully(stream, bhs.DataSegmentLength);
+                contentData = StreamUtilities.ReadExact(stream, bhs.DataSegmentLength);
                 numRead += bhs.DataSegmentLength;
 
                 if (dataDigestEnabled)
@@ -75,7 +75,7 @@ namespace DiscUtils.Iscsi
             int rem = 4 - numRead % 4;
             if (rem != 4)
             {
-                StreamUtilities.ReadFully(stream, rem);
+                StreamUtilities.ReadExact(stream, rem);
             }
 
             return new ProtocolDataUnit(headerData, contentData);
@@ -83,7 +83,7 @@ namespace DiscUtils.Iscsi
 
         private static uint ReadDigest(Stream stream)
         {
-            byte[] data = StreamUtilities.ReadFully(stream, 4);
+            byte[] data = StreamUtilities.ReadExact(stream, 4);
             return EndianUtilities.ToUInt32BigEndian(data, 0);
         }
     }

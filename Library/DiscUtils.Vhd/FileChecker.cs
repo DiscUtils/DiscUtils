@@ -124,7 +124,7 @@ namespace DiscUtils.Vhd
             }
 
             _fileStream.Position = _dynamicHeader.TableOffset;
-            byte[] batData = StreamUtilities.ReadFully(_fileStream, batSize);
+            byte[] batData = StreamUtilities.ReadExact(_fileStream, batSize);
             uint[] bat = new uint[batSize / 4];
             for (int i = 0; i < bat.Length; ++i)
             {
@@ -357,7 +357,7 @@ namespace DiscUtils.Vhd
         private void CheckFooter()
         {
             _fileStream.Position = _fileStream.Length - Sizes.Sector;
-            byte[] sector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] sector = StreamUtilities.ReadExact(_fileStream, Sizes.Sector);
 
             _footer = Footer.FromBytes(sector, 0);
             if (!_footer.IsValid())
@@ -369,7 +369,7 @@ namespace DiscUtils.Vhd
         private void CheckHeader()
         {
             _fileStream.Position = 0;
-            byte[] headerSector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] headerSector = StreamUtilities.ReadExact(_fileStream, Sizes.Sector);
 
             Footer header = Footer.FromBytes(headerSector, 0);
             if (!header.IsValid())
@@ -378,7 +378,7 @@ namespace DiscUtils.Vhd
             }
 
             _fileStream.Position = _fileStream.Length - Sizes.Sector;
-            byte[] footerSector = StreamUtilities.ReadFully(_fileStream, Sizes.Sector);
+            byte[] footerSector = StreamUtilities.ReadExact(_fileStream, Sizes.Sector);
 
             if (!Utilities.AreEqual(footerSector, headerSector))
             {

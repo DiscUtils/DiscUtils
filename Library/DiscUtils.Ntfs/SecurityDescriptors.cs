@@ -80,7 +80,7 @@ namespace DiscUtils.Ntfs
 
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
-                byte[] buffer = StreamUtilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = StreamUtilities.ReadExact(s, (int)s.Length);
 
                 foreach (KeyValuePair<IdIndexKey, IdIndexData> entry in _idIndex.Entries)
                 {
@@ -217,7 +217,7 @@ namespace DiscUtils.Ntfs
             using (Stream s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.Read))
             {
                 s.Position = data.SdsOffset;
-                byte[] buffer = StreamUtilities.ReadFully(s, data.SdsLength);
+                byte[] buffer = StreamUtilities.ReadExact(s, data.SdsLength);
 
                 SecurityDescriptorRecord record = new SecurityDescriptorRecord();
                 record.Read(buffer, 0);

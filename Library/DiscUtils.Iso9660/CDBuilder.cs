@@ -429,7 +429,7 @@ namespace DiscUtils.Iso9660
                 return bootImage;
             }
 
-            byte[] bootData = StreamUtilities.ReadFully(bootImage, (int)bootImage.Length);
+            byte[] bootData = StreamUtilities.ReadExact(bootImage, (int)bootImage.Length);
 
             Array.Clear(bootData, 8, 56);
 

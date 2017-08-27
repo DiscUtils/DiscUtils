@@ -5,6 +5,7 @@ Buildlog-*\.txt
 *.suo
 *.user
 *.lock.json
+LaunchSettings.json
 
 .vs/
 Nuget/

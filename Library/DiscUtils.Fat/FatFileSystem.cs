@@ -391,7 +391,7 @@ namespace DiscUtils.Fat
             }
 
             stream.Position = 0;
-            byte[] bytes = StreamUtilities.ReadFully(stream, 512);
+            byte[] bytes = StreamUtilities.ReadExact(stream, 512);
             ushort bpbBytesPerSec = EndianUtilities.ToUInt16LittleEndian(bytes, 11);
             if (bpbBytesPerSec != 512)
             {

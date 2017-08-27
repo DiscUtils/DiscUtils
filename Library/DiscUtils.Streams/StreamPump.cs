@@ -203,8 +203,8 @@ namespace DiscUtils.Streams
                 long extentOffset = 0;
                 while (extentOffset < extent.Length)
                 {
-                    int toRead = (int)Math.Min(copyBuffer.Length, extent.Length - extentOffset);
-                    int numRead = StreamUtilities.ReadFully(inStream, copyBuffer, 0, toRead);
+                    int numRead = (int)Math.Min(copyBuffer.Length, extent.Length - extentOffset);
+                    StreamUtilities.ReadExact(inStream, copyBuffer, 0, numRead);
                     BytesRead += numRead;
 
                     int copyBufferOffset = 0;

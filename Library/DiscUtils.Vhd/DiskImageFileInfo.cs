@@ -154,7 +154,7 @@ namespace DiscUtils.Vhd
                         || pl.PlatformCode == ParentLocator.PlatformCodeWindowsRelativeUnicode)
                     {
                         _vhdStream.Position = pl.PlatformDataOffset;
-                        byte[] buffer = StreamUtilities.ReadFully(_vhdStream, pl.PlatformDataLength);
+                        byte[] buffer = StreamUtilities.ReadExact(_vhdStream, pl.PlatformDataLength);
                         vals.Add(Encoding.Unicode.GetString(buffer));
                     }
                 }

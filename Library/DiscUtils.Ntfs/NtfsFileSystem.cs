@@ -70,7 +70,7 @@ namespace DiscUtils.Ntfs
             _fileCache = new ObjectCache<long, File>();
 
             stream.Position = 0;
-            byte[] bytes = StreamUtilities.ReadFully(stream, 512);
+            byte[] bytes = StreamUtilities.ReadExact(stream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
             if (!IsValidBPB(_context.BiosParameterBlock, stream.Length))
@@ -1003,7 +1003,7 @@ namespace DiscUtils.Ntfs
         {
             using (Stream s = OpenFile(@"\$Boot", FileMode.Open))
             {
-                return StreamUtilities.ReadFully(s, (int)s.Length);
+                return StreamUtilities.ReadExact(s, (int)s.Length);
             }
         }
 
@@ -1152,7 +1152,7 @@ namespace DiscUtils.Ntfs
                     // If there's an existing reparse point, unhook it.
                     using (Stream contentStream = stream.Open(FileAccess.Read))
                     {
-                        byte[] oldRpBuffer = StreamUtilities.ReadFully(contentStream, (int)contentStream.Length);
+                        byte[] oldRpBuffer = StreamUtilities.ReadExact(contentStream, (int)contentStream.Length);
                         ReparsePointRecord rp = new ReparsePointRecord();
                         rp.ReadFrom(oldRpBuffer, 0);
                         _context.ReparsePoints.Remove(rp.Tag, dirEntry.Reference);
@@ -1217,7 +1217,7 @@ namespace DiscUtils.Ntfs
 
                     using (Stream contentStream = stream.Open(FileAccess.Read))
                     {
-                        byte[] buffer = StreamUtilities.ReadFully(contentStream, (int)contentStream.Length);
+                        byte[] buffer = StreamUtilities.ReadExact(contentStream, (int)contentStream.Length);
                         rp.ReadFrom(buffer, 0);
                         return new ReparsePoint((int)rp.Tag, rp.Content);
                     }
@@ -1632,7 +1632,7 @@ namespace DiscUtils.Ntfs
             }
 
             stream.Position = 0;
-            byte[] bytes = StreamUtilities.ReadFully(stream, 512);
+            byte[] bytes = StreamUtilities.ReadExact(stream, 512);
             BiosParameterBlock bpb = BiosParameterBlock.FromBytes(bytes, 0);
 
             return IsValidBPB(bpb, stream.Length);
@@ -1901,7 +1901,7 @@ namespace DiscUtils.Ntfs
             _context.BiosParameterBlock.NumHeads = (ushort)geometry.HeadsPerCylinder;
 
             _context.RawStream.Position = 0;
-            byte[] bpbSector = StreamUtilities.ReadFully(_context.RawStream, 512);
+            byte[] bpbSector = StreamUtilities.ReadExact(_context.RawStream, 512);
 
             _context.BiosParameterBlock.ToBytes(bpbSector, 0);
 
@@ -2172,7 +2172,7 @@ namespace DiscUtils.Ntfs
 
                 using (Stream contentStream = stream.Open(FileAccess.Read))
                 {
-                    byte[] buffer = StreamUtilities.ReadFully(contentStream, (int)contentStream.Length);
+                    byte[] buffer = StreamUtilities.ReadExact(contentStream, (int)contentStream.Length);
                     rp.ReadFrom(buffer, 0);
                 }
 

@@ -35,7 +35,7 @@ namespace DiscUtils.Udf
         public static T FromStream(Stream stream, uint sector, uint sectorSize)
         {
             stream.Position = sector * (long)sectorSize;
-            byte[] buffer = StreamUtilities.ReadFully(stream, 512);
+            byte[] buffer = StreamUtilities.ReadExact(stream, 512);
 
             T result = new T();
             result.ReadFrom(buffer, 0);

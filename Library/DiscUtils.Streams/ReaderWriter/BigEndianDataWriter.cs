@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Streams
@@ -31,42 +32,37 @@ namespace DiscUtils.Streams
 
         public override void Write(ushort value)
         {
-            byte[] buffer = new byte[2];
-            EndianUtilities.WriteBytesBigEndian(value, buffer, 0);
-            _stream.Write(buffer, 0, buffer.Length);
+            EnsureBuffer();
+            EndianUtilities.WriteBytesBigEndian(value, _buffer, 0);
+            FlushBuffer(sizeof(UInt16));
         }
 
         public override void Write(int value)
         {
-            byte[] buffer = new byte[4];
-            EndianUtilities.WriteBytesBigEndian(value, buffer, 0);
-            _stream.Write(buffer, 0, buffer.Length);
+            EnsureBuffer();
+            EndianUtilities.WriteBytesBigEndian(value, _buffer, 0);
+            FlushBuffer(sizeof(Int32));
         }
 
         public override void Write(uint value)
         {
-            byte[] buffer = new byte[4];
-            EndianUtilities.WriteBytesBigEndian(value, buffer, 0);
-            _stream.Write(buffer, 0, buffer.Length);
+            EnsureBuffer();
+            EndianUtilities.WriteBytesBigEndian(value, _buffer, 0);
+            FlushBuffer(sizeof(UInt32));
         }
 
         public override void Write(long value)
         {
-            byte[] buffer = new byte[8];
-            EndianUtilities.WriteBytesBigEndian(value, buffer, 0);
-            _stream.Write(buffer, 0, buffer.Length);
+            EnsureBuffer();
+            EndianUtilities.WriteBytesBigEndian(value, _buffer, 0);
+            FlushBuffer(sizeof(Int64));
         }
 
         public override void Write(ulong value)
         {
-            byte[] buffer = new byte[8];
-            EndianUtilities.WriteBytesBigEndian(value, buffer, 0);
-            _stream.Write(buffer, 0, buffer.Length);
-        }
-
-        public override void WriteBytes(byte[] value, int offset, int count)
-        {
-            _stream.Write(value, offset, count);
+            EnsureBuffer();
+            EndianUtilities.WriteBytesBigEndian(value, _buffer, 0);
+            FlushBuffer(sizeof(UInt64));
         }
     }
 }

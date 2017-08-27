@@ -67,7 +67,7 @@ namespace DiscUtils.Wim
             _chunkLength = new long[numChunks];
             for (int i = 1; i < numChunks; ++i)
             {
-                _chunkOffsets[i] = EndianUtilities.ToUInt32LittleEndian(StreamUtilities.ReadFully(_baseStream, 4), 0);
+                _chunkOffsets[i] = EndianUtilities.ToUInt32LittleEndian(StreamUtilities.ReadExact(_baseStream, 4), 0);
                 _chunkLength[i - 1] = _chunkOffsets[i] - _chunkOffsets[i - 1];
             }
 
