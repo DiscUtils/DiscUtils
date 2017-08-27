@@ -158,7 +158,7 @@ namespace DiscUtils.Btrfs.Base.Items
                 }
                 case ExtentDataCompression.Lzo:
                 {
-                    var buffer = StreamUtilities.ReadFully(stream, sizeof(uint));
+                    var buffer = StreamUtilities.ReadExact(stream, sizeof(uint));
                     var totalLength = EndianUtilities.ToUInt32LittleEndian(buffer, 0);
                     long processed = sizeof(uint);
                     var parts = new List<SparseStream>();
@@ -166,7 +166,7 @@ namespace DiscUtils.Btrfs.Base.Items
                     while (processed < totalLength)
                     {
                         stream.Position = processed;
-                        StreamUtilities.ReadFully(stream, buffer, 0, sizeof(uint));
+                        StreamUtilities.ReadExact(stream, buffer, 0, sizeof(uint));
                         var partLength = EndianUtilities.ToUInt32LittleEndian(buffer, 0);
                         processed += sizeof(uint);
                         var part = new SubStream(stream, Ownership.Dispose, processed, partLength);

@@ -61,7 +61,7 @@ namespace DiscUtils.Btrfs
             }
 
             stream.Position = SuperblockOffsets[0];
-            byte[] superblockData = StreamUtilities.ReadFully(stream, SuperBlock.Length);
+            byte[] superblockData = StreamUtilities.ReadExact(stream, SuperBlock.Length);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

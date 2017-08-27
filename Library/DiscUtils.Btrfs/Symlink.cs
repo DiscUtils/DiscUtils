@@ -38,7 +38,7 @@ namespace DiscUtils.Btrfs
             get
             {
                 IBuffer content = FileContent;
-                byte[] data = StreamUtilities.ReadFully(content, 0, (int)content.Capacity);
+                byte[] data = StreamUtilities.ReadExact(content, 0, (int)content.Capacity);
                 return Encoding.UTF8.GetString(data, 0, data.Length).Replace('/', '\\');
             }
         }
