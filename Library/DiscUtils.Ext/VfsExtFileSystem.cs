@@ -31,7 +31,9 @@ namespace DiscUtils.Ext
         internal const IncompatibleFeatures SupportedIncompatibleFeatures =
             IncompatibleFeatures.FileType
             | IncompatibleFeatures.FlexBlockGroups
-            | IncompatibleFeatures.Extents;
+            | IncompatibleFeatures.Extents
+            | IncompatibleFeatures.NeedsRecovery
+            | IncompatibleFeatures.SixtyFourBit;
 
         private readonly BlockGroup[] _blockGroups;
 

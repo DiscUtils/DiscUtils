@@ -191,10 +191,10 @@ namespace DiscUtils.Ext
             WantExtraInodeSize = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 350);
             Flags = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 352);
             RaidStride = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 356);
-            MultiMountProtectionInterval = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 258);
-            MultiMountProtectionBlock = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 260);
-            RaidStripeWidth = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 268);
-            LogGroupsPerFlex = buffer[offset + 272];
+            MultiMountProtectionInterval = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 358);
+            MultiMountProtectionBlock = EndianUtilities.ToUInt64LittleEndian(buffer, offset + 360);
+            RaidStripeWidth = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 368);
+            LogGroupsPerFlex = buffer[offset + 372];
 
             OverheadBlocksCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 584);
 
