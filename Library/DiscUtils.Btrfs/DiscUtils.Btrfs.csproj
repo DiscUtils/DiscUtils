@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>DiscUtils Btrfs</Description>
     <AssemblyTitle>DiscUtils.Btrfs</AssemblyTitle>
-    <VersionPrefix>0.12.2-alpha</VersionPrefix>
+    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Bianco Veigel</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Btrfs</AssemblyName>
