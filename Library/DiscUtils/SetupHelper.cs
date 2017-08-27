@@ -1,4 +1,5 @@
-﻿using DiscUtils.BootConfig;
+﻿using DiscUtils.Btrfs;
+using DiscUtils.BootConfig;
 using DiscUtils.CoreCompat;
 using DiscUtils.Dmg;
 using DiscUtils.Ext;
@@ -28,6 +29,7 @@ namespace DiscUtils.Complete
         {
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Store)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Disk)));
+            Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(BtrfsFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(ExtFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(FatFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(HfsPlusFileSystem)));

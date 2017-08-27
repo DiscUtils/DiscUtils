@@ -22,6 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DiscUtils.Btrfs\DiscUtils.Btrfs.csproj" />
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
     <ProjectReference Include="..\DiscUtils.BootConfig\DiscUtils.BootConfig.csproj" />
     <ProjectReference Include="..\DiscUtils.Dmg\DiscUtils.Dmg.csproj" />
