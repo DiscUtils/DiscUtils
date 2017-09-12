@@ -56,7 +56,8 @@ namespace DiscUtils.Partitions
                 {
                     BiosPartitionRecord thisPart = new BiosPartitionRecord(sector, offset, partPos, -1);
 
-                    if (thisPart.StartCylinder != 0 || thisPart.StartHead != 0 || thisPart.StartSector != 0)
+                    if (thisPart.StartCylinder != 0 || thisPart.StartHead != 0 || thisPart.StartSector != 0 || 
+                        (thisPart.LBAStart != 0 && thisPart.LBALength != 0))
                     {
                         if (thisPart.PartitionType != 0x05 && thisPart.PartitionType != 0x0F)
                         {
