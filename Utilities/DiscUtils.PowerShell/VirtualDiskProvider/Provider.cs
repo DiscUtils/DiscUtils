@@ -27,6 +27,7 @@ using System.Management.Automation;
 using System.Management.Automation.Provider;
 using System.Net;
 using System.Text;
+using DiscUtils.Complete;
 using DiscUtils.Ntfs;
 
 namespace DiscUtils.PowerShell.VirtualDiskProvider
@@ -37,6 +38,8 @@ namespace DiscUtils.PowerShell.VirtualDiskProvider
         #region Drive manipulation
         protected override PSDriveInfo NewDrive(PSDriveInfo drive)
         {
+            SetupHelper.SetupComplete();
+
             NewDriveParameters dynParams = DynamicParameters as NewDriveParameters;
 
             if (drive == null)
