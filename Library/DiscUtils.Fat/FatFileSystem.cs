@@ -34,7 +34,7 @@ namespace DiscUtils.Fat
     /// <summary>
     /// Class for accessing FAT file systems.
     /// </summary>
-    public sealed class FatFileSystem : DiscFileSystem
+    public class FatFileSystem : DiscFileSystem
     {
         /// <summary>
         /// The Epoch for FAT file systems (1st Jan, 1980).
@@ -79,6 +79,22 @@ namespace DiscUtils.Fat
         /// </remarks>
         public FatFileSystem(Stream data)
             : base(new FatFileSystemOptions())
+        {
+            _dirCache = new Dictionary<uint, Directory>();
+            _timeConverter = DefaultTimeConverter;
+            Initialize(data);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the FatFileSystem class.
+        /// </summary>
+        /// <param name="data">The stream containing the file system.</param>
+        /// <param name="fileSystemOptions">The file system options.</param>
+        /// <remarks>
+        /// Local time is the effective timezone of the new instance.
+        /// </remarks>
+        internal FatFileSystem(Stream data, DiscFileSystemOptions fileSystemOptions)
+            : base(fileSystemOptions)
         {
             _dirCache = new Dictionary<uint, Directory>();
             _timeConverter = DefaultTimeConverter;
@@ -156,6 +172,8 @@ namespace DiscUtils.Fat
             Initialize(data);
             _ownsData = ownsData;
         }
+
+        internal Directory RootDir {  get { return _rootDir;  } }
 
         /// <summary>
         /// Gets the active FAT (zero-based index).
@@ -1238,9 +1256,19 @@ namespace DiscUtils.Fat
             }
 
             // Not cached - create a new one.
-            result = new Directory(parent, parentId);
+            result = DirectoryFactory(parent, parentId);
             _dirCache[dirEntry.FirstCluster] = result;
             return result;
+        }
+
+        internal virtual Directory DirectoryFactory(Directory parent, long parentId)
+        {
+            return new Directory(parent, parentId);
+        }
+
+        internal virtual Directory DirectoryFactory(Stream fatStream)
+        {
+            return new Directory(this, fatStream);
         }
 
         internal void ForgetDirectory(DirectoryEntry entry)
@@ -1532,7 +1560,7 @@ namespace DiscUtils.Fat
                 fatStream = new ClusterStream(this, FileAccess.ReadWrite, _bpbRootClus, uint.MaxValue);
             }
 
-            _rootDir = new Directory(this, fatStream);
+            _rootDir = DirectoryFactory(fatStream);
         }
 
         private void LoadFAT()
@@ -1581,7 +1609,7 @@ namespace DiscUtils.Fat
             FileSystemType = Encoding.ASCII.GetString(_bootSector, offset + 18, 8);
         }
 
-        private long GetDirectoryEntry(Directory dir, string path, out Directory parent)
+        internal long GetDirectoryEntry(Directory dir, string path, out Directory parent)
         {
             string[] pathElements = path.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
             return GetDirectoryEntry(dir, pathElements, 0, out parent);
@@ -1597,7 +1625,7 @@ namespace DiscUtils.Fat
                 parent = null;
                 return 0;
             }
-            entryId = dir.FindEntry(new FileName(pathEntries[pathOffset], FatOptions.FileNameEncoding));
+            entryId = dir.FindEntry(FileNameFactory(pathEntries[pathOffset]));
             if (entryId >= 0)
             {
                 if (pathOffset == pathEntries.Length - 1)
@@ -1614,6 +1642,11 @@ namespace DiscUtils.Fat
             }
             parent = null;
             return -1;
+        }
+
+        internal virtual FileName FileNameFactory(string name)
+        {
+            return new FileName(name, FatOptions.FileNameEncoding);
         }
 
         private void DoSearch(List<string> results, string path, Regex regex, bool subFolders, bool dirs, bool files)
@@ -1707,6 +1740,12 @@ namespace DiscUtils.Fat
         /// <returns>An object that provides access to the newly created floppy disk image.</returns>
         public static FatFileSystem FormatFloppy(Stream stream, FloppyDiskType type, string label)
         {
+            FormatStream(stream, type, label);
+            return new FatFileSystem(stream);
+        }
+
+        protected static void FormatStream(Stream stream, FloppyDiskType type, string label)
+        {
             long pos = stream.Position;
 
             long ticks = DateTime.UtcNow.Ticks;
@@ -1758,7 +1797,6 @@ namespace DiscUtils.Fat
 
             // Give the caller access to the new file system
             stream.Position = pos;
-            return new FatFileSystem(stream);
         }
 
         /// <summary>

@@ -73,6 +73,8 @@ namespace DiscUtils.Fat
             _fileSize = toCopy._fileSize;
         }
 
+        internal byte Attr {  get { return _attr; } }
+
         public FatAttributes Attributes
         {
             get { return (FatAttributes)_attr; }
@@ -127,7 +129,7 @@ namespace DiscUtils.Fat
 
         public FileName Name { get; set; }
 
-        internal void WriteTo(Stream stream)
+        internal virtual void WriteTo(Stream stream)
         {
             byte[] buffer = new byte[32];
 

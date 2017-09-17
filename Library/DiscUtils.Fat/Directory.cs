@@ -223,7 +223,7 @@ namespace DiscUtils.Fat
             return -1;
         }
 
-        internal SparseStream OpenFile(FileName name, FileMode mode, FileAccess fileAccess)
+        internal virtual SparseStream OpenFile(FileName name, FileMode mode, FileAccess fileAccess)
         {
             if (mode == FileMode.Append || mode == FileMode.Truncate)
             {

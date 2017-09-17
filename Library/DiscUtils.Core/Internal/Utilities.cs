@@ -242,6 +242,26 @@ namespace DiscUtils.Internal
             return trimmed.Substring(index + 1);
         }
 
+
+        /// <summary>
+        /// Extracts the extension part of a file from a full path including
+        /// the dot.
+        /// </summary>
+        /// <param name="path">The path to process.</param>
+        /// <returns>The file extension.</returns>
+        public static string GetExtFromPath(string path)
+        {
+            string trimmed = path.Trim('\\');
+
+            int index = trimmed.LastIndexOf('.');
+            if (index < 0)
+            {
+                return trimmed; // No extension, just a file name
+            }
+
+            return trimmed.Substring(index);
+        }
+
         /// <summary>
         /// Combines two paths.
         /// </summary>

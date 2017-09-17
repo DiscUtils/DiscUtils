@@ -29,7 +29,7 @@ namespace DiscUtils.Fat
     /// <summary>
     /// FAT file system options.
     /// </summary>
-    public sealed class FatFileSystemOptions : DiscFileSystemOptions
+    public class FatFileSystemOptions : DiscFileSystemOptions
     {
         private Encoding _encoding;
 

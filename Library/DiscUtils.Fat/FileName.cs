@@ -26,7 +26,7 @@ using DiscUtils.Internal;
 
 namespace DiscUtils.Fat
 {
-    internal sealed class FileName : IEquatable<FileName>
+    internal class FileName : IEquatable<FileName>
     {
         private const byte SpaceByte = 0x20;
 
@@ -107,6 +107,8 @@ namespace DiscUtils.Fat
                 throw new ArgumentException("File extension too long '" + name + "'", nameof(name));
             }
         }
+
+        protected byte[] Raw {  get { return _raw;  } }
 
         public bool Equals(FileName other)
         {
