@@ -8,6 +8,9 @@ namespace DiscUtils.Vfat
 {
     internal class VfatFileName : FileName
     {
+        // Each part contains 10+12+4 = 26 bytes.
+        private const int partSize = 26;
+
         private byte[] _bytes;
         private byte _lastPart;
 
@@ -33,10 +36,10 @@ namespace DiscUtils.Vfat
             byte[] bytes = secondaryEncoding.GetBytes(secondaryName + "\u0000");
 
             // Integer division intentional
-            _lastPart = (byte)(bytes.Length / 32);
+            _lastPart = (byte)(bytes.Length / partSize);
 
             // We want the array bigger than we need
-            _bytes = new byte[(_lastPart + 1) * 32];
+            _bytes = new byte[(_lastPart + 1) * partSize];
 
             for (int i = 0; i < _bytes.Length; ++i) _bytes[i] = 0xff;
 
@@ -45,12 +48,21 @@ namespace DiscUtils.Vfat
 
         public byte LastPart { get { return _lastPart; } }
 
-        public void GetPart(int part, byte[] data)
+        public void GetPart1(int part, byte[] data, int offset)
         {
-            var pos = part * 26; // Each part contains 10+12+4 = 26 bytes.
-            Array.Copy(_bytes, pos, data, 0x01, 10);
-            Array.Copy(_bytes, pos + 10, data, 0x0e, 12);
-            Array.Copy(_bytes, pos + 22, data, 0x1c, 4);
+            var pos = part * partSize;
+            Array.Copy(_bytes, pos, data, offset, 10);
+        }
+        public void GetPart2(int part, byte[] data, int offset)
+        {
+            var pos = part * partSize;
+            Array.Copy(_bytes, pos + 10, data, offset, 12);
+        }
+
+        public void GetPart3(int part, byte[] data, int offset)
+        {
+            var pos = part * partSize;
+            Array.Copy(_bytes, pos + 22, data, offset, 4);
         }
 
         public byte Checksum()
