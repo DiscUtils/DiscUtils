@@ -41,6 +41,7 @@
     <ProjectReference Include="..\DiscUtils.Swap\DiscUtils.Swap.csproj" />
     <ProjectReference Include="..\DiscUtils.Udf\DiscUtils.Udf.csproj" />
     <ProjectReference Include="..\DiscUtils.Vdi\DiscUtils.Vdi.csproj" />
+    <ProjectReference Include="..\DiscUtils.Vfat\DiscUtils.Vfat.csproj" />
     <ProjectReference Include="..\DiscUtils.Vhd\DiscUtils.Vhd.csproj" />
     <ProjectReference Include="..\DiscUtils.Vhdx\DiscUtils.Vhdx.csproj" />
     <ProjectReference Include="..\DiscUtils.Vmdk\DiscUtils.Vmdk.csproj" />
