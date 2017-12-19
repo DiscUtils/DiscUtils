@@ -232,34 +232,28 @@ namespace DiscUtils.Ntfs
 
         private List<DirectoryIndexEntry> FilterEntries(IEnumerable<DirectoryIndexEntry> entriesIter)
         {
-            List<DirectoryIndexEntry> entries = new List<DirectoryIndexEntry>(entriesIter);
+            List<DirectoryIndexEntry> entries = new List<DirectoryIndexEntry>();
 
             // Weed out short-name entries for files and any hidden / system / metadata files.
-            int i = 0;
-            while (i < entries.Count)
+            foreach (var entry in entriesIter)
             {
-                DirectoryIndexEntry entry = entries[i];
-
-                if (((entry.Key.Flags & FileAttributeFlags.Hidden) != 0) && _context.Options.HideHiddenFiles)
+                if ((entry.Key.Flags & FileAttributeFlags.Hidden) != 0 && _context.Options.HideHiddenFiles)
                 {
-                    entries.RemoveAt(i);
+                    continue;
                 }
-                else if (((entry.Key.Flags & FileAttributeFlags.System) != 0) && _context.Options.HideSystemFiles)
+                if ((entry.Key.Flags & FileAttributeFlags.System) != 0 && _context.Options.HideSystemFiles)
                 {
-                    entries.RemoveAt(i);
+                    continue;
                 }
-                else if (entry.Value.MftIndex < 24 && _context.Options.HideMetafiles)
+                if (entry.Value.MftIndex < 24 && _context.Options.HideMetafiles)
                 {
-                    entries.RemoveAt(i);
+                    continue;
                 }
-                else if (entry.Key.FileNameNamespace == FileNameNamespace.Dos && _context.Options.HideDosFileNames)
+                if (entry.Key.FileNameNamespace == FileNameNamespace.Dos && _context.Options.HideDosFileNames)
                 {
-                    entries.RemoveAt(i);
+                    continue;
                 }
-                else
-                {
-                    ++i;
-                }
+                entries.Add(entry);
             }
 
             return entries;
