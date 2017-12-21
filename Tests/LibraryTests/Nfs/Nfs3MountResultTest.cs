@@ -21,43 +21,44 @@
 //
 
 using DiscUtils.Nfs;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3FileSystemInfoTest
+    public class Nfs3MountResultTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
+            Nfs3MountResult result = new Nfs3MountResult()
             {
-                DirectoryPreferredBytes = 1,
-                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
-                MaxFileSize = 2,
-                ReadMaxBytes = 3,
-                ReadMultipleSize = 4,
-                ReadPreferredBytes = 5,
-                TimePrecision = Nfs3FileTime.Precision,
-                WriteMaxBytes = 7,
-                WriteMultipleSize = 8,
-                WritePreferredBytes = 9
+                AuthFlavours = new List<RpcAuthFlavour>()
+                 {
+                      RpcAuthFlavour.Des,
+                       RpcAuthFlavour.Null
+                 },
+                FileHandle = new Nfs3FileHandle()
+                {
+                    Value = new byte[] { 0x5 }
+                },
+                Status = Nfs3Status.Ok
             };
 
-            Nfs3FileSystemInfo clone = null;
+            Nfs3MountResult clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 XdrDataWriter writer = new XdrDataWriter(stream);
-                attributes.Write(writer);
+                result.Write(writer);
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3FileSystemInfo(reader);
+                clone = new Nfs3MountResult(reader);
             }
 
-            Assert.Equal(attributes, clone);
+            Assert.Equal(result, clone);
         }
     }
 }

@@ -21,43 +21,37 @@
 //
 
 using DiscUtils.Nfs;
+using System;
 using System.IO;
 using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3FileSystemInfoTest
+    public class Nfs3WeakCacheConsistencyAttrTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
+            Nfs3WeakCacheConsistencyAttr attr = new Nfs3WeakCacheConsistencyAttr()
             {
-                DirectoryPreferredBytes = 1,
-                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
-                MaxFileSize = 2,
-                ReadMaxBytes = 3,
-                ReadMultipleSize = 4,
-                ReadPreferredBytes = 5,
-                TimePrecision = Nfs3FileTime.Precision,
-                WriteMaxBytes = 7,
-                WriteMultipleSize = 8,
-                WritePreferredBytes = 9
+                ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                Size = 3
             };
 
-            Nfs3FileSystemInfo clone = null;
+            Nfs3WeakCacheConsistencyAttr clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 XdrDataWriter writer = new XdrDataWriter(stream);
-                attributes.Write(writer);
+                attr.Write(writer);
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3FileSystemInfo(reader);
+                clone = new Nfs3WeakCacheConsistencyAttr(reader);
             }
 
-            Assert.Equal(attributes, clone);
+            Assert.Equal(attr, clone);
         }
     }
 }

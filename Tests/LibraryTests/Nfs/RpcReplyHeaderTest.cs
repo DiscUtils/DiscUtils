@@ -26,38 +26,34 @@ using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3FileSystemInfoTest
+    public class RpcReplyHeaderTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
+            RpcReplyHeader header = new RpcReplyHeader()
             {
-                DirectoryPreferredBytes = 1,
-                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
-                MaxFileSize = 2,
-                ReadMaxBytes = 3,
-                ReadMultipleSize = 4,
-                ReadPreferredBytes = 5,
-                TimePrecision = Nfs3FileTime.Precision,
-                WriteMaxBytes = 7,
-                WriteMultipleSize = 8,
-                WritePreferredBytes = 9
+                AcceptReply = new RpcAcceptedReplyHeader()
+                {
+                    AcceptStatus = RpcAcceptStatus.Success,
+                    MismatchInfo = null,
+                    Verifier = new RpcAuthentication(new RpcUnixCredential(1, 2))
+                }
             };
 
-            Nfs3FileSystemInfo clone = null;
+            RpcReplyHeader clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 XdrDataWriter writer = new XdrDataWriter(stream);
-                attributes.Write(writer);
+                header.Write(writer);
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3FileSystemInfo(reader);
+                clone = new RpcReplyHeader(reader);
             }
 
-            Assert.Equal(attributes, clone);
+            Assert.Equal(header, clone);
         }
     }
 }

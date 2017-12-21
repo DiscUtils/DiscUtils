@@ -20,44 +20,57 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils;
 using DiscUtils.Nfs;
+using System;
 using System.IO;
 using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3FileSystemInfoTest
+    public class Nfs3ReadResultTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
+            Nfs3ReadResult result = new Nfs3ReadResult()
             {
-                DirectoryPreferredBytes = 1,
-                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
-                MaxFileSize = 2,
-                ReadMaxBytes = 3,
-                ReadMultipleSize = 4,
-                ReadPreferredBytes = 5,
-                TimePrecision = Nfs3FileTime.Precision,
-                WriteMaxBytes = 7,
-                WriteMultipleSize = 8,
-                WritePreferredBytes = 9
+                Count = 1,
+                Data = new byte[] { 0x02, 0x03 },
+                Eof = false,
+                FileAttributes = new Nfs3FileAttributes()
+                {
+                    AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                    BytesUsed = 1,
+                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                    FileId = 2,
+                    FileSystemId = 3,
+                    Gid = 4,
+                    LinkCount = 5,
+                    Mode = UnixFilePermissions.GroupAll,
+                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3)),
+                    RdevMajor = 6,
+                    RdevMinor = 7,
+                    Size = 8,
+                    Type = Nfs3FileType.BlockDevice,
+                    Uid = 9
+                },
+                Status = Nfs3Status.Ok
             };
 
-            Nfs3FileSystemInfo clone = null;
+            Nfs3ReadResult clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 XdrDataWriter writer = new XdrDataWriter(stream);
-                attributes.Write(writer);
+                result.Write(writer);
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3FileSystemInfo(reader);
+                clone = new Nfs3ReadResult(reader);
             }
 
-            Assert.Equal(attributes, clone);
+            Assert.Equal(result, clone);
         }
     }
 }

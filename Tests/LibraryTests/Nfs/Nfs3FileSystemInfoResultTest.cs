@@ -28,47 +28,59 @@ using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3DirectoryEntryTest
+    public class Nfs3FileSystemInfoResultTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3DirectoryEntry entry = new Nfs3DirectoryEntry()
+            Nfs3FileSystemInfoResult result = new Nfs3FileSystemInfoResult()
             {
-                Cookie = 1,
-                FileAttributes = new Nfs3FileAttributes()
+                FileSystemInfo = new Nfs3FileSystemInfo()
+                {
+                    DirectoryPreferredBytes = 1,
+                    FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
+                    MaxFileSize = 3,
+                    ReadMaxBytes = 4,
+                    ReadMultipleSize = 5,
+                    ReadPreferredBytes = 6,
+                    TimePrecision = Nfs3FileTime.Precision,
+                    WriteMaxBytes = 8,
+                    WriteMultipleSize = 9,
+                    WritePreferredBytes = 10
+                },
+                PostOpAttributes = new Nfs3FileAttributes()
                 {
                     AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
                     BytesUsed = 2,
-                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
-                    FileId = 3,
-                    FileSystemId = 4,
-                    Gid = 5,
-                    LinkCount = 6,
-                    Mode = UnixFilePermissions.GroupAll,
-                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3)),
-                    RdevMajor = 7,
-                    RdevMinor = 8,
-                    Size = 9,
-                    Type = Nfs3FileType.NamedPipe,
-                    Uid = 10
+                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 3)),
+                    FileId = 4,
+                    FileSystemId = 5,
+                    Gid = 6,
+                    LinkCount = 7,
+                    Mode = UnixFilePermissions.OthersExecute,
+                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 8)),
+                    RdevMajor = 9,
+                    RdevMinor = 10,
+                    Size = 11,
+                    Type = Nfs3FileType.BlockDevice,
+                    Uid = 12
                 },
-                Name = "test"
+                Status = Nfs3Status.Ok
             };
 
-            Nfs3DirectoryEntry clone = null;
+            Nfs3FileSystemInfoResult clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 XdrDataWriter writer = new XdrDataWriter(stream);
-                entry.Write(writer);
+                result.Write(writer);
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3DirectoryEntry(reader);
+                clone = new Nfs3FileSystemInfoResult(reader);
             }
 
-            Assert.Equal(entry, clone);
+            Assert.Equal(result, clone);
         }
     }
 }

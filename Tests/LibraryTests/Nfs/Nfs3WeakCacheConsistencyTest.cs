@@ -20,44 +20,59 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils;
 using DiscUtils.Nfs;
+using System;
 using System.IO;
 using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3FileSystemInfoTest
+    public class Nfs3WeakCacheConsistencyTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
+            Nfs3WeakCacheConsistency consistency = new Nfs3WeakCacheConsistency()
             {
-                DirectoryPreferredBytes = 1,
-                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
-                MaxFileSize = 2,
-                ReadMaxBytes = 3,
-                ReadMultipleSize = 4,
-                ReadPreferredBytes = 5,
-                TimePrecision = Nfs3FileTime.Precision,
-                WriteMaxBytes = 7,
-                WriteMultipleSize = 8,
-                WritePreferredBytes = 9
+                Before = new Nfs3WeakCacheConsistencyAttr()
+                {
+                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                    Size = 3
+                },
+                After = new Nfs3FileAttributes()
+                {
+                    AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                    BytesUsed = 2,
+                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                    FileId = 3,
+                    FileSystemId = 4,
+                    Gid = 5,
+                    LinkCount = 6,
+                    Mode = UnixFilePermissions.GroupAll,
+                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3)),
+                    RdevMajor = 7,
+                    RdevMinor = 8,
+                    Size = 9,
+                    Type = Nfs3FileType.NamedPipe,
+                    Uid = 10
+                }
             };
 
-            Nfs3FileSystemInfo clone = null;
+            Nfs3WeakCacheConsistency clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
                 XdrDataWriter writer = new XdrDataWriter(stream);
-                attributes.Write(writer);
+                consistency.Write(writer);
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3FileSystemInfo(reader);
+                clone = new Nfs3WeakCacheConsistency(reader);
             }
 
-            Assert.Equal(attributes, clone);
+            Assert.Equal(consistency, clone);
         }
     }
 }

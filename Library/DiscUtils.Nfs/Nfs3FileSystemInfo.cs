@@ -127,7 +127,7 @@ namespace DiscUtils.Nfs
 
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            return Equals(obj as Nfs3FileSystemInfo);
         }
 
         public bool Equals(Nfs3FileSystemInfo other)

@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2017, Quamotion
+// Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,32 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils;
 using DiscUtils.Nfs;
+using System;
 using System.IO;
 using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3FileSystemInfoTest
+    public class Nfs3SetAttributesTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
+            Nfs3SetAttributes attributes = new Nfs3SetAttributes()
             {
-                DirectoryPreferredBytes = 1,
-                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
-                MaxFileSize = 2,
-                ReadMaxBytes = 3,
-                ReadMultipleSize = 4,
-                ReadPreferredBytes = 5,
-                TimePrecision = Nfs3FileTime.Precision,
-                WriteMaxBytes = 7,
-                WriteMultipleSize = 8,
-                WritePreferredBytes = 9
+                AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                Gid = 1,
+                Mode = UnixFilePermissions.GroupAll,
+                ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                SetAccessTime = Nfs3SetTimeMethod.ClientTime,
+                SetGid = true,
+                SetMode = true,
+                SetModifyTime = Nfs3SetTimeMethod.ClientTime,
+                SetSize = true,
+                SetUid = true,
+                Size = 4,
+                Uid = 5
             };
 
-            Nfs3FileSystemInfo clone = null;
+            Nfs3SetAttributes clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -54,7 +58,7 @@ namespace LibraryTests.Nfs
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3FileSystemInfo(reader);
+                clone = new Nfs3SetAttributes(reader);
             }
 
             Assert.Equal(attributes, clone);

@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3WeakCacheConsistency
@@ -37,8 +39,48 @@ namespace DiscUtils.Nfs
             }
         }
 
+        public Nfs3WeakCacheConsistency()
+        {
+        }
+
         public Nfs3FileAttributes After { get; set; }
 
         public Nfs3WeakCacheConsistencyAttr Before { get; set; }
+
+        public void Write(XdrDataWriter writer)
+        {
+            writer.Write(Before != null);
+            if (Before != null)
+            {
+                Before.Write(writer);
+            }
+
+            writer.Write(After != null);
+            if (After != null)
+            {
+                After.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3WeakCacheConsistency);
+        }
+
+        public bool Equals(Nfs3WeakCacheConsistency other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return object.Equals(other.After, After)
+                && object.Equals(other.Before, Before);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(After, Before);
+        }
     }
 }
