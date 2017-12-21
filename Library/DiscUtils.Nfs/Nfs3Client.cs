@@ -250,7 +250,7 @@ namespace DiscUtils.Nfs
         internal IEnumerable<Nfs3DirectoryEntry> ReadDirectory(Nfs3FileHandle parent, bool silentFail)
         {
             ulong cookie = 0;
-            byte[] cookieVerifier = 0;
+            byte[] cookieVerifier = null;
 
             Nfs3ReadDirPlusResult result;
             do
