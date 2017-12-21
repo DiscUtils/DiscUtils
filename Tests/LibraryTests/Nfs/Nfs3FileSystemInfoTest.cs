@@ -1,5 +1,4 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
 // Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,50 +20,44 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using DiscUtils.Nfs;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    internal class RpcMismatchInfo
+    public class Nfs3FileSystemInfoTest
     {
-        public uint High;
-        public uint Low;
-
-        public RpcMismatchInfo()
+        [Fact]
+        public void RoundTripTest()
         {
-        }
-
-        public RpcMismatchInfo(XdrDataReader reader)
-        {
-            Low = reader.ReadUInt32();
-            High = reader.ReadUInt32();
-        }
-
-        public void Write(XdrDataWriter writer)
-        {
-            writer.Write(Low);
-            writer.Write(High);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as RpcMismatchInfo);
-        }
-
-        public bool Equals(RpcMismatchInfo other)
-        {
-            if (other == null)
+            Nfs3FileSystemInfo attributes = new Nfs3FileSystemInfo()
             {
-                return false;
+                DirectoryPreferredBytes = 1,
+                FileSystemProperties = Nfs3FileSystemProperties.HardLinks,
+                MaxFileSize = 2,
+                ReadMaxBytes = 3,
+                ReadMultipleSize = 4,
+                ReadPreferredBytes = 5,
+                TimePrecision = 6,
+                WriteMaxBytes = 7,
+                WriteMultipleSize = 8,
+                WritePreferredBytes = 9
+            };
+
+            Nfs3FileSystemInfo clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                attributes.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3FileSystemInfo(reader);
             }
 
-            return other.High == High
-                && other.Low == Low;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(High, Low);
+            Assert.Equal(attributes, clone);
         }
     }
 }

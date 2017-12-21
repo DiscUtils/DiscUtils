@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,6 +21,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Nfs
@@ -28,6 +30,11 @@ namespace DiscUtils.Nfs
     {
         private readonly byte[] _body;
         private readonly RpcAuthFlavour _flavour;
+
+        public RpcAuthentication()
+        {
+            _body = new byte[400];
+        }
 
         public RpcAuthentication(XdrDataReader reader)
         {
@@ -54,6 +61,26 @@ namespace DiscUtils.Nfs
         {
             writer.Write((int)_flavour);
             writer.WriteBuffer(_body);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as RpcAuthentication);
+        }
+
+        public bool Equals(RpcAuthentication other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+            
+            return other._flavour == _flavour;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(_flavour);
         }
     }
 }

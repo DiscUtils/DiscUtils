@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
     internal class Nfs3FileAttributes
@@ -39,6 +41,10 @@ namespace DiscUtils.Nfs
         public Nfs3FileType Type;
         public uint Uid;
 
+        public Nfs3FileAttributes()
+        {
+        }
+
         public Nfs3FileAttributes(XdrDataReader reader)
         {
             Type = (Nfs3FileType)reader.ReadInt32();
@@ -55,6 +61,59 @@ namespace DiscUtils.Nfs
             AccessTime = new Nfs3FileTime(reader);
             ModifyTime = new Nfs3FileTime(reader);
             ChangeTime = new Nfs3FileTime(reader);
+        }
+
+        public void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Type);
+            writer.Write((int)Mode);
+            writer.Write(LinkCount);
+            writer.Write(Uid);
+            writer.Write(Gid);
+            writer.Write(Size);
+            writer.Write(BytesUsed);
+            writer.Write(RdevMajor);
+            writer.Write(RdevMinor);
+            writer.Write(FileSystemId);
+            writer.Write(FileId);
+            AccessTime.Write(writer);
+            ModifyTime.Write(writer);
+            ChangeTime.Write(writer);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public bool Equals(Nfs3FileAttributes other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Type == Type
+                && other.Mode == Mode
+                && other.LinkCount == LinkCount
+                && other.Uid == Uid
+                && other.Gid == Gid
+                && other.Size == Size
+                && other.BytesUsed == BytesUsed
+                && other.RdevMajor == RdevMajor
+                && other.RdevMinor == RdevMinor
+                && other.FileSystemId == FileSystemId
+                && other.FileId == FileId
+                && object.Equals(other.AccessTime, AccessTime)
+                && object.Equals(other.ModifyTime, ModifyTime)
+                && object.Equals(other.ChangeTime, ChangeTime);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                HashCode.Combine(Type, Mode, LinkCount, Uid, Gid, Size, BytesUsed, RdevMajor),
+                RdevMinor, FileSystemId, FileId, AccessTime, ModifyTime, ChangeTime);
         }
     }
 }
