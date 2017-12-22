@@ -20,6 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+#if !NET20
+using System.Linq;
+#endif
+
 namespace DiscUtils.Nfs
 {
     internal class Nfs3WriteResult : Nfs3CallResult
@@ -32,8 +36,12 @@ namespace DiscUtils.Nfs
             {
                 Count = reader.ReadInt32();
                 HowCommitted = reader.ReadInt32();
-                WriteVerifier = reader.ReadBytes(Nfs3.WriteVerifierSize);
+                WriteVerifier = reader.ReadUInt64();
             }
+        }
+
+        public Nfs3WriteResult()
+        {
         }
 
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
@@ -42,6 +50,37 @@ namespace DiscUtils.Nfs
 
         public int HowCommitted { get; set; }
 
-        public byte[] WriteVerifier { get; set; }
+        public ulong WriteVerifier { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+            CacheConsistency.Write(writer);
+            if(Status == Nfs3Status.Ok)
+            {
+                writer.Write(Count);
+                writer.Write(HowCommitted);
+                writer.Write(WriteVerifier);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3WriteResult);
+        }
+
+        public bool Equals(Nfs3WriteResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.CacheConsistency, CacheConsistency)
+                && other.Count == Count
+                && other.WriteVerifier == WriteVerifier
+                && other.HowCommitted == HowCommitted;
+        }
     }
 }

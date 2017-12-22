@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
     internal class Nfs3DirectoryEntry
@@ -40,6 +42,10 @@ namespace DiscUtils.Nfs
             }
         }
 
+        public Nfs3DirectoryEntry()
+        {
+        }
+
         public ulong Cookie { get; set; }
 
         public Nfs3FileAttributes FileAttributes { get; set; }
@@ -49,5 +55,48 @@ namespace DiscUtils.Nfs
         public ulong FileId { get; set; }
 
         public string Name { get; set; }
+
+        public void Write(XdrDataWriter writer)
+        {
+            writer.Write(FileId);
+            writer.Write(Name);
+            writer.Write(Cookie);
+
+            writer.Write(FileAttributes != null);
+            if (FileAttributes != null)
+            {
+                FileAttributes.Write(writer);
+            }
+
+            writer.Write(FileHandle != null);
+            if (FileHandle != null)
+            {
+                FileHandle.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3DirectoryEntry);
+        }
+
+        public bool Equals(Nfs3DirectoryEntry other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Cookie == Cookie
+                && object.Equals(other.FileAttributes, FileAttributes)
+                && object.Equals(other.FileHandle, FileHandle)
+                && other.FileId == FileId
+                && object.Equals(other.Name, Name);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Cookie, FileAttributes, FileHandle, FileId, Name);
+        }
     }
 }

@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
     internal class RpcReplyHeader
@@ -27,6 +29,10 @@ namespace DiscUtils.Nfs
         public RpcAcceptedReplyHeader AcceptReply;
         public RpcRejectedReplyHeader RejectedReply;
         public RpcReplyStatus Status;
+
+        public RpcReplyHeader()
+        {
+        }
 
         public RpcReplyHeader(XdrDataReader reader)
         {
@@ -39,6 +45,42 @@ namespace DiscUtils.Nfs
             {
                 RejectedReply = new RpcRejectedReplyHeader(reader);
             }
+        }
+
+        public void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            if (Status == RpcReplyStatus.Accepted)
+            {
+                AcceptReply.Write(writer);
+            }
+            else
+            {
+                RejectedReply.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as RpcReplyHeader);
+        }
+
+        public bool Equals(RpcReplyHeader other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.AcceptReply, AcceptReply)
+                && object.Equals(other.RejectedReply, RejectedReply);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, AcceptReply, RejectedReply);
         }
     }
 }

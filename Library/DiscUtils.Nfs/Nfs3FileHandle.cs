@@ -26,6 +26,10 @@ namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
     {
+        public Nfs3FileHandle()
+        {
+        }
+
         internal Nfs3FileHandle(XdrDataReader reader)
         {
             Value = reader.ReadBuffer(Nfs3Mount.MaxFileHandleSize);

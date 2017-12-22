@@ -224,14 +224,14 @@ namespace DiscUtils.Nfs
             throw new RpcException(reply.Header.ReplyHeader);
         }
 
-        public Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, byte[] cookieVerifier, uint dirCount,
+        public Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint dirCount,
                                                  uint maxCount)
         {
             MemoryStream ms = new MemoryStream();
             XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Readdirplus);
             dir.Write(writer);
             writer.Write(cookie);
-            writer.WriteBytes(cookieVerifier ?? new byte[CookieVerifierSize]);
+            writer.Write(cookieVerifier);
             writer.Write(dirCount);
             writer.Write(maxCount);
 

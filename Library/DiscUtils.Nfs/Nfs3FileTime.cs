@@ -47,6 +47,12 @@ namespace DiscUtils.Nfs
             _nseconds = (uint)(ticks % TicksPerSec * TicksPerNanoSec);
         }
 
+        public Nfs3FileTime(uint seconds, uint nseconds)
+        {
+            _seconds = seconds;
+            _nseconds = nseconds;
+        }
+
         ////public Nfs3FileTime(TimeSpan timeSpan)
         ////{
         ////    long ticks = timeSpan.Ticks;
@@ -68,6 +74,40 @@ namespace DiscUtils.Nfs
         {
             writer.Write(_seconds);
             writer.Write(_nseconds);
+        }
+
+        public static Nfs3FileTime Precision
+        {
+            get
+            {
+                return new Nfs3FileTime(0, 1);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3FileTime);
+        }
+
+        public bool Equals(Nfs3FileTime other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other._seconds == _seconds
+                && other._nseconds == _nseconds;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(_seconds, _nseconds);
+        }
+
+        public override string ToString()
+        {
+            return ToDateTime().ToString();
         }
     }
 }

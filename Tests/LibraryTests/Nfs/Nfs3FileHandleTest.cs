@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,20 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using DiscUtils.Nfs;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    /// <summary>
-    /// Base class for all NFS result structures.
-    /// </summary>
-    internal abstract class Nfs3CallResult
+    public class Nfs3FileHandleTest
     {
-        public Nfs3Status Status { get; set; }
-
-        public virtual void Write(XdrDataWriter writer)
+        [Fact]
+        public void RoundTripTest()
         {
-            throw new NotSupportedException();
+            Nfs3FileHandle attributes = new Nfs3FileHandle()
+            {
+                Value = new byte[] { 0x01 }
+            };
+
+            Nfs3FileHandle clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                attributes.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3FileHandle(reader);
+            }
+
+            Assert.Equal(attributes, clone);
         }
     }
 }

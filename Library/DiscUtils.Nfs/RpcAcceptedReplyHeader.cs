@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,6 +21,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
     internal class RpcAcceptedReplyHeader
@@ -27,6 +30,10 @@ namespace DiscUtils.Nfs
         public RpcAcceptStatus AcceptStatus;
         public RpcMismatchInfo MismatchInfo;
         public RpcAuthentication Verifier;
+
+        public RpcAcceptedReplyHeader()
+        {
+        }
 
         public RpcAcceptedReplyHeader(XdrDataReader reader)
         {
@@ -36,6 +43,38 @@ namespace DiscUtils.Nfs
             {
                 MismatchInfo = new RpcMismatchInfo(reader);
             }
+        }
+
+        public void Write(XdrDataWriter writer)
+        {
+            Verifier.Write(writer);
+            writer.Write((int)AcceptStatus);
+            if (AcceptStatus == RpcAcceptStatus.ProgramVersionMismatch)
+            {
+                MismatchInfo.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as RpcAcceptedReplyHeader);
+        }
+
+        public bool Equals(RpcAcceptedReplyHeader other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return object.Equals(other.Verifier, Verifier)
+                && other.AcceptStatus == AcceptStatus
+                && object.Equals(other.MismatchInfo, MismatchInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Verifier, AcceptStatus, MismatchInfo);
         }
     }
 }

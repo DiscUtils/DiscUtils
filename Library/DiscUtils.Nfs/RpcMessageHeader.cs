@@ -26,6 +26,10 @@ namespace DiscUtils.Nfs
 {
     internal class RpcMessageHeader
     {
+        public RpcMessageHeader()
+        {
+        }
+
         public RpcMessageHeader(XdrDataReader reader)
         {
             TransactionId = reader.ReadUInt32();
@@ -50,5 +54,70 @@ namespace DiscUtils.Nfs
         public RpcReplyHeader ReplyHeader { get; set; }
 
         public uint TransactionId { get; set; }
+
+        public void Write(XdrDataWriter writer)
+        {
+            writer.Write(TransactionId);
+            writer.Write((int)RpcMessageType.Reply);
+            ReplyHeader.Write(writer);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as RpcMessageHeader);
+        }
+
+        public bool Equals(RpcMessageHeader other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.IsSuccess == IsSuccess
+                && other.TransactionId == TransactionId
+                && object.Equals(other.ReplyHeader, ReplyHeader);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(IsSuccess, TransactionId, ReplyHeader);
+        }
+
+
+        public static RpcMessageHeader Accepted(uint transactionId)
+        {
+            return new RpcMessageHeader()
+            {
+                TransactionId = transactionId,
+                ReplyHeader = new RpcReplyHeader()
+                {
+                    Status = RpcReplyStatus.Accepted,
+                    AcceptReply = new RpcAcceptedReplyHeader()
+                    {
+                        AcceptStatus = RpcAcceptStatus.Success,
+                        Verifier = new RpcAuthentication(new RpcUnixCredential(0, 0))
+                    }
+                }
+            };
+        }
+
+        public static RpcMessageHeader ProcedureUnavailable(uint transactionId)
+        {
+            return new RpcMessageHeader()
+            {
+                TransactionId = transactionId,
+                ReplyHeader = new RpcReplyHeader()
+                {
+                    Status = RpcReplyStatus.Accepted,
+                    AcceptReply = new RpcAcceptedReplyHeader()
+                    {
+                        AcceptStatus = RpcAcceptStatus.ProcedureUnavailable,
+                        MismatchInfo = new RpcMismatchInfo(),
+                        Verifier = RpcAuthentication.Null()
+                    }
+                }
+            };
+        }
     }
 }

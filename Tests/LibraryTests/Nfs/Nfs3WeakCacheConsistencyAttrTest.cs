@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,20 +20,38 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Nfs;
 using System;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    /// <summary>
-    /// Base class for all NFS result structures.
-    /// </summary>
-    internal abstract class Nfs3CallResult
+    public class Nfs3WeakCacheConsistencyAttrTest
     {
-        public Nfs3Status Status { get; set; }
-
-        public virtual void Write(XdrDataWriter writer)
+        [Fact]
+        public void RoundTripTest()
         {
-            throw new NotSupportedException();
+            Nfs3WeakCacheConsistencyAttr attr = new Nfs3WeakCacheConsistencyAttr()
+            {
+                ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                Size = 3
+            };
+
+            Nfs3WeakCacheConsistencyAttr clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                attr.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3WeakCacheConsistencyAttr(reader);
+            }
+
+            Assert.Equal(attr, clone);
         }
     }
 }

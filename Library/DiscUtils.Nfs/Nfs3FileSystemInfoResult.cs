@@ -20,6 +20,8 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
     internal class Nfs3FileSystemInfoResult : Nfs3CallResult
@@ -38,8 +40,52 @@ namespace DiscUtils.Nfs
             }
         }
 
+        public Nfs3FileSystemInfoResult()
+        {
+        }
+
         public Nfs3FileSystemInfo FileSystemInfo { get; set; }
 
         public Nfs3FileAttributes PostOpAttributes { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            writer.Write(PostOpAttributes != null);
+
+            if (PostOpAttributes != null)
+            {
+                PostOpAttributes.Write(writer);
+            }
+
+            if (Status == Nfs3Status.Ok)
+            {
+                FileSystemInfo.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3FileSystemInfoResult);
+        }
+
+        public bool Equals(Nfs3FileSystemInfoResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.PostOpAttributes, PostOpAttributes)
+                && other.Status == Status
+                && object.Equals(other.FileSystemInfo, FileSystemInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, PostOpAttributes, Status, FileSystemInfo);
+        }
     }
 }

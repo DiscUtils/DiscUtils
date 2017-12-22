@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,20 +20,41 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using DiscUtils.Nfs;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    /// <summary>
-    /// Base class for all NFS result structures.
-    /// </summary>
-    internal abstract class Nfs3CallResult
+    public class RpcRejectedReplyHeaderTest
     {
-        public Nfs3Status Status { get; set; }
-
-        public virtual void Write(XdrDataWriter writer)
+        [Fact]
+        public void RoundTripTest()
         {
-            throw new NotSupportedException();
+            RpcRejectedReplyHeader header = new RpcRejectedReplyHeader()
+            {
+                AuthenticationStatus = RpcAuthenticationStatus.None,
+                MismatchInfo = new RpcMismatchInfo()
+                {
+                    High = 1,
+                    Low = 2
+                },
+                Status = RpcRejectedStatus.RpcMismatch
+            };
+
+            RpcRejectedReplyHeader clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                header.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new RpcRejectedReplyHeader(reader);
+            }
+
+            Assert.Equal(header, clone);
         }
     }
 }

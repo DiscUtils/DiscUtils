@@ -20,7 +20,11 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
+#if !NET20
+using System.Linq;
+#endif
 
 namespace DiscUtils.Nfs
 {
@@ -36,7 +40,7 @@ namespace DiscUtils.Nfs
 
             if (Status == Nfs3Status.Ok)
             {
-                CookieVerifier = reader.ReadBytes(Nfs3.CookieVerifierSize);
+                CookieVerifier = reader.ReadUInt64();
 
                 DirEntries = new List<Nfs3DirectoryEntry>();
                 while (reader.ReadBool())
@@ -49,12 +53,66 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public byte[] CookieVerifier { get; set; }
+        public Nfs3ReadDirPlusResult()
+        {
+        }
+
+        public ulong CookieVerifier { get; set; }
 
         public Nfs3FileAttributes DirAttributes { get; set; }
 
         public List<Nfs3DirectoryEntry> DirEntries { get; set; }
 
         public bool Eof { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            writer.Write(DirAttributes != null);
+            if (DirAttributes != null)
+            {
+                DirAttributes.Write(writer);
+            }
+
+            if (Status == Nfs3Status.Ok)
+            {
+                writer.Write(CookieVerifier);
+
+                foreach (var entry in DirEntries)
+                {
+                    writer.Write(true);
+                    entry.Write(writer);
+                }
+
+                writer.Write(false);
+                writer.Write(true); // EOF
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3ReadDirPlusResult);
+        }
+
+        public bool Equals(Nfs3ReadDirPlusResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.DirAttributes, DirAttributes)
+#if !NET20
+                && Enumerable.SequenceEqual(other.DirEntries, DirEntries)
+#endif
+                && other.CookieVerifier == CookieVerifier;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, DirAttributes, CookieVerifier, DirEntries);
+        }
     }
 }

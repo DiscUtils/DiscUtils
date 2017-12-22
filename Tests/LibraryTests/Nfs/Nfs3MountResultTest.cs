@@ -1,5 +1,4 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
 // Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,50 +20,45 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using DiscUtils.Nfs;
+using System.Collections.Generic;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    internal class RpcMismatchInfo
+    public class Nfs3MountResultTest
     {
-        public uint High;
-        public uint Low;
-
-        public RpcMismatchInfo()
+        [Fact]
+        public void RoundTripTest()
         {
-        }
-
-        public RpcMismatchInfo(XdrDataReader reader)
-        {
-            Low = reader.ReadUInt32();
-            High = reader.ReadUInt32();
-        }
-
-        public void Write(XdrDataWriter writer)
-        {
-            writer.Write(Low);
-            writer.Write(High);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as RpcMismatchInfo);
-        }
-
-        public bool Equals(RpcMismatchInfo other)
-        {
-            if (other == null)
+            Nfs3MountResult result = new Nfs3MountResult()
             {
-                return false;
+                AuthFlavours = new List<RpcAuthFlavour>()
+                 {
+                      RpcAuthFlavour.Des,
+                       RpcAuthFlavour.Null
+                 },
+                FileHandle = new Nfs3FileHandle()
+                {
+                    Value = new byte[] { 0x5 }
+                },
+                Status = Nfs3Status.Ok
+            };
+
+            Nfs3MountResult clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                result.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3MountResult(reader);
             }
 
-            return other.High == High
-                && other.Low == Low;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(High, Low);
+            Assert.Equal(result, clone);
         }
     }
 }
