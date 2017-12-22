@@ -24,9 +24,9 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3FileSystemInfo
+    public sealed class Nfs3FileSystemInfo
     {
-        public Nfs3FileSystemInfo(XdrDataReader reader)
+        internal Nfs3FileSystemInfo(XdrDataReader reader)
         {
             ReadMaxBytes = reader.ReadUInt32();
             ReadPreferredBytes = reader.ReadUInt32();
@@ -111,7 +111,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         public uint WritePreferredBytes { get; set; }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(ReadMaxBytes);
             writer.Write(ReadPreferredBytes);

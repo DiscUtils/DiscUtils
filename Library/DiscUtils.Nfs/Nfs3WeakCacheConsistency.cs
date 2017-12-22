@@ -24,9 +24,9 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3WeakCacheConsistency
+    public sealed class Nfs3WeakCacheConsistency
     {
-        public Nfs3WeakCacheConsistency(XdrDataReader reader)
+        internal Nfs3WeakCacheConsistency(XdrDataReader reader)
         {
             if (reader.ReadBool())
             {
@@ -47,7 +47,7 @@ namespace DiscUtils.Nfs
 
         public Nfs3WeakCacheConsistencyAttr Before { get; set; }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(Before != null);
             if (Before != null)

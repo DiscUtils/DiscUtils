@@ -25,7 +25,7 @@ using System;
 namespace DiscUtils.Nfs
 {
     [Flags]
-    internal enum Nfs3FileSystemProperties
+    public enum Nfs3FileSystemProperties
     {
         None = 0,
         HardLinks = 1,

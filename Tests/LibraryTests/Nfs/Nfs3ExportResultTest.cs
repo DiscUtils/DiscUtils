@@ -20,54 +20,35 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils;
 using DiscUtils.Nfs;
-using System;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3WriteResultTest
+    public class Nfs3ExportResultTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3WriteResult result = new Nfs3WriteResult()
+            Nfs3ExportResult result = new Nfs3ExportResult()
             {
-                CacheConsistency = new Nfs3WeakCacheConsistency()
-                {
-                    Before = new Nfs3WeakCacheConsistencyAttr()
-                    {
-                        ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
-                        ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
-                        Size = 3
-                    },
-                    After = new Nfs3FileAttributes()
-                    {
-                        AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
-                        BytesUsed = 2,
-                        ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
-                        FileId = 3,
-                        FileSystemId = 4,
-                        Gid = 5,
-                        LinkCount = 6,
-                        Mode = UnixFilePermissions.GroupAll,
-                        ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3)),
-                        RdevMajor = 7,
-                        RdevMinor = 8,
-                        Size = 9,
-                        Type = Nfs3FileType.NamedPipe,
-                        Uid = 10
-                    }
-                },
-                Count = 1,
-                HowCommitted = Nfs3StableHow.Unstable,
-                Status = Nfs3Status.Ok,
-                WriteVerifier = 3
+                Exports = new List<Nfs3Export>()
+                 {
+                      new Nfs3Export()
+                      {
+                           DirPath = "export",
+                           Groups = new List<string>()
+                           {
+                                "GroupA",
+                                "GroupB"
+                           }
+                      }
+                 }
             };
 
-            Nfs3WriteResult clone = null;
+            Nfs3ExportResult clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -76,7 +57,7 @@ namespace LibraryTests.Nfs
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3WriteResult(reader);
+                clone = new Nfs3ExportResult(reader);
             }
 
             Assert.Equal(result, clone);

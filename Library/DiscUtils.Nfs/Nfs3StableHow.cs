@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,19 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
 
 namespace DiscUtils.Nfs
 {
-    [Flags]
-    public enum Nfs3AccessPermissions
+    public enum Nfs3StableHow : uint
     {
-        None = 0x00,
-        Read = 0x01,
-        Lookup = 0x02,
-        Modify = 0x04,
-        Extend = 0x08,
-        Delete = 0x10,
-        Execute = 0x20
+        Unstable = 0,
+        DataSync = 1,
+        FileSynce = 2
     }
 }

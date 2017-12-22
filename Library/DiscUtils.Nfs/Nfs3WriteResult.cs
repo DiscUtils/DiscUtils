@@ -20,22 +20,23 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 #if !NET20
 using System.Linq;
 #endif
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3WriteResult : Nfs3CallResult
+    public sealed class Nfs3WriteResult : Nfs3CallResult
     {
-        public Nfs3WriteResult(XdrDataReader reader)
+        internal Nfs3WriteResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             CacheConsistency = new Nfs3WeakCacheConsistency(reader);
             if (Status == Nfs3Status.Ok)
             {
                 Count = reader.ReadInt32();
-                HowCommitted = reader.ReadInt32();
+                HowCommitted = (Nfs3StableHow)reader.ReadInt32();
                 WriteVerifier = reader.ReadUInt64();
             }
         }
@@ -48,18 +49,18 @@ namespace DiscUtils.Nfs
 
         public int Count { get; set; }
 
-        public int HowCommitted { get; set; }
+        public Nfs3StableHow HowCommitted { get; set; }
 
         public ulong WriteVerifier { get; set; }
 
-        public override void Write(XdrDataWriter writer)
+        internal override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
             CacheConsistency.Write(writer);
             if(Status == Nfs3Status.Ok)
             {
                 writer.Write(Count);
-                writer.Write(HowCommitted);
+                writer.Write((int)HowCommitted);
                 writer.Write(WriteVerifier);
             }
         }
@@ -81,6 +82,11 @@ namespace DiscUtils.Nfs
                 && other.Count == Count
                 && other.WriteVerifier == WriteVerifier
                 && other.HowCommitted == HowCommitted;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, CacheConsistency, Count, WriteVerifier, HowCommitted);
         }
     }
 }

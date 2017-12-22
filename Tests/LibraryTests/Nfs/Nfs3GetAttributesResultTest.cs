@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,49 +20,42 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Nfs;
 using System;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    public sealed class Nfs3ModifyResult : Nfs3CallResult
+    public class Nfs3GetAttributesResultTest
     {
-        public Nfs3ModifyResult()
+        [Fact]
+        public void RoundTripTest()
         {
-        }
-
-        internal Nfs3ModifyResult(XdrDataReader reader)
-        {
-            Status = (Nfs3Status)reader.ReadInt32();
-            CacheConsistency = new Nfs3WeakCacheConsistency(reader);
-        }
-
-        public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
-
-        internal override void Write(XdrDataWriter writer)
-        {
-            writer.Write((int)Status);
-            CacheConsistency.Write(writer);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as Nfs3ModifyResult);
-        }
-
-        public bool Equals(Nfs3ModifyResult other)
-        {
-            if(other == null)
+            Nfs3GetAttributesResult result = new Nfs3GetAttributesResult()
             {
-                return false;
+                Attributes = new Nfs3FileAttributes()
+                {
+                    AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3))
+                },
+                Status = Nfs3Status.Ok
+            };
+
+            Nfs3GetAttributesResult clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                result.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3GetAttributesResult(reader);
             }
 
-            return other.Status == Status
-                && object.Equals(other.CacheConsistency, CacheConsistency);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Status, CacheConsistency);
+            Assert.Equal(result, clone);
         }
     }
 }

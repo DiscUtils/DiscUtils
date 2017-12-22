@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,19 +20,41 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
+using DiscUtils.Nfs;
+using System.Collections.Generic;
+using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    [Flags]
-    public enum Nfs3AccessPermissions
+    public class Nfs3ExportTest
     {
-        None = 0x00,
-        Read = 0x01,
-        Lookup = 0x02,
-        Modify = 0x04,
-        Extend = 0x08,
-        Delete = 0x10,
-        Execute = 0x20
+        [Fact]
+        public void RoundTripTest()
+        {
+            Nfs3Export export = new Nfs3Export()
+            {
+                DirPath = "test",
+                Groups = new List<string>()
+                  {
+                      "Group1",
+                      "Group2"
+                  }
+            };
+
+            Nfs3Export clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                export.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3Export(reader);
+            }
+
+            Assert.Equal(export, clone);
+        }
     }
 }
