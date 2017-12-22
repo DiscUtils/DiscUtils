@@ -35,7 +35,7 @@ namespace DiscUtils.Nfs
             if (Status == Nfs3Status.Ok)
             {
                 Count = reader.ReadInt32();
-                HowCommitted = reader.ReadInt32();
+                HowCommitted = (Nfs3StableHow)reader.ReadInt32();
                 WriteVerifier = reader.ReadUInt64();
             }
         }
@@ -48,7 +48,7 @@ namespace DiscUtils.Nfs
 
         public int Count { get; set; }
 
-        public int HowCommitted { get; set; }
+        public Nfs3StableHow HowCommitted { get; set; }
 
         public ulong WriteVerifier { get; set; }
 
@@ -59,7 +59,7 @@ namespace DiscUtils.Nfs
             if(Status == Nfs3Status.Ok)
             {
                 writer.Write(Count);
-                writer.Write(HowCommitted);
+                writer.Write((int)HowCommitted);
                 writer.Write(WriteVerifier);
             }
         }
