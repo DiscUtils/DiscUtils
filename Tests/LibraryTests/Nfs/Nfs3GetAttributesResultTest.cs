@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils;
 using DiscUtils.Nfs;
 using System;
 using System.IO;
@@ -28,46 +27,23 @@ using Xunit;
 
 namespace LibraryTests.Nfs
 {
-    public class Nfs3WriteResultTest
+    public class Nfs3GetAttributesResultTest
     {
         [Fact]
         public void RoundTripTest()
         {
-            Nfs3WriteResult result = new Nfs3WriteResult()
+            Nfs3GetAttributesResult result = new Nfs3GetAttributesResult()
             {
-                CacheConsistency = new Nfs3WeakCacheConsistency()
+                Attributes = new Nfs3FileAttributes()
                 {
-                    Before = new Nfs3WeakCacheConsistencyAttr()
-                    {
-                        ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
-                        ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
-                        Size = 3
-                    },
-                    After = new Nfs3FileAttributes()
-                    {
-                        AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
-                        BytesUsed = 2,
-                        ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
-                        FileId = 3,
-                        FileSystemId = 4,
-                        Gid = 5,
-                        LinkCount = 6,
-                        Mode = UnixFilePermissions.GroupAll,
-                        ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3)),
-                        RdevMajor = 7,
-                        RdevMinor = 8,
-                        Size = 9,
-                        Type = Nfs3FileType.NamedPipe,
-                        Uid = 10
-                    }
+                    AccessTime = new Nfs3FileTime(new DateTime(2017, 1, 1)),
+                    ChangeTime = new Nfs3FileTime(new DateTime(2017, 1, 2)),
+                    ModifyTime = new Nfs3FileTime(new DateTime(2017, 1, 3))
                 },
-                Count = 1,
-                HowCommitted = Nfs3StableHow.Unstable,
-                Status = Nfs3Status.Ok,
-                WriteVerifier = 3
+                Status = Nfs3Status.Ok
             };
 
-            Nfs3WriteResult clone = null;
+            Nfs3GetAttributesResult clone = null;
 
             using (MemoryStream stream = new MemoryStream())
             {
@@ -76,7 +52,7 @@ namespace LibraryTests.Nfs
 
                 stream.Position = 0;
                 XdrDataReader reader = new XdrDataReader(stream);
-                clone = new Nfs3WriteResult(reader);
+                clone = new Nfs3GetAttributesResult(reader);
             }
 
             Assert.Equal(result, clone);
