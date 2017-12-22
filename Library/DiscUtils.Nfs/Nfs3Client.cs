@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiscUtils.Nfs
 {
@@ -32,11 +33,16 @@ namespace DiscUtils.Nfs
         private readonly Nfs3Mount _mountClient;
         private readonly Nfs3 _nfsClient;
 
-        private RpcClient _rpcClient;
+        private IRpcClient _rpcClient;
 
         public Nfs3Client(string address, RpcCredentials credentials, string mountPoint)
+            : this(new RpcClient(address, credentials), mountPoint)
         {
-            _rpcClient = new RpcClient(address, credentials);
+        }
+
+        public Nfs3Client(IRpcClient rpcClient, string mountPoint)
+        {
+            _rpcClient = rpcClient;
             _mountClient = new Nfs3Mount(_rpcClient);
             RootHandle = _mountClient.Mount(mountPoint).FileHandle;
 

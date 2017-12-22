@@ -34,7 +34,7 @@ namespace DiscUtils.Nfs
         public const int CreateVerifierSize = 8;
         public const int WriteVerifierSize = 8;
 
-        public Nfs3(RpcClient client)
+        public Nfs3(IRpcClient client)
             : base(client) {}
 
         public override int Identifier
