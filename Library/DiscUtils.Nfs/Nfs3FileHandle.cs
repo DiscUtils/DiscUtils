@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
+    public sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
     {
         public Nfs3FileHandle()
         {

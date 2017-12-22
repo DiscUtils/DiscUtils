@@ -24,9 +24,9 @@ namespace DiscUtils.Nfs
 {
     using System;
 
-    internal sealed class Nfs3FileSystemStat
+    public sealed class Nfs3FileSystemStat
     {
-        public Nfs3FileSystemStat(XdrDataReader reader)
+        internal Nfs3FileSystemStat(XdrDataReader reader)
         {
             TotalSizeBytes = reader.ReadUInt64();
             FreeSpaceBytes = reader.ReadUInt64();

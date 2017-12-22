@@ -24,9 +24,9 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3DirectoryEntry
+    public sealed class Nfs3DirectoryEntry
     {
-        public Nfs3DirectoryEntry(XdrDataReader reader)
+        internal Nfs3DirectoryEntry(XdrDataReader reader)
         {
             FileId = reader.ReadUInt64();
             Name = reader.ReadString();
@@ -56,7 +56,7 @@ namespace DiscUtils.Nfs
 
         public string Name { get; set; }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(FileId);
             writer.Write(Name);

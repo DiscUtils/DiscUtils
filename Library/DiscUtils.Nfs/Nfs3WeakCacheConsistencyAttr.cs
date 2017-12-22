@@ -24,9 +24,9 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3WeakCacheConsistencyAttr
+    public sealed class Nfs3WeakCacheConsistencyAttr
     {
-        public Nfs3WeakCacheConsistencyAttr(XdrDataReader reader)
+        internal Nfs3WeakCacheConsistencyAttr(XdrDataReader reader)
         {
             Size = reader.ReadInt64();
             ModifyTime = new Nfs3FileTime(reader);
@@ -43,7 +43,7 @@ namespace DiscUtils.Nfs
 
         public long Size { get; set; }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(Size);
             ModifyTime.Write(writer);

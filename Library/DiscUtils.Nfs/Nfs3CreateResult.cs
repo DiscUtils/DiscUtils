@@ -24,9 +24,9 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3CreateResult : Nfs3CallResult
+    public class Nfs3CreateResult : Nfs3CallResult
     {
-        public Nfs3CreateResult(XdrDataReader reader)
+        internal Nfs3CreateResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (Status == Nfs3Status.Ok)

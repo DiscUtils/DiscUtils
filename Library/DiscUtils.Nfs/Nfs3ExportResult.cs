@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -21,48 +21,74 @@
 //
 
 using System;
+using System.Collections.Generic;
 
 namespace DiscUtils.Nfs
 {
-    public sealed class Nfs3ModifyResult : Nfs3CallResult
+    public sealed class Nfs3ExportResult : Nfs3CallResult
     {
-        public Nfs3ModifyResult()
+        internal Nfs3ExportResult(XdrDataReader reader)
+        {
+            Exports = new List<Nfs3Export>();
+            while (reader.ReadBool())
+            {
+                Exports.Add(new Nfs3Export(reader));
+            }
+        }
+
+        public Nfs3ExportResult()
         {
         }
 
-        internal Nfs3ModifyResult(XdrDataReader reader)
-        {
-            Status = (Nfs3Status)reader.ReadInt32();
-            CacheConsistency = new Nfs3WeakCacheConsistency(reader);
-        }
-
-        public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
+        public List<Nfs3Export> Exports { get; set; }
 
         internal override void Write(XdrDataWriter writer)
         {
-            writer.Write((int)Status);
-            CacheConsistency.Write(writer);
+            foreach (var export in Exports)
+            {
+                writer.Write(true);
+                export.Write(writer);
+            }
+
+            writer.Write(false);
         }
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as Nfs3ModifyResult);
+            return Equals(obj as Nfs3ExportResult);
         }
 
-        public bool Equals(Nfs3ModifyResult other)
+        public bool Equals(Nfs3ExportResult other)
         {
-            if(other == null)
+            if (other == null)
             {
                 return false;
             }
 
-            return other.Status == Status
-                && object.Equals(other.CacheConsistency, CacheConsistency);
+            if (other.Exports == null || Exports == null)
+            {
+                return false;
+            }
+
+            if (other.Exports.Count != Exports.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Exports.Count; i++)
+            {
+                if (!object.Equals(other.Exports[i], Exports[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Status, CacheConsistency);
+            return HashCode.Combine(Exports);
         }
     }
 }

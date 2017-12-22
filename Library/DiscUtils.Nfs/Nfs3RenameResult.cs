@@ -22,9 +22,9 @@
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3RenameResult : Nfs3CallResult
+    public sealed class Nfs3RenameResult : Nfs3CallResult
     {
-        public Nfs3RenameResult(XdrDataReader reader)
+        internal Nfs3RenameResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             FromDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);

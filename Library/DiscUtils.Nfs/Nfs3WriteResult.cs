@@ -26,9 +26,9 @@ using System.Linq;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3WriteResult : Nfs3CallResult
+    public sealed class Nfs3WriteResult : Nfs3CallResult
     {
-        public Nfs3WriteResult(XdrDataReader reader)
+        internal Nfs3WriteResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             CacheConsistency = new Nfs3WeakCacheConsistency(reader);
@@ -52,7 +52,7 @@ namespace DiscUtils.Nfs
 
         public ulong WriteVerifier { get; set; }
 
-        public override void Write(XdrDataWriter writer)
+        internal override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
             CacheConsistency.Write(writer);

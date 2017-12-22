@@ -25,7 +25,7 @@ using System;
 namespace DiscUtils.Nfs
 {
     [Flags]
-    internal enum Nfs3AccessPermissions
+    public enum Nfs3AccessPermissions
     {
         None = 0x00,
         Read = 0x01,

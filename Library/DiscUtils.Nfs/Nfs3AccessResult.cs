@@ -22,9 +22,9 @@
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3AccessResult : Nfs3CallResult
+    public sealed class Nfs3AccessResult : Nfs3CallResult
     {
-        public Nfs3AccessResult(XdrDataReader reader)
+        internal Nfs3AccessResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (reader.ReadBool())

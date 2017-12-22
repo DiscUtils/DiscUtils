@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3FileTime
+    public sealed class Nfs3FileTime
     {
         private const long TicksPerSec = 10 * 1000 * 1000; // 10 million ticks per sec
         private const long TicksPerNanoSec = 100; // 1 tick = 100 ns
@@ -34,7 +34,7 @@ namespace DiscUtils.Nfs
 
         private readonly uint _seconds;
 
-        public Nfs3FileTime(XdrDataReader reader)
+        internal Nfs3FileTime(XdrDataReader reader)
         {
             _seconds = reader.ReadUInt32();
             _nseconds = reader.ReadUInt32();
@@ -53,24 +53,12 @@ namespace DiscUtils.Nfs
             _nseconds = nseconds;
         }
 
-        ////public Nfs3FileTime(TimeSpan timeSpan)
-        ////{
-        ////    long ticks = timeSpan.Ticks;
-        ////    _seconds = (uint)(ticks / TicksPerSec);
-        ////    _nseconds = (uint)((ticks % TicksPerSec) * TicksPerNanoSec);
-        ////}
-
         public DateTime ToDateTime()
         {
             return new DateTime(_seconds * TicksPerSec + _nseconds / TicksPerNanoSec + nfsEpoch.Ticks);
         }
 
-        ////public TimeSpan ToTimeSpan()
-        ////{
-        ////    return new TimeSpan(_seconds * TicksPerSec + (_nseconds / TicksPerNanoSec));
-        ////}
-
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(_seconds);
             writer.Write(_nseconds);

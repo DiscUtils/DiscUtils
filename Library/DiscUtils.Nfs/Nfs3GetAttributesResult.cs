@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3GetAttributesResult : Nfs3CallResult
+    public class Nfs3GetAttributesResult : Nfs3CallResult
     {
         public Nfs3GetAttributesResult()
         {

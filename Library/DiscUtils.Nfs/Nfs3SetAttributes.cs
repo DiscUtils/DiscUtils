@@ -24,13 +24,13 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3SetAttributes
+    public sealed class Nfs3SetAttributes
     {
         public Nfs3SetAttributes()
         {
         }
 
-        public Nfs3SetAttributes(XdrDataReader reader)
+        internal Nfs3SetAttributes(XdrDataReader reader)
         {
             SetMode = reader.ReadBool();
 
@@ -93,7 +93,7 @@ namespace DiscUtils.Nfs
 
         public uint Uid { get; set; }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(SetMode);
             if (SetMode)

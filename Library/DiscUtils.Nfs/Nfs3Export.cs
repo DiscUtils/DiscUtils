@@ -20,11 +20,12 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3Export
+    public sealed class Nfs3Export
     {
         internal Nfs3Export(XdrDataReader reader)
         {
@@ -39,8 +40,63 @@ namespace DiscUtils.Nfs
             Groups = groups;
         }
 
+        public Nfs3Export()
+        {
+        }
+
         public string DirPath { get; set; }
 
         public List<string> Groups { get; set; }
+
+        internal void Write(XdrDataWriter writer)
+        {
+            writer.Write(DirPath);
+
+            foreach (var group in Groups)
+            {
+                writer.Write(true);
+                writer.Write(group);
+            }
+
+            writer.Write(false);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3Export);
+        }
+
+        public bool Equals(Nfs3Export other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (!string.Equals(other.DirPath, DirPath))
+            {
+                return false;
+            }
+
+            if (other.Groups == null || Groups == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Groups.Count; i++)
+            {
+                if (!string.Equals(other.Groups[i], Groups[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(DirPath, Groups);
+        }
     }
 }

@@ -1,6 +1,6 @@
 namespace DiscUtils.Nfs
 {
-    internal enum RpcAuthFlavour
+    public enum RpcAuthFlavour : int
     {
         Null = 0,
         Unix = 1,

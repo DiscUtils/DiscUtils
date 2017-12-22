@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3FileAttributes
+    public sealed class Nfs3FileAttributes
     {
         public Nfs3FileTime AccessTime;
         public long BytesUsed;
@@ -45,7 +45,7 @@ namespace DiscUtils.Nfs
         {
         }
 
-        public Nfs3FileAttributes(XdrDataReader reader)
+        internal Nfs3FileAttributes(XdrDataReader reader)
         {
             Type = (Nfs3FileType)reader.ReadInt32();
             Mode = (UnixFilePermissions)reader.ReadInt32();
@@ -63,7 +63,7 @@ namespace DiscUtils.Nfs
             ChangeTime = new Nfs3FileTime(reader);
         }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write((int)Type);
             writer.Write((int)Mode);

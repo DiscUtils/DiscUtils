@@ -27,9 +27,9 @@ using System.Linq;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3ReadResult : Nfs3CallResult
+    public sealed class Nfs3ReadResult : Nfs3CallResult
     {
-        public Nfs3ReadResult(XdrDataReader reader)
+        internal Nfs3ReadResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (reader.ReadBool())
@@ -57,7 +57,7 @@ namespace DiscUtils.Nfs
 
         public Nfs3FileAttributes FileAttributes { get; set; }
 
-        public override void Write(XdrDataWriter writer)
+        internal override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
 

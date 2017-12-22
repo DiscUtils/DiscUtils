@@ -27,11 +27,11 @@ namespace DiscUtils.Nfs
     /// <summary>
     /// Base class for all NFS result structures.
     /// </summary>
-    internal abstract class Nfs3CallResult
+    public abstract class Nfs3CallResult
     {
         public Nfs3Status Status { get; set; }
 
-        public virtual void Write(XdrDataWriter writer)
+        internal virtual void Write(XdrDataWriter writer)
         {
             throw new NotSupportedException();
         }

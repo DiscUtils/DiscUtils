@@ -24,13 +24,13 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3LookupResult : Nfs3CallResult
+    public sealed class Nfs3LookupResult : Nfs3CallResult
     {
         public Nfs3LookupResult()
         {
         }
 
-        public Nfs3LookupResult(XdrDataReader reader)
+        internal Nfs3LookupResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (Status == Nfs3Status.Ok)
@@ -54,7 +54,7 @@ namespace DiscUtils.Nfs
 
         public Nfs3FileHandle ObjectHandle { get; set; }
 
-        public override void Write(XdrDataWriter writer)
+        internal override void Write(XdrDataWriter writer)
         {
             writer.Write((int)this.Status);
 
