@@ -131,7 +131,7 @@ namespace DiscUtils.Nfs
             handle.Write(writer);
             writer.Write(position);
             writer.Write(count);
-            writer.Write(0); // UNSTABLE
+            writer.Write((int)Nfs3StableHow.Unstable);
             writer.WriteBuffer(buffer, bufferOffset, count);
 
             RpcReply reply = DoSend(ms);
