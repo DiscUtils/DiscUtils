@@ -20,17 +20,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#if !NETSTANDARD1_5
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3Server
+    public class Nfs3Server
     {
         private const int NfsPort = 111;
 
@@ -41,7 +38,11 @@ namespace DiscUtils.Nfs
 
             while (true)
             {
+#if NETSTANDARD1_5
+                var socket = listener.AcceptSocketAsync().GetAwaiter().GetResult();
+#else
                 var socket = listener.AcceptSocket();
+#endif
                 ClientLoop(socket);
             }
         }
@@ -82,19 +83,12 @@ namespace DiscUtils.Nfs
                             case MountProc3.Mnt:
                                 string dirPath = reader.ReadString();
 
-                                responseHeader = RpcMessageHeader.Accepted(transactionId);
+                                response = Mount(dirPath);
+                                break;
 
-                                response = new Nfs3MountResult()
-                                {
-                                    Status = Nfs3Status.Ok,
-                                    FileHandle = new Nfs3FileHandle() { Value = new byte[] { 0x01 } },
-                                    AuthFlavours = new List<RpcAuthFlavour>()
-                                    {
-                                        RpcAuthFlavour.Null,
-                                        RpcAuthFlavour.Unix
-                                    }
-                                };
+                            case MountProc3.Export:
 
+                                response = Exports();
                                 break;
 
                             default:
@@ -161,7 +155,7 @@ namespace DiscUtils.Nfs
                                     var handle = new Nfs3FileHandle(reader);
                                     var position = reader.ReadInt64();
                                     var count = reader.ReadInt32();
-                                    reader.ReadInt32(); // UNSTABLE
+                                    var howRead = (Nfs3StableHow)reader.ReadInt32();
                                     var buffer = reader.ReadBuffer();
 
                                     response = Write(handle, position, buffer, count);
@@ -281,7 +275,7 @@ namespace DiscUtils.Nfs
             throw new NotImplementedException();
         }
 
-        protected virtual Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
+        protected Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
         {
             throw new NotImplementedException();
         }
@@ -351,6 +345,15 @@ namespace DiscUtils.Nfs
         {
             throw new NotImplementedException();
         }
+
+        protected virtual Nfs3MountResult Mount(string dirPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual Nfs3ExportResult Exports()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
-#endif

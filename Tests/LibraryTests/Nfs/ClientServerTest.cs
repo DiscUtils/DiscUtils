@@ -22,7 +22,9 @@
 
 using DiscUtils.Nfs;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -39,13 +41,85 @@ namespace LibraryTests.Nfs
             var rpcClient = new MockRpcClient(serverToClient, clientToServer);
             var rpcServer = new MockRpcClient(clientToServer, serverToClient);
 
-            Nfs3Server server = new Nfs3Server();
+            Nfs3Server server = new Nfs3FileServer(
+                new Dictionary<string, string>()
+                {
+                    { "share", Path.GetFullPath("Nfs/Share")}
+                });
+
             var serverLoop = Task.Run(() => server.ClientLoop(rpcServer.GetTransport(0, 0)));
 
-            Nfs3Client client = new Nfs3Client(rpcClient, "/mnt");
+            // Test: Mount a share
+            Nfs3Client client = new Nfs3Client(rpcClient, "share");
 
+            // Test: Read a directory
             var entries = client.ReadDirectory(client.RootHandle, silentFail: false).ToArray();
-            var result = client.Read(entries[0].FileHandle, 0, (int)entries[0].FileAttributes.Size);
+            Assert.Equal(2, entries.Length);
+            Assert.Equal("Child", entries[0].Name);
+            Assert.Equal("MyFile.txt", entries[1].Name);
+
+            // Test: Read a file
+            var readResult = client.Read(entries[1].FileHandle, 0, (int)entries[1].FileAttributes.Size);
+            Assert.Equal(Nfs3Status.Ok, readResult.Status);
+            Assert.Equal("Hello, World!", Encoding.UTF8.GetString(readResult.Data));
+
+            // Test: Create a directory in a child node
+            if (Directory.Exists(@"Nfs/Share/Child/NewDir"))
+            {
+                Directory.Delete(@"Nfs/Share/Child/NewDir");
+            }
+
+            var makeDirectoryResult = client.MakeDirectory(entries[0].FileHandle, "NewDir", new Nfs3SetAttributes()
+            {
+                SetAccessTime = Nfs3SetTimeMethod.ServerTime,
+                SetModifyTime = Nfs3SetTimeMethod.ServerTime,
+                SetMode = false,
+                SetSize = false,
+                SetGid = false,
+                SetUid = false,
+            });
+
+            Assert.True(Directory.Exists(@"Nfs/Share/Child/NewDir"));
+
+            // Test: Delete a directory
+            client.RemoveDirectory(entries[0].FileHandle, "NewDir");
+            Assert.False(Directory.Exists(@"Nfs/Share/Child/NewDir"));
+
+            // Test: Create, Update, Read, Delete a file
+            if (File.Exists(@"Nfs/Share/Child/NewFile"))
+            {
+                File.Delete(@"Nfs/Share/Child/NewFile");
+            }
+
+            var createResult = client.Create(entries[0].FileHandle, "NewFile", true, new Nfs3SetAttributes()
+            {
+                SetAccessTime = Nfs3SetTimeMethod.ServerTime,
+                SetModifyTime = Nfs3SetTimeMethod.ServerTime,
+                SetMode = false,
+                SetSize = false,
+                SetGid = false,
+                SetUid = false,
+            });
+
+            Assert.True(File.Exists(@"Nfs/Share/Child/NewFile"));
+
+            byte[] dataToWrite = Encoding.UTF8.GetBytes("Alors on dance");
+            client.Write(createResult, 0, dataToWrite, 0, dataToWrite.Length);
+
+            Assert.Equal("Alors on dance", File.ReadAllText(@"Nfs/Share/Child/NewFile"));
+
+            readResult = client.Read(createResult, 0, dataToWrite.Length);
+            Assert.Equal("Alors on dance", Encoding.UTF8.GetString(readResult.Data));
+
+            client.Remove(entries[0].FileHandle, "NewFile");
+            Assert.False(File.Exists(@"Nfs/Share/Child/NewFile"));
+
+            // Lookup test
+            var lookupResult = client.Lookup(client.RootHandle, "Child");
+            Assert.Equal(entries[0].FileHandle, lookupResult);
+
+            // Get attributes
+            var getAttributes = client.GetAttributes(lookupResult);
         }
     }
 }
