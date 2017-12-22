@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 #if !NET20
 using System.Linq;
 #endif
@@ -81,6 +82,11 @@ namespace DiscUtils.Nfs
                 && other.Count == Count
                 && other.WriteVerifier == WriteVerifier
                 && other.HowCommitted == HowCommitted;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, CacheConsistency, Count, WriteVerifier, HowCommitted);
         }
     }
 }

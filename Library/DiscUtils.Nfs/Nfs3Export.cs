@@ -27,7 +27,7 @@ namespace DiscUtils.Nfs
 {
     public sealed class Nfs3Export
     {
-        internal Nfs3Export(XdrDataReader reader)
+        public Nfs3Export(XdrDataReader reader)
         {
             DirPath = reader.ReadString(Nfs3Mount.MaxPathLength);
 
