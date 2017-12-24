@@ -36,7 +36,7 @@ namespace DiscUtils.Nfs
             _serverAddress = address;
             Credentials = credential;
             _nextTransaction = (uint)new Random().Next();
-            _transports[PortMapper.ProgramIdentifier] = new RpcTcpTransport(address, 111);
+            _transports[PortMap2.ProgramIdentifier] = new RpcTcpTransport(address, 111);
         }
 
         public RpcCredentials Credentials { get; }
@@ -64,8 +64,8 @@ namespace DiscUtils.Nfs
             RpcTcpTransport transport;
             if (!_transports.TryGetValue(program, out transport))
             {
-                PortMapper pm = new PortMapper(this);
-                int port = pm.GetPort(program, version, PortMapperProtocol.Tcp);
+                PortMap2 pm = new PortMap2(this);
+                int port = pm.GetPort(program, version, PortMap2Protocol.Tcp);
                 transport = new RpcTcpTransport(_serverAddress, port);
                 _transports[program] = transport;
             }

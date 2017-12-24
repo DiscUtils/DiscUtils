@@ -63,6 +63,11 @@ namespace DiscUtils.Nfs
             return new RpcReply { Header = header, BodyReader = reader };
         }
 
+        protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, PortMapProc2 procedure)
+        {
+            return StartCallMessage(ms, credentials, (int)procedure);
+        }
+
         protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, MountProc3 procedure)
         {
             return StartCallMessage(ms, credentials, (int)procedure);
