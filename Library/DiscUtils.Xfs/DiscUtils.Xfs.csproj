@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils XFS</Description>
-    <VersionPrefix>0.13.0-alpha</VersionPrefix>
+    <AssemblyTitle>DiscUtils.Xfs</AssemblyTitle>
     <Authors>Bianco Veigel</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Xfs</AssemblyName>
