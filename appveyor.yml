@@ -7,12 +7,12 @@ build_script:
 
     Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
 - cmd: REM Build
-- cmd: msbuild /t:Build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal /p:VersionSuffix=alpha-r%APPVEYOR_BUILD_NUMBER%
+- cmd: msbuild /t:Build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal /p:VersionSuffix=alpha%APPVEYOR_BUILD_NUMBER%
 test_script:
 - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
 - cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx
 install:
-- msbuild /t:Restore /Verbosity:Minimal /p:VersionSuffix=alpha-r%APPVEYOR_BUILD_NUMBER%
+- msbuild /t:Restore /Verbosity:Minimal /p:VersionSuffix=alpha%APPVEYOR_BUILD_NUMBER%
 artifacts:
 - path: '**\*.nupkg'
 deploy:
