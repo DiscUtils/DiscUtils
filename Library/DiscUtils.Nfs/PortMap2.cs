@@ -24,12 +24,12 @@ using System.IO;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class PortMapper : RpcProgram
+    internal sealed class PortMap2 : RpcProgram
     {
         public const int ProgramIdentifier = 100000;
         public const int ProgramVersion = 2;
 
-        public PortMapper(RpcClient client)
+        public PortMap2(RpcClient client)
             : base(client) {}
 
         public override int Identifier
@@ -42,18 +42,23 @@ namespace DiscUtils.Nfs
             get { return ProgramVersion; }
         }
 
-        public int GetPort(int program, int version, PortMapperProtocol protocol)
+        public int GetPort(int program, int version, PortMap2Protocol protocol)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Lookup);
-            writer.Write(program);
-            writer.Write(version);
-            writer.Write((uint)protocol);
-            writer.Write((uint)0);
+            XdrDataWriter writer = StartCallMessage(ms, null, PortMapProc2.GetPort);
+
+            new PortMap2Mapping()
+            {
+                Program = program,
+                Version = version,
+                Protocol = protocol,
+                Port = 0
+            }.Write(writer);
 
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
+                var port = new PortMap2Port(reply.BodyReader);
                 return (int)reply.BodyReader.ReadUInt32();
             }
             throw new RpcException(reply.Header.ReplyHeader);
