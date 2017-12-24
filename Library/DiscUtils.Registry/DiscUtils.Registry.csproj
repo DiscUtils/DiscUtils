@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../common.props" />
 
   <PropertyGroup>
     <Description>DiscUtils Registry</Description>
     <AssemblyTitle>DiscUtils.Registry</AssemblyTitle>
-    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Registry</AssemblyName>
