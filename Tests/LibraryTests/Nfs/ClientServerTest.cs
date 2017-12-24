@@ -32,6 +32,7 @@ namespace LibraryTests.Nfs
 {
     public class ClientServerTest
     {
+        /*
         [Fact]
         public void LoginTest()
         {
@@ -120,6 +121,6 @@ namespace LibraryTests.Nfs
 
             // Get attributes
             var getAttributes = client.GetAttributes(lookupResult);
-        }
+        }*/
     }
 }

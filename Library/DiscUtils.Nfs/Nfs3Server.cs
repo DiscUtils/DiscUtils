@@ -21,243 +21,198 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
 namespace DiscUtils.Nfs
 {
-    public class Nfs3Server
+    public class Nfs3Server : IRpcProgram
     {
-        private const int NfsPort = 111;
+        public int ProgramIdentifier => Nfs3.ProgramIdentifier;
 
-        public void Run()
+        public int ProgramVersion => Nfs3.ProgramVersion;
+
+        public IEnumerable<int> Procedures
+        { get; } = new int[]
         {
-            TcpListener listener = new TcpListener(IPAddress.Any, NfsPort);
-            listener.Start();
+            (int)NfsProc3.Null,
+            (int)NfsProc3.GetAttr,
+            (int)NfsProc3.SetAttr,
+            (int)NfsProc3.Lookup,
+            (int)NfsProc3.Access,
+            (int)NfsProc3.Read,
+            (int)NfsProc3.Write,
+            (int)NfsProc3.Create,
+            (int)NfsProc3.Mkdir,
+            (int)NfsProc3.Remove,
+            (int)NfsProc3.Rmdir,
+            (int)NfsProc3.Rename,
+            // (int)NfsProc3.ReadDir,
+            (int)NfsProc3.ReadDirPlus,
+            (int)NfsProc3.Fsinfo,
+            (int)NfsProc3.Fsstat,
+            (int)NfsProc3.Pathconf,
+        };
 
-            while (true)
+        public IRpcObject Invoke(RpcCallHeader header, XdrDataReader reader)
+        {
+            switch ((NfsProc3)header.Proc)
             {
-#if NETSTANDARD1_5
-                var socket = listener.AcceptSocketAsync().GetAwaiter().GetResult();
-#else
-                var socket = listener.AcceptSocket();
-#endif
-                ClientLoop(socket);
+                case NfsProc3.Null:
+                    {
+                        // Nothing to do here.
+                        return null;
+                    }
+
+                case NfsProc3.GetAttr:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+
+                        return GetAttributes(handle);
+                    }
+
+                case NfsProc3.SetAttr:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+                        var newAttributes = new Nfs3FileAttributes(reader);
+                        reader.ReadBool();
+
+                        return SetAttributes(handle, newAttributes);
+                    }
+
+                case NfsProc3.Lookup:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+                        var name = reader.ReadString();
+
+                        return Lookup(handle, name);
+                    }
+
+                case NfsProc3.Access:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+                        var requested = (Nfs3AccessPermissions)reader.ReadInt32();
+
+                        return Access(handle, requested);
+                    }
+
+                case NfsProc3.Read:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+                        var position = reader.ReadInt64();
+                        var count = reader.ReadInt32();
+
+                        return Read(handle, position, count);
+                    }
+
+                case NfsProc3.Write:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+                        var position = reader.ReadInt64();
+                        var count = reader.ReadInt32();
+                        var howRead = (Nfs3StableHow)reader.ReadInt32();
+                        var buffer = reader.ReadBuffer();
+
+                        return Write(handle, position, buffer, count);
+                    }
+
+                case NfsProc3.Create:
+                    {
+                        var dirHandle = new Nfs3FileHandle(reader);
+                        var name = reader.ReadString();
+                        var createNew = reader.ReadInt32() == 1 ? true : false;
+                        var attributes = new Nfs3SetAttributes(reader);
+
+                        return Create(dirHandle, name, createNew, attributes);
+                    }
+
+                case NfsProc3.Mkdir:
+                    {
+                        var dirHandle = new Nfs3FileHandle(reader);
+                        var name = reader.ReadString();
+                        var attributes = new Nfs3SetAttributes(reader);
+
+                        return MakeDirectory(dirHandle, name, attributes);
+                    }
+
+                case NfsProc3.Remove:
+                    {
+                        var dirHandle = new Nfs3FileHandle(reader);
+                        var name = reader.ReadString();
+
+                        return Remove(dirHandle, name);
+                    }
+
+                case NfsProc3.Rmdir:
+                    {
+                        var dirHandle = new Nfs3FileHandle(reader);
+                        var name = reader.ReadString();
+
+                        return RemoveDirectory(dirHandle, name);
+                    }
+
+                case NfsProc3.Rename:
+                    {
+                        var fromDirHandle = new Nfs3FileHandle(reader);
+                        var fromName = reader.ReadString();
+                        var toDirHandle = new Nfs3FileHandle(reader);
+                        var toName = reader.ReadString();
+
+                        return Rename(fromDirHandle, fromName, toDirHandle, toName);
+                    }
+
+                case NfsProc3.ReadDir:
+                    {
+                        var dir = new Nfs3FileHandle(reader);
+                        var cookie = reader.ReadUInt64();
+                        var cookieVerifier = reader.ReadUInt64();
+                        var count = reader.ReadUInt32();
+
+                        return ReadDir(dir, cookie, cookieVerifier, count);
+                    }
+
+                case NfsProc3.ReadDirPlus:
+                    {
+                        var dir = new Nfs3FileHandle(reader);
+                        var cookie = reader.ReadUInt64();
+                        var cookieVerifier = reader.ReadUInt64();
+                        var dirCount = reader.ReadUInt32();
+                        var maxCount = reader.ReadUInt32();
+
+                        return ReadDirPlus(dir, cookie, cookieVerifier, dirCount, maxCount);
+                    }
+
+                case NfsProc3.Fsinfo:
+                    {
+                        var fileHandle = new Nfs3FileHandle(reader);
+
+                        return FileSystemInfo(fileHandle);
+                    }
+
+                case NfsProc3.Fsstat:
+                    {
+                        var fileHandle = new Nfs3FileHandle(reader);
+
+                        return FileSystemStat(fileHandle);
+                    }
+
+                case NfsProc3.Pathconf:
+                    {
+                        var fileHandle = new Nfs3FileHandle(reader);
+
+                        return PathConf(fileHandle);
+                    }
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(header));
             }
         }
 
-        private void ClientLoop(Socket socket)
+        protected virtual Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
         {
-            using (socket)
-            using (NetworkStream stream = new NetworkStream(socket))
-            {
-                RpcStreamTransport transport = new RpcStreamTransport(stream);
-                ClientLoop(transport);
-            }
-        }
-
-        public void ClientLoop(IRpcTransport transport)
-        {
-            while (true)
-            {
-                // Read the client request
-                byte[] message = transport.Receive();
-
-                using (MemoryStream input = new MemoryStream(message))
-                using (MemoryStream output = new MemoryStream())
-                {
-                    XdrDataReader reader = new XdrDataReader(input);
-
-                    var transactionId = reader.ReadUInt32();
-                    var messageType = (RpcMessageType)reader.ReadInt32();
-
-                    RpcCallHeader header = new RpcCallHeader(reader);
-                    RpcMessageHeader responseHeader = RpcMessageHeader.Accepted(transactionId); ;
-                    Nfs3CallResult response = null;
-
-                    if (header.Program == Nfs3Mount.ProgramIdentifier)
-                    {
-                        switch ((MountProc3)header.Proc)
-                        {
-                            case MountProc3.Mnt:
-                                string dirPath = reader.ReadString();
-
-                                response = Mount(dirPath);
-                                break;
-
-                            case MountProc3.Export:
-
-                                response = Exports();
-                                break;
-
-                            default:
-                                throw new NotImplementedException();
-                        }
-                    }
-                    else
-                    {
-                        switch (header.Proc)
-                        {
-                            case NfsProc3.Null:
-                                // Nothing to do here.
-                                break;
-
-                            case NfsProc3.GetAttr:
-                                {
-                                    var handle = new Nfs3FileHandle(reader);
-                                    reader.ReadBool();
-
-                                    response = GetAttributes(handle);
-                                    break;
-                                }
-
-                            case NfsProc3.SetAttr:
-                                {
-                                    var handle = new Nfs3FileHandle(reader);
-                                    var newAttributes = new Nfs3FileAttributes(reader);
-                                    reader.ReadBool();
-
-                                    response = SetAttributes(handle, newAttributes);
-                                    break;
-                                }
-
-                            case NfsProc3.Lookup:
-                                {
-                                    var handle = new Nfs3FileHandle(reader);
-                                    var name = reader.ReadString();
-
-                                    response = Lookup(handle, name);
-                                    break;
-                                }
-
-                            case NfsProc3.Access:
-                                {
-                                    var handle = new Nfs3FileHandle(reader);
-                                    var requested = (Nfs3AccessPermissions)reader.ReadInt32();
-
-                                    response = Access(handle, requested);
-                                    break;
-                                }
-
-                            case NfsProc3.Read:
-                                {
-                                    var handle = new Nfs3FileHandle(reader);
-                                    var position = reader.ReadInt64();
-                                    var count = reader.ReadInt32();
-
-                                    response = Read(handle, position, count);
-                                    break;
-                                }
-
-                            case NfsProc3.Write:
-                                {
-                                    var handle = new Nfs3FileHandle(reader);
-                                    var position = reader.ReadInt64();
-                                    var count = reader.ReadInt32();
-                                    var howRead = (Nfs3StableHow)reader.ReadInt32();
-                                    var buffer = reader.ReadBuffer();
-
-                                    response = Write(handle, position, buffer, count);
-                                    break;
-                                }
-
-                            case NfsProc3.Create:
-                                {
-                                    var dirHandle = new Nfs3FileHandle(reader);
-                                    var name = reader.ReadString();
-                                    var createNew = reader.ReadInt32() == 1 ? true : false;
-                                    var attributes = new Nfs3SetAttributes(reader);
-
-                                    response = Create(dirHandle, name, createNew, attributes);
-                                    break;
-                                }
-
-                            case NfsProc3.Mkdir:
-                                {
-                                    var dirHandle = new Nfs3FileHandle(reader);
-                                    var name = reader.ReadString();
-                                    var attributes = new Nfs3SetAttributes(reader);
-
-                                    response = MakeDirectory(dirHandle, name, attributes);
-                                    break;
-                                }
-
-                            case NfsProc3.Remove:
-                                {
-                                    var dirHandle = new Nfs3FileHandle(reader);
-                                    var name = reader.ReadString();
-
-                                    response = Remove(dirHandle, name);
-                                    break;
-                                }
-
-                            case NfsProc3.Rmdir:
-                                {
-                                    var dirHandle = new Nfs3FileHandle(reader);
-                                    var name = reader.ReadString();
-
-                                    response = RemoveDirectory(dirHandle, name);
-                                    break;
-                                }
-
-                            case NfsProc3.Rename:
-                                {
-                                    var fromDirHandle = new Nfs3FileHandle(reader);
-                                    var fromName = reader.ReadString();
-                                    var toDirHandle = new Nfs3FileHandle(reader);
-                                    var toName = reader.ReadString();
-
-                                    response = Rename(fromDirHandle, fromName, toDirHandle, toName);
-                                    break;
-                                }
-
-                            case NfsProc3.Readdirplus:
-                                {
-                                    var dir = new Nfs3FileHandle(reader);
-                                    var cookie = reader.ReadUInt64();
-                                    var cookieVerifier = reader.ReadUInt64();
-                                    var dirCount = reader.ReadUInt32();
-                                    var maxCount = reader.ReadUInt32();
-
-                                    response = ReadDirPlus(dir, cookie, cookieVerifier, dirCount, maxCount);
-                                    break;
-                                }
-
-                            case NfsProc3.Fsinfo:
-                                {
-                                    var fileHandle = new Nfs3FileHandle(reader);
-
-                                    response = FileSystemInfo(fileHandle);
-                                    break;
-                                }
-
-                            case NfsProc3.Fsstat:
-                                {
-                                    var fileHandle = new Nfs3FileHandle(reader);
-
-                                    response = FileSystemStat(fileHandle);
-                                    break;
-                                }
-
-                            default:
-                                responseHeader = RpcMessageHeader.ProcedureUnavailable(transactionId);
-                                break;
-                        }
-                    }
-
-                    XdrDataWriter writer = new XdrDataWriter(output);
-
-                    responseHeader.Write(writer);
-
-                    if (response != null)
-                    {
-                        response.Write(writer);
-                    }
-
-                    transport.Send(output.ToArray());
-                }
-            }
+            throw new NotImplementedException();
         }
 
         protected virtual Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
@@ -275,7 +230,7 @@ namespace DiscUtils.Nfs
             throw new NotImplementedException();
         }
 
-        protected Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
+        protected virtual Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
         {
             throw new NotImplementedException();
         }
@@ -346,12 +301,7 @@ namespace DiscUtils.Nfs
             throw new NotImplementedException();
         }
 
-        protected virtual Nfs3MountResult Mount(string dirPath)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected virtual Nfs3ExportResult Exports()
+        protected virtual Nfs3PathConfResult PathConf(Nfs3FileHandle handle)
         {
             throw new NotImplementedException();
         }

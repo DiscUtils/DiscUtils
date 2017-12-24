@@ -34,43 +34,46 @@ namespace DiscUtils.Nfs
         private readonly Dictionary<Nfs3FileHandle, string> _handles = new Dictionary<Nfs3FileHandle, string>();
         private ulong handleIndex = 0;
 
+        public Dictionary<string, string> Mounts { get { return _mounts; } }
+
         public Nfs3FileServer(Dictionary<string, string> mounts)
         {
             _mounts = mounts;
         }
 
-        protected override Nfs3ExportResult Exports()
+        protected override Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
         {
-            return new Nfs3ExportResult()
+            if (!_handles.ContainsKey(dir))
             {
-                Exports = _mounts.Select(
-                     m => new Nfs3Export()
-                     {
-                         DirPath = m.Key,
-                         Groups = new List<string>()
-                     }).ToList(),
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected override Nfs3MountResult Mount(string dirPath)
-        {
-            if (_mounts.ContainsKey(dirPath))
-            {
-                return new Nfs3MountResult()
-                {
-                    AuthFlavours = new List<RpcAuthFlavour>() { RpcAuthFlavour.Null },
-                    FileHandle = GetHandle(_mounts[dirPath]),
-                    Status = Nfs3Status.Ok
-                };
-            }
-            else
-            {
-                return new Nfs3MountResult()
+                return new Nfs3ReadDirResult()
                 {
                     Status = Nfs3Status.NoSuchEntity
                 };
             }
+
+            var directory = _handles[dir];
+            List<Nfs3DirectoryEntry> dirEntries = new List<Nfs3DirectoryEntry>();
+
+            foreach (var file in Directory.GetFileSystemEntries(directory))
+            {
+                dirEntries.Add(new Nfs3DirectoryEntry()
+                {
+                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
+                    Name = Path.GetFileName(file),
+                    Cookie = 0,
+                    FileAttributes = null,
+                    FileHandle = null,
+                });
+            }
+
+            return new Nfs3ReadDirResult()
+            {
+                CookieVerifier = 0,
+                DirAttributes = GetAttributes(directory),
+                DirEntries = dirEntries,
+                Status = Nfs3Status.Ok,
+                Eof = true
+            };
         }
 
         protected override Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint dirCount, uint maxCount)
@@ -375,7 +378,52 @@ namespace DiscUtils.Nfs
             };
         }
 
-        private Nfs3FileHandle GetHandle(string path)
+        protected override Nfs3PathConfResult PathConf(Nfs3FileHandle handle)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3PathConfResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var path = _handles[handle];
+
+            return new Nfs3PathConfResult()
+            {
+                Status = Nfs3Status.Ok,
+                ObjectAttributes = GetAttributes(path),
+                CaseInsensitive = true,
+                CasePreserving = false,
+                ChownRestricted = true,
+                LinkMax = 128,
+                NameMax = 128,
+                NoTrunc = false
+            };
+        }
+
+        protected override Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3AccessResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var path = _handles[handle];
+
+            return new Nfs3AccessResult()
+            {
+                Status = Nfs3Status.Ok,
+                ObjectAttributes = GetAttributes(path),
+                Access = Nfs3AccessPermissions.Read | Nfs3AccessPermissions.Delete | Nfs3AccessPermissions.Modify
+            };
+        }
+
+        public Nfs3FileHandle GetHandle(string path)
         {
             if (!_handles.Values.Any(v => v == path))
             {
