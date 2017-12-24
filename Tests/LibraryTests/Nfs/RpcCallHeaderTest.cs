@@ -36,7 +36,7 @@ namespace LibraryTests.Nfs
                 Credentials = new RpcAuthentication()
                 {
                 },
-                Proc = NfsProc3.Commit,
+                Proc = (int)NfsProc3.Commit,
                 Program = 5,
                 RpcVersion = 6,
                 Verifier = new RpcAuthentication()
