@@ -26,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcCallHeader
+    public class RpcCallHeader
     {
         public RpcCallHeader()
         {
@@ -37,19 +37,14 @@ namespace DiscUtils.Nfs
             RpcVersion = reader.ReadUInt32();
             Program = reader.ReadUInt32();
             Version = reader.ReadUInt32();
-            Proc = (NfsProc3)reader.ReadUInt32();
+            Proc = reader.ReadInt32();
             Credentials = new RpcAuthentication(reader);
             Verifier = new RpcAuthentication(reader);
-
-            if (!Enum.IsDefined(typeof(NfsProc3), Proc))
-            {
-                throw new InvalidDataException();
-            }
         }
 
         public RpcAuthentication Credentials { get; set; }
 
-        public NfsProc3 Proc { get; set; }
+        public int Proc { get; set; }
 
         public uint Program { get; set; }
 

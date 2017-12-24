@@ -53,7 +53,7 @@ namespace DiscUtils.Nfs
 
         public ulong WriteVerifier { get; set; }
 
-        internal override void Write(XdrDataWriter writer)
+        public override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
             CacheConsistency.Write(writer);

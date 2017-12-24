@@ -96,7 +96,7 @@ namespace DiscUtils.Nfs
                     AcceptReply = new RpcAcceptedReplyHeader()
                     {
                         AcceptStatus = RpcAcceptStatus.Success,
-                        Verifier = new RpcAuthentication(new RpcUnixCredential(0, 0))
+                        Verifier = RpcAuthentication.Null()
                     }
                 }
             };

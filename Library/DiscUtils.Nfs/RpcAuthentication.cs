@@ -26,7 +26,7 @@ using System.IO;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcAuthentication
+    public class RpcAuthentication
     {
         private readonly byte[] _body;
         private readonly RpcAuthFlavour _flavour;

@@ -26,7 +26,7 @@ using DiscUtils.Streams;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class XdrDataReader : BigEndianDataReader
+    public sealed class XdrDataReader : BigEndianDataReader
     {
         public XdrDataReader(Stream stream)
             : base(stream) {}

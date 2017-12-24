@@ -26,7 +26,7 @@ using DiscUtils.Streams;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class XdrDataWriter : BigEndianDataWriter
+    public sealed class XdrDataWriter : BigEndianDataWriter
     {
         public XdrDataWriter(Stream stream)
             : base(stream) {}

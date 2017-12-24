@@ -48,7 +48,7 @@ namespace DiscUtils.Nfs
 
         public Nfs3FileSystemStat FileSystemStat { get; set; }
 
-        internal override void Write(XdrDataWriter writer)
+        public override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
 

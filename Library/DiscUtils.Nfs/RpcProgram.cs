@@ -65,10 +65,15 @@ namespace DiscUtils.Nfs
 
         protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, MountProc3 procedure)
         {
-            return StartCallMessage(ms, credentials, (NfsProc3)procedure);
+            return StartCallMessage(ms, credentials, (int)procedure);
         }
 
         protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, NfsProc3 procedure)
+        {
+            return StartCallMessage(ms, credentials, (int)procedure);
+        }
+
+        protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, int procedure)
         {
             XdrDataWriter writer = new XdrDataWriter(ms);
 

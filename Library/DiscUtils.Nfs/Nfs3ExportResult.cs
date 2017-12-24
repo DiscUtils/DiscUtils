@@ -42,7 +42,7 @@ namespace DiscUtils.Nfs
 
         public List<Nfs3Export> Exports { get; set; }
 
-        internal override void Write(XdrDataWriter writer)
+        public override void Write(XdrDataWriter writer)
         {
             foreach (var export in Exports)
             {

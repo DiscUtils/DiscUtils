@@ -20,44 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Nfs;
-using System.IO;
-using Xunit;
-
-namespace LibraryTests.Nfs
+namespace DiscUtils.Nfs
 {
-    public class RpcCallHeaderTest
+    public interface IRpcObject
     {
-        [Fact]
-        public void RoundTripTest()
-        {
-            RpcCallHeader header = new RpcCallHeader()
-            {
-                Credentials = new RpcAuthentication()
-                {
-                },
-                Proc = (int)NfsProc3.Commit,
-                Program = 5,
-                RpcVersion = 6,
-                Verifier = new RpcAuthentication()
-                {
-                },
-                Version = 7
-            };
-
-            RpcCallHeader clone = null;
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                XdrDataWriter writer = new XdrDataWriter(stream);
-                header.Write(writer);
-
-                stream.Position = 0;
-                XdrDataReader reader = new XdrDataReader(stream);
-                clone = new RpcCallHeader(reader);
-            }
-
-            Assert.Equal(header, clone);
-        }
+        void Write(XdrDataWriter writer);
     }
 }
