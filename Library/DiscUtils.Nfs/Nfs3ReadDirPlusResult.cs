@@ -65,7 +65,7 @@ namespace DiscUtils.Nfs
 
         public bool Eof { get; set; }
 
-        internal override void Write(XdrDataWriter writer)
+        public override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
 
@@ -86,7 +86,7 @@ namespace DiscUtils.Nfs
                 }
 
                 writer.Write(false);
-                writer.Write(true); // EOF
+                writer.Write(Eof);
             }
         }
 

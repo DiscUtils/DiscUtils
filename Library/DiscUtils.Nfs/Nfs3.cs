@@ -228,7 +228,7 @@ namespace DiscUtils.Nfs
                                                  uint maxCount)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Readdirplus);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.ReadDirPlus);
             dir.Write(writer);
             writer.Write(cookie);
             writer.Write(cookieVerifier);

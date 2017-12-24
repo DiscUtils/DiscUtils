@@ -38,7 +38,7 @@ namespace DiscUtils.Nfs
 
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
 
-        internal override void Write(XdrDataWriter writer)
+        public override void Write(XdrDataWriter writer)
         {
             writer.Write((int)Status);
             CacheConsistency.Write(writer);
