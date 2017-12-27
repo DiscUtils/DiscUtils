@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using DiscUtils.Nfs;
+using DiscUtils.Nfs.Server;
 using System;
 using System.Collections.Generic;
 using System.Net;
