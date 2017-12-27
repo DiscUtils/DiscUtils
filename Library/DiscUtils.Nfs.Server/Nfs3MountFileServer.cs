@@ -52,10 +52,12 @@ namespace DiscUtils.Nfs.Server
         {
             if (_fileServer.Mounts.ContainsKey(dirPath))
             {
+                var fileSystem = _fileServer.Mounts[dirPath];
+
                 return new Nfs3MountResult()
                 {
                     AuthFlavours = new List<RpcAuthFlavour>() { RpcAuthFlavour.Null },
-                    FileHandle = _fileServer.GetHandle(_fileServer.Mounts[dirPath]),
+                    FileHandle = _fileServer.GetHandle(fileSystem, fileSystem.Root.FullName),
                     Status = Nfs3Status.Ok
                 };
             }

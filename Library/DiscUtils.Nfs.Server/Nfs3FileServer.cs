@@ -29,15 +29,19 @@ namespace DiscUtils.Nfs.Server
 {
     public class Nfs3FileServer : Nfs3Server
     {
-        private readonly Dictionary<string, string> _mounts;
-        private readonly Dictionary<Nfs3FileHandle, string> _handles = new Dictionary<Nfs3FileHandle, string>();
+        private readonly Dictionary<string, IFileSystem> _mounts;
+        private readonly Dictionary<Nfs3FileHandle, FileHandleMapping> _handles = new Dictionary<Nfs3FileHandle, FileHandleMapping>();
         private ulong handleIndex = 0;
 
-        public Dictionary<string, string> Mounts { get { return _mounts; } }
+        public Dictionary<string, IFileSystem> Mounts { get { return _mounts; } }
 
-        public Nfs3FileServer(Dictionary<string, string> mounts)
+        public Nfs3FileServer(Dictionary<string, IFileSystem> mounts)
         {
             _mounts = mounts;
+        }
+
+        protected virtual void BeforeReadDirectory(string path)
+        {
         }
 
         protected override Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
@@ -46,14 +50,16 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3ReadDirResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var directory = _handles[dir];
+            var fileSystem = directory.FileSystem;
+
             List<Nfs3DirectoryEntry> dirEntries = new List<Nfs3DirectoryEntry>();
 
-            var entries = Directory.GetFileSystemEntries(directory);
+            var entries = fileSystem.GetFiles(directory.Path);
 
             var result = new Nfs3ReadDirResult()
             {
@@ -70,13 +76,16 @@ namespace DiscUtils.Nfs.Server
             for (; index < entries.Length; index++)
             {
                 var file = entries[index];
+                var fileHandle = GetHandle(fileSystem, file);
+                var fileMapping = _handles[fileHandle];
+
                 var entry = new Nfs3DirectoryEntry()
                 {
-                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
+                    FileId = BitConverter.ToUInt64(fileHandle.Value, 0),
                     Name = Path.GetFileName(file),
                     Cookie = (ulong)index,
-                    FileAttributes = GetAttributes(file),
-                    FileHandle = GetHandle(file),
+                    FileAttributes = GetAttributes(fileMapping),
+                    FileHandle = fileHandle,
                 };
 
                 var entrySize = (int)entry.GetSize();
@@ -102,14 +111,15 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3ReadDirPlusResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var directory = _handles[dir];
+            var fileSystem = directory.FileSystem;
             List<Nfs3DirectoryEntry> dirEntries = new List<Nfs3DirectoryEntry>();
 
-            var entries = Directory.GetFileSystemEntries(directory);
+            var entries = fileSystem.GetFileSystemEntries(directory.Path);
 
             var index = (int)cookie;
 
@@ -128,12 +138,15 @@ namespace DiscUtils.Nfs.Server
             for (; index < entries.Length; index++)
             {
                 var file = entries[index];
+                var fileHandle = GetHandle(fileSystem, file);
+                var fileMapping = _handles[fileHandle];
+
                 var entry = new Nfs3DirectoryEntry()
                 {
                     Cookie = (ulong)index,
-                    FileAttributes = GetAttributes(file),
-                    FileHandle = GetHandle(file),
-                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
+                    FileAttributes = GetAttributes(fileMapping),
+                    FileHandle = fileHandle,
+                    FileId = BitConverter.ToUInt64(fileHandle.Value, 0),
                     Name = Path.GetFileName(file)
                 };
 
@@ -152,8 +165,6 @@ namespace DiscUtils.Nfs.Server
             }
 
             result.Eof = index == entries.Length;
-
-            Console.WriteLine(result);
             return result;
         }
 
@@ -163,15 +174,16 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3ReadResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var path = _handles[handle];
+            var fileSystem = path.FileSystem;
             byte[] buffer = new byte[count];
             int read = 0;
 
-            using (Stream stream = File.OpenRead(path))
+            using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Read))
             {
                 stream.Seek(position, SeekOrigin.Begin);
                 read = stream.Read(buffer, 0, count);
@@ -187,26 +199,31 @@ namespace DiscUtils.Nfs.Server
             };
         }
 
+        protected virtual void BeforeWriteFile(string path)
+        {
+        }
+
         protected override Nfs3WriteResult Write(Nfs3FileHandle handle, long position, byte[] buffer, int count)
         {
             if (!_handles.ContainsKey(handle))
             {
                 return new Nfs3WriteResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var path = _handles[handle];
+            var fileSystem = path.FileSystem;
 
             var before = new Nfs3WeakCacheConsistencyAttr()
             {
-                ChangeTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
-                ModifyTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
-                Size = new FileInfo(path).Length
+                ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                Size = fileSystem.GetFileLength(path.Path)
             };
 
-            using (Stream stream = File.OpenWrite(path))
+            using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Write))
             {
                 stream.Position = position;
                 stream.Write(buffer, 0, count);
@@ -232,20 +249,23 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3CreateResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var parentPath = _handles[dirHandle];
-            var newPath = Path.Combine(parentPath, name);
+            var fileSystem = parentPath.FileSystem;
+            var newPath = Path.Combine(parentPath.Path, name);
 
-            Directory.CreateDirectory(newPath);
+            fileSystem.CreateDirectory(newPath);
+            var childHandle = GetHandle(fileSystem, newPath);
+            var child = _handles[childHandle];
 
             return new Nfs3CreateResult()
             {
                 CacheConsistency = new Nfs3WeakCacheConsistency(),
-                FileAttributes = GetAttributes(newPath),
-                FileHandle = GetHandle(newPath),
+                FileAttributes = GetAttributes(child),
+                FileHandle = childHandle,
                 Status = Nfs3Status.Ok
             };
         }
@@ -256,22 +276,25 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3ModifyResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    CacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var parentPath = _handles[dirHandle];
-            var childPath = Path.Combine(parentPath, name);
+            var fileSystem = parentPath.FileSystem;
+            var childPath = Path.Combine(parentPath.Path, name);
 
-            if (!Directory.Exists(childPath))
+            if (!fileSystem.DirectoryExists(childPath))
             {
                 return new Nfs3ModifyResult()
                 {
+                    CacheConsistency = new Nfs3WeakCacheConsistency(),
                     Status = Nfs3Status.NoSuchEntity
                 };
             }
 
-            Directory.Delete(childPath, recursive: true);
+            fileSystem.DeleteDirectory(childPath, recursive: true);
 
             return new Nfs3ModifyResult()
             {
@@ -301,8 +324,9 @@ namespace DiscUtils.Nfs.Server
             }
 
             var parentPath = _handles[dirHandle];
+            var fileSystem = parentPath.FileSystem;
 
-            if (!Directory.Exists(parentPath))
+            if (!fileSystem.DirectoryExists(parentPath.Path))
             {
                 return new Nfs3CreateResult()
                 {
@@ -311,9 +335,11 @@ namespace DiscUtils.Nfs.Server
                 };
             }
 
-            var childPath = Path.Combine(parentPath, name);
+            var childPath = Path.Combine(parentPath.Path, name);
+            var childHandle = GetHandle(fileSystem, childPath);
+            var child = _handles[childHandle];
 
-            if (File.Exists(childPath) || Directory.Exists(childPath))
+            if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
             {
                 return new Nfs3CreateResult()
                 {
@@ -322,15 +348,15 @@ namespace DiscUtils.Nfs.Server
                 };
             }
 
-            using (File.Create(childPath))
+            using (fileSystem.OpenFile(childPath, FileMode.CreateNew, FileAccess.ReadWrite))
             {
             }
 
             return new Nfs3CreateResult()
             {
                 Status = Nfs3Status.Ok,
-                FileAttributes = GetAttributes(childPath),
-                FileHandle = GetHandle(childPath),
+                FileAttributes = GetAttributes(child),
+                FileHandle = childHandle,
                 CacheConsistency = new Nfs3WeakCacheConsistency()
             };
         }
@@ -341,22 +367,25 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3ModifyResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
                 };
             }
 
             var parentPath = _handles[dirHandle];
-            var childPath = Path.Combine(parentPath, name);
+            var fileSystem = parentPath.FileSystem;
+            var childPath = Path.Combine(parentPath.Path, name);
 
-            if (!File.Exists(childPath))
+            if (!fileSystem.FileExists(childPath))
             {
                 return new Nfs3ModifyResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.NoSuchEntity,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
                 };
             }
 
-            File.Delete(childPath);
+            fileSystem.DeleteFile(childPath);
 
             return new Nfs3ModifyResult()
             {
@@ -371,20 +400,24 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3LookupResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
-            var parentPath = _handles[dir];
-            var childPath = Path.Combine(parentPath, name);
+            var parentHandle = _handles[dir];
+            var fileSystem = parentHandle.FileSystem;
+            var childPath = Path.Combine(parentHandle.Path, name);
 
-            if (File.Exists(childPath) || Directory.Exists(childPath))
+            var childHandle = GetHandle(fileSystem, childPath);
+            var child = _handles[childHandle];
+
+            if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
             {
                 return new Nfs3LookupResult()
                 {
-                    DirAttributes = GetAttributes(parentPath),
-                    ObjectAttributes = GetAttributes(childPath),
-                    ObjectHandle = GetHandle(childPath),
+                    DirAttributes = GetAttributes(parentHandle),
+                    ObjectAttributes = GetAttributes(child),
+                    ObjectHandle = childHandle,
                     Status = Nfs3Status.Ok
                 };
             }
@@ -403,7 +436,7 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3GetAttributesResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
@@ -422,11 +455,12 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3ModifyResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var path = _handles[handle];
+            var fileSystem = path.FileSystem;
 
             // Don't do anything
             return new Nfs3ModifyResult()
@@ -435,9 +469,9 @@ namespace DiscUtils.Nfs.Server
                 {
                     Before = new Nfs3WeakCacheConsistencyAttr()
                     {
-                        ChangeTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
-                        ModifyTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
-                        Size = new FileInfo(path).Length
+                        ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                        ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                        Size = fileSystem.GetFileLength(path.Path)
                     },
                     After = GetAttributes(path)
                 },
@@ -451,25 +485,24 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3FileSystemStatResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
             var path = _handles[fileHandle];
-
-            DriveInfo info = new DriveInfo(Path.GetPathRoot(path));
+            var fileSystem = path.FileSystem;
 
             return new Nfs3FileSystemStatResult()
             {
                 FileSystemStat = new Nfs3FileSystemStat()
                 {
                     AvailableFreeFileSlotCount = (ulong)(int.MaxValue - _handles.Count),
-                    AvailableFreeSpaceBytes = (ulong)info.AvailableFreeSpace,
+                    AvailableFreeSpaceBytes = (ulong)fileSystem.AvailableSpace,
                     FileSlotCount = int.MaxValue,
                     FreeFileSlotCount = (ulong)(int.MaxValue - _handles.Count),
-                    FreeSpaceBytes = (ulong)info.TotalFreeSpace,
+                    FreeSpaceBytes = (ulong)fileSystem.AvailableSpace,
                     Invariant = TimeSpan.FromMilliseconds(1),
-                    TotalSizeBytes = (ulong)info.TotalSize
+                    TotalSizeBytes = (ulong)fileSystem.Size
                 },
                 PostOpAttributes = GetAttributes(path),
                 Status = Nfs3Status.Ok
@@ -482,7 +515,7 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3PathConfResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
@@ -512,15 +545,16 @@ namespace DiscUtils.Nfs.Server
             }
 
             var path = _handles[handle];
+            var fileSystem = path.FileSystem;
 
             var possiblePermissions = Nfs3AccessPermissions.None;
 
-            if (Directory.Exists(path))
+            if (fileSystem.DirectoryExists(path.Path))
             {
                 // The execute permission doesn't exist for files.
                 possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Execute;
             }
-            else if (File.Exists(path))
+            else if (fileSystem.FileExists(path.Path))
             {
                 // The lookup permission doesn't exist for files.
                 possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Lookup;
@@ -549,17 +583,20 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3CommitResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
                 };
             }
 
             var path = _handles[handle];
+            var fileSystem = path.FileSystem;
 
-            if (!File.Exists(path))
+            if (!fileSystem.FileExists(path.Path))
             {
                 return new Nfs3CommitResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.NoSuchEntity,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
                 };
             }
 
@@ -570,9 +607,9 @@ namespace DiscUtils.Nfs.Server
                 {
                     Before = new Nfs3WeakCacheConsistencyAttr()
                     {
-                        ChangeTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
-                        ModifyTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
-                        Size = new FileInfo(path).Length
+                        ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                        ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                        Size = fileSystem.GetFileLength(path.Path)
                     },
                     After = GetAttributes(path)
                 },
@@ -586,7 +623,7 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3FileSystemInfoResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle
                 };
             }
 
@@ -614,14 +651,18 @@ namespace DiscUtils.Nfs.Server
             };
         }
 
-        public Nfs3FileHandle GetHandle(string path)
+        public Nfs3FileHandle GetHandle(IFileSystem fileSystem, string path)
         {
-            if (!_handles.Values.Any(v => v == path))
+            if (!_handles.Values.Any(v => v.FileSystem == fileSystem && v.Path == path))
             {
-                _handles.Add(NextHandle(), path);
+                _handles.Add(NextHandle(), new FileHandleMapping()
+                {
+                    FileSystem = fileSystem,
+                    Path = path
+                });
             }
 
-            return _handles.Single(h => h.Value == path).Key;
+            return _handles.Single(v => v.Value.FileSystem == fileSystem && v.Value.Path == path).Key;
         }
 
         private Nfs3FileHandle NextHandle()
@@ -633,15 +674,16 @@ namespace DiscUtils.Nfs.Server
             };
         }
 
-        private Nfs3FileAttributes GetAttributes(string path)
+        private Nfs3FileAttributes GetAttributes(FileHandleMapping path)
         {
             Nfs3FileAttributes attributes = new Nfs3FileAttributes();
+            var fileSystem = path.FileSystem;
 
-            System.IO.FileSystemInfo fsi = null;
+            DiscFileSystemInfo fsi = null;
 
-            if (File.Exists(path))
+            if (fileSystem.FileExists(path.Path))
             {
-                var info = new FileInfo(path);
+                var info = fileSystem.GetFileInfo(path.Path);
 
                 attributes.BytesUsed = info.Length;
                 attributes.Size = info.Length;
@@ -649,9 +691,9 @@ namespace DiscUtils.Nfs.Server
 
                 fsi = info;
             }
-            else if (Directory.Exists(path))
+            else if (fileSystem.DirectoryExists(path.Path))
             {
-                var info = new DirectoryInfo(path);
+                var info = fileSystem.GetDirectoryInfo(path.Path);
 
                 attributes.BytesUsed = 0;
                 attributes.Size = 0;
@@ -666,7 +708,7 @@ namespace DiscUtils.Nfs.Server
 
             attributes.AccessTime = new Nfs3FileTime(fsi.LastAccessTime);
             attributes.ChangeTime = new Nfs3FileTime(fsi.LastWriteTime);
-            attributes.FileId = BitConverter.ToUInt64(GetHandle(fsi.FullName).Value, 0);
+            attributes.FileId = BitConverter.ToUInt64(GetHandle(path.FileSystem, fsi.FullName).Value, 0);
             attributes.FileSystemId = 0;
             attributes.Gid = 0;
             attributes.Uid = 0;

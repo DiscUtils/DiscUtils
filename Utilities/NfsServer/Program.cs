@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils;
 using DiscUtils.Nfs.Server;
 using System;
 using System.Collections.Generic;
@@ -37,10 +38,10 @@ namespace NfsServer
             Console.WriteLine($"To connect, use sudo mount -t nfs -o proto=tcp,port=111,nfsvers=3 {GetLocalIPAddress()}:/home /mnt/test or a similar command");
             Console.WriteLine($"Alternatively, use nfusr -f -d --log-level=7 nfs://{GetLocalIPAddress()}/home ~/mnt/nfs/");
 
-            var fileServer = new Nfs3FileServer(new Dictionary<string, string>()
+            var fileServer = new Nfs3FileServer(new Dictionary<string, IFileSystem>()
             {
-                { "/home", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { "/docs", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) }
+                { "/home", new NativeFileSystem(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),readOnly: false) },
+                { "/docs", new NativeFileSystem(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), readOnly: false) }
             });
 
             RpcServer server = new RpcServer();
