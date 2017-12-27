@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,30 +20,26 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-using System.IO;
-
 namespace DiscUtils.Nfs
 {
-    /// <summary>
-    /// Base class for all NFS result structures.
-    /// </summary>
-    public abstract class Nfs3CallResult : IRpcObject
+    public class Nfs3CommitResult : Nfs3CallResult
     {
-        public Nfs3Status Status { get; set; }
-
-        public virtual void Write(XdrDataWriter writer)
+        public Nfs3CommitResult()
         {
-            throw new NotSupportedException();
         }
 
-        public virtual long GetSize()
+        public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
+
+        public ulong WriteVerifier { get; set; }
+
+        public override void Write(XdrDataWriter writer)
         {
-            using (MemoryStream stream = new MemoryStream())
+            writer.Write((int)Status);
+            CacheConsistency.Write(writer);
+
+            if (Status == Nfs3Status.Ok)
             {
-                XdrDataWriter writer = new XdrDataWriter(stream);
-                Write(writer);
-                return stream.Length;
+                writer.Write(WriteVerifier);
             }
         }
     }

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.IO;
 
 namespace DiscUtils.Nfs
 {
@@ -97,6 +98,21 @@ namespace DiscUtils.Nfs
         public override int GetHashCode()
         {
             return HashCode.Combine(Cookie, FileAttributes, FileHandle, FileId, Name);
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
+        public long GetSize()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                Write(writer);
+                return stream.Length;
+            }
         }
     }
 }
