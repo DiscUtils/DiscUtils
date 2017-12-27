@@ -42,15 +42,18 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3GetAttributesResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
             var path = _handles[handle];
+            var fileSystem = path.FileSystem;
 
             return new Nfs3GetAttributesResult()
             {
@@ -61,11 +64,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3ModifyResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -91,11 +96,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3LookupResult Lookup(Nfs3FileHandle dir, string name)
         {
-            if (!_handles.ContainsKey(dir))
+            var handleStatus = ValidateFileHandle(dir);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3LookupResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -127,11 +134,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3AccessResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = handleStatus
                 };
             }
 
@@ -170,11 +179,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3ReadResult Read(Nfs3FileHandle handle, long position, int count)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3ReadResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -201,11 +212,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3WriteResult Write(Nfs3FileHandle handle, long position, byte[] buffer, int count)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3WriteResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -250,12 +263,13 @@ namespace DiscUtils.Nfs.Server
                 };
             }
 
-            if (!_handles.ContainsKey(dirHandle))
+            var handleStatus = ValidateFileHandle(dirHandle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3CreateResult()
                 {
-                    Status = Nfs3Status.BadFileHandle,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                    Status = handleStatus
                 };
             }
 
@@ -299,11 +313,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3CreateResult MakeDirectory(Nfs3FileHandle dirHandle, string name, Nfs3SetAttributes attributes)
         {
-            if (!_handles.ContainsKey(dirHandle))
+            var handleStatus = ValidateFileHandle(dirHandle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3CreateResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -326,12 +342,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3ModifyResult Remove(Nfs3FileHandle dirHandle, string name)
         {
-            if (!_handles.ContainsKey(dirHandle))
+            var handleStatus = ValidateFileHandle(dirHandle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3ModifyResult()
                 {
-                    Status = Nfs3Status.BadFileHandle,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                    Status = handleStatus
                 };
             }
 
@@ -359,12 +376,14 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3ModifyResult RemoveDirectory(Nfs3FileHandle dirHandle, string name)
         {
-            if (!_handles.ContainsKey(dirHandle))
+            var handleStatus = ValidateFileHandle(dirHandle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3ModifyResult()
                 {
                     CacheConsistency = new Nfs3WeakCacheConsistency(),
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -390,13 +409,97 @@ namespace DiscUtils.Nfs.Server
             };
         }
 
+        protected override Nfs3RenameResult Rename(Nfs3FileHandle fromDirHandle, string fromName, Nfs3FileHandle toDirHandle, string toName)
+        {
+            if (!_handles.ContainsKey(fromDirHandle) || !_handles.ContainsKey(toDirHandle))
+            {
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var fromDir = _handles[fromDirHandle];
+            var toDir = _handles[toDirHandle];
+
+            if (fromDir.FileSystem != toDir.FileSystem)
+            {
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.AttemptedCrossDeviceHardLink
+                };
+            }
+
+            var fileSystem = toDir.FileSystem;
+            var fromPath = Path.Combine(fromDir.Path, fromName);
+            var toPath = Path.Combine(toDir.Path, toName);
+
+            if (!fileSystem.DirectoryExists(toDir.Path) || !fileSystem.DirectoryExists(fromDir.Path))
+            {
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.StaleFileHandle
+                };
+            }
+
+            if (fileSystem.Exists(toPath))
+            {
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.FileExists
+                };
+            }
+
+            if (fileSystem.FileExists(fromPath))
+            {
+                fileSystem.MoveFile(fromPath, toPath);
+
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.Ok
+                };
+            }
+            else if (fileSystem.DirectoryExists(fromPath))
+            {
+                fileSystem.MoveDirectory(fromPath, toPath);
+
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.Ok
+                };
+            }
+            else
+            {
+                return new Nfs3RenameResult()
+                {
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+        }
+
         protected override Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
         {
-            if (!_handles.ContainsKey(dir))
+            var handleStatus = ValidateFileHandle(dir);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3ReadDirResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -453,11 +556,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint dirCount, uint maxCount)
         {
-            if (!_handles.ContainsKey(dir))
+            var handleStatus = ValidateFileHandle(dir);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3ReadDirPlusResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -516,11 +621,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3FileSystemInfoResult FileSystemInfo(Nfs3FileHandle fileHandle)
         {
-            if (!_handles.ContainsKey(fileHandle))
+            var handleStatus = ValidateFileHandle(fileHandle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3FileSystemInfoResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -550,11 +657,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3FileSystemStatResult FileSystemStat(Nfs3FileHandle fileHandle)
         {
-            if (!_handles.ContainsKey(fileHandle))
+            var handleStatus = ValidateFileHandle(fileHandle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3FileSystemStatResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -580,11 +689,13 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3PathConfResult PathConf(Nfs3FileHandle handle)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3PathConfResult()
                 {
-                    Status = Nfs3Status.BadFileHandle
+                    Status = handleStatus
                 };
             }
 
@@ -605,12 +716,14 @@ namespace DiscUtils.Nfs.Server
 
         protected override Nfs3CommitResult Commit(Nfs3FileHandle handle, long offset, int count)
         {
-            if (!_handles.ContainsKey(handle))
+            var handleStatus = ValidateFileHandle(handle);
+
+            if (handleStatus != Nfs3Status.Ok)
             {
                 return new Nfs3CommitResult()
                 {
-                    Status = Nfs3Status.BadFileHandle,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                    CacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = handleStatus
                 };
             }
 
@@ -711,6 +824,24 @@ namespace DiscUtils.Nfs.Server
             attributes.RdevMinor = 0;
 
             return attributes;
+        }
+
+        private Nfs3Status ValidateFileHandle(Nfs3FileHandle handle)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return Nfs3Status.BadFileHandle;
+            }
+
+            var path = _handles[handle];
+            var fileSystem = path.FileSystem;
+
+            if (!fileSystem.Exists(path.Path))
+            {
+                return Nfs3Status.StaleFileHandle;
+            }
+
+            return Nfs3Status.Ok;
         }
     }
 }

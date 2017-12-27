@@ -24,6 +24,10 @@ namespace DiscUtils.Nfs
 {
     public sealed class Nfs3RenameResult : Nfs3CallResult
     {
+        public Nfs3RenameResult()
+        {
+        }
+
         internal Nfs3RenameResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
@@ -34,5 +38,12 @@ namespace DiscUtils.Nfs
         public Nfs3WeakCacheConsistency FromDirCacheConsistency { get; set; }
 
         public Nfs3WeakCacheConsistency ToDirCacheConsistency { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+            FromDirCacheConsistency.Write(writer);
+            ToDirCacheConsistency.Write(writer);
+        }
     }
 }
