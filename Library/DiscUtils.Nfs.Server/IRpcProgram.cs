@@ -22,7 +22,7 @@
 
 using System.Collections.Generic;
 
-namespace DiscUtils.Nfs
+namespace DiscUtils.Nfs.Server
 {
     public interface IRpcProgram
     {

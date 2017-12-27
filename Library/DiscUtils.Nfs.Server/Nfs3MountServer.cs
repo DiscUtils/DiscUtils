@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DiscUtils.Nfs
+namespace DiscUtils.Nfs.Server
 {
     public class Nfs3MountServer : IRpcProgram
     {

@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#if !NET20
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -74,4 +73,3 @@ namespace DiscUtils.Nfs.Server
         }
     }
 }
-#endif
