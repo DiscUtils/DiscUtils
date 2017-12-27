@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Nfs
 {
-    internal enum NfsProc3 : uint
+    public enum NfsProc3 : uint
     {
         Null = 0,
         GetAttr = 1,

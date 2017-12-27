@@ -29,8 +29,8 @@ namespace DiscUtils.Nfs
     // https://www.ietf.org/rfc/rfc1813.txt Appendix I: Mount Protocol
     internal sealed class Nfs3Mount : RpcProgram
     {
-        public const int ProgramIdentifier = 100005;
-        public const int ProgramVersion = 3;
+        public const int ProgramIdentifier = RpcIdentifiers.Nfs3MountProgramIdentifier;
+        public const int ProgramVersion = RpcIdentifiers.Nfs3MountProgramVersion;
 
         public const int MaxPathLength = 1024;
         public const int MaxNameLength = 255;

@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright (c) 2008-2011, Kenneth Bell
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,9 +22,12 @@
 
 namespace DiscUtils.Nfs
 {
-    public enum RpcMessageType
+    public static class RpcIdentifiers
     {
-        Call = 0,
-        Reply = 1
+        public const int Nfs3ProgramIdentifier = 100003;
+        public const int Nfs3ProgramVersion = 3;
+        public const int Nfs3MountProgramIdentifier = 100005;
+        public const int Nfs3MountProgramVersion = 3;
+        public const int RpcVersion = 2;
     }
 }

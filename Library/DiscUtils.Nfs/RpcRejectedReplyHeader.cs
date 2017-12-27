@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcRejectedReplyHeader
+    public class RpcRejectedReplyHeader
     {
         public RpcAuthenticationStatus AuthenticationStatus;
         public RpcMismatchInfo MismatchInfo;

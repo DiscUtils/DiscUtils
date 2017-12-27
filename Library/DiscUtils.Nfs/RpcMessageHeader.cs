@@ -24,7 +24,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcMessageHeader
+    public class RpcMessageHeader
     {
         public RpcMessageHeader()
         {

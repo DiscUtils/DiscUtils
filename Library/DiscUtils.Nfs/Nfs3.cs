@@ -26,8 +26,8 @@ namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3 : RpcProgram
     {
-        public const int ProgramIdentifier = 100003;
-        public const int ProgramVersion = 3;
+        public const int ProgramIdentifier = RpcIdentifiers.Nfs3ProgramIdentifier;
+        public const int ProgramVersion = RpcIdentifiers.Nfs3ProgramVersion;
 
         public const int MaxFileHandleSize = 64;
         public const int CookieVerifierSize = 8;
