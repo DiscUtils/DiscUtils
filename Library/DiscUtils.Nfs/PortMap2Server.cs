@@ -41,7 +41,7 @@ namespace DiscUtils.Nfs
         }
 
         public IEnumerable<int> Procedures
-        { get; } = new int[] { (int)PortMapProc2.GetPort };
+        { get; } = new int[] { (int)PortMapProc2.Null, (int)PortMapProc2.GetPort };
 
         public int ProgramIdentifier => 100000;
         public int ProgramVersion => 2;
@@ -50,6 +50,9 @@ namespace DiscUtils.Nfs
         {
             switch ((PortMapProc2)header.Proc)
             {
+                case PortMapProc2.Null:
+                    return null;
+
                 case PortMapProc2.GetPort:
                     uint port = 0;
 
