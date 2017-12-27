@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../common.props" />
 
   <PropertyGroup>
     <Description>DiscUtils, meta-package with transports, such as iSCSI and NFS</Description>
     <AssemblyTitle>DiscUtils.Transports</AssemblyTitle>
-    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Transports</AssemblyName>
