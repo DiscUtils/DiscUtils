@@ -40,8 +40,354 @@ namespace DiscUtils.Nfs.Server
             _mounts = mounts;
         }
 
-        protected virtual void BeforeReadDirectory(string path)
+        protected override Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
         {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3GetAttributesResult()
+                {
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var path = _handles[handle];
+
+            return new Nfs3GetAttributesResult()
+            {
+                Attributes = GetAttributes(path),
+                Status = Nfs3Status.Ok
+            };
+        }
+
+        protected override Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3ModifyResult()
+                {
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var path = _handles[handle];
+            var fileSystem = path.FileSystem;
+
+            // Don't do anything
+            return new Nfs3ModifyResult()
+            {
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = new Nfs3WeakCacheConsistencyAttr()
+                    {
+                        ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                        ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                        Size = fileSystem.GetFileLength(path.Path)
+                    },
+                    After = GetAttributes(path)
+                },
+                Status = Nfs3Status.Ok
+            };
+        }
+
+        protected override Nfs3LookupResult Lookup(Nfs3FileHandle dir, string name)
+        {
+            if (!_handles.ContainsKey(dir))
+            {
+                return new Nfs3LookupResult()
+                {
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var parentHandle = _handles[dir];
+            var fileSystem = parentHandle.FileSystem;
+            var childPath = Path.Combine(parentHandle.Path, name);
+
+            var childHandle = GetHandle(fileSystem, childPath);
+            var child = _handles[childHandle];
+
+            if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
+            {
+                return new Nfs3LookupResult()
+                {
+                    DirAttributes = GetAttributes(parentHandle),
+                    ObjectAttributes = GetAttributes(child),
+                    ObjectHandle = childHandle,
+                    Status = Nfs3Status.Ok
+                };
+            }
+            else
+            {
+                return new Nfs3LookupResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+        }
+
+        protected override Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3AccessResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var path = _handles[handle];
+            var fileSystem = path.FileSystem;
+
+            var possiblePermissions = Nfs3AccessPermissions.None;
+
+            if (fileSystem.DirectoryExists(path.Path))
+            {
+                // The execute permission doesn't exist for files.
+                possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Execute;
+            }
+            else if (fileSystem.FileExists(path.Path))
+            {
+                // The lookup permission doesn't exist for files.
+                possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Lookup;
+            }
+            else
+            {
+                return new Nfs3AccessResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var permissions = requested & possiblePermissions;
+
+            return new Nfs3AccessResult()
+            {
+                Status = Nfs3Status.Ok,
+                ObjectAttributes = GetAttributes(path),
+                Access = permissions
+            };
+        }
+
+        protected override Nfs3ReadResult Read(Nfs3FileHandle handle, long position, int count)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3ReadResult()
+                {
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var path = _handles[handle];
+            var fileSystem = path.FileSystem;
+            byte[] buffer = new byte[count];
+            int read = 0;
+
+            using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Read))
+            {
+                stream.Seek(position, SeekOrigin.Begin);
+                read = stream.Read(buffer, 0, count);
+            }
+
+            return new Nfs3ReadResult()
+            {
+                Count = read,
+                Data = buffer,
+                Eof = true,
+                FileAttributes = GetAttributes(path),
+                Status = Nfs3Status.Ok
+            };
+        }
+
+        protected override Nfs3WriteResult Write(Nfs3FileHandle handle, long position, byte[] buffer, int count)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3WriteResult()
+                {
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var path = _handles[handle];
+            var fileSystem = path.FileSystem;
+
+            var before = new Nfs3WeakCacheConsistencyAttr()
+            {
+                ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
+                Size = fileSystem.GetFileLength(path.Path)
+            };
+
+            using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Write))
+            {
+                stream.Position = position;
+                stream.Write(buffer, 0, count);
+            }
+
+            return new Nfs3WriteResult()
+            {
+                Count = count,
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = before,
+                    After = GetAttributes(path)
+                },
+                HowCommitted = Nfs3StableHow.DataSync,
+                WriteVerifier = 0,
+                Status = Nfs3Status.Ok
+            };
+        }
+
+        protected override Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, Nfs3CreateMode mode, Nfs3SetAttributes attributes, ulong verifier)
+        {
+            if (mode == Nfs3CreateMode.Exclusive)
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.NotSupported,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
+            if (!_handles.ContainsKey(dirHandle))
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.BadFileHandle,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
+            var parentPath = _handles[dirHandle];
+            var fileSystem = parentPath.FileSystem;
+
+            if (!fileSystem.DirectoryExists(parentPath.Path))
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.NotDirectory,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
+            var childPath = Path.Combine(parentPath.Path, name);
+            var childHandle = GetHandle(fileSystem, childPath);
+            var child = _handles[childHandle];
+
+            if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.FileExists,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
+            using (fileSystem.OpenFile(childPath, FileMode.CreateNew, FileAccess.ReadWrite))
+            {
+            }
+
+            return new Nfs3CreateResult()
+            {
+                Status = Nfs3Status.Ok,
+                FileAttributes = GetAttributes(child),
+                FileHandle = childHandle,
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+            };
+        }
+
+        protected override Nfs3CreateResult MakeDirectory(Nfs3FileHandle dirHandle, string name, Nfs3SetAttributes attributes)
+        {
+            if (!_handles.ContainsKey(dirHandle))
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var parentPath = _handles[dirHandle];
+            var fileSystem = parentPath.FileSystem;
+            var newPath = Path.Combine(parentPath.Path, name);
+
+            fileSystem.CreateDirectory(newPath);
+            var childHandle = GetHandle(fileSystem, newPath);
+            var child = _handles[childHandle];
+
+            return new Nfs3CreateResult()
+            {
+                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                FileAttributes = GetAttributes(child),
+                FileHandle = childHandle,
+                Status = Nfs3Status.Ok
+            };
+        }
+
+        protected override Nfs3ModifyResult Remove(Nfs3FileHandle dirHandle, string name)
+        {
+            if (!_handles.ContainsKey(dirHandle))
+            {
+                return new Nfs3ModifyResult()
+                {
+                    Status = Nfs3Status.BadFileHandle,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
+            var parentPath = _handles[dirHandle];
+            var fileSystem = parentPath.FileSystem;
+            var childPath = Path.Combine(parentPath.Path, name);
+
+            if (!fileSystem.FileExists(childPath))
+            {
+                return new Nfs3ModifyResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
+            fileSystem.DeleteFile(childPath);
+
+            return new Nfs3ModifyResult()
+            {
+                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                Status = Nfs3Status.Ok
+            };
+        }
+
+        protected override Nfs3ModifyResult RemoveDirectory(Nfs3FileHandle dirHandle, string name)
+        {
+            if (!_handles.ContainsKey(dirHandle))
+            {
+                return new Nfs3ModifyResult()
+                {
+                    CacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.BadFileHandle
+                };
+            }
+
+            var parentPath = _handles[dirHandle];
+            var fileSystem = parentPath.FileSystem;
+            var childPath = Path.Combine(parentPath.Path, name);
+
+            if (!fileSystem.DirectoryExists(childPath))
+            {
+                return new Nfs3ModifyResult()
+                {
+                    CacheConsistency = new Nfs3WeakCacheConsistency(),
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            fileSystem.DeleteDirectory(childPath, recursive: true);
+
+            return new Nfs3ModifyResult()
+            {
+                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                Status = Nfs3Status.Ok
+            };
         }
 
         protected override Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
@@ -168,313 +514,36 @@ namespace DiscUtils.Nfs.Server
             return result;
         }
 
-        protected override Nfs3ReadResult Read(Nfs3FileHandle handle, long position, int count)
+        protected override Nfs3FileSystemInfoResult FileSystemInfo(Nfs3FileHandle fileHandle)
         {
-            if (!_handles.ContainsKey(handle))
+            if (!_handles.ContainsKey(fileHandle))
             {
-                return new Nfs3ReadResult()
+                return new Nfs3FileSystemInfoResult()
                 {
                     Status = Nfs3Status.BadFileHandle
                 };
             }
 
-            var path = _handles[handle];
-            var fileSystem = path.FileSystem;
-            byte[] buffer = new byte[count];
-            int read = 0;
+            var path = _handles[fileHandle];
 
-            using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Read))
+            var _10mb = 10 * 1024 * 1024u;
+            var _100kb = 100 * 1024u;
+
+            return new Nfs3FileSystemInfoResult()
             {
-                stream.Seek(position, SeekOrigin.Begin);
-                read = stream.Read(buffer, 0, count);
-            }
-
-            return new Nfs3ReadResult()
-            {
-                Count = read,
-                Data = buffer,
-                Eof = true,
-                FileAttributes = GetAttributes(path),
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected virtual void BeforeWriteFile(string path)
-        {
-        }
-
-        protected override Nfs3WriteResult Write(Nfs3FileHandle handle, long position, byte[] buffer, int count)
-        {
-            if (!_handles.ContainsKey(handle))
-            {
-                return new Nfs3WriteResult()
+                FileSystemInfo = new Nfs3FileSystemInfo()
                 {
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var path = _handles[handle];
-            var fileSystem = path.FileSystem;
-
-            var before = new Nfs3WeakCacheConsistencyAttr()
-            {
-                ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                Size = fileSystem.GetFileLength(path.Path)
-            };
-
-            using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Write))
-            {
-                stream.Position = position;
-                stream.Write(buffer, 0, count);
-            }
-
-            return new Nfs3WriteResult()
-            {
-                Count = count,
-                CacheConsistency = new Nfs3WeakCacheConsistency()
-                {
-                    Before = before,
-                    After = GetAttributes(path)
+                    DirectoryPreferredBytes = _10mb,
+                    MaxFileSize = int.MaxValue,
+                    ReadMaxBytes = _10mb,
+                    ReadMultipleSize = _100kb,
+                    ReadPreferredBytes = _10mb,
+                    WriteMaxBytes = _10mb,
+                    WriteMultipleSize = _100kb,
+                    WritePreferredBytes = _10mb,
+                    TimePrecision = Nfs3FileTime.Precision
                 },
-                HowCommitted = Nfs3StableHow.DataSync,
-                WriteVerifier = 0,
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected override Nfs3CreateResult MakeDirectory(Nfs3FileHandle dirHandle, string name, Nfs3SetAttributes attributes)
-        {
-            if (!_handles.ContainsKey(dirHandle))
-            {
-                return new Nfs3CreateResult()
-                {
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var parentPath = _handles[dirHandle];
-            var fileSystem = parentPath.FileSystem;
-            var newPath = Path.Combine(parentPath.Path, name);
-
-            fileSystem.CreateDirectory(newPath);
-            var childHandle = GetHandle(fileSystem, newPath);
-            var child = _handles[childHandle];
-
-            return new Nfs3CreateResult()
-            {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
-                FileAttributes = GetAttributes(child),
-                FileHandle = childHandle,
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected override Nfs3ModifyResult RemoveDirectory(Nfs3FileHandle dirHandle, string name)
-        {
-            if (!_handles.ContainsKey(dirHandle))
-            {
-                return new Nfs3ModifyResult()
-                {
-                    CacheConsistency = new Nfs3WeakCacheConsistency(),
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var parentPath = _handles[dirHandle];
-            var fileSystem = parentPath.FileSystem;
-            var childPath = Path.Combine(parentPath.Path, name);
-
-            if (!fileSystem.DirectoryExists(childPath))
-            {
-                return new Nfs3ModifyResult()
-                {
-                    CacheConsistency = new Nfs3WeakCacheConsistency(),
-                    Status = Nfs3Status.NoSuchEntity
-                };
-            }
-
-            fileSystem.DeleteDirectory(childPath, recursive: true);
-
-            return new Nfs3ModifyResult()
-            {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected override Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, Nfs3CreateMode mode, Nfs3SetAttributes attributes, ulong verifier)
-        {
-            if (mode == Nfs3CreateMode.Exclusive)
-            {
-                return new Nfs3CreateResult()
-                {
-                    Status = Nfs3Status.NotSupported,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
-                };
-            }
-
-            if (!_handles.ContainsKey(dirHandle))
-            {
-                return new Nfs3CreateResult()
-                {
-                    Status = Nfs3Status.BadFileHandle,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
-                };
-            }
-
-            var parentPath = _handles[dirHandle];
-            var fileSystem = parentPath.FileSystem;
-
-            if (!fileSystem.DirectoryExists(parentPath.Path))
-            {
-                return new Nfs3CreateResult()
-                {
-                    Status = Nfs3Status.NotDirectory,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
-                };
-            }
-
-            var childPath = Path.Combine(parentPath.Path, name);
-            var childHandle = GetHandle(fileSystem, childPath);
-            var child = _handles[childHandle];
-
-            if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
-            {
-                return new Nfs3CreateResult()
-                {
-                    Status = Nfs3Status.FileExists,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
-                };
-            }
-
-            using (fileSystem.OpenFile(childPath, FileMode.CreateNew, FileAccess.ReadWrite))
-            {
-            }
-
-            return new Nfs3CreateResult()
-            {
-                Status = Nfs3Status.Ok,
-                FileAttributes = GetAttributes(child),
-                FileHandle = childHandle,
-                CacheConsistency = new Nfs3WeakCacheConsistency()
-            };
-        }
-
-        protected override Nfs3ModifyResult Remove(Nfs3FileHandle dirHandle, string name)
-        {
-            if (!_handles.ContainsKey(dirHandle))
-            {
-                return new Nfs3ModifyResult()
-                {
-                    Status = Nfs3Status.BadFileHandle,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
-                };
-            }
-
-            var parentPath = _handles[dirHandle];
-            var fileSystem = parentPath.FileSystem;
-            var childPath = Path.Combine(parentPath.Path, name);
-
-            if (!fileSystem.FileExists(childPath))
-            {
-                return new Nfs3ModifyResult()
-                {
-                    Status = Nfs3Status.NoSuchEntity,
-                    CacheConsistency = new Nfs3WeakCacheConsistency()
-                };
-            }
-
-            fileSystem.DeleteFile(childPath);
-
-            return new Nfs3ModifyResult()
-            {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected override Nfs3LookupResult Lookup(Nfs3FileHandle dir, string name)
-        {
-            if (!_handles.ContainsKey(dir))
-            {
-                return new Nfs3LookupResult()
-                {
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var parentHandle = _handles[dir];
-            var fileSystem = parentHandle.FileSystem;
-            var childPath = Path.Combine(parentHandle.Path, name);
-
-            var childHandle = GetHandle(fileSystem, childPath);
-            var child = _handles[childHandle];
-
-            if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
-            {
-                return new Nfs3LookupResult()
-                {
-                    DirAttributes = GetAttributes(parentHandle),
-                    ObjectAttributes = GetAttributes(child),
-                    ObjectHandle = childHandle,
-                    Status = Nfs3Status.Ok
-                };
-            }
-            else
-            {
-                return new Nfs3LookupResult()
-                {
-                    Status = Nfs3Status.NoSuchEntity
-                };
-            }
-        }
-
-        protected override Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
-        {
-            if (!_handles.ContainsKey(handle))
-            {
-                return new Nfs3GetAttributesResult()
-                {
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var path = _handles[handle];
-
-            return new Nfs3GetAttributesResult()
-            {
-                Attributes = GetAttributes(path),
-                Status = Nfs3Status.Ok
-            };
-        }
-
-        protected override Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
-        {
-            if (!_handles.ContainsKey(handle))
-            {
-                return new Nfs3ModifyResult()
-                {
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var path = _handles[handle];
-            var fileSystem = path.FileSystem;
-
-            // Don't do anything
-            return new Nfs3ModifyResult()
-            {
-                CacheConsistency = new Nfs3WeakCacheConsistency()
-                {
-                    Before = new Nfs3WeakCacheConsistencyAttr()
-                    {
-                        ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                        ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                        Size = fileSystem.GetFileLength(path.Path)
-                    },
-                    After = GetAttributes(path)
-                },
+                PostOpAttributes = GetAttributes(path),
                 Status = Nfs3Status.Ok
             };
         }
@@ -534,49 +603,6 @@ namespace DiscUtils.Nfs.Server
             };
         }
 
-        protected override Nfs3AccessResult Access(Nfs3FileHandle handle, Nfs3AccessPermissions requested)
-        {
-            if (!_handles.ContainsKey(handle))
-            {
-                return new Nfs3AccessResult()
-                {
-                    Status = Nfs3Status.NoSuchEntity
-                };
-            }
-
-            var path = _handles[handle];
-            var fileSystem = path.FileSystem;
-
-            var possiblePermissions = Nfs3AccessPermissions.None;
-
-            if (fileSystem.DirectoryExists(path.Path))
-            {
-                // The execute permission doesn't exist for files.
-                possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Execute;
-            }
-            else if (fileSystem.FileExists(path.Path))
-            {
-                // The lookup permission doesn't exist for files.
-                possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Lookup;
-            }
-            else
-            {
-                return new Nfs3AccessResult()
-                {
-                    Status = Nfs3Status.NoSuchEntity
-                };
-            }
-
-            var permissions = requested & possiblePermissions;
-
-            return new Nfs3AccessResult()
-            {
-                Status = Nfs3Status.Ok,
-                ObjectAttributes = GetAttributes(path),
-                Access = permissions
-            };
-        }
-
         protected override Nfs3CommitResult Commit(Nfs3FileHandle handle, long offset, int count)
         {
             if (!_handles.ContainsKey(handle))
@@ -614,40 +640,6 @@ namespace DiscUtils.Nfs.Server
                     After = GetAttributes(path)
                 },
                 WriteVerifier = 0
-            };
-        }
-
-        protected override Nfs3FileSystemInfoResult FileSystemInfo(Nfs3FileHandle fileHandle)
-        {
-            if (!_handles.ContainsKey(fileHandle))
-            {
-                return new Nfs3FileSystemInfoResult()
-                {
-                    Status = Nfs3Status.BadFileHandle
-                };
-            }
-
-            var path = _handles[fileHandle];
-
-            var _10mb = 10 * 1024 * 1024u;
-            var _100kb = 100 * 1024u;
-
-            return new Nfs3FileSystemInfoResult()
-            {
-                FileSystemInfo = new Nfs3FileSystemInfo()
-                {
-                    DirectoryPreferredBytes = _10mb,
-                    MaxFileSize = int.MaxValue,
-                    ReadMaxBytes = _10mb,
-                    ReadMultipleSize = _100kb,
-                    ReadPreferredBytes = _10mb,
-                    WriteMaxBytes = _10mb,
-                    WriteMultipleSize = _100kb,
-                    WritePreferredBytes = _10mb,
-                    TimePrecision = Nfs3FileTime.Precision
-                },
-                PostOpAttributes = GetAttributes(path),
-                Status = Nfs3Status.Ok
             };
         }
 

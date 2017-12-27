@@ -59,8 +59,6 @@ namespace DiscUtils.Nfs.Server
 
         public IRpcObject Invoke(RpcCallHeader header, XdrDataReader reader)
         {
-            Console.WriteLine($"{(NfsProc3)header.Proc}");
-
             switch ((NfsProc3)header.Proc)
             {
                 case NfsProc3.Null:
@@ -247,11 +245,6 @@ namespace DiscUtils.Nfs.Server
             }
         }
 
-        protected virtual Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
-        {
-            throw new NotImplementedException();
-        }
-
         protected virtual Nfs3GetAttributesResult GetAttributes(Nfs3FileHandle handle)
         {
             throw new NotImplementedException();
@@ -302,6 +295,11 @@ namespace DiscUtils.Nfs.Server
         }
 
         protected virtual Nfs3RenameResult Rename(Nfs3FileHandle fromDirHandle, string fromName, Nfs3FileHandle toDirHandle, string toName)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual Nfs3ReadDirResult ReadDir(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint count)
         {
             throw new NotImplementedException();
         }
