@@ -54,26 +54,47 @@ namespace DiscUtils.Nfs
             var directory = _handles[dir];
             List<Nfs3DirectoryEntry> dirEntries = new List<Nfs3DirectoryEntry>();
 
-            foreach (var file in Directory.GetFileSystemEntries(directory))
-            {
-                dirEntries.Add(new Nfs3DirectoryEntry()
-                {
-                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
-                    Name = Path.GetFileName(file),
-                    Cookie = 0,
-                    FileAttributes = null,
-                    FileHandle = null,
-                });
-            }
+            var entries = Directory.GetFileSystemEntries(directory);
 
-            return new Nfs3ReadDirResult()
+            var result = new Nfs3ReadDirResult()
             {
-                CookieVerifier = 0,
+                CookieVerifier = (ulong)entries.Length,
                 DirAttributes = GetAttributes(directory),
                 DirEntries = dirEntries,
                 Status = Nfs3Status.Ok,
                 Eof = true
             };
+
+            var index = (int)cookie;
+            var size = result.GetSize();
+
+            for (; index < entries.Length; index++)
+            {
+                var file = entries[index];
+                var entry = new Nfs3DirectoryEntry()
+                {
+                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
+                    Name = Path.GetFileName(file),
+                    Cookie = (ulong)index,
+                    FileAttributes = GetAttributes(file),
+                    FileHandle = GetHandle(file),
+                };
+
+                var entrySize = (int)entry.GetSize();
+
+                if (size + entrySize > count)
+                {
+                    break;
+                }
+                else
+                {
+                    size += entrySize;
+                    dirEntries.Add(entry);
+                }
+            }
+
+            result.Eof = index == entries.Length;
+            return result;
         }
 
         protected override Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint dirCount, uint maxCount)
@@ -89,26 +110,52 @@ namespace DiscUtils.Nfs
             var directory = _handles[dir];
             List<Nfs3DirectoryEntry> dirEntries = new List<Nfs3DirectoryEntry>();
 
-            foreach (var file in Directory.GetFileSystemEntries(directory))
-            {
-                dirEntries.Add(new Nfs3DirectoryEntry()
-                {
-                    Cookie = 0,
-                    FileAttributes = GetAttributes(file),
-                    FileHandle = GetHandle(file),
-                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
-                    Name = Path.GetFileName(file)
-                });
-            }
+            var entries = Directory.GetFileSystemEntries(directory);
 
-            return new Nfs3ReadDirPlusResult()
+            var index = (int)cookie;
+
+            var result = new Nfs3ReadDirPlusResult()
             {
-                CookieVerifier = 0,
+                CookieVerifier = (ulong)entries.Length,
                 Eof = true,
                 DirAttributes = GetAttributes(directory),
                 DirEntries = dirEntries,
                 Status = Nfs3Status.Ok
             };
+
+            var dirSize = 0;
+            var maxSize = result.GetSize();
+
+            for (; index < entries.Length; index++)
+            {
+                var file = entries[index];
+                var entry = new Nfs3DirectoryEntry()
+                {
+                    Cookie = (ulong)index,
+                    FileAttributes = GetAttributes(file),
+                    FileHandle = GetHandle(file),
+                    FileId = BitConverter.ToUInt64(GetHandle(file).Value, 0),
+                    Name = Path.GetFileName(file)
+                };
+
+                var entrySize = (int)entry.GetSize();
+
+                if (dirSize + entrySize > dirCount || maxSize + entrySize > maxCount)
+                {
+                    break;
+                }
+                else
+                {
+                    dirSize += entrySize;
+                    maxSize += entrySize;
+                    dirEntries.Add(entry);
+                }
+            }
+
+            result.Eof = index == entries.Length;
+
+            Console.WriteLine(result);
+            return result;
         }
 
         protected override Nfs3ReadResult Read(Nfs3FileHandle handle, long position, int count)
@@ -127,7 +174,8 @@ namespace DiscUtils.Nfs
 
             using (Stream stream = File.OpenRead(path))
             {
-                read = stream.Read(buffer, (int)position, count);
+                stream.Seek(position, SeekOrigin.Begin);
+                read = stream.Read(buffer, 0, count);
             }
 
             return new Nfs3ReadResult()
@@ -152,6 +200,13 @@ namespace DiscUtils.Nfs
 
             var path = _handles[handle];
 
+            var before = new Nfs3WeakCacheConsistencyAttr()
+            {
+                ChangeTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
+                ModifyTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
+                Size = new FileInfo(path).Length
+            };
+
             using (Stream stream = File.OpenWrite(path))
             {
                 stream.Position = position;
@@ -161,7 +216,11 @@ namespace DiscUtils.Nfs
             return new Nfs3WriteResult()
             {
                 Count = count,
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = before,
+                    After = GetAttributes(path)
+                },
                 HowCommitted = Nfs3StableHow.DataSync,
                 WriteVerifier = 0,
                 Status = Nfs3Status.Ok
@@ -222,18 +281,47 @@ namespace DiscUtils.Nfs
             };
         }
 
-        protected override Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, bool createNew, Nfs3SetAttributes attributes)
+        protected override Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, Nfs3CreateMode mode, Nfs3SetAttributes attributes, ulong verifier)
         {
+            if (mode == Nfs3CreateMode.Exclusive)
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.NotSupported,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
             if (!_handles.ContainsKey(dirHandle))
             {
                 return new Nfs3CreateResult()
                 {
-                    Status = Nfs3Status.NoSuchEntity
+                    Status = Nfs3Status.BadFileHandle,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
                 };
             }
 
             var parentPath = _handles[dirHandle];
+
+            if (!Directory.Exists(parentPath))
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.NotDirectory,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
+
             var childPath = Path.Combine(parentPath, name);
+
+            if (File.Exists(childPath) || Directory.Exists(childPath))
+            {
+                return new Nfs3CreateResult()
+                {
+                    Status = Nfs3Status.FileExists,
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                };
+            }
 
             using (File.Create(childPath))
             {
@@ -329,7 +417,7 @@ namespace DiscUtils.Nfs
             };
         }
 
-        protected override Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3FileAttributes newAttributes)
+        protected override Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
         {
             if (!_handles.ContainsKey(handle))
             {
@@ -339,10 +427,21 @@ namespace DiscUtils.Nfs
                 };
             }
 
+            var path = _handles[handle];
+
             // Don't do anything
             return new Nfs3ModifyResult()
             {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = new Nfs3WeakCacheConsistencyAttr()
+                    {
+                        ChangeTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
+                        ModifyTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
+                        Size = new FileInfo(path).Length
+                    },
+                    After = GetAttributes(path)
+                },
                 Status = Nfs3Status.Ok
             };
         }
@@ -415,11 +514,104 @@ namespace DiscUtils.Nfs
 
             var path = _handles[handle];
 
+            var possiblePermissions = Nfs3AccessPermissions.None;
+
+            if (Directory.Exists(path))
+            {
+                // The execute permission doesn't exist for files.
+                possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Execute;
+            }
+            else if (File.Exists(path))
+            {
+                // The lookup permission doesn't exist for files.
+                possiblePermissions = Nfs3AccessPermissions.All & ~Nfs3AccessPermissions.Lookup;
+            }
+            else
+            {
+                return new Nfs3AccessResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var permissions = requested & possiblePermissions;
+
             return new Nfs3AccessResult()
             {
                 Status = Nfs3Status.Ok,
                 ObjectAttributes = GetAttributes(path),
-                Access = Nfs3AccessPermissions.Read | Nfs3AccessPermissions.Delete | Nfs3AccessPermissions.Modify
+                Access = permissions
+            };
+        }
+
+        protected override Nfs3CommitResult Commit(Nfs3FileHandle handle, long offset, int count)
+        {
+            if (!_handles.ContainsKey(handle))
+            {
+                return new Nfs3CommitResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var path = _handles[handle];
+
+            if (!File.Exists(path))
+            {
+                return new Nfs3CommitResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            return new Nfs3CommitResult()
+            {
+                Status = Nfs3Status.Ok,
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = new Nfs3WeakCacheConsistencyAttr()
+                    {
+                        ChangeTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
+                        ModifyTime = new Nfs3FileTime(File.GetLastWriteTime(path)),
+                        Size = new FileInfo(path).Length
+                    },
+                    After = GetAttributes(path)
+                },
+                WriteVerifier = 0
+            };
+        }
+
+        protected override Nfs3FileSystemInfoResult FileSystemInfo(Nfs3FileHandle fileHandle)
+        {
+            if (!_handles.ContainsKey(fileHandle))
+            {
+                return new Nfs3FileSystemInfoResult()
+                {
+                    Status = Nfs3Status.NoSuchEntity
+                };
+            }
+
+            var path = _handles[fileHandle];
+
+            var _10mb = 10 * 1024 * 1024u;
+            var _100kb = 100 * 1024u;
+
+            return new Nfs3FileSystemInfoResult()
+            {
+                FileSystemInfo = new Nfs3FileSystemInfo()
+                {
+                    DirectoryPreferredBytes = _10mb,
+                    MaxFileSize = int.MaxValue,
+                    ReadMaxBytes = _10mb,
+                    ReadMultipleSize = _100kb,
+                    ReadPreferredBytes = _10mb,
+                    WriteMaxBytes = _10mb,
+                    WriteMultipleSize = _100kb,
+                    WritePreferredBytes = _10mb,
+                    TimePrecision = Nfs3FileTime.Precision
+                },
+                PostOpAttributes = GetAttributes(path),
+                Status = Nfs3Status.Ok
             };
         }
 
@@ -478,12 +670,12 @@ namespace DiscUtils.Nfs
             attributes.FileId = BitConverter.ToUInt64(GetHandle(fsi.FullName).Value, 0);
             attributes.FileSystemId = 0;
             attributes.Gid = 0;
-            attributes.LinkCount = 0;
-            attributes.Mode = UnixFilePermissions.GroupAll | UnixFilePermissions.OthersAll | UnixFilePermissions.OwnerAll;
+            attributes.Uid = 0;
+            attributes.LinkCount = 1;
+            attributes.Mode = UnixFilePermissions.OwnerRead | UnixFilePermissions.OwnerWrite;
             attributes.ModifyTime = new Nfs3FileTime(fsi.LastWriteTime);
             attributes.RdevMajor = 0;
             attributes.RdevMinor = 0;
-            attributes.Uid = 0;
 
             return attributes;
         }
