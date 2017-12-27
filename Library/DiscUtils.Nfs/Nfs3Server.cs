@@ -49,15 +49,18 @@ namespace DiscUtils.Nfs
             (int)NfsProc3.Remove,
             (int)NfsProc3.Rmdir,
             (int)NfsProc3.Rename,
-            // (int)NfsProc3.ReadDir,
+            (int)NfsProc3.ReadDir,
             (int)NfsProc3.ReadDirPlus,
             (int)NfsProc3.Fsinfo,
             (int)NfsProc3.Fsstat,
             (int)NfsProc3.Pathconf,
+            (int)NfsProc3.Commit
         };
 
         public IRpcObject Invoke(RpcCallHeader header, XdrDataReader reader)
         {
+            Console.WriteLine($"{(NfsProc3)header.Proc}");
+
             switch ((NfsProc3)header.Proc)
             {
                 case NfsProc3.Null:
@@ -76,7 +79,7 @@ namespace DiscUtils.Nfs
                 case NfsProc3.SetAttr:
                     {
                         var handle = new Nfs3FileHandle(reader);
-                        var newAttributes = new Nfs3FileAttributes(reader);
+                        var newAttributes = new Nfs3SetAttributes(reader);
                         reader.ReadBool();
 
                         return SetAttributes(handle, newAttributes);
@@ -98,6 +101,7 @@ namespace DiscUtils.Nfs
                         return Access(handle, requested);
                     }
 
+                // NfsProc3.Readlink
                 case NfsProc3.Read:
                     {
                         var handle = new Nfs3FileHandle(reader);
@@ -120,12 +124,32 @@ namespace DiscUtils.Nfs
 
                 case NfsProc3.Create:
                     {
+                        // diropargs3 = dir handle + name
                         var dirHandle = new Nfs3FileHandle(reader);
                         var name = reader.ReadString();
-                        var createNew = reader.ReadInt32() == 1 ? true : false;
-                        var attributes = new Nfs3SetAttributes(reader);
 
-                        return Create(dirHandle, name, createNew, attributes);
+                        // createhow3
+                        var mode = (Nfs3CreateMode)reader.ReadInt32();
+
+                        Nfs3SetAttributes attributes = null;
+                        ulong verifier = 0;
+
+                        switch (mode)
+                        {
+                            case Nfs3CreateMode.Unchecked:
+                            case Nfs3CreateMode.Guarded:
+                                attributes = new Nfs3SetAttributes(reader);
+                                break;
+
+                            case Nfs3CreateMode.Exclusive:
+                                verifier = reader.ReadUInt64();
+                                break;
+
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+
+                        return Create(dirHandle, name, mode, attributes, verifier);
                     }
 
                 case NfsProc3.Mkdir:
@@ -137,6 +161,8 @@ namespace DiscUtils.Nfs
                         return MakeDirectory(dirHandle, name, attributes);
                     }
 
+                // NfsProc3.Symlink = 10,
+                // NfsProc3.Mknod = 11,
                 case NfsProc3.Remove:
                     {
                         var dirHandle = new Nfs3FileHandle(reader);
@@ -163,6 +189,7 @@ namespace DiscUtils.Nfs
                         return Rename(fromDirHandle, fromName, toDirHandle, toName);
                     }
 
+                // NfsProc3.Link = 15
                 case NfsProc3.ReadDir:
                     {
                         var dir = new Nfs3FileHandle(reader);
@@ -181,14 +208,8 @@ namespace DiscUtils.Nfs
                         var dirCount = reader.ReadUInt32();
                         var maxCount = reader.ReadUInt32();
 
+                        Console.WriteLine($"ReadDirPlus: dir {dir}, cookie: {cookie}, cookieVerifier: {cookieVerifier}, dirCount: {dirCount}, maxCount: {maxCount}");
                         return ReadDirPlus(dir, cookie, cookieVerifier, dirCount, maxCount);
-                    }
-
-                case NfsProc3.Fsinfo:
-                    {
-                        var fileHandle = new Nfs3FileHandle(reader);
-
-                        return FileSystemInfo(fileHandle);
                     }
 
                 case NfsProc3.Fsstat:
@@ -198,11 +219,27 @@ namespace DiscUtils.Nfs
                         return FileSystemStat(fileHandle);
                     }
 
+                case NfsProc3.Fsinfo:
+                    {
+                        var fileHandle = new Nfs3FileHandle(reader);
+
+                        return FileSystemInfo(fileHandle);
+                    }
+
                 case NfsProc3.Pathconf:
                     {
                         var fileHandle = new Nfs3FileHandle(reader);
 
                         return PathConf(fileHandle);
+                    }
+
+                case NfsProc3.Commit:
+                    {
+                        var handle = new Nfs3FileHandle(reader);
+                        var offset = reader.ReadInt64();
+                        var count = reader.ReadInt32();
+
+                        return Commit(handle, offset, count);
                     }
 
                 default:
@@ -220,7 +257,7 @@ namespace DiscUtils.Nfs
             throw new NotImplementedException();
         }
 
-        protected virtual Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3FileAttributes newAttributes)
+        protected virtual Nfs3ModifyResult SetAttributes(Nfs3FileHandle handle, Nfs3SetAttributes newAttributes)
         {
             throw new NotImplementedException();
         }
@@ -244,7 +281,7 @@ namespace DiscUtils.Nfs
             throw new NotImplementedException();
         }
 
-        protected virtual Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, bool createNew, Nfs3SetAttributes attributes)
+        protected virtual Nfs3CreateResult Create(Nfs3FileHandle dirHandle, string name, Nfs3CreateMode mode, Nfs3SetAttributes attributes, ulong verifier)
         {
             throw new NotImplementedException();
         }
@@ -276,24 +313,7 @@ namespace DiscUtils.Nfs
 
         protected virtual Nfs3FileSystemInfoResult FileSystemInfo(Nfs3FileHandle fileHandle)
         {
-            var _10mb = 10 * 1024 * 1024u;
-            var _1kb = 1024u;
-
-            return new Nfs3FileSystemInfoResult()
-            {
-                FileSystemInfo = new Nfs3FileSystemInfo()
-                {
-                    DirectoryPreferredBytes = _10mb,
-                    MaxFileSize = int.MaxValue,
-                    ReadMaxBytes = _10mb,
-                    ReadMultipleSize = _1kb,
-                    ReadPreferredBytes = _10mb,
-                    WriteMaxBytes = _10mb,
-                    WriteMultipleSize = _1kb,
-                    WritePreferredBytes = _10mb,
-                    TimePrecision = Nfs3FileTime.Precision
-                }
-            };
+            throw new NotImplementedException();
         }
 
         protected virtual Nfs3FileSystemStatResult FileSystemStat(Nfs3FileHandle fileHandle)
@@ -302,6 +322,11 @@ namespace DiscUtils.Nfs
         }
 
         protected virtual Nfs3PathConfResult PathConf(Nfs3FileHandle handle)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual Nfs3CommitResult Commit(Nfs3FileHandle handle, long offset, int count)
         {
             throw new NotImplementedException();
         }
