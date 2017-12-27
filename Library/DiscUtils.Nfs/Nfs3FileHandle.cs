@@ -30,7 +30,7 @@ namespace DiscUtils.Nfs
         {
         }
 
-        internal Nfs3FileHandle(XdrDataReader reader)
+        public Nfs3FileHandle(XdrDataReader reader)
         {
             Value = reader.ReadBuffer(Nfs3Mount.MaxFileHandleSize);
         }

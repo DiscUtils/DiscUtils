@@ -30,7 +30,7 @@ namespace DiscUtils.Nfs
         {
         }
 
-        internal Nfs3SetAttributes(XdrDataReader reader)
+        public Nfs3SetAttributes(XdrDataReader reader)
         {
             SetMode = reader.ReadBool();
 

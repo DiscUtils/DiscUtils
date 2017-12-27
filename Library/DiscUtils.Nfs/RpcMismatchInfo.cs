@@ -25,7 +25,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcMismatchInfo
+    public class RpcMismatchInfo
     {
         public uint High;
         public uint Low;

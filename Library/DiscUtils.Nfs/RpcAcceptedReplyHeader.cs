@@ -25,7 +25,7 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal class RpcAcceptedReplyHeader
+    public class RpcAcceptedReplyHeader
     {
         public RpcAcceptStatus AcceptStatus;
         public RpcMismatchInfo MismatchInfo;

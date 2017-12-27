@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Nfs
 {
-    internal enum PortMapProc2
+    public enum PortMapProc2
     {
         Null = 0,
         Set = 1,
