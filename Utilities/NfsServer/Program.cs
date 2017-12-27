@@ -34,12 +34,13 @@ namespace NfsServer
         {
             Console.WriteLine("Starting NFS server");
 
-            Console.WriteLine($"To connect, use sudo mount -t nfs -o proto=tcp,port=111,nfsvers=3 {GetLocalIPAddress()}:home /mnt/test or a similar command");
+            Console.WriteLine($"To connect, use sudo mount -t nfs -o proto=tcp,port=111,nfsvers=3 {GetLocalIPAddress()}:/home /mnt/test or a similar command");
+            Console.WriteLine($"Alternatively, use nfusr -f -d --log-level=7 nfs://{GetLocalIPAddress()}/home ~/mnt/nfs/");
 
             var fileServer = new Nfs3FileServer(new Dictionary<string, string>()
             {
-                { "home", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
-                { "docs", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) }
+                { "/home", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) },
+                { "/docs", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) }
             });
 
             RpcServer server = new RpcServer();
