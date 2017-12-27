@@ -117,5 +117,19 @@ namespace DiscUtils.Nfs
         {
             writer.WriteBuffer(Value);
         }
+
+        public override string ToString()
+        {
+            int value = 0;
+            if (Value != null)
+            {
+                for (int i = Value.Length - 1; i >= 0; i--)
+                {
+                    value = (value << sizeof(byte)) | Value[i];
+                }
+            }
+
+            return value.ToString();
+        }
     }
 }

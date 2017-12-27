@@ -33,6 +33,7 @@ namespace DiscUtils.Nfs
         Modify = 0x04,
         Extend = 0x08,
         Delete = 0x10,
-        Execute = 0x20
+        Execute = 0x20,
+        All = Read | Lookup | Modify | Extend | Delete | Execute
     }
 }
