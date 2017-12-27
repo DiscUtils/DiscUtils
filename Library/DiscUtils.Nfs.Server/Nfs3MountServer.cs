@@ -20,58 +20,54 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#if !NET20
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace DiscUtils.Nfs
 {
-    // http://pubs.opengroup.org/onlinepubs/9629799/chap6.htm
-    public class PortMap2Server : IRpcProgram
+    public class Nfs3MountServer : IRpcProgram
     {
-        public const int Port = 111;
+        public int ProgramIdentifier => RpcIdentifiers.Nfs3MountProgramIdentifier;
 
-        private readonly Collection<IRpcProgram> _programs;
-
-        public PortMap2Server(Collection<IRpcProgram> programs)
-        {
-            _programs = programs;
-        }
+        public int ProgramVersion => RpcIdentifiers.Nfs3MountProgramVersion;
 
         public IEnumerable<int> Procedures
-        { get; } = new int[] { (int)PortMapProc2.Null, (int)PortMapProc2.GetPort };
-
-        public int ProgramIdentifier => 100000;
-        public int ProgramVersion => 2;
+        { get; } = new int[] 
+        {
+            (int)MountProc3.Null,
+            (int)MountProc3.Mnt,
+            (int)MountProc3.Export
+        };
 
         public IRpcObject Invoke(RpcCallHeader header, XdrDataReader reader)
         {
-            switch ((PortMapProc2)header.Proc)
+            switch ((MountProc3)header.Proc)
             {
-                case PortMapProc2.Null:
+                case MountProc3.Null:
                     return null;
 
-                case PortMapProc2.GetPort:
-                    uint port = 0;
+                case MountProc3.Mnt:
+                    string dirPath = reader.ReadString();
 
-                    if (_programs.Any(
-                        p => p.ProgramIdentifier == header.Program
-                        && p.ProgramVersion == header.Version))
-                    {
-                        port = PortMap2Server.Port;
-                    }
+                    return Mount(dirPath);
 
-                    return new PortMap2Port()
-                    {
-                        Port = port
-                    };
+                case MountProc3.Export:
+
+                    return Exports();
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(header));
+                    throw new NotImplementedException();
             }
+        }
+
+        protected virtual Nfs3MountResult Mount(string dirPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected virtual Nfs3ExportResult Exports()
+        {
+            throw new NotImplementedException();
         }
     }
 }
-#endif

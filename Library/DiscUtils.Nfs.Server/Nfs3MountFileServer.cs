@@ -20,13 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#if !NET20
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace DiscUtils.Nfs
+namespace DiscUtils.Nfs.Server
 {
     public class Nfs3MountFileServer : Nfs3MountServer
     {
@@ -72,4 +69,3 @@ namespace DiscUtils.Nfs
         }
     }
 }
-#endif

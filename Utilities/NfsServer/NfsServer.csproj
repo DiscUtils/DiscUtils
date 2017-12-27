@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Library\DiscUtils.Nfs.Server\DiscUtils.Nfs.Server.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Nfs\DiscUtils.Nfs.csproj" />
   </ItemGroup>
 

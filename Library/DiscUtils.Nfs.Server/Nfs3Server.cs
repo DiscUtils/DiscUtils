@@ -26,13 +26,13 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
-namespace DiscUtils.Nfs
+namespace DiscUtils.Nfs.Server
 {
     public class Nfs3Server : IRpcProgram
     {
-        public int ProgramIdentifier => Nfs3.ProgramIdentifier;
+        public int ProgramIdentifier => RpcIdentifiers.Nfs3ProgramIdentifier;
 
-        public int ProgramVersion => Nfs3.ProgramVersion;
+        public int ProgramVersion => RpcIdentifiers.Nfs3ProgramVersion;
 
         public IEnumerable<int> Procedures
         { get; } = new int[]

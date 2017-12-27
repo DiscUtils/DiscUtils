@@ -28,7 +28,7 @@ using System.Net.Sockets;
 using System.Linq;
 using System;
 
-namespace DiscUtils.Nfs
+namespace DiscUtils.Nfs.Server
 {
     public class RpcServer
     {
@@ -91,7 +91,7 @@ namespace DiscUtils.Nfs
 
                     Console.WriteLine($"Program {header.Program} version {header.Version}, procedure {header.Proc}");
 
-                    if (header.RpcVersion != Nfs3.RpcVersion)
+                    if (header.RpcVersion != RpcIdentifiers.RpcVersion)
                     {
                         responseHeader = new RpcMessageHeader()
                         {
