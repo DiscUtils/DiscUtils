@@ -82,12 +82,7 @@ namespace DiscUtils.Nfs.Server
             {
                 CacheConsistency = new Nfs3WeakCacheConsistency()
                 {
-                    Before = new Nfs3WeakCacheConsistencyAttr()
-                    {
-                        ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                        ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                        Size = fileSystem.GetFileLength(path.Path)
-                    },
+                    Before = GetWeakConsistencyAttributes(path),
                     After = GetAttributes(path)
                 },
                 Status = Nfs3Status.Ok
@@ -225,12 +220,7 @@ namespace DiscUtils.Nfs.Server
             var path = _handles[handle];
             var fileSystem = path.FileSystem;
 
-            var before = new Nfs3WeakCacheConsistencyAttr()
-            {
-                ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                Size = fileSystem.GetFileLength(path.Path)
-            };
+            var before = GetWeakConsistencyAttributes(path);
 
             using (Stream stream = fileSystem.OpenFile(path.Path, FileMode.Open, FileAccess.Write))
             {
@@ -288,6 +278,7 @@ namespace DiscUtils.Nfs.Server
             var childPath = Path.Combine(parentPath.Path, name);
             var childHandle = GetHandle(fileSystem, childPath);
             var child = _handles[childHandle];
+            var before = GetWeakConsistencyAttributes(parentPath);
 
             if (fileSystem.FileExists(childPath) || fileSystem.DirectoryExists(childPath))
             {
@@ -295,6 +286,10 @@ namespace DiscUtils.Nfs.Server
                 {
                     Status = Nfs3Status.FileExists,
                     CacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = before,
+                        After = GetAttributes(parentPath)
+                    }
                 };
             }
 
@@ -308,6 +303,10 @@ namespace DiscUtils.Nfs.Server
                 FileAttributes = GetAttributes(child),
                 FileHandle = childHandle,
                 CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = before,
+                    After = GetAttributes(parentPath)
+                }
             };
         }
 
@@ -327,13 +326,18 @@ namespace DiscUtils.Nfs.Server
             var fileSystem = parentPath.FileSystem;
             var newPath = Path.Combine(parentPath.Path, name);
 
+            var before = GetWeakConsistencyAttributes(parentPath);
             fileSystem.CreateDirectory(newPath);
             var childHandle = GetHandle(fileSystem, newPath);
             var child = _handles[childHandle];
 
             return new Nfs3CreateResult()
             {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = before,
+                    After = GetAttributes(parentPath)
+                },
                 FileAttributes = GetAttributes(child),
                 FileHandle = childHandle,
                 Status = Nfs3Status.Ok
@@ -355,6 +359,7 @@ namespace DiscUtils.Nfs.Server
             var parentPath = _handles[dirHandle];
             var fileSystem = parentPath.FileSystem;
             var childPath = Path.Combine(parentPath.Path, name);
+            var before = GetWeakConsistencyAttributes(parentPath);
 
             if (!fileSystem.FileExists(childPath))
             {
@@ -362,6 +367,10 @@ namespace DiscUtils.Nfs.Server
                 {
                     Status = Nfs3Status.NoSuchEntity,
                     CacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = before,
+                        After = GetAttributes(parentPath)
+                    }
                 };
             }
 
@@ -369,7 +378,11 @@ namespace DiscUtils.Nfs.Server
 
             return new Nfs3ModifyResult()
             {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = before,
+                    After = GetAttributes(parentPath)
+                },
                 Status = Nfs3Status.Ok
             };
         }
@@ -390,12 +403,17 @@ namespace DiscUtils.Nfs.Server
             var parentPath = _handles[dirHandle];
             var fileSystem = parentPath.FileSystem;
             var childPath = Path.Combine(parentPath.Path, name);
+            var before = GetWeakConsistencyAttributes(parentPath);
 
             if (!fileSystem.DirectoryExists(childPath))
             {
                 return new Nfs3ModifyResult()
                 {
-                    CacheConsistency = new Nfs3WeakCacheConsistency(),
+                    CacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = before,
+                        After = GetAttributes(parentPath)
+                    },
                     Status = Nfs3Status.NoSuchEntity
                 };
             }
@@ -404,7 +422,11 @@ namespace DiscUtils.Nfs.Server
 
             return new Nfs3ModifyResult()
             {
-                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                CacheConsistency = new Nfs3WeakCacheConsistency()
+                {
+                    Before = before,
+                    After = GetAttributes(parentPath)
+                },
                 Status = Nfs3Status.Ok
             };
         }
@@ -448,12 +470,23 @@ namespace DiscUtils.Nfs.Server
                 };
             }
 
+            var fromBefore = GetWeakConsistencyAttributes(fromDir);
+            var toBefore = GetWeakConsistencyAttributes(toDir);
+
             if (fileSystem.Exists(toPath))
             {
                 return new Nfs3RenameResult()
                 {
-                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
-                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = fromBefore,
+                        After = GetAttributes(fromDir),
+                    },
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = toBefore,
+                        After = GetAttributes(toDir)
+                    },
                     Status = Nfs3Status.FileExists
                 };
             }
@@ -464,8 +497,16 @@ namespace DiscUtils.Nfs.Server
 
                 return new Nfs3RenameResult()
                 {
-                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
-                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = fromBefore,
+                        After = GetAttributes(fromDir),
+                    },
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = toBefore,
+                        After = GetAttributes(toDir)
+                    },
                     Status = Nfs3Status.Ok
                 };
             }
@@ -475,8 +516,16 @@ namespace DiscUtils.Nfs.Server
 
                 return new Nfs3RenameResult()
                 {
-                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
-                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = fromBefore,
+                        After = GetAttributes(fromDir),
+                    },
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = toBefore,
+                        After = GetAttributes(toDir)
+                    },
                     Status = Nfs3Status.Ok
                 };
             }
@@ -484,8 +533,16 @@ namespace DiscUtils.Nfs.Server
             {
                 return new Nfs3RenameResult()
                 {
-                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency(),
-                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency(),
+                    FromDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = fromBefore,
+                        After = GetAttributes(fromDir),
+                    },
+                    ToDirCacheConsistency = new Nfs3WeakCacheConsistency()
+                    {
+                        Before = toBefore,
+                        After = GetAttributes(toDir)
+                    },
                     Status = Nfs3Status.NoSuchEntity
                 };
             }
@@ -744,12 +801,7 @@ namespace DiscUtils.Nfs.Server
                 Status = Nfs3Status.Ok,
                 CacheConsistency = new Nfs3WeakCacheConsistency()
                 {
-                    Before = new Nfs3WeakCacheConsistencyAttr()
-                    {
-                        ChangeTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                        ModifyTime = new Nfs3FileTime(fileSystem.GetLastWriteTime(path.Path)),
-                        Size = fileSystem.GetFileLength(path.Path)
-                    },
+                    Before = GetWeakConsistencyAttributes(path),
                     After = GetAttributes(path)
                 },
                 WriteVerifier = 0
@@ -842,6 +894,30 @@ namespace DiscUtils.Nfs.Server
             }
 
             return Nfs3Status.Ok;
+        }
+
+        private Nfs3WeakCacheConsistencyAttr GetWeakConsistencyAttributes(FileHandleMapping path)
+        {
+            var fileSystem = path.FileSystem;
+
+            if (!fileSystem.Exists(path.Path))
+            {
+                return null;
+            }
+
+            var info = fileSystem.GetFileSystemInfo(path.Path);
+            var attr = new Nfs3WeakCacheConsistencyAttr()
+            {
+                ChangeTime = new Nfs3FileTime(info.LastWriteTime),
+                ModifyTime = new Nfs3FileTime(info.LastWriteTime),
+            };
+
+            if (fileSystem.FileExists(path.Path))
+            {
+                attr.Size = fileSystem.GetFileLength(path.Path);
+            }
+
+            return attr;
         }
     }
 }
