@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../common.props" />
 
   <PropertyGroup>
     <Description>DiscUtils NFS Server</Description>
     <AssemblyTitle>DiscUtils.Nfs.Server</AssemblyTitle>
-    <VersionPrefix>0.13.0-alpha</VersionPrefix>
     <Authors>Kenneth Bell;LordMike;Quamotion</Authors>
     <TargetFrameworks>netstandard1.5;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Nfs.Server</AssemblyName>
