@@ -59,10 +59,15 @@ namespace DiscUtils.Nfs.Server
                 {
                     ClientLoop(transport);
                 }
-                catch (EndOfStreamException)
+                catch (IOException)
                 {
                     Console.WriteLine("> Disconnected");
                     // The client has disconnected.
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unexpected exception");
+                    Console.WriteLine(ex);
                 }
             }
         }
