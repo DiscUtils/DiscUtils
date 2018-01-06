@@ -29,7 +29,12 @@ namespace DiscUtils
     /// </summary>
     public sealed class DiscFileInfo : DiscFileSystemInfo
     {
-        internal DiscFileInfo(DiscFileSystem fileSystem, string path)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscFileInfo"/> class.
+        /// </summary>
+        /// <param name="fileSystem">The file system the file info relates to.</param>
+        /// <param name="path">The path within the file system of the file.</param>
+        public DiscFileInfo(DiscFileSystem fileSystem, string path)
             : base(fileSystem, path) {}
 
         /// <summary>

@@ -31,7 +31,12 @@ namespace DiscUtils
     /// </summary>
     public class DiscFileSystemInfo
     {
-        internal DiscFileSystemInfo(DiscFileSystem fileSystem, string path)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscFileSystemInfo"/> class.
+        /// </summary>
+        /// <param name="fileSystem">The file system the file or directory info relates to.</param>
+        /// <param name="path">The path within the file system of the file or directory.</param>
+        public DiscFileSystemInfo(DiscFileSystem fileSystem, string path)
         {
             if (path == null)
             {
