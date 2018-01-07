@@ -54,7 +54,7 @@ namespace DiscUtils
         /// </summary>
         public override string FullName
         {
-            get { return base.FullName + System.IO.Path.PathSeparator; }
+            get { return base.FullName + System.IO.Path.DirectorySeparatorChar; }
         }
 
         /// <summary>
