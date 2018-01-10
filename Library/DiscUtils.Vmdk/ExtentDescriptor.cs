@@ -135,6 +135,14 @@ namespace DiscUtils.Vmdk
             {
                 return ExtentType.VmfsRaw;
             }
+            if (type == "SESPARSE")
+            {
+                return ExtentType.SeSparse;
+            }
+            if (type == "VSANSPARSE")
+            {
+                return ExtentType.VsanSparse;
+            }
             throw new ArgumentException("Unknown extent type", nameof(type));
         }
 
@@ -156,6 +164,10 @@ namespace DiscUtils.Vmdk
                     return "VMFSRDM";
                 case ExtentType.VmfsRaw:
                     return "VMFSRAW";
+                case ExtentType.SeSparse:
+                    return "SESPARSE";
+                case ExtentType.VsanSparse:
+                    return "VSANSPARSE";
                 default:
                     throw new ArgumentException("Unknown extent type", nameof(type));
             }

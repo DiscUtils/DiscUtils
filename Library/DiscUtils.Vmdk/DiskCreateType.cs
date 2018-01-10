@@ -90,6 +90,16 @@ namespace DiscUtils.Vmdk
         /// <summary>
         /// A streaming-optimized disk.
         /// </summary>
-        StreamOptimized = 12
+        StreamOptimized = 12,
+
+        /// <summary>
+        /// ESX SeSparse disk.
+        /// </summary>
+        SeSparse = 13,
+
+        /// <summary>
+        /// ESX VsanSparse disk.
+        /// </summary>
+        VsanSparse = 14
     }
 }

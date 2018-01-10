@@ -272,6 +272,10 @@ namespace DiscUtils.Vmdk
                     return DiskCreateType.VmfsPassthroughRawDeviceMap;
                 case "streamOptimized":
                     return DiskCreateType.StreamOptimized;
+                case "seSparse":
+                    return DiskCreateType.SeSparse;
+                case "vsanSparse":
+                    return DiskCreateType.VsanSparse;
                 default:
                     throw new ArgumentException(
                         string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
@@ -306,6 +310,10 @@ namespace DiscUtils.Vmdk
                     return "vmfsPassthroughRawDeviceMap";
                 case DiskCreateType.StreamOptimized:
                     return "streamOptimized";
+                case DiskCreateType.SeSparse:
+                    return "seSparse";
+                case DiskCreateType.VsanSparse:
+                    return "vsanSparse";
                 default:
                     throw new ArgumentException(
                         string.Format(CultureInfo.InvariantCulture, "Unknown type: {0}", value), nameof(value));
