@@ -49,7 +49,16 @@ namespace DiscUtils.Fat
             Array.Copy(data, offset, _raw, 0, 11);
         }
 
-        public FileName(string name, Encoding encoding)
+        /// <summary>
+        /// Constructs the long name using the given data and encoding
+        /// </summary>
+        public FileName(byte[] data, int offset, Encoding encoding)
+            : this(data, offset)
+        {
+            LongName = GetDisplayName(encoding);
+        }
+
+        public FileName(string name, Encoding encoding, bool useLongName)
         {
             _raw = new byte[11];
             byte[] bytes = encoding.GetBytes(name.ToUpperInvariant());
@@ -69,7 +78,9 @@ namespace DiscUtils.Fat
 
             if (rawIdx > 8)
             {
-                throw new ArgumentException("File name too long '" + name + "'", nameof(name));
+                if(!useLongName)
+                    throw new ArgumentException("File name too long '" + name + "'", nameof(name));
+                LongName = name;
             }
             if (rawIdx == 0)
             {
@@ -102,11 +113,16 @@ namespace DiscUtils.Fat
                 _raw[rawIdx++] = SpaceByte;
             }
 
-            if (nameIdx != bytes.Length)
+            if (nameIdx != bytes.Length && !useLongName)
             {
                 throw new ArgumentException("File extension too long '" + name + "'", nameof(name));
             }
         }
+
+        /// <summary>
+        /// Long name to be displayed to the user
+        /// </summary>
+        public string LongName { get; set; }
 
         public bool Equals(FileName other)
         {
@@ -114,32 +130,40 @@ namespace DiscUtils.Fat
             {
                 return false;
             }
+            if (!string.IsNullOrEmpty(LongName) && !string.IsNullOrEmpty(other.LongName))
+                return LongName == other.LongName;
 
             return CompareRawNames(this, other) == 0;
         }
 
         public static FileName FromPath(string path, Encoding encoding)
         {
-            return new FileName(Utilities.GetFileFromPath(path), encoding);
+            return new FileName(Utilities.GetFileFromPath(path), encoding, false);
         }
 
         public static bool operator ==(FileName a, FileName b)
         {
-            return CompareRawNames(a, b) == 0;
+            if (a is null)
+                return b is null;
+            return a.Equals(b);
         }
 
         public static bool operator !=(FileName a, FileName b)
         {
-            return CompareRawNames(a, b) != 0;
+            return !(a == b);
         }
 
         public string GetDisplayName(Encoding encoding)
         {
+            if (!string.IsNullOrEmpty(LongName))
+                return LongName;
             return GetSearchName(encoding).TrimEnd('.');
         }
 
         public string GetSearchName(Encoding encoding)
         {
+            if (!string.IsNullOrEmpty(LongName))
+                return LongName;
             return encoding.GetString(_raw, 0, 8).TrimEnd() + "." + encoding.GetString(_raw, 8, 3).TrimEnd();
         }
 
@@ -187,6 +211,18 @@ namespace DiscUtils.Fat
             }
 
             return val;
+        }
+
+        public byte ComputeChecksum()
+        {
+            byte checksum = 0;
+
+            for (var i = 0; i < 11; ++i)
+            {
+                checksum = (byte)((((checksum & 1) << 7) | ((checksum & 0xfe) >> 1)) + _raw[i]);
+            }
+
+            return checksum;
         }
 
         private static int CompareRawNames(FileName a, FileName b)
