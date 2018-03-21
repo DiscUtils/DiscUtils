@@ -155,12 +155,12 @@ namespace DiscUtils.Lvm
         }
 
         private MetadataPhysicalVolumeSection GetPhysicalVolumeMetadata(MetadataVolumeGroupSection vg, string name)
-        {            
+        {
             foreach (var pv in vg.PhysicalVolumes)
             {
                 if (pv.Name == name)
                     return pv;
-            }            
+            }
             return null;
         }
     }
