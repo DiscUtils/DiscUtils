@@ -73,7 +73,7 @@ namespace DiscUtils.Ntfs
             byte[] bytes = StreamUtilities.ReadExact(stream, 512);
 
             _context.BiosParameterBlock = BiosParameterBlock.FromBytes(bytes, 0);
-            if (!IsValidBPB(_context.BiosParameterBlock, stream.Length))
+            if (!_context.BiosParameterBlock.IsValid(stream.Length))
             {
                 throw new InvalidFileSystemException("BIOS Parameter Block is invalid for an NTFS file system");
             }
