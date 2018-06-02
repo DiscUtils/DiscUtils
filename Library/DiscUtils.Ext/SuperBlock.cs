@@ -121,6 +121,9 @@ namespace DiscUtils.Ext
 
         public int ReadFrom(byte[] buffer, int offset)
         {
+            Magic = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 56);
+            if (Magic != Ext2Magic) return Size;
+
             InodesCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
             BlocksCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
             ReservedBlocksCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
@@ -136,7 +139,6 @@ namespace DiscUtils.Ext
             WriteTime = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 48);
             MountCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 52);
             MaxMountCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 54);
-            Magic = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 56);
             State = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 58);
             Errors = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 60);
             MinorRevisionLevel = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 62);
