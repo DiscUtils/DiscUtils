@@ -1635,7 +1635,7 @@ namespace DiscUtils.Ntfs
             byte[] bytes = StreamUtilities.ReadExact(stream, 512);
             BiosParameterBlock bpb = BiosParameterBlock.FromBytes(bytes, 0);
 
-            return IsValidBPB(bpb, stream.Length);
+            return bpb.IsValid(stream.Length);
         }
 
         /// <summary>
@@ -1938,19 +1938,7 @@ namespace DiscUtils.Ntfs
 
             base.Dispose(disposing);
         }
-
-        private static bool IsValidBPB(BiosParameterBlock bpb, long volumeSize)
-        {
-            if (bpb.SignatureByte != 0x80 || bpb.TotalSectors16 != 0 || bpb.TotalSectors32 != 0
-                || bpb.TotalSectors64 == 0 || bpb.MftRecordSize == 0 || bpb.MftCluster == 0 || bpb.BytesPerSector == 0)
-            {
-                return false;
-            }
-
-            long mftPos = bpb.MftCluster * bpb.SectorsPerCluster * bpb.BytesPerSector;
-            return mftPos < bpb.TotalSectors64 * bpb.BytesPerSector && mftPos < volumeSize;
-        }
-
+        
         private static void RemoveFileFromDirectory(Directory dir, File file, string name)
         {
             List<string> aliases = new List<string>();
