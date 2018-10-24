@@ -349,6 +349,19 @@ namespace DiscUtils.Xfs
             get { return Version & XfsSbVersionNumbits; }
         }
 
+        public bool SB_hasftype
+        {
+            get
+            {
+                if ((((this.SbVersion == 5) || ((this.Version & 0x8000) != 0)) && ((this.Features2 & 0x00000200) != 0)) ||
+                    ((this.SbVersion == 5) && (this.IncompatibleFeatures & 0x0001) != 0))
+                {//has ftype in dir inode
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public int ReadFrom(byte[] buffer, int offset)
         {
             Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
@@ -400,6 +413,7 @@ namespace DiscUtils.Xfs
             
             if (SbVersion >= XfsSbVersion5)
             {
+                offset = offset + 0xD0;
                 CompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset);
                 ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x04);
                 IncompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x08);

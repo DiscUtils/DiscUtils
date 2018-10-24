@@ -28,7 +28,22 @@ namespace DiscUtils.Xfs
 
     internal class ShortformDirectory : IByteArraySerializable
     {
+        public SuperBlock superblock { get; private set; }
+
+        public ShortformDirectory(SuperBlock sb)
+        {
+            superblock = sb;
+            if ((((sb.SbVersion == 5) || ((sb.Version & 0x8000) != 0)) && ((sb.Features2 & 0x00000200) != 0)) ||
+                ((sb.SbVersion == 5) && (sb.IncompatibleFeatures & 0x0001) != 0))
+            {//has ftype in dir inode
+
+                has_ftype = true;
+            }
+        }
+
         private bool _useShortInode;
+
+        private bool has_ftype = false;
 
         public byte Count4Bytes { get; private set; }
 
@@ -56,26 +71,28 @@ namespace DiscUtils.Xfs
             Count4Bytes = buffer[offset];
             Count8Bytes = buffer[offset+0x1];
             byte count;
-            _useShortInode = false;
+            _useShortInode = true;
             Parent = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x2);
-            offset = offset + 0x6;
-            if (Count4Bytes != 0)
+            
+            if (Count8Bytes != 0)
             {
-                _useShortInode = true;
-                count = Count4Bytes;
-            }
-            else if (Count8Bytes != 0)
-            {
+                _useShortInode = false;
                 count = Count8Bytes;
+            }
+            else if (Count4Bytes != 0)
+            {
+                count = Count4Bytes;
             }
             else
             {
                 count = 0;
             }
+
+            offset = offset + 10 - (_useShortInode?4:0);//sizeof(struct xfs_dir2_sf_hdr) - (i8count == 0) * (XFS_INO64_SIZE - XFS_INO32_SIZE);
             Entries = new ShortformDirectoryEntry[count];
             for (int i = 0; i < count; i++)
             {
-                var entry = new ShortformDirectoryEntry(_useShortInode);
+                var entry = new ShortformDirectoryEntry(_useShortInode,has_ftype);
                 entry.ReadFrom(buffer, offset);
                 offset += entry.Size;
                 Entries[i] = entry;

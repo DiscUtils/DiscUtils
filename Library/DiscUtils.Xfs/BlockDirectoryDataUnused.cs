@@ -32,6 +32,16 @@ namespace DiscUtils.Xfs
 
         public ushort Tag { get; private set; }
 
+        public SuperBlock SuperBlock { get; private set; }
+
+        public bool sb_ok = false;
+
+        public BlockDirectoryDataUnused(SuperBlock sb)
+        {
+            SuperBlock = sb;
+            sb_ok = true;
+        }
+
         public override int Size { get { return Length; } }
 
         public override int ReadFrom(byte[] buffer, int offset)

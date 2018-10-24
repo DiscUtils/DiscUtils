@@ -29,10 +29,12 @@ namespace DiscUtils.Xfs
     internal class ShortformDirectoryEntry : IByteArraySerializable, IDirectoryEntry
     {
         private readonly bool _useShortInode;
+        private readonly bool _has_ftype;
 
-        public ShortformDirectoryEntry(bool useShortInode)
+        public ShortformDirectoryEntry(bool useShortInode,bool has_ftype)
         {
             _useShortInode = useShortInode;
+            _has_ftype = has_ftype;
         }
 
         public byte NameLength { get; private set; }
@@ -45,7 +47,7 @@ namespace DiscUtils.Xfs
 
         public int Size
         {
-            get { return 0x3 + NameLength + (_useShortInode ? 4 : 8); }
+            get { return 0x3 + NameLength + (_useShortInode ? 4 : 8) + (_has_ftype ? 1 : 0); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -55,11 +57,11 @@ namespace DiscUtils.Xfs
             Name = EndianUtilities.ToByteArray(buffer, offset + 0x3, NameLength);
             if (_useShortInode)
             {
-                Inode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x3 + NameLength);
+                Inode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x3 + NameLength + (_has_ftype ? 1 : 0) );
             }
             else
             {
-                Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x3 + NameLength);
+                Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x3 + NameLength + (_has_ftype ? 1 : 0) );
             }
             return Size;
         }

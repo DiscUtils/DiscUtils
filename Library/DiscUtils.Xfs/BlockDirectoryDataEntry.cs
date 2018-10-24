@@ -21,6 +21,7 @@
 //
 
 using DiscUtils.Streams;
+using System.IO;
 
 namespace DiscUtils.Xfs
 {
@@ -34,11 +35,27 @@ namespace DiscUtils.Xfs
 
         public ushort Tag { get; private set; }
 
+        public SuperBlock SuperBlock { get; private set; }
+
+        public bool sb_ok = false;
+
+        public int has_ftype = 0;
+
+        public BlockDirectoryDataEntry(SuperBlock sb)
+        {
+            SuperBlock = sb;
+            sb_ok = true;
+        }
+
         public override int Size
         {
             get
             {
                 var size = 0xb + NameLength;
+                if(has_ftype != 0)
+                {
+                    size++;
+                }
                 var padding = size%8;
                 if (padding != 0)
                     return size + (8 - padding);
@@ -48,12 +65,38 @@ namespace DiscUtils.Xfs
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
+            if (sb_ok == false)
+                throw new IOException("not initial SuperBlock");
+
+
             Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset);
             NameLength = buffer[offset + 0x8];
             Name = EndianUtilities.ToByteArray(buffer, offset + 0x9, NameLength);
-            var padding = 6 - ((NameLength + 1)%8);
-            offset += padding;
-            Tag = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x9 + NameLength);
+
+            /* according to linux kernel
+             static inline int xfs_sb_version_hasftype(struct xfs_sb *sbp)
+                {
+	                return (XFS_SB_VERSION_NUM(sbp) == XFS_SB_VERSION_5 &&
+		                xfs_sb_has_incompat_feature(sbp, XFS_SB_FEAT_INCOMPAT_FTYPE)) ||
+	                       (xfs_sb_version_hasmorebits(sbp) &&
+		                 (sbp->sb_features2 & XFS_SB_VERSION2_FTYPE));
+                }
+             *******/
+             if(SuperBlock.SB_hasftype == true)
+            //if( (((SuperBlock.SbVersion == 5) || ((SuperBlock.Version & 0x8000) != 0)) && ((SuperBlock.Features2 & 0x00000200) != 0)) ||
+             //   ((SuperBlock.SbVersion == 5) && (SuperBlock.IncompatibleFeatures&0x0001)!=0))
+            {//has ftype in dir inode
+                var padding = 6 - ((NameLength + 1 + 1) % 8);//skip ftype
+                offset += padding;
+                has_ftype = 1;
+            }
+            else
+            {
+                var padding = 6 - ((NameLength + 1) % 8);
+                offset += padding;
+                has_ftype = 0;
+            }
+            Tag = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x9 + NameLength);//length u16
             return Size;
         }
 

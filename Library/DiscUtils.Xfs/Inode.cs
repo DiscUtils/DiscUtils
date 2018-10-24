@@ -247,12 +247,15 @@ namespace DiscUtils.Xfs
             DmState = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x58);
             Flags = (InodeFlags) EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x5A);
             Generation = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x5C);
-            var dfLength = (Forkoff*8) - 0x64;
-            if (dfLength < 0)
+            int DataForkStartOffset = 0x64;
+            if (Version == 3)
             {
-                dfLength = buffer.Length - offset - 0x64;
+                DataForkStartOffset = 0xb0;
             }
-            DataFork = EndianUtilities.ToByteArray(buffer, offset + 0x64, dfLength);
+            //var dfLength = (Forkoff*8) - DataForkStartOffset;//Extended atributes come in two versions: ¡°atr1¡± or ¡°atr2¡±, this just fit atr2
+            var dfLength = buffer.Length - offset - DataForkStartOffset;//read all data
+
+            DataFork = EndianUtilities.ToByteArray(buffer, offset + DataForkStartOffset, dfLength);
             return Size;
         }
 
@@ -271,7 +274,7 @@ namespace DiscUtils.Xfs
         public Extent[] GetExtents()
         {
             var result = new Extent[Extents];
-            int offset = Forkoff;
+            int offset = 0;// Forkoff;
             for (int i = 0; i < Extents; i++)
             {
                 var extent = new Extent();

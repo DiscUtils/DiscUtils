@@ -48,7 +48,7 @@ namespace DiscUtils.Xfs
                 if (Inode.Format == InodeFormat.Local)
                 {
                     //shortform directory
-                    var sfDir = new ShortformDirectory();
+                    var sfDir = new ShortformDirectory(Context.SuperBlock);
                     sfDir.ReadFrom(Inode.DataFork, 0);
                     foreach (var entry in sfDir.Entries)
                     {
@@ -59,12 +59,12 @@ namespace DiscUtils.Xfs
                 {
                     if (Inode.Extents == 1)
                     {
-                        var blockDir = new BlockDirectory();
+                        var blockDir = new BlockDirectory(Context.SuperBlock);//need feature to detect.
 
                         var dirContent = Inode.GetContentBuffer(Context);
                         var buffer = StreamUtilities.ReadAll(dirContent);
                         blockDir.ReadFrom(buffer, 0);
-                        if (blockDir.Magic != BlockDirectory.HeaderMagic)
+                        if ((blockDir.Magic != BlockDirectory.HeaderMagic)&&(blockDir.Magic != BlockDirectory.HeaderMagicV5))
                             throw new IOException("invalid block directory magic");
                         AddDirEntries(blockDir.Entries, result);
                     }
@@ -98,9 +98,9 @@ namespace DiscUtils.Xfs
                     for (long i = 0; i < extent.BlockCount; i++)
                     {
                         var buffer = extent.GetData(Context, i* Context.SuperBlock.DirBlockSize, Context.SuperBlock.DirBlockSize);
-                        var leafDir = new LeafDirectory();
+                        var leafDir = new LeafDirectory(Context.SuperBlock);
                         leafDir.ReadFrom(buffer, 0);
-                        if (leafDir.Magic != LeafDirectory.HeaderMagic)
+                        if ( (leafDir.Magic != LeafDirectory.HeaderMagic) && (leafDir.Magic != LeafDirectory.HeaderMagicV5) )
                             throw new IOException("invalid leaf directory magic");
                         AddDirEntries(leafDir.Entries, target);
                     }

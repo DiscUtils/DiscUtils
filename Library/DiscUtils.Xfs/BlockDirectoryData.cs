@@ -32,6 +32,8 @@ namespace DiscUtils.Xfs
 
         public abstract int ReadFrom(byte[] buffer, int offset);
 
+        //public abstract void TransSuperBlock(SuperBlock sb);
+
         public void WriteTo(byte[] buffer, int offset)
         {
             throw new NotImplementedException();

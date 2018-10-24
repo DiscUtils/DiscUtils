@@ -31,6 +31,8 @@ namespace DiscUtils.Xfs
     {
         public const uint HeaderMagic = 0x58443242;
 
+        public const uint HeaderMagicV5 = 0x58444233;
+
         public uint Magic { get; private set; }
 
         public uint LeafCount { get; private set; }
@@ -41,21 +43,46 @@ namespace DiscUtils.Xfs
 
         public BlockDirectoryData[] Entries { get; private set; }
 
+        public SuperBlock SuperBlock { get; private set; }
+
+        public bool sb_ok = false;
+
         public int Size
         {
             get { return 16 + 3*32; }
         }
+        public BlockDirectory(SuperBlock sb)
+        {
+            SuperBlock = sb;
+            sb_ok = true;
+        }
 
         public int ReadFrom(byte[] buffer, int offset)
         {
+            if (sb_ok == false)
+                throw new IOException("not initial SuperBlock");
+
             Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             BestFree = new BlockDirectoryDataFree[3];
-            offset += 0x4;
+            if (Magic == BlockDirectory.HeaderMagicV5)
+            {
+                offset += 48;//xfs_dir3_blk_hdr
+            }
+            else
+            {
+                offset += 0x4;
+            }
+
             for (int i = 0; i < BestFree.Length; i++)
             {
                 var free = new BlockDirectoryDataFree();
                 offset += free.ReadFrom(buffer, offset);
                 BestFree[i] = free;
+            }
+
+            if (Magic == BlockDirectory.HeaderMagicV5)
+            {
+                offset += 4;//__be32 xfs_dir3_data_hdr.pad
             }
 
             LeafStale = EndianUtilities.ToUInt32BigEndian(buffer, buffer.Length - 0x4);
@@ -68,12 +95,13 @@ namespace DiscUtils.Xfs
                 if (buffer[offset] == 0xff && buffer[offset + 0x1] == 0xff)
                 {
                     //unused
-                    entry = new BlockDirectoryDataUnused();
+                    entry = new BlockDirectoryDataUnused(SuperBlock);
                 }
                 else
                 {
-                    entry = new BlockDirectoryDataEntry();
+                    entry = new BlockDirectoryDataEntry(SuperBlock);
                 }
+                
                 offset += entry.ReadFrom(buffer, offset);
                 entries.Add(entry);
             }
