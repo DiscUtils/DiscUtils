@@ -7,18 +7,8 @@
     <Authors>Kenneth Bell;LordMike</Authors>
     <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Udf</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
     <PackageId>DiscUtils.Udf</PackageId>
     <PackageTags>DiscUtils;Filesystem;UDF</PackageTags>
-    <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GeneratePackageOnBuild Condition="'$(Configuration)' != 'Debug'">True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,14 +24,6 @@
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net20' ">
-    <DefineConstants>$(DefineConstants);NET20</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
