@@ -110,7 +110,7 @@ namespace DiscUtils.Lvm
                             var pvAlias = stripe.PhysicalVolumeName;
                             if (!pvs.ContainsKey(pvAlias))
                             {
-                                var pvm = GetPhysicalVolumeMetadata(pvAlias);
+                                var pvm = GetPhysicalVolumeMetadata(vg, pvAlias);
                                 if (pvm == null)
                                 {
                                     allPvsAvailable = false;
@@ -154,15 +154,12 @@ namespace DiscUtils.Lvm
             return null;
         }
 
-        private MetadataPhysicalVolumeSection GetPhysicalVolumeMetadata(string name)
+        private MetadataPhysicalVolumeSection GetPhysicalVolumeMetadata(MetadataVolumeGroupSection vg, string name)
         {
-            foreach (var vg in _volumeGroups)
+            foreach (var pv in vg.PhysicalVolumes)
             {
-                foreach (var pv in vg.PhysicalVolumes)
-                {
-                    if (pv.Name == name)
-                        return pv;
-                }
+                if (pv.Name == name)
+                    return pv;
             }
             return null;
         }

@@ -72,7 +72,7 @@ namespace DiscUtils.Udf
             while (validDescriptor)
             {
                 data.Position = vdpos;
-                int numRead = StreamUtilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
+                int numRead = StreamUtilities.ReadMaximum(data, buffer, 0, IsoUtilities.SectorSize);
                 if (numRead != IsoUtilities.SectorSize)
                 {
                     break;

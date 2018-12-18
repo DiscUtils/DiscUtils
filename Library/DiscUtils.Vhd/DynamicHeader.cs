@@ -149,7 +149,7 @@ namespace DiscUtils.Vhd
 
         internal static DynamicHeader FromStream(Stream stream)
         {
-            return FromBytes(StreamUtilities.ReadFully(stream, 1024), 0);
+            return FromBytes(StreamUtilities.ReadExact(stream, 1024), 0);
         }
 
         private uint CalculateChecksum()

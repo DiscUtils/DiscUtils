@@ -20,11 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3LookupResult : Nfs3CallResult
+    public sealed class Nfs3LookupResult : Nfs3CallResult
     {
-        public Nfs3LookupResult(XdrDataReader reader)
+        public Nfs3LookupResult()
+        {
+        }
+
+        internal Nfs3LookupResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (Status == Nfs3Status.Ok)
@@ -47,5 +53,52 @@ namespace DiscUtils.Nfs
         public Nfs3FileAttributes ObjectAttributes { get; set; }
 
         public Nfs3FileHandle ObjectHandle { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)this.Status);
+
+            if (Status == Nfs3Status.Ok)
+            {
+                ObjectHandle.Write(writer);
+
+                writer.Write(ObjectAttributes != null);
+
+                if (ObjectAttributes != null)
+                {
+                    ObjectAttributes.Write(writer);
+                }
+            }
+
+            writer.Write(DirAttributes != null);
+
+            if (DirAttributes != null)
+            {
+                DirAttributes.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3LookupResult);
+        }
+
+        public bool Equals(Nfs3LookupResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.ObjectHandle, ObjectHandle)
+                && object.Equals(other.ObjectAttributes, ObjectAttributes)
+                && object.Equals(other.DirAttributes, DirAttributes);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, ObjectHandle, ObjectAttributes, DirAttributes);
+        }
     }
 }

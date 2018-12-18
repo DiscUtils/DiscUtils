@@ -25,7 +25,7 @@ using System;
 namespace DiscUtils.Nfs
 {
     [Flags]
-    internal enum Nfs3AccessPermissions
+    public enum Nfs3AccessPermissions
     {
         None = 0x00,
         Read = 0x01,
@@ -33,6 +33,7 @@ namespace DiscUtils.Nfs
         Modify = 0x04,
         Extend = 0x08,
         Delete = 0x10,
-        Execute = 0x20
+        Execute = 0x20,
+        All = Read | Lookup | Modify | Extend | Delete | Execute
     }
 }

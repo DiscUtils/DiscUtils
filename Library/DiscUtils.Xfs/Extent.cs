@@ -80,7 +80,7 @@ namespace DiscUtils.Xfs
         public byte[] GetData(Context context, long offset, uint count)
         {
             context.RawStream.Position = GetOffset(context) + offset;
-            return StreamUtilities.ReadFully(context.RawStream, (int) count);
+            return StreamUtilities.ReadExact(context.RawStream, (int) count);
         }
 
         /// <inheritdoc />

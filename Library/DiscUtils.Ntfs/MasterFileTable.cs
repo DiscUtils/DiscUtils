@@ -135,7 +135,7 @@ namespace DiscUtils.Ntfs
                     uint index = 0;
                     while (mftStream.Position < mftStream.Length)
                     {
-                        byte[] recordData = StreamUtilities.ReadFully(mftStream, RecordSize);
+                        byte[] recordData = StreamUtilities.ReadExact(mftStream, RecordSize);
 
                         if (EndianUtilities.BytesToString(recordData, 0, 4) != "FILE")
                         {
@@ -192,7 +192,7 @@ namespace DiscUtils.Ntfs
         public FileRecord GetBootstrapRecord()
         {
             _recordStream.Position = 0;
-            byte[] mftSelfRecordData = StreamUtilities.ReadFully(_recordStream, RecordSize);
+            byte[] mftSelfRecordData = StreamUtilities.ReadExact(_recordStream, RecordSize);
             FileRecord mftSelfRecord = new FileRecord(_bytesPerSector);
             mftSelfRecord.FromBytes(mftSelfRecordData, 0);
             _recordCache[MftIndex] = mftSelfRecord;
@@ -367,7 +367,7 @@ namespace DiscUtils.Ntfs
                 if ((index + 1) * RecordSize <= _recordStream.Length)
                 {
                     _recordStream.Position = index * RecordSize;
-                    byte[] recordBuffer = StreamUtilities.ReadFully(_recordStream, RecordSize);
+                    byte[] recordBuffer = StreamUtilities.ReadExact(_recordStream, RecordSize);
 
                     result = new FileRecord(_bytesPerSector);
                     result.FromBytes(recordBuffer, 0, ignoreMagic);

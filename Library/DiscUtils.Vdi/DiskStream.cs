@@ -189,7 +189,7 @@ namespace DiscUtils.Vdi
                     long filePos = _fileHeader.DataOffset + _fileHeader.BlockExtraSize + blockOffset +
                                    offsetInBlock;
                     _fileStream.Position = filePos;
-                    StreamUtilities.ReadFully(_fileStream, buffer, offset + numRead, toRead);
+                    StreamUtilities.ReadExact(_fileStream, buffer, offset + numRead, toRead);
                 }
 
                 _position += toRead;
@@ -357,7 +357,7 @@ namespace DiscUtils.Vdi
         {
             _fileStream.Position = _fileHeader.BlocksOffset;
 
-            byte[] buffer = StreamUtilities.ReadFully(_fileStream, _fileHeader.BlockCount * 4);
+            byte[] buffer = StreamUtilities.ReadExact(_fileStream, _fileHeader.BlockCount * 4);
 
             _blockTable = new uint[_fileHeader.BlockCount];
             for (int i = 0; i < _fileHeader.BlockCount; ++i)

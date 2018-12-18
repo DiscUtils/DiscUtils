@@ -24,9 +24,13 @@ namespace DiscUtils.Nfs
 {
     using System;
 
-    internal sealed class Nfs3FileSystemStat
+    public sealed class Nfs3FileSystemStat
     {
-        public Nfs3FileSystemStat(XdrDataReader reader)
+        public Nfs3FileSystemStat()
+        {
+        }
+
+        internal Nfs3FileSystemStat(XdrDataReader reader)
         {
             TotalSizeBytes = reader.ReadUInt64();
             FreeSpaceBytes = reader.ReadUInt64();
@@ -105,5 +109,50 @@ namespace DiscUtils.Nfs
         public TimeSpan Invariant { get; set; }
 
         public DateTime InvariantUntil { get; private set; }
+
+        internal void Write(XdrDataWriter writer)
+        {
+            writer.Write(TotalSizeBytes);
+            writer.Write(FreeSpaceBytes);
+            writer.Write(AvailableFreeSpaceBytes);
+            writer.Write(FileSlotCount);
+            writer.Write(FreeFileSlotCount);
+            writer.Write(AvailableFreeFileSlotCount);
+
+            if (Invariant == TimeSpan.MaxValue)
+            {
+                writer.Write(uint.MaxValue);
+            }
+            else
+            {
+                writer.Write((uint)Invariant.TotalSeconds);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3FileSystemStat);
+        }
+
+        public bool Equals(Nfs3FileSystemStat other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.TotalSizeBytes == TotalSizeBytes
+                && other.FreeSpaceBytes == FreeSpaceBytes
+                && other.AvailableFreeSpaceBytes == AvailableFreeSpaceBytes
+                && other.FileSlotCount == FileSlotCount
+                && other.FreeFileSlotCount == FreeFileSlotCount
+                && other.AvailableFreeFileSlotCount == AvailableFreeFileSlotCount
+                && other.Invariant == Invariant;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(TotalSizeBytes, FreeSpaceBytes, AvailableFreeSpaceBytes, FileSlotCount, FreeFileSlotCount, AvailableFreeFileSlotCount, Invariant);
+        }
     }
 }

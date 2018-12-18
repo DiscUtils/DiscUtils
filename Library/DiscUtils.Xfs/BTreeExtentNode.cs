@@ -75,7 +75,7 @@ namespace DiscUtils.Xfs
                 }
                 var data = context.RawStream;
                 data.Position = Extent.GetOffset(context, Pointer[i]);
-                var buffer = StreamUtilities.ReadFully(data, (int)context.SuperBlock.Blocksize);
+                var buffer = StreamUtilities.ReadExact(data, (int)context.SuperBlock.Blocksize);
                 child.ReadFrom(buffer, 0);
                 if (child.Magic != BtreeMagic)
                 {

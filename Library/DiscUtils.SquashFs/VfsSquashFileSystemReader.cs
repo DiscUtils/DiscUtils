@@ -48,7 +48,7 @@ namespace DiscUtils.SquashFs
 
             // Read superblock
             stream.Position = 0;
-            byte[] buffer = StreamUtilities.ReadFully(stream, _context.SuperBlock.Size);
+            byte[] buffer = StreamUtilities.ReadExact(stream, _context.SuperBlock.Size);
             _context.SuperBlock.ReadFrom(buffer, 0);
 
             if (_context.SuperBlock.Magic != SuperBlock.SquashFsMagic)
@@ -209,7 +209,7 @@ namespace DiscUtils.SquashFs
             _context.RawStream.Position = pos;
             int numBlocks = MathUtilities.Ceil(count * recordSize, MetadataBufferSize);
 
-            byte[] tableBytes = StreamUtilities.ReadFully(_context.RawStream, numBlocks * 8);
+            byte[] tableBytes = StreamUtilities.ReadExact(_context.RawStream, numBlocks * 8);
             MetablockReader[] result = new MetablockReader[numBlocks];
             for (int i = 0; i < numBlocks; ++i)
             {
@@ -252,25 +252,19 @@ namespace DiscUtils.SquashFs
                     _ioBuffer = new byte[readLen];
                 }
 
-                if (StreamUtilities.ReadFully(stream, _ioBuffer, 0, readLen) != readLen)
-                {
-                    throw new IOException("Truncated stream reading compressed block");
-                }
+                StreamUtilities.ReadExact(stream, _ioBuffer, 0, readLen);
 
                 using (
                     ZlibStream zlibStream = new ZlibStream(new MemoryStream(_ioBuffer, 0, readLen, false),
                         CompressionMode.Decompress, true))
                 {
-                    block.Available = StreamUtilities.ReadFully(zlibStream, block.Data, 0, (int)_context.SuperBlock.BlockSize);
+                    block.Available = StreamUtilities.ReadMaximum(zlibStream, block.Data, 0, (int)_context.SuperBlock.BlockSize);
                 }
             }
             else
             {
-                block.Available = StreamUtilities.ReadFully(stream, block.Data, 0, readLen);
-                if (block.Available != readLen)
-                {
-                    throw new IOException("Truncated stream reading uncompressed block");
-                }
+                StreamUtilities.ReadExact(stream, block.Data, 0, readLen);
+                block.Available = readLen;
             }
 
             return block;
@@ -287,7 +281,7 @@ namespace DiscUtils.SquashFs
             Stream stream = _context.RawStream;
             stream.Position = pos;
 
-            byte[] buffer = StreamUtilities.ReadFully(stream, 2);
+            byte[] buffer = StreamUtilities.ReadExact(stream, 2);
 
             int readLen = EndianUtilities.ToUInt16LittleEndian(buffer, 0);
             bool isCompressed = (readLen & 0x8000) == 0;
@@ -306,21 +300,18 @@ namespace DiscUtils.SquashFs
                     _ioBuffer = new byte[readLen];
                 }
 
-                if (StreamUtilities.ReadFully(stream, _ioBuffer, 0, readLen) != readLen)
-                {
-                    throw new IOException("Truncated stream reading compressed metadata");
-                }
+                StreamUtilities.ReadExact(stream, _ioBuffer, 0, readLen);
 
                 using (
                     ZlibStream zlibStream = new ZlibStream(new MemoryStream(_ioBuffer, 0, readLen, false),
                         CompressionMode.Decompress, true))
                 {
-                    block.Available = StreamUtilities.ReadFully(zlibStream, block.Data, 0, MetadataBufferSize);
+                    block.Available = StreamUtilities.ReadMaximum(zlibStream, block.Data, 0, MetadataBufferSize);
                 }
             }
             else
             {
-                block.Available = StreamUtilities.ReadFully(stream, block.Data, 0, readLen);
+                block.Available = StreamUtilities.ReadMaximum(stream, block.Data, 0, readLen);
             }
 
             return block;

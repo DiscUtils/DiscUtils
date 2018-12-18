@@ -26,15 +26,15 @@ namespace DiscUtils.Nfs
 {
     internal sealed class Nfs3 : RpcProgram
     {
-        public const int ProgramIdentifier = 100003;
-        public const int ProgramVersion = 3;
+        public const int ProgramIdentifier = RpcIdentifiers.Nfs3ProgramIdentifier;
+        public const int ProgramVersion = RpcIdentifiers.Nfs3ProgramVersion;
 
         public const int MaxFileHandleSize = 64;
         public const int CookieVerifierSize = 8;
         public const int CreateVerifierSize = 8;
         public const int WriteVerifierSize = 8;
 
-        public Nfs3(RpcClient client)
+        public Nfs3(IRpcClient client)
             : base(client) {}
 
         public override int Identifier
@@ -131,7 +131,7 @@ namespace DiscUtils.Nfs
             handle.Write(writer);
             writer.Write(position);
             writer.Write(count);
-            writer.Write(0); // UNSTABLE
+            writer.Write((int)Nfs3StableHow.Unstable);
             writer.WriteBuffer(buffer, bufferOffset, count);
 
             RpcReply reply = DoSend(ms);
@@ -224,14 +224,14 @@ namespace DiscUtils.Nfs
             throw new RpcException(reply.Header.ReplyHeader);
         }
 
-        public Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, byte[] cookieVerifier, uint dirCount,
+        public Nfs3ReadDirPlusResult ReadDirPlus(Nfs3FileHandle dir, ulong cookie, ulong cookieVerifier, uint dirCount,
                                                  uint maxCount)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.Readdirplus);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.ReadDirPlus);
             dir.Write(writer);
             writer.Write(cookie);
-            writer.WriteBytes(cookieVerifier ?? new byte[CookieVerifierSize]);
+            writer.Write(cookieVerifier);
             writer.Write(dirCount);
             writer.Write(maxCount);
 

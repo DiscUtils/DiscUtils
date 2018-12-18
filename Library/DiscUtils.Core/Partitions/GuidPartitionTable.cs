@@ -362,7 +362,7 @@ namespace DiscUtils.Partitions
             _diskGeometry = diskGeometry;
 
             disk.Position = diskGeometry.BytesPerSector;
-            byte[] sector = StreamUtilities.ReadFully(disk, diskGeometry.BytesPerSector);
+            byte[] sector = StreamUtilities.ReadExact(disk, diskGeometry.BytesPerSector);
 
             _primaryHeader = new GptHeader(diskGeometry.BytesPerSector);
             if (!_primaryHeader.ReadFrom(sector, 0) || !ReadEntries(_primaryHeader))
@@ -558,7 +558,7 @@ namespace DiscUtils.Partitions
         private bool ReadEntries(GptHeader header)
         {
             _diskData.Position = header.PartitionEntriesLba * _diskGeometry.BytesPerSector;
-            _entryBuffer = StreamUtilities.ReadFully(_diskData, (int)(header.PartitionEntrySize * header.PartitionEntryCount));
+            _entryBuffer = StreamUtilities.ReadExact(_diskData, (int)(header.PartitionEntrySize * header.PartitionEntryCount));
             if (header.EntriesCrc != CalcEntriesCrc())
             {
                 return false;

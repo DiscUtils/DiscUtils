@@ -188,7 +188,7 @@ namespace DiscUtils.Vhdx
                 if (blockStatus == PayloadBlockStatus.FullyPresent)
                 {
                     _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
-                    int read = StreamUtilities.ReadFully(_fileStream, buffer, offset + totalRead,
+                    int read = StreamUtilities.ReadMaximum(_fileStream, buffer, offset + totalRead,
                         Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
                     totalRead += read;
@@ -205,12 +205,12 @@ namespace DiscUtils.Vhdx
                     if (present)
                     {
                         _fileStream.Position = chunk.GetBlockPosition(blockIndex) + blockOffset;
-                        read = StreamUtilities.ReadFully(_fileStream, buffer, offset + totalRead, toRead);
+                        read = StreamUtilities.ReadMaximum(_fileStream, buffer, offset + totalRead, toRead);
                     }
                     else
                     {
                         _parentStream.Position = _position + totalRead;
-                        read = StreamUtilities.ReadFully(_parentStream, buffer, offset + totalRead, toRead);
+                        read = StreamUtilities.ReadMaximum(_parentStream, buffer, offset + totalRead, toRead);
                     }
 
                     totalRead += read;
@@ -218,7 +218,7 @@ namespace DiscUtils.Vhdx
                 else if (blockStatus == PayloadBlockStatus.NotPresent)
                 {
                     _parentStream.Position = _position + totalRead;
-                    int read = StreamUtilities.ReadFully(_parentStream, buffer, offset + totalRead,
+                    int read = StreamUtilities.ReadMaximum(_parentStream, buffer, offset + totalRead,
                         Math.Min(blockBytesRemaining, totalToRead - totalRead));
 
                     totalRead += read;

@@ -38,7 +38,7 @@ namespace DiscUtils.Xfs
             :base(new XfsFileSystemOptions(parameters))
         {
             stream.Position = 0;
-            byte[] superblockData = StreamUtilities.ReadFully(stream, 264);
+            byte[] superblockData = StreamUtilities.ReadExact(stream, 264);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

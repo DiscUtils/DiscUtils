@@ -68,7 +68,7 @@ namespace DiscUtils.SquashFs
                 return false;
             }
 
-            byte[] buffer = StreamUtilities.ReadFully(stream, superBlock.Size);
+            byte[] buffer = StreamUtilities.ReadExact(stream, superBlock.Size);
             superBlock.ReadFrom(buffer, 0);
 
             return superBlock.Magic == SuperBlock.SquashFsMagic;

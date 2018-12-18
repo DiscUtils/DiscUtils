@@ -20,16 +20,49 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3ModifyResult : Nfs3CallResult
+    public sealed class Nfs3ModifyResult : Nfs3CallResult
     {
-        public Nfs3ModifyResult(XdrDataReader reader)
+        public Nfs3ModifyResult()
+        {
+        }
+
+        internal Nfs3ModifyResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             CacheConsistency = new Nfs3WeakCacheConsistency(reader);
         }
 
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+            CacheConsistency.Write(writer);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3ModifyResult);
+        }
+
+        public bool Equals(Nfs3ModifyResult other)
+        {
+            if(other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.CacheConsistency, CacheConsistency);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, CacheConsistency);
+        }
     }
 }

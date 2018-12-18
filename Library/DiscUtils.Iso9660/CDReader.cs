@@ -184,7 +184,7 @@ namespace DiscUtils.Iso9660
             }
 
             data.Position = 0x8000;
-            int numRead = StreamUtilities.ReadFully(data, buffer, 0, IsoUtilities.SectorSize);
+            int numRead = StreamUtilities.ReadMaximum(data, buffer, 0, IsoUtilities.SectorSize);
             if (numRead != IsoUtilities.SectorSize)
             {
                 return false;

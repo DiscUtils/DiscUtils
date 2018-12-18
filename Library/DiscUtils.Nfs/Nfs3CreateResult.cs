@@ -20,11 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3CreateResult : Nfs3CallResult
+    public class Nfs3CreateResult : Nfs3CallResult
     {
-        public Nfs3CreateResult(XdrDataReader reader)
+        internal Nfs3CreateResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (Status == Nfs3Status.Ok)
@@ -43,10 +45,59 @@ namespace DiscUtils.Nfs
             CacheConsistency = new Nfs3WeakCacheConsistency(reader);
         }
 
+        public Nfs3CreateResult()
+        {
+        }
+
         public Nfs3WeakCacheConsistency CacheConsistency { get; set; }
 
         public Nfs3FileAttributes FileAttributes { get; set; }
 
         public Nfs3FileHandle FileHandle { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            if (Status == Nfs3Status.Ok)
+            {
+                writer.Write(FileHandle != null);
+                if (FileHandle != null)
+                {
+                    FileHandle.Write(writer);
+                }
+
+                writer.Write(FileAttributes != null);
+                if (FileAttributes != null)
+                {
+                    FileAttributes.Write(writer);
+                }
+            }
+
+            CacheConsistency.Write(writer);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3CreateResult);
+        }
+
+        public bool Equals(Nfs3CreateResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.FileHandle, FileHandle)
+                && object.Equals(other.FileAttributes, FileAttributes)
+                && object.Equals(other.CacheConsistency, CacheConsistency);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, FileHandle, FileAttributes, CacheConsistency);
+        }
     }
 }

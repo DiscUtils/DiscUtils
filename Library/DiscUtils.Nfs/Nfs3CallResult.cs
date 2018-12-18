@@ -20,13 +20,31 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.IO;
+
 namespace DiscUtils.Nfs
 {
     /// <summary>
     /// Base class for all NFS result structures.
     /// </summary>
-    internal abstract class Nfs3CallResult
+    public abstract class Nfs3CallResult : IRpcObject
     {
         public Nfs3Status Status { get; set; }
+
+        public virtual void Write(XdrDataWriter writer)
+        {
+            throw new NotSupportedException();
+        }
+
+        public virtual long GetSize()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                Write(writer);
+                return stream.Length;
+            }
+        }
     }
 }

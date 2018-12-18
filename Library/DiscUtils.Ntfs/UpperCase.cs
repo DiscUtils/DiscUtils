@@ -37,7 +37,7 @@ namespace DiscUtils.Ntfs
             {
                 _table = new char[s.Length / 2];
 
-                byte[] buffer = StreamUtilities.ReadFully(s, (int)s.Length);
+                byte[] buffer = StreamUtilities.ReadExact(s, (int)s.Length);
 
                 for (int i = 0; i < _table.Length; ++i)
                 {

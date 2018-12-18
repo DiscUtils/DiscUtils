@@ -50,7 +50,7 @@ namespace DiscUtils.Ntfs
             Stream stream = index.AllocationStream;
             _streamPosition = index.IndexBlockVcnToPosition(parentEntry.ChildrenVirtualCluster);
             stream.Position = _streamPosition;
-            byte[] buffer = StreamUtilities.ReadFully(stream, (int)index.IndexBufferSize);
+            byte[] buffer = StreamUtilities.ReadExact(stream, (int)index.IndexBufferSize);
             FromBytes(buffer, 0);
         }
 

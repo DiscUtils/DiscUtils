@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class RpcClient : IDisposable
+    internal sealed class RpcClient : IRpcClient
     {
         private uint _nextTransaction;
         private readonly string _serverAddress;
@@ -36,10 +36,10 @@ namespace DiscUtils.Nfs
             _serverAddress = address;
             Credentials = credential;
             _nextTransaction = (uint)new Random().Next();
-            _transports[PortMapper.ProgramIdentifier] = new RpcTcpTransport(address, 111);
+            _transports[PortMap2.ProgramIdentifier] = new RpcTcpTransport(address, 111);
         }
 
-        internal RpcCredentials Credentials { get; }
+        public RpcCredentials Credentials { get; }
 
         public void Dispose()
         {
@@ -54,18 +54,18 @@ namespace DiscUtils.Nfs
             }
         }
 
-        internal uint NextTransactionId()
+        public uint NextTransactionId()
         {
             return _nextTransaction++;
         }
 
-        internal RpcTcpTransport GetTransport(int program, int version)
+        public IRpcTransport GetTransport(int program, int version)
         {
             RpcTcpTransport transport;
             if (!_transports.TryGetValue(program, out transport))
             {
-                PortMapper pm = new PortMapper(this);
-                int port = pm.GetPort(program, version, PortMapperProtocol.Tcp);
+                PortMap2 pm = new PortMap2(this);
+                int port = pm.GetPort(program, version, PortMap2Protocol.Tcp);
                 transport = new RpcTcpTransport(_serverAddress, port);
                 _transports[program] = transport;
             }

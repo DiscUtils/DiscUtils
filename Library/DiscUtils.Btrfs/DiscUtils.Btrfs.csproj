@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../common.props" />
+
+  <PropertyGroup>
+    <Description>DiscUtils Btrfs</Description>
+    <AssemblyTitle>DiscUtils.Btrfs</AssemblyTitle>
+    <Authors>Bianco Veigel</Authors>
+    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
+    <AssemblyName>DiscUtils.Btrfs</AssemblyName>
+    <PackageId>DiscUtils.Btrfs</PackageId>
+    <PackageTags>DiscUtils;Btrfs</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="lzo.net" Version="0.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
+    <ProjectReference Include="..\DiscUtils.Streams\DiscUtils.Streams.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
+    <Reference Include="System.Xml" />
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Reference Include="System.Xml" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="System.Xml" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>

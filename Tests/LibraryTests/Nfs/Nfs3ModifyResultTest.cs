@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,43 +20,36 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.Nfs;
 using System.IO;
+using Xunit;
 
-namespace DiscUtils.Nfs
+namespace LibraryTests.Nfs
 {
-    internal sealed class PortMapper : RpcProgram
+    public class Nfs3ModifyResultTest
     {
-        public const int ProgramIdentifier = 100000;
-        public const int ProgramVersion = 2;
-
-        public PortMapper(RpcClient client)
-            : base(client) {}
-
-        public override int Identifier
+        [Fact]
+        public void RoundTripTest()
         {
-            get { return ProgramIdentifier; }
-        }
-
-        public override int Version
-        {
-            get { return ProgramVersion; }
-        }
-
-        public int GetPort(int program, int version, PortMapperProtocol protocol)
-        {
-            MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Lookup);
-            writer.Write(program);
-            writer.Write(version);
-            writer.Write((uint)protocol);
-            writer.Write((uint)0);
-
-            RpcReply reply = DoSend(ms);
-            if (reply.Header.IsSuccess)
+            Nfs3ModifyResult result = new Nfs3ModifyResult()
             {
-                return (int)reply.BodyReader.ReadUInt32();
+                CacheConsistency = new Nfs3WeakCacheConsistency(),
+                Status = Nfs3Status.Ok
+            };
+
+            Nfs3ModifyResult clone = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                XdrDataWriter writer = new XdrDataWriter(stream);
+                result.Write(writer);
+
+                stream.Position = 0;
+                XdrDataReader reader = new XdrDataReader(stream);
+                clone = new Nfs3ModifyResult(reader);
             }
-            throw new RpcException(reply.Header.ReplyHeader);
+
+            Assert.Equal(result, clone);
         }
     }
 }

@@ -20,13 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using DiscUtils.CoreCompat;
+using DiscUtils.Streams;
+using DiscUtils.Vfs;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using DiscUtils.CoreCompat;
-using DiscUtils.Streams;
-using DiscUtils.Vfs;
 
 namespace DiscUtils.Iso9660
 {
@@ -46,14 +46,10 @@ namespace DiscUtils.Iso9660
             uint totalRead = 0;
             while (totalRead < totalLength)
             {
-                int toRead = (int)Math.Min(buffer.Length, totalLength - totalRead);
-                uint bytesRead = (uint)StreamUtilities.ReadFully(extent, buffer, 0, toRead);
-                if (bytesRead != toRead)
-                {
-                    throw new IOException("Failed to read whole directory");
-                }
+                int bytesRead = (int)Math.Min(buffer.Length, totalLength - totalRead);
 
-                totalRead += bytesRead;
+                StreamUtilities.ReadExact(extent, buffer, 0, bytesRead);
+                totalRead += (uint)bytesRead;
 
                 uint pos = 0;
                 while (pos < bytesRead && buffer[pos] != 0)

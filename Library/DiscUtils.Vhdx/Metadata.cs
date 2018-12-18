@@ -167,7 +167,7 @@ namespace DiscUtils.Vhdx
             if (Table.Entries.TryGetValue(key, out entry))
             {
                 _regionStream.Position = entry.Offset;
-                byte[] data = StreamUtilities.ReadFully(_regionStream, ReflectionHelper.SizeOf<T>());
+                byte[] data = StreamUtilities.ReadExact(_regionStream, ReflectionHelper.SizeOf<T>());
                 return reader(data, 0);
             }
 

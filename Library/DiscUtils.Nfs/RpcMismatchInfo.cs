@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,17 +21,50 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    internal class RpcMismatchInfo
+    public class RpcMismatchInfo
     {
         public uint High;
         public uint Low;
+
+        public RpcMismatchInfo()
+        {
+        }
 
         public RpcMismatchInfo(XdrDataReader reader)
         {
             Low = reader.ReadUInt32();
             High = reader.ReadUInt32();
+        }
+
+        public void Write(XdrDataWriter writer)
+        {
+            writer.Write(Low);
+            writer.Write(High);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as RpcMismatchInfo);
+        }
+
+        public bool Equals(RpcMismatchInfo other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.High == High
+                && other.Low == Low;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(High, Low);
         }
     }
 }

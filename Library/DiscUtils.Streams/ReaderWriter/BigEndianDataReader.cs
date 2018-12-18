@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.IO;
 
 namespace DiscUtils.Streams
@@ -31,32 +32,32 @@ namespace DiscUtils.Streams
 
         public override ushort ReadUInt16()
         {
-            return EndianUtilities.ToUInt16BigEndian(StreamUtilities.ReadFully(_stream, 2), 0);
+            ReadToBuffer(sizeof(UInt16));
+            return EndianUtilities.ToUInt16BigEndian(_buffer, 0);
         }
 
         public override int ReadInt32()
         {
-            return EndianUtilities.ToInt32BigEndian(StreamUtilities.ReadFully(_stream, 4), 0);
+            ReadToBuffer(sizeof(Int32));
+            return EndianUtilities.ToInt32BigEndian(_buffer, 0);
         }
 
         public override uint ReadUInt32()
         {
-            return EndianUtilities.ToUInt32BigEndian(StreamUtilities.ReadFully(_stream, 4), 0);
+            ReadToBuffer(sizeof(UInt32));
+            return EndianUtilities.ToUInt32BigEndian(_buffer, 0);
         }
 
         public override long ReadInt64()
         {
-            return EndianUtilities.ToInt64BigEndian(StreamUtilities.ReadFully(_stream, 8), 0);
+            ReadToBuffer(sizeof(Int64));
+            return EndianUtilities.ToInt64BigEndian(_buffer, 0);
         }
 
         public override ulong ReadUInt64()
         {
-            return EndianUtilities.ToUInt64BigEndian(StreamUtilities.ReadFully(_stream, 8), 0);
-        }
-
-        public override byte[] ReadBytes(int count)
-        {
-            return StreamUtilities.ReadFully(_stream, count);
+            ReadToBuffer(sizeof(UInt64));
+            return EndianUtilities.ToUInt64BigEndian(_buffer, 0);
         }
     }
 }

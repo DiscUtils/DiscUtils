@@ -32,7 +32,7 @@ namespace DiscUtils.Vhd
 
         public static Header FromStream(Stream stream)
         {
-            return FromBytes(StreamUtilities.ReadFully(stream, 16), 0);
+            return FromBytes(StreamUtilities.ReadExact(stream, 16), 0);
         }
 
         public static Header FromBytes(byte[] data, int offset)

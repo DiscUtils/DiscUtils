@@ -24,9 +24,13 @@ using System;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
+    public sealed class Nfs3FileHandle : IEquatable<Nfs3FileHandle>, IComparable<Nfs3FileHandle>
     {
-        internal Nfs3FileHandle(XdrDataReader reader)
+        public Nfs3FileHandle()
+        {
+        }
+
+        public Nfs3FileHandle(XdrDataReader reader)
         {
             Value = reader.ReadBuffer(Nfs3Mount.MaxFileHandleSize);
         }
@@ -112,6 +116,20 @@ namespace DiscUtils.Nfs
         internal void Write(XdrDataWriter writer)
         {
             writer.WriteBuffer(Value);
+        }
+
+        public override string ToString()
+        {
+            int value = 0;
+            if (Value != null)
+            {
+                for (int i = Value.Length - 1; i >= 0; i--)
+                {
+                    value = (value << sizeof(byte)) | Value[i];
+                }
+            }
+
+            return value.ToString();
         }
     }
 }

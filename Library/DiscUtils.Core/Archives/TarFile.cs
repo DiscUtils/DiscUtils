@@ -45,7 +45,7 @@ namespace DiscUtils.Archives
             _files = new Dictionary<string, FileRecord>();
 
             TarHeader hdr = new TarHeader();
-            byte[] hdrBuf = StreamUtilities.ReadFully(_fileStream, TarHeader.Length);
+            byte[] hdrBuf = StreamUtilities.ReadExact(_fileStream, TarHeader.Length);
             hdr.ReadFrom(hdrBuf, 0);
             while (hdr.FileLength != 0 || !string.IsNullOrEmpty(hdr.FileName))
             {
@@ -53,7 +53,7 @@ namespace DiscUtils.Archives
                 _files.Add(record.Name, record);
                 _fileStream.Position += (hdr.FileLength + 511) / 512 * 512;
 
-                hdrBuf = StreamUtilities.ReadFully(_fileStream, TarHeader.Length);
+                hdrBuf = StreamUtilities.ReadExact(_fileStream, TarHeader.Length);
                 hdr.ReadFrom(hdrBuf, 0);
             }
         }

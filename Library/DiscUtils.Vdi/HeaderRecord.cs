@@ -89,11 +89,11 @@ namespace DiscUtils.Vdi
             else
             {
                 long savedPos = s.Position;
-                headerSize = EndianUtilities.ToInt32LittleEndian(StreamUtilities.ReadFully(s, 4), 0);
+                headerSize = EndianUtilities.ToInt32LittleEndian(StreamUtilities.ReadExact(s, 4), 0);
                 s.Position = savedPos;
             }
 
-            byte[] buffer = StreamUtilities.ReadFully(s, headerSize);
+            byte[] buffer = StreamUtilities.ReadExact(s, headerSize);
             Read(version, buffer, 0);
         }
 

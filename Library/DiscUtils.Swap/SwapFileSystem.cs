@@ -82,7 +82,7 @@ namespace DiscUtils.Swap
                 return null;
             }
             stream.Position = 0;
-            byte[] headerData = StreamUtilities.ReadFully(stream, SwapHeader.PageSize);
+            byte[] headerData = StreamUtilities.ReadExact(stream, SwapHeader.PageSize);
             SwapHeader header = new SwapHeader();
             header.ReadFrom(headerData, 0);
             return header;

@@ -69,7 +69,7 @@ namespace DiscUtils.Xfs
             }
 
             stream.Position = 0;
-            byte[] superblockData = StreamUtilities.ReadFully(stream, 264);
+            byte[] superblockData = StreamUtilities.ReadExact(stream, 264);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);

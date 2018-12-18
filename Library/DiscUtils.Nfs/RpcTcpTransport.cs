@@ -1,5 +1,6 @@
 //
 // Copyright (c) 2008-2011, Kenneth Bell
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -30,7 +31,7 @@ using DiscUtils.Streams;
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class RpcTcpTransport : IDisposable
+    internal sealed class RpcTcpTransport : IRpcTransport
     {
         private const int RetryLimit = 20;
 
@@ -69,7 +70,7 @@ namespace DiscUtils.Nfs
             }
         }
 
-        public byte[] Send(byte[] message)
+        public byte[] SendAndReceive(byte[] message)
         {
             int retries = 0;
             int retryLimit = RetryLimit;
@@ -141,11 +142,7 @@ namespace DiscUtils.Nfs
                 {
                     try
                     {
-                        byte[] header = new byte[4];
-                        EndianUtilities.WriteBytesBigEndian(0x80000000 | (uint)message.Length, header, 0);
-                        _tcpStream.Write(header, 0, 4);
-                        _tcpStream.Write(message, 0, message.Length);
-                        _tcpStream.Flush();
+                        Send(_tcpStream, message);
 
                         response = Receive();
                     }
@@ -177,18 +174,37 @@ namespace DiscUtils.Nfs
             return response;
         }
 
-        private byte[] Receive()
+        public void Send(byte[] message)
+        {
+            Send(_tcpStream, message);
+        }
+
+        public static void Send(Stream stream, byte[] message)
+        {
+            byte[] header = new byte[4];
+            EndianUtilities.WriteBytesBigEndian(0x80000000 | (uint)message.Length, header, 0);
+            stream.Write(header, 0, 4);
+            stream.Write(message, 0, message.Length);
+            stream.Flush();
+        }
+
+        public byte[] Receive()
+        {
+            return Receive(_tcpStream);
+        }
+
+        public static byte[] Receive(Stream stream)
         {
             MemoryStream ms = null;
             bool lastFragFound = false;
 
             while (!lastFragFound)
             {
-                byte[] header = StreamUtilities.ReadFully(_tcpStream, 4);
+                byte[] header = StreamUtilities.ReadExact(stream, 4);
                 uint headerVal = EndianUtilities.ToUInt32BigEndian(header, 0);
 
                 lastFragFound = (headerVal & 0x80000000) != 0;
-                byte[] frag = StreamUtilities.ReadFully(_tcpStream, (int)(headerVal & 0x7FFFFFFF));
+                byte[] frag = StreamUtilities.ReadExact(stream, (int)(headerVal & 0x7FFFFFFF));
 
                 if (ms != null)
                 {

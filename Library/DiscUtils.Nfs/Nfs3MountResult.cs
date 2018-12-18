@@ -20,25 +20,82 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
+#if !NET20
+using System.Linq;
+#endif
 
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3MountResult
+    public sealed class Nfs3MountResult : Nfs3CallResult
     {
         internal Nfs3MountResult(XdrDataReader reader)
         {
-            FileHandle = new Nfs3FileHandle(reader);
-            int numAuthFlavours = reader.ReadInt32();
-            AuthFlavours = new List<int>(numAuthFlavours);
-            for (int i = 0; i < numAuthFlavours; ++i)
+            Status = (Nfs3Status)reader.ReadInt32();
+
+            if (Status == Nfs3Status.Ok)
             {
-                AuthFlavours.Add(reader.ReadInt32());
+                FileHandle = new Nfs3FileHandle(reader);
+                int numAuthFlavours = reader.ReadInt32();
+                AuthFlavours = new List<RpcAuthFlavour>(numAuthFlavours);
+                for (int i = 0; i < numAuthFlavours; ++i)
+                {
+                    AuthFlavours.Add((RpcAuthFlavour)reader.ReadInt32());
+                }
+            }
+            else
+            {
+                throw new Nfs3Exception(Status);
             }
         }
 
-        public List<int> AuthFlavours { get; set; }
+        public Nfs3MountResult()
+        {
+        }
+
+        public List<RpcAuthFlavour> AuthFlavours { get; set; }
 
         public Nfs3FileHandle FileHandle { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            if (Status == Nfs3Status.Ok)
+            {
+                FileHandle.Write(writer);
+
+                writer.Write(AuthFlavours.Count);
+                for (int i = 0; i < AuthFlavours.Count; i++)
+                {
+                    writer.Write((int)AuthFlavours[i]);
+                }
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3MountResult);
+        }
+
+        public bool Equals(Nfs3MountResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+#if !NET20
+                && Enumerable.SequenceEqual(other.AuthFlavours, AuthFlavours)
+#endif
+                && object.Equals(other.FileHandle, FileHandle);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, FileHandle, AuthFlavours);
+        }
     }
 }

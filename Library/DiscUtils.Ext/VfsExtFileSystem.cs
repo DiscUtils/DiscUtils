@@ -31,7 +31,9 @@ namespace DiscUtils.Ext
         internal const IncompatibleFeatures SupportedIncompatibleFeatures =
             IncompatibleFeatures.FileType
             | IncompatibleFeatures.FlexBlockGroups
-            | IncompatibleFeatures.Extents;
+            | IncompatibleFeatures.Extents
+            | IncompatibleFeatures.NeedsRecovery
+            | IncompatibleFeatures.SixtyFourBit;
 
         private readonly BlockGroup[] _blockGroups;
 
@@ -39,7 +41,7 @@ namespace DiscUtils.Ext
             : base(new ExtFileSystemOptions(parameters))
         {
             stream.Position = 1024;
-            byte[] superblockData = StreamUtilities.ReadFully(stream, 1024);
+            byte[] superblockData = StreamUtilities.ReadExact(stream, 1024);
 
             SuperBlock superblock = new SuperBlock();
             superblock.ReadFrom(superblockData, 0);
@@ -72,7 +74,7 @@ namespace DiscUtils.Ext
 
             stream.Position = blockDescStart;
             var bgDescSize = superblock.Has64Bit ? BlockGroup64.DescriptorSize64 : BlockGroup.DescriptorSize;
-            byte[] blockDescData = StreamUtilities.ReadFully(stream, (int)numGroups * bgDescSize);
+            byte[] blockDescData = StreamUtilities.ReadExact(stream, (int)numGroups * bgDescSize);
 
             _blockGroups = new BlockGroup[numGroups];
             for (int i = 0; i < numGroups; ++i)
@@ -87,7 +89,7 @@ namespace DiscUtils.Ext
             {
                 var journalInode = GetInode(superblock.JournalInode);
                 var journalDataStream = journalInode.GetContentBuffer(Context);
-                var journalData = StreamUtilities.ReadFully(journalDataStream, 0, 1024 + 12);
+                var journalData = StreamUtilities.ReadExact(journalDataStream, 0, 1024 + 12);
                 journalSuperBlock.ReadFrom(journalData, 0);
                 Context.JournalSuperblock = journalSuperBlock;
             }
@@ -167,7 +169,7 @@ namespace DiscUtils.Ext
 
             Context.RawStream.Position = (inodeBlockGroup.InodeTableBlock + block) * (long)superBlock.BlockSize +
                                          blockOffset * superBlock.InodeSize;
-            byte[] inodeData = StreamUtilities.ReadFully(Context.RawStream, superBlock.InodeSize);
+            byte[] inodeData = StreamUtilities.ReadExact(Context.RawStream, superBlock.InodeSize);
 
             return EndianUtilities.ToStruct<Inode>(inodeData, 0);
         }

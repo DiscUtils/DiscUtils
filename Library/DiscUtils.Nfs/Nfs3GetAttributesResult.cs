@@ -20,16 +20,53 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3GetAttributesResult : Nfs3CallResult
+    public class Nfs3GetAttributesResult : Nfs3CallResult
     {
-        public Nfs3GetAttributesResult(XdrDataReader reader)
+        public Nfs3GetAttributesResult()
+        {
+        }
+
+        internal Nfs3GetAttributesResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             Attributes = new Nfs3FileAttributes(reader);
         }
 
         public Nfs3FileAttributes Attributes { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            if (Status == Nfs3Status.Ok)
+            {
+                Attributes.Write(writer);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3GetAttributesResult);
+        }
+
+        public bool Equals(Nfs3GetAttributesResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.Attributes, Attributes);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, Attributes);
+        }
     }
 }

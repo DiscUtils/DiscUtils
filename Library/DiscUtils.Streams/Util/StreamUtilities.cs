@@ -59,45 +59,115 @@ namespace DiscUtils.Streams
         #region Stream Manipulation
 
         /// <summary>
+        /// Read bytes until buffer filled or throw EndOfStreamException.
+        /// </summary>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="buffer">The buffer to populate.</param>
+        /// <param name="offset">Offset in the buffer to start.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        public static void ReadExact(Stream stream, byte[] buffer, int offset, int count)
+        {
+            int originalCount = count;
+
+            while (count > 0)
+            {
+                int numRead = stream.Read(buffer, offset, count);
+
+                if (numRead == 0)
+                {
+                    throw new EndOfStreamException("Unable to complete read of " + originalCount + " bytes");
+                }
+
+                offset += numRead;
+                count -= numRead;
+            }
+        }
+
+        /// <summary>
+        /// Read bytes until buffer filled or throw EndOfStreamException.
+        /// </summary>
+        /// <param name="stream">The stream to read.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The data read from the stream.</returns>
+        public static byte[] ReadExact(Stream stream, int count)
+        {
+            byte[] buffer = new byte[count];
+
+            ReadExact(stream, buffer, 0, count);
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Read bytes until buffer filled or throw EndOfStreamException.
+        /// </summary>
+        /// <param name="buffer">The stream to read.</param>
+        /// <param name="pos">The position in buffer to read from.</param>
+        /// <param name="data">The buffer to populate.</param>
+        /// <param name="offset">Offset in the buffer to start.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        public static void ReadExact(IBuffer buffer, long pos, byte[] data, int offset, int count)
+        {
+            int originalCount = count;
+
+            while (count > 0)
+            {
+                int numRead = buffer.Read(pos, data, offset, count);
+
+                if (numRead == 0)
+                {
+                    throw new EndOfStreamException("Unable to complete read of " + originalCount + " bytes");
+                }
+
+                pos += numRead;
+                offset += numRead;
+                count -= numRead;
+            }
+        }
+
+        /// <summary>
+        /// Read bytes until buffer filled or throw EndOfStreamException.
+        /// </summary>
+        /// <param name="buffer">The buffer to read.</param>
+        /// <param name="pos">The position in buffer to read from.</param>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns>The data read from the stream.</returns>
+        public static byte[] ReadExact(IBuffer buffer, long pos, int count)
+        {
+            byte[] result = new byte[count];
+
+            ReadExact(buffer, pos, result, 0, count);
+
+            return result;
+        }
+
+        /// <summary>
         /// Read bytes until buffer filled or EOF.
         /// </summary>
         /// <param name="stream">The stream to read.</param>
         /// <param name="buffer">The buffer to populate.</param>
         /// <param name="offset">Offset in the buffer to start.</param>
-        /// <param name="length">The number of bytes to read.</param>
+        /// <param name="count">The number of bytes to read.</param>
         /// <returns>The number of bytes actually read.</returns>
-        public static int ReadFully(Stream stream, byte[] buffer, int offset, int length)
+        public static int ReadMaximum(Stream stream, byte[] buffer, int offset, int count)
         {
             int totalRead = 0;
-            int numRead = stream.Read(buffer, offset, length);
-            while (numRead > 0)
+
+            while (count > 0)
             {
-                totalRead += numRead;
-                if (totalRead == length)
+                int numRead = stream.Read(buffer, offset, count);
+
+                if (numRead == 0)
                 {
-                    break;
+                    return totalRead;
                 }
 
-                numRead = stream.Read(buffer, offset + totalRead, length - totalRead);
+                offset += numRead;
+                count -= numRead;
+                totalRead += numRead;
             }
 
             return totalRead;
-        }
-
-        /// <summary>
-        /// Read bytes until buffer filled or throw IOException.
-        /// </summary>
-        /// <param name="stream">The stream to read.</param>
-        /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The data read from the stream.</returns>
-        public static byte[] ReadFully(Stream stream, int count)
-        {
-            byte[] buffer = new byte[count];
-            if (ReadFully(stream, buffer, 0, count) == count)
-            {
-                return buffer;
-            }
-            throw new IOException("Unable to complete read of " + count + " bytes");
         }
 
         /// <summary>
@@ -107,51 +177,38 @@ namespace DiscUtils.Streams
         /// <param name="pos">The position in buffer to read from.</param>
         /// <param name="data">The buffer to populate.</param>
         /// <param name="offset">Offset in the buffer to start.</param>
-        /// <param name="length">The number of bytes to read.</param>
+        /// <param name="count">The number of bytes to read.</param>
         /// <returns>The number of bytes actually read.</returns>
-        public static int ReadFully(IBuffer buffer, long pos, byte[] data, int offset, int length)
+        public static int ReadMaximum(IBuffer buffer, long pos, byte[] data, int offset, int count)
         {
             int totalRead = 0;
-            int numRead = buffer.Read(pos, data, offset, length);
-            while (numRead > 0)
+
+            while (count > 0)
             {
-                totalRead += numRead;
-                if (totalRead == length)
+                int numRead = buffer.Read(pos, data, offset, count);
+
+                if (numRead == 0)
                 {
-                    break;
+                    return totalRead;
                 }
 
-                numRead = buffer.Read(pos, data, offset + totalRead, length - totalRead);
+                pos += numRead;
+                offset += numRead;
+                count -= numRead;
+                totalRead += numRead;
             }
 
             return totalRead;
         }
 
         /// <summary>
-        /// Read bytes until buffer filled or throw IOException.
-        /// </summary>
-        /// <param name="buffer">The buffer to read.</param>
-        /// <param name="pos">The position in buffer to read from.</param>
-        /// <param name="count">The number of bytes to read.</param>
-        /// <returns>The data read from the stream.</returns>
-        public static byte[] ReadFully(IBuffer buffer, long pos, int count)
-        {
-            byte[] result = new byte[count];
-            if (ReadFully(buffer, pos, result, 0, count) == count)
-            {
-                return result;
-            }
-            throw new IOException("Unable to complete read of " + count + " bytes");
-        }
-
-        /// <summary>
-        /// Read bytes until buffer filled or throw IOException.
+        /// Read bytes until buffer filled or throw EndOfStreamException.
         /// </summary>
         /// <param name="buffer">The buffer to read.</param>
         /// <returns>The data read from the stream.</returns>
         public static byte[] ReadAll(IBuffer buffer)
         {
-            return ReadFully(buffer, 0, (int)buffer.Capacity);
+            return ReadExact(buffer, 0, (int)buffer.Capacity);
         }
 
         /// <summary>
@@ -161,7 +218,7 @@ namespace DiscUtils.Streams
         /// <returns>The sector data as a byte array.</returns>
         public static byte[] ReadSector(Stream stream)
         {
-            return ReadFully(stream, Sizes.Sector);
+            return ReadExact(stream, Sizes.Sector);
         }
 
         /// <summary>
@@ -174,7 +231,7 @@ namespace DiscUtils.Streams
             where T : IByteArraySerializable, new()
         {
             T result = new T();
-            byte[] buffer = ReadFully(stream, result.Size);
+            byte[] buffer = ReadExact(stream, result.Size);
             result.ReadFrom(buffer, 0);
             return result;
         }
@@ -190,7 +247,7 @@ namespace DiscUtils.Streams
             where T : IByteArraySerializable, new()
         {
             T result = new T();
-            byte[] buffer = ReadFully(stream, length);
+            byte[] buffer = ReadExact(stream, length);
             result.ReadFrom(buffer, 0);
             return result;
         }
@@ -217,13 +274,12 @@ namespace DiscUtils.Streams
         /// <remarks>Copying starts at the current stream positions.</remarks>
         public static void PumpStreams(Stream source, Stream dest)
         {
-            byte[] buffer = new byte[64 * 1024];
+            byte[] buffer = new byte[8192];
+            int numRead;
 
-            int numRead = source.Read(buffer, 0, buffer.Length);
-            while (numRead != 0)
+            while ((numRead = source.Read(buffer, 0, buffer.Length)) > 0)
             {
                 dest.Write(buffer, 0, numRead);
-                numRead = source.Read(buffer, 0, buffer.Length);
             }
         }
 

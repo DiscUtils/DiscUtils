@@ -45,7 +45,7 @@ namespace DiscUtils.Partitions
             while (partPos != 0)
             {
                 _disk.Position = (long)partPos * Sizes.Sector;
-                byte[] sector = StreamUtilities.ReadFully(_disk, Sizes.Sector);
+                byte[] sector = StreamUtilities.ReadExact(_disk, Sizes.Sector);
                 if (sector[510] != 0x55 || sector[511] != 0xAA)
                 {
                     throw new IOException("Invalid extended partition sector");
@@ -56,7 +56,8 @@ namespace DiscUtils.Partitions
                 {
                     BiosPartitionRecord thisPart = new BiosPartitionRecord(sector, offset, partPos, -1);
 
-                    if (thisPart.StartCylinder != 0 || thisPart.StartHead != 0 || thisPart.StartSector != 0)
+                    if (thisPart.StartCylinder != 0 || thisPart.StartHead != 0 || thisPart.StartSector != 0 || 
+                        (thisPart.LBAStart != 0 && thisPart.LBALength != 0))
                     {
                         if (thisPart.PartitionType != 0x05 && thisPart.PartitionType != 0x0F)
                         {
@@ -89,7 +90,7 @@ namespace DiscUtils.Partitions
                 extents.Add(new StreamExtent((long)partPos * Sizes.Sector, Sizes.Sector));
 
                 _disk.Position = (long)partPos * Sizes.Sector;
-                byte[] sector = StreamUtilities.ReadFully(_disk, Sizes.Sector);
+                byte[] sector = StreamUtilities.ReadExact(_disk, Sizes.Sector);
                 if (sector[510] != 0x55 || sector[511] != 0xAA)
                 {
                     throw new IOException("Invalid extended partition sector");

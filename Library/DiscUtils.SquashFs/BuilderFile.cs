@@ -89,7 +89,7 @@ namespace DiscUtils.SquashFs
                 }
 
                 long startPos = outStream.Position;
-                int bufferedBytes = StreamUtilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
+                int bufferedBytes = StreamUtilities.ReadMaximum(_source, context.IoBuffer, 0, context.DataBlockSize);
 
                 if (bufferedBytes < context.DataBlockSize)
                 {
@@ -110,7 +110,7 @@ namespace DiscUtils.SquashFs
                     while (bufferedBytes > 0)
                     {
                         _lengths.Add(context.WriteDataBlock(context.IoBuffer, 0, bufferedBytes));
-                        bufferedBytes = StreamUtilities.ReadFully(_source, context.IoBuffer, 0, context.DataBlockSize);
+                        bufferedBytes = StreamUtilities.ReadMaximum(_source, context.IoBuffer, 0, context.DataBlockSize);
                         _inode.FileSize += (uint)bufferedBytes;
                     }
                 }

@@ -25,17 +25,19 @@ using System.IO;
 
 namespace DiscUtils.Nfs
 {
+    // For more information, see
+    // https://www.ietf.org/rfc/rfc1813.txt Appendix I: Mount Protocol
     internal sealed class Nfs3Mount : RpcProgram
     {
-        public const int ProgramIdentifier = 100005;
-        public const int ProgramVersion = 3;
+        public const int ProgramIdentifier = RpcIdentifiers.Nfs3MountProgramIdentifier;
+        public const int ProgramVersion = RpcIdentifiers.Nfs3MountProgramVersion;
 
         public const int MaxPathLength = 1024;
         public const int MaxNameLength = 255;
         public const int MaxFileHandleSize = 64;
 
-        public Nfs3Mount(RpcClient client)
-            : base(client) {}
+        public Nfs3Mount(IRpcClient client)
+            : base(client) { }
 
         public override int Identifier
         {
@@ -50,7 +52,7 @@ namespace DiscUtils.Nfs
         public List<Nfs3Export> Exports()
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Readlink);
+            XdrDataWriter writer = StartCallMessage(ms, null, MountProc3.Export);
 
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
@@ -69,20 +71,15 @@ namespace DiscUtils.Nfs
         public Nfs3MountResult Mount(string dirPath)
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, NfsProc3.GetAttr);
+            XdrDataWriter writer = StartCallMessage(ms, _client.Credentials, MountProc3.Mnt);
             writer.Write(dirPath);
 
             RpcReply reply = DoSend(ms);
             if (reply.Header.IsSuccess)
             {
-                Nfs3Status status = (Nfs3Status)reply.BodyReader.ReadInt32();
-                if (status == Nfs3Status.Ok)
-                {
-                    return new Nfs3MountResult(reply.BodyReader);
-                }
-
-                throw new Nfs3Exception(status);
+                return new Nfs3MountResult(reply.BodyReader);
             }
+
             throw new RpcException(reply.Header.ReplyHeader);
         }
     }

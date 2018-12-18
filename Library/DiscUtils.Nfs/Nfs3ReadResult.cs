@@ -20,11 +20,16 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+#if !NET20
+using System.Linq;
+#endif
+
 namespace DiscUtils.Nfs
 {
-    internal class Nfs3ReadResult : Nfs3CallResult
+    public sealed class Nfs3ReadResult : Nfs3CallResult
     {
-        public Nfs3ReadResult(XdrDataReader reader)
+        internal Nfs3ReadResult(XdrDataReader reader)
         {
             Status = (Nfs3Status)reader.ReadInt32();
             if (reader.ReadBool())
@@ -40,6 +45,10 @@ namespace DiscUtils.Nfs
             }
         }
 
+        public Nfs3ReadResult()
+        {
+        }
+
         public int Count { get; set; }
 
         public byte[] Data { get; set; }
@@ -47,5 +56,49 @@ namespace DiscUtils.Nfs
         public bool Eof { get; set; }
 
         public Nfs3FileAttributes FileAttributes { get; set; }
+
+        public override void Write(XdrDataWriter writer)
+        {
+            writer.Write((int)Status);
+
+            writer.Write(FileAttributes != null);
+            if (FileAttributes != null)
+            {
+                FileAttributes.Write(writer);
+            }
+
+            if (Status == Nfs3Status.Ok)
+            {
+                writer.Write(Count);
+                writer.Write(Eof);
+                writer.WriteBuffer(Data);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Nfs3ReadResult);
+        }
+
+        public bool Equals(Nfs3ReadResult other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.Status == Status
+                && object.Equals(other.FileAttributes, FileAttributes)
+                && other.Count == Count
+#if !NET20
+                && Enumerable.SequenceEqual(other.Data, Data)
+#endif
+                && other.Eof == Eof;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Status, FileAttributes, Count, Eof, Data);
+        }
     }
 }

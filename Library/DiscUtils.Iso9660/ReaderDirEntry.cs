@@ -71,7 +71,7 @@ namespace DiscUtils.Iso9660
                 if (clEntry != null)
                 {
                     _context.DataStream.Position = clEntry.ChildDirLocation * _context.VolumeDescriptor.LogicalBlockSize;
-                    byte[] firstSector = StreamUtilities.ReadFully(_context.DataStream,
+                    byte[] firstSector = StreamUtilities.ReadExact(_context.DataStream,
                         _context.VolumeDescriptor.LogicalBlockSize);
 
                     DirectoryRecord.ReadFrom(firstSector, 0, _context.VolumeDescriptor.CharacterEncoding, out _record);

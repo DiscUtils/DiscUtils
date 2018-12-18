@@ -20,10 +20,56 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Nfs
 {
-    internal sealed class Nfs3SetAttributes
+    public sealed class Nfs3SetAttributes
     {
+        public Nfs3SetAttributes()
+        {
+        }
+
+        public Nfs3SetAttributes(XdrDataReader reader)
+        {
+            SetMode = reader.ReadBool();
+
+            if (SetMode)
+            {
+                Mode = (UnixFilePermissions)reader.ReadInt32();
+            }
+
+            SetUid = reader.ReadBool();
+            if (SetUid)
+            {
+                Uid = reader.ReadUInt32();
+            }
+
+            SetGid = reader.ReadBool();
+            if (SetGid)
+            {
+                Gid = reader.ReadUInt32();
+            }
+
+            SetSize = reader.ReadBool();
+            if (SetSize)
+            {
+                Size = reader.ReadInt64();
+            }
+
+            SetAccessTime = (Nfs3SetTimeMethod)reader.ReadInt32();
+            if (SetAccessTime == Nfs3SetTimeMethod.ClientTime)
+            {
+                AccessTime = new Nfs3FileTime(reader);
+            }
+
+            SetModifyTime = (Nfs3SetTimeMethod)reader.ReadInt32();
+            if (SetModifyTime == Nfs3SetTimeMethod.ClientTime)
+            {
+                ModifyTime = new Nfs3FileTime(reader);
+            }
+        }
+
         public Nfs3FileTime AccessTime { get; set; }
 
         public uint Gid { get; set; }
@@ -47,7 +93,7 @@ namespace DiscUtils.Nfs
 
         public uint Uid { get; set; }
 
-        public void Write(XdrDataWriter writer)
+        internal void Write(XdrDataWriter writer)
         {
             writer.Write(SetMode);
             if (SetMode)
@@ -84,6 +130,39 @@ namespace DiscUtils.Nfs
             {
                 ModifyTime.Write(writer);
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equal(obj as Nfs3SetAttributes);
+        }
+
+        public bool Equal(Nfs3SetAttributes other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return other.SetMode == SetMode
+                && other.Mode == Mode
+                && other.SetUid == SetUid
+                && other.Uid == Uid
+                && other.SetGid == SetGid
+                && other.Gid == Gid
+                && other.SetSize == SetSize
+                && other.Size == Size
+                && other.SetAccessTime == SetAccessTime
+                && object.Equals(other.AccessTime, AccessTime)
+                && other.SetModifyTime == SetModifyTime
+                && object.Equals(other.ModifyTime, ModifyTime);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(
+                HashCode.Combine(SetMode, ModifyTime, SetUid, Uid, SetGid, Gid, SetSize, Size),
+                SetAccessTime, AccessTime, SetModifyTime, ModifyTime);
         }
     }
 }

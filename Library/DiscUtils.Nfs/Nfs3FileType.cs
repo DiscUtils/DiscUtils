@@ -22,7 +22,7 @@
 
 namespace DiscUtils.Nfs
 {
-    internal enum Nfs3FileType
+    public enum Nfs3FileType
     {
         None = 0,
         File = 1,

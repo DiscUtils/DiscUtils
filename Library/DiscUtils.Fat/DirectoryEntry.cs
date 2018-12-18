@@ -45,7 +45,7 @@ namespace DiscUtils.Fat
         {
             _options = options;
             _fatVariant = fatVariant;
-            byte[] buffer = StreamUtilities.ReadFully(stream, 32);
+            byte[] buffer = StreamUtilities.ReadExact(stream, 32);
             Load(buffer, 0);
         }
 

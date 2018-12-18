@@ -59,7 +59,7 @@ namespace DiscUtils.Ntfs
             byte[] buffer;
             using (Stream s = Open(FileAccess.Read))
             {
-                buffer = StreamUtilities.ReadFully(s, (int)s.Length);
+                buffer = StreamUtilities.ReadExact(s, (int)s.Length);
             }
 
             T value = new T();

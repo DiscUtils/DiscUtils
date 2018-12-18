@@ -28,9 +28,9 @@ namespace DiscUtils.Nfs
     {
         public const uint RpcVersion = 2;
 
-        protected RpcClient _client;
+        protected IRpcClient _client;
 
-        protected RpcProgram(RpcClient client)
+        protected RpcProgram(IRpcClient client)
         {
             _client = client;
         }
@@ -42,9 +42,9 @@ namespace DiscUtils.Nfs
         public void NullProc()
         {
             MemoryStream ms = new MemoryStream();
-            XdrDataWriter writer = StartCallMessage(ms, null, 0);
+            XdrDataWriter writer = StartCallMessage(ms, null, NfsProc3.Null);
             RpcReply reply = DoSend(ms);
-            if (reply.Header.IsSuccess) {}
+            if (reply.Header.IsSuccess) { }
             else
             {
                 throw new RpcException(reply.Header.ReplyHeader);
@@ -53,17 +53,32 @@ namespace DiscUtils.Nfs
 
         protected RpcReply DoSend(MemoryStream ms)
         {
-            RpcTcpTransport transport = _client.GetTransport(Identifier, Version);
+            IRpcTransport transport = _client.GetTransport(Identifier, Version);
 
             byte[] buffer = ms.ToArray();
-            buffer = transport.Send(buffer);
+            buffer = transport.SendAndReceive(buffer);
 
             XdrDataReader reader = new XdrDataReader(new MemoryStream(buffer));
             RpcMessageHeader header = new RpcMessageHeader(reader);
             return new RpcReply { Header = header, BodyReader = reader };
         }
 
+        protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, PortMapProc2 procedure)
+        {
+            return StartCallMessage(ms, credentials, (int)procedure);
+        }
+
+        protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, MountProc3 procedure)
+        {
+            return StartCallMessage(ms, credentials, (int)procedure);
+        }
+
         protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, NfsProc3 procedure)
+        {
+            return StartCallMessage(ms, credentials, (int)procedure);
+        }
+
+        protected XdrDataWriter StartCallMessage(MemoryStream ms, RpcCredentials credentials, int procedure)
         {
             XdrDataWriter writer = new XdrDataWriter(ms);
 

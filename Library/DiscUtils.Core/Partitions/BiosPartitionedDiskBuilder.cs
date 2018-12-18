@@ -107,7 +107,7 @@ namespace DiscUtils.Partitions
             foreach (StreamExtent extent in new BiosPartitionTable(sourceDisk).GetMetadataDiskExtents())
             {
                 sourceDisk.Content.Position = extent.Start;
-                byte[] buffer = StreamUtilities.ReadFully(sourceDisk.Content, (int)extent.Length);
+                byte[] buffer = StreamUtilities.ReadExact(sourceDisk.Content, (int)extent.Length);
                 _bootSectors.Position = extent.Start;
                 _bootSectors.Write(buffer, 0, buffer.Length);
             }
@@ -154,7 +154,7 @@ namespace DiscUtils.Partitions
             foreach (StreamExtent extent in PartitionTable.GetMetadataDiskExtents())
             {
                 _bootSectors.Position = extent.Start;
-                byte[] buffer = StreamUtilities.ReadFully(_bootSectors, (int)extent.Length);
+                byte[] buffer = StreamUtilities.ReadExact(_bootSectors, (int)extent.Length);
 
                 extents.Add(new BuilderBufferExtent(extent.Start, buffer));
             }
