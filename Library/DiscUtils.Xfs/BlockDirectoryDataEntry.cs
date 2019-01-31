@@ -42,7 +42,7 @@ namespace DiscUtils.Xfs
         {
             get
             {
-                var size = 0xb + NameLength;
+                var size = 0xb + NameLength + (_ftype?1:0);
                 var padding = size%8;
                 if (padding != 0)
                     return size + (8 - padding);
