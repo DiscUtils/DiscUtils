@@ -29,10 +29,12 @@ namespace DiscUtils.Xfs
     internal class ShortformDirectoryEntry : IByteArraySerializable, IDirectoryEntry
     {
         private readonly bool _useShortInode;
+        private bool _ftype;
 
-        public ShortformDirectoryEntry(bool useShortInode)
+        public ShortformDirectoryEntry(bool useShortInode, Context context)
         {
             _useShortInode = useShortInode;
+            _ftype = context.SuperBlock.HasFType;
         }
 
         public byte NameLength { get; private set; }
@@ -43,9 +45,11 @@ namespace DiscUtils.Xfs
 
         public ulong Inode { get; private set; }
 
+        public DirectoryFType FType { get; private set; }
+
         public int Size
         {
-            get { return 0x3 + NameLength + (_useShortInode ? 4 : 8); }
+            get { return 0x3 + NameLength + (_useShortInode ? 4 : 8) + (_ftype?1:0); }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -53,13 +57,19 @@ namespace DiscUtils.Xfs
             NameLength = buffer[offset];
             Offset = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x1);
             Name = EndianUtilities.ToByteArray(buffer, offset + 0x3, NameLength);
+            offset += 0x3 + NameLength;
+            if (_ftype)
+            {
+                FType = (DirectoryFType)buffer[offset];
+                offset++;
+            }
             if (_useShortInode)
             {
-                Inode = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x3 + NameLength);
+                Inode = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             }
             else
             {
-                Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x3 + NameLength);
+                Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset);
             }
             return Size;
         }

@@ -248,10 +248,14 @@ namespace DiscUtils.Xfs
             Flags = (InodeFlags) EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x5A);
             Generation = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x5C);
             var dfOffset = Version < 3 ? 0x64 : 0xb0;
-            var dfLength = (Forkoff*8) - dfOffset;
-            if (dfLength < 0)
+            int dfLength;
+            if (Forkoff == 0)
             {
                 dfLength = buffer.Length - offset - dfOffset;
+            }
+            else
+            {
+                dfLength = (Forkoff*8);
             }
             DataFork = EndianUtilities.ToByteArray(buffer, offset + dfOffset, dfLength);
             return Size;

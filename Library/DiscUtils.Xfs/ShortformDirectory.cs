@@ -28,15 +28,27 @@ namespace DiscUtils.Xfs
 
     internal class ShortformDirectory : IByteArraySerializable
     {
+        private readonly Context _context;
         private bool _useShortInode;
 
+        /// <summary>
+        /// Number of directory entries.
+        /// </summary>
         public byte Count4Bytes { get; private set; }
 
+        /// <summary>
+        /// Number of directory entries requiring 64-bit entries, if any inode numbers require 64-bits. Zero otherwise.
+        /// </summary>
         public byte Count8Bytes { get; private set; }
 
         public ulong Parent { get; set; }
 
         public ShortformDirectoryEntry[] Entries { get; private set; }
+
+        public ShortformDirectory(Context context)
+        {
+            _context = context;
+        }
 
         public int Size
         {
@@ -55,27 +67,23 @@ namespace DiscUtils.Xfs
         {
             Count4Bytes = buffer[offset];
             Count8Bytes = buffer[offset+0x1];
-            byte count;
-            _useShortInode = false;
-            Parent = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x2);
-            offset = offset + 0x6;
-            if (Count4Bytes != 0)
+            byte count = Count4Bytes;
+            _useShortInode = Count8Bytes == 0;
+            offset += 0x2;
+            if (_useShortInode)
             {
-                _useShortInode = true;
-                count = Count4Bytes;
-            }
-            else if (Count8Bytes != 0)
-            {
-                count = Count8Bytes;
+                Parent = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+                offset += 0x4;
             }
             else
             {
-                count = 0;
+                Parent = EndianUtilities.ToUInt64BigEndian(buffer, offset);
+                offset += 0x8;
             }
             Entries = new ShortformDirectoryEntry[count];
             for (int i = 0; i < count; i++)
             {
-                var entry = new ShortformDirectoryEntry(_useShortInode);
+                var entry = new ShortformDirectoryEntry(_useShortInode, _context);
                 entry.ReadFrom(buffer, offset);
                 offset += entry.Size;
                 Entries[i] = entry;

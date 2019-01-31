@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2019, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -25,33 +25,49 @@ namespace DiscUtils.Xfs
     using System;
 
     /// <summary>
-    /// Feature flags for features backwards compatible with read-only mounting.
+    /// Inode type
     /// </summary>
     [Flags]
-    internal enum ReadOnlyCompatibleFeatures : uint
+    internal enum DirectoryFType : byte
     {
         /// <summary>
-        /// Free inode B+tree. Each allocation group contains a
-        /// B+tree to track inode chunks containing free inodes.
-        /// This is a performance optimization to reduce the
-        /// time required to allocate inodes.
+        /// Entry points to a file.
         /// </summary>
-        FINOBT = (1 << 0),
+        File = 1,
 
         /// <summary>
-        /// Reverse mapping B+tree. Each allocation group
-        /// contains a B+tree containing records mapping AG
-        /// blocks to their owners.
+        /// Entry points to another directory.
         /// </summary>
-        RMAPBT = (1 << 1),
+        Directory = 2,
 
         /// <summary>
-        /// Reference count B+tree. Each allocation group
-        /// contains a B+tree to track the reference counts of AG
-        /// blocks. This enables files to share data blocks safely.
+        /// Entry points to a character device.
         /// </summary>
-        REFLINK = (1 << 2),
+        CharDevice = 3,
 
-        ALL = FINOBT | RMAPBT | REFLINK,
+        /// <summary>
+        /// Entry points to a block device.
+        /// </summary>
+        BlockDevice = 4,
+
+        /// <summary>
+        /// Entry points to a FIFO.
+        /// </summary>
+        Fifo = 5,
+
+        /// <summary>
+        /// Entry points to a socket.
+        /// </summary>
+        Socket = 6,
+
+        /// <summary>
+        /// Entry points to a symbolic link.
+        /// </summary>
+        Symlink = 7,
+
+        /// <summary>
+        /// Entry points to an overlayfs whiteout file.
+        /// </summary>
+        Whiteout = 8,
     }
 }

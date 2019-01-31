@@ -48,7 +48,7 @@ namespace DiscUtils.Xfs
                 if (Inode.Format == InodeFormat.Local)
                 {
                     //shortform directory
-                    var sfDir = new ShortformDirectory();
+                    var sfDir = new ShortformDirectory(Context);
                     sfDir.ReadFrom(Inode.DataFork, 0);
                     foreach (var entry in sfDir.Entries)
                     {

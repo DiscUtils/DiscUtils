@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2019, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -25,33 +25,42 @@ namespace DiscUtils.Xfs
     using System;
 
     /// <summary>
-    /// Feature flags for features backwards compatible with read-only mounting.
+    /// Read-write incompatible feature flags.
     /// </summary>
     [Flags]
-    internal enum ReadOnlyCompatibleFeatures : uint
+    internal enum IncompatibleFeatures : uint
     {
-        /// <summary>
-        /// Free inode B+tree. Each allocation group contains a
-        /// B+tree to track inode chunks containing free inodes.
-        /// This is a performance optimization to reduce the
-        /// time required to allocate inodes.
-        /// </summary>
-        FINOBT = (1 << 0),
+        None = 0,
 
         /// <summary>
-        /// Reverse mapping B+tree. Each allocation group
-        /// contains a B+tree containing records mapping AG
-        /// blocks to their owners.
+        /// Directory file type. Each directory entry tracks the
+        /// type of the inode to which the entry points. This is a
+        /// performance optimization to remove the need to
+        /// load every inode into memory to iterate a directory.
         /// </summary>
-        RMAPBT = (1 << 1),
+        FType = (1 << 0),
 
         /// <summary>
-        /// Reference count B+tree. Each allocation group
-        /// contains a B+tree to track the reference counts of AG
-        /// blocks. This enables files to share data blocks safely.
+        /// Sparse inodes. This feature relaxes the requirement
+        /// to allocate inodes in chunks of 64. When the free
+        /// space is heavily fragmented, there might exist plenty
+        /// of free space but not enough contiguous free space to
+        /// allocate a new inode chunk. With this feature, the
+        /// user can continue to create files until all free space is
+        /// exhausted.
+        /// Unused space in the inode B+tree records are used to
+        /// track which parts of the inode chunk are not inodes.
         /// </summary>
-        REFLINK = (1 << 2),
+        SparseInodes = (1 << 1),
 
-        ALL = FINOBT | RMAPBT | REFLINK,
+        /// <summary>
+        /// Metadata UUID. The UUID stamped into each
+        /// metadata block must match the value in
+        /// sb_meta_uuid. This enables the administrator to
+        /// change sb_uuid at will without having to rewrite
+        /// the entire filesystem.
+        /// </summary>
+        MetaUUID = (1 << 2),
+        Supported = FType
     }
 }
