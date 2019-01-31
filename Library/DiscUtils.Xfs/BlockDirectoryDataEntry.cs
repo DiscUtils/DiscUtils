@@ -26,6 +26,8 @@ namespace DiscUtils.Xfs
 {
     internal class BlockDirectoryDataEntry : BlockDirectoryData, IDirectoryEntry
     {
+        private readonly bool _ftype;
+
         public ulong Inode { get; private set; }
 
         public byte NameLength { get; private set; }
@@ -33,6 +35,8 @@ namespace DiscUtils.Xfs
         public byte[] Name { get; private set; }
 
         public ushort Tag { get; private set; }
+
+        public DirectoryFType FType { get; private set; }
 
         public override int Size
         {
@@ -46,14 +50,28 @@ namespace DiscUtils.Xfs
             }
         }
 
+        public BlockDirectoryDataEntry(Context context)
+        {
+            _ftype = context.SuperBlock.HasFType;
+        }
+
         public override int ReadFrom(byte[] buffer, int offset)
         {
             Inode = EndianUtilities.ToUInt64BigEndian(buffer, offset);
             NameLength = buffer[offset + 0x8];
             Name = EndianUtilities.ToByteArray(buffer, offset + 0x9, NameLength);
-            var padding = 6 - ((NameLength + 1)%8);
+            offset += 0x9 + NameLength;
+            if (_ftype)
+            {
+                FType = (DirectoryFType)buffer[offset];
+                offset++;
+            }
+
+            var padding = 6 - ((NameLength + (_ftype ? 2 : 1)) % 8);
+            if (padding < 0)
+                padding += 8;
             offset += padding;
-            Tag = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x9 + NameLength);
+            Tag = EndianUtilities.ToUInt16BigEndian(buffer, offset);
             return Size;
         }
 

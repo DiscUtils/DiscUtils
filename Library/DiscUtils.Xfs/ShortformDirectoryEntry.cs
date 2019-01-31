@@ -29,7 +29,7 @@ namespace DiscUtils.Xfs
     internal class ShortformDirectoryEntry : IByteArraySerializable, IDirectoryEntry
     {
         private readonly bool _useShortInode;
-        private bool _ftype;
+        private readonly bool _ftype;
 
         public ShortformDirectoryEntry(bool useShortInode, Context context)
         {
