@@ -27,7 +27,7 @@ namespace DiscUtils.Ext
 {
     internal class BlockGroup64 : BlockGroup
     {
-        public const int DescriptorSize64 = 64;
+        private int _descriptorSize;
 
         public uint BlockBitmapBlockHigh;
         public uint InodeBitmapBlockHigh;
@@ -36,7 +36,12 @@ namespace DiscUtils.Ext
         public ushort FreeInodesCountHigh;
         public ushort UsedDirsCountHigh;
 
-        public override int Size { get { return DescriptorSize64; } }
+        public BlockGroup64(int descriptorSize)
+        {
+            this._descriptorSize = descriptorSize;
+        }
+
+        public override int Size { get { return this._descriptorSize; } }
 
         public override int ReadFrom(byte[] buffer, int offset)
         {
@@ -49,7 +54,7 @@ namespace DiscUtils.Ext
             FreeInodesCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x2E);
             UsedDirsCountHigh = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 0x30);
 
-            return DescriptorSize64;
+            return this._descriptorSize;
         }
     }
 

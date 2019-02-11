@@ -35,18 +35,53 @@ namespace LibraryTests.Xfs
                 var filesystem = filesystems[0];
                 Assert.Equal("xfs", filesystem.Name);
 
-                var xfs = filesystem.Open(volume);
-                Assert.IsType<XfsFileSystem>(xfs);
+                using (var xfs = filesystem.Open(volume))
+                {
+                    Assert.IsType<XfsFileSystem>(xfs);
 
-                Assert.Equal(9082019840, xfs.AvailableSpace);
-                Assert.Equal(10725863424, xfs.Size);
-                Assert.Equal(1643843584, xfs.UsedSpace);
-                ValidateContent(xfs);
+                    Assert.Equal(9082019840, xfs.AvailableSpace);
+                    Assert.Equal(10725863424, xfs.Size);
+                    Assert.Equal(1643843584, xfs.UsedSpace);
+                    ValidateContent(xfs);
+                }
+            }
+        }
+
+        [Fact]
+        public void Xfs5VhdxZip()
+        {
+            SetupHelper.SetupComplete();
+            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Xfs", "Data", "xfs5.zip")))
+            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+            using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
+            using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
+            {
+                var manager = new VolumeManager(disk);
+                var logicalVolumes = manager.GetLogicalVolumes();
+                Assert.Equal(1, logicalVolumes.Length);
+
+                var volume = logicalVolumes[0];
+                var filesystems = FileSystemManager.DetectFileSystems(volume);
+                Assert.Equal(1, filesystems.Length);
+
+                var filesystem = filesystems[0];
+                Assert.Equal("xfs", filesystem.Name);
+
+                using (var xfs = filesystem.Open(volume))
+                {
+                    Assert.IsType<XfsFileSystem>(xfs);
+
+                    Assert.Equal(9082445824, xfs.AvailableSpace);
+                    Assert.Equal(10725883904, xfs.Size);
+                    Assert.Equal(1643438080, xfs.UsedSpace);
+                    ValidateContent(xfs);
+                }
             }
         }
 
         private void ValidateContent(DiscFileSystem xfs)
         {
+            Assert.True(xfs.DirectoryExists(""));
             Assert.True(xfs.FileExists("folder\\nested\\file"));
             Assert.Equal(0, xfs.GetFileSystemEntries("empty").Length);
             for (int i = 1; i <= 1000; i++)

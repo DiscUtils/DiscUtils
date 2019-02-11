@@ -23,15 +23,15 @@
 namespace DiscUtils.Xfs
 {
     using System;
-    using System.IO;
     using System.Collections.Generic;
     using DiscUtils.Streams;
 
     internal class BlockDirectory : IByteArraySerializable
     {
+        private readonly Context _context;
         public const uint HeaderMagic = 0x58443242;
 
-        public uint Magic { get; private set; }
+        public uint Magic { get; protected set; }
 
         public uint LeafCount { get; private set; }
 
@@ -41,22 +41,43 @@ namespace DiscUtils.Xfs
 
         public BlockDirectoryData[] Entries { get; private set; }
 
-        public int Size
+        public virtual int Size
         {
             get { return 16 + 3*32; }
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
+        protected virtual int ReadHeader(byte[] buffer, int offset)
         {
             Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            return 0x4;
+        }
+
+        protected virtual int HeaderPadding
+        {
+            get { return 0; }
+        }
+
+        public BlockDirectory(Context context)
+        {
+            _context = context;
+        }
+
+        public virtual bool HasValidMagic
+        {
+            get { return Magic == HeaderMagic; }
+        }
+
+        public int ReadFrom(byte[] buffer, int offset)
+        {
+            offset += ReadHeader(buffer, offset);
             BestFree = new BlockDirectoryDataFree[3];
-            offset += 0x4;
             for (int i = 0; i < BestFree.Length; i++)
             {
                 var free = new BlockDirectoryDataFree();
                 offset += free.ReadFrom(buffer, offset);
                 BestFree[i] = free;
             }
+            offset += HeaderPadding;
 
             LeafStale = EndianUtilities.ToUInt32BigEndian(buffer, buffer.Length - 0x4);
             LeafCount = EndianUtilities.ToUInt32BigEndian(buffer, buffer.Length - 0x8);
@@ -72,7 +93,7 @@ namespace DiscUtils.Xfs
                 }
                 else
                 {
-                    entry = new BlockDirectoryDataEntry();
+                    entry = new BlockDirectoryDataEntry(_context);
                 }
                 offset += entry.ReadFrom(buffer, offset);
                 entries.Add(entry);
