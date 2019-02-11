@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.1;net452</TargetFrameworks>
@@ -13,6 +13,11 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="_Data\*" />
+    <EmbeddedResource Include="_Data\*" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Utilities\DiscUtils.Diagnostics\DiscUtils.Diagnostics.csproj" />
