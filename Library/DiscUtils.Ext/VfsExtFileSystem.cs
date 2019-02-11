@@ -73,13 +73,13 @@ namespace DiscUtils.Ext
             long blockDescStart = (superblock.FirstDataBlock + 1) * (long)superblock.BlockSize;
 
             stream.Position = blockDescStart;
-            var bgDescSize = superblock.Has64Bit ? BlockGroup64.DescriptorSize64 : BlockGroup.DescriptorSize;
+            var bgDescSize = superblock.Has64Bit ? superblock.DescriptorSize : BlockGroup.DescriptorSize;
             byte[] blockDescData = StreamUtilities.ReadExact(stream, (int)numGroups * bgDescSize);
 
             _blockGroups = new BlockGroup[numGroups];
             for (int i = 0; i < numGroups; ++i)
             {
-                BlockGroup bg = superblock.Has64Bit ? new BlockGroup64() : new BlockGroup();
+                BlockGroup bg = superblock.Has64Bit ? new BlockGroup64(bgDescSize) : new BlockGroup();
                 bg.ReadFrom(blockDescData, i * bgDescSize);
                 _blockGroups[i] = bg;
             }
