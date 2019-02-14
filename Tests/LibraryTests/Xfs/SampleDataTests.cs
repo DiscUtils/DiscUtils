@@ -39,9 +39,9 @@ namespace LibraryTests.Xfs
                 {
                     Assert.IsType<XfsFileSystem>(xfs);
 
-                    Assert.Equal(9082019840, xfs.AvailableSpace);
+                    Assert.Equal(9081729024, xfs.AvailableSpace);
                     Assert.Equal(10725863424, xfs.Size);
-                    Assert.Equal(1643843584, xfs.UsedSpace);
+                    Assert.Equal(1644134400, xfs.UsedSpace);
                     ValidateContent(xfs);
                 }
             }
@@ -71,9 +71,9 @@ namespace LibraryTests.Xfs
                 {
                     Assert.IsType<XfsFileSystem>(xfs);
 
-                    Assert.Equal(9082445824, xfs.AvailableSpace);
+                    Assert.Equal(9077555200, xfs.AvailableSpace);
                     Assert.Equal(10725883904, xfs.Size);
-                    Assert.Equal(1643438080, xfs.UsedSpace);
+                    Assert.Equal(1648328704, xfs.UsedSpace);
                     ValidateContent(xfs);
                 }
             }
@@ -99,6 +99,11 @@ namespace LibraryTests.Xfs
             {
                 var md5 = MD5.Create().ComputeHash(file);
                 Assert.Equal("9a202a11d6e87688591eb97714ed56f1", BitConverter.ToString(md5).ToLowerInvariant().Replace("-", string.Empty));
+            }
+
+            for (int i = 1; i <= 999; i++)
+            {
+                Assert.True(xfs.FileExists($"huge\\{i}"), $"File huge/{i} not found");
             }
         }
     }
