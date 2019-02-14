@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016, Bianco Veigel
+// Copyright (c) 2019, Bianco Veigel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,7 +20,6 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 namespace DiscUtils.Xfs
 {
     using DiscUtils.Streams;
@@ -28,35 +27,31 @@ namespace DiscUtils.Xfs
     using System.Collections.Generic;
     using System.IO;
 
-    internal class BTreeExtentRoot : IByteArraySerializable
+    internal class BTreeExtentNodeV5 : BTreeExtentHeaderV5
     {
-        public ushort Level { get; protected set; }
+        public ulong[] Keys { get; protected set; }
 
-        public ushort NumberOfRecords { get; protected set; }
+        public ulong[] Pointer { get; protected set; }
 
-        public ulong[] Keys { get; private set; }
+        public Dictionary<ulong, BTreeExtentHeader> Children { get; protected set; }
 
-        public ulong[] Pointer { get; private set; }
-
-        public Dictionary<ulong, BTreeExtentHeader> Children { get; private set; }
-
-        public int Size
+        public override int Size
         {
-            get { return 4 + (0x9 * 0x16); }
+            get { return base.Size + (NumberOfRecords * 0x8); }
         }
 
-        public int ReadFrom(byte[] buffer, int offset)
+        public override int ReadFrom(byte[] buffer, int offset)
         {
-            Level = EndianUtilities.ToUInt16BigEndian(buffer, offset);
-            NumberOfRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x2);
-            offset += 0x4;
+            offset += base.ReadFrom(buffer, offset);
+            if (Level == 0)
+                throw new IOException("invalid B+tree level - expected >= 1");
             Keys = new ulong[NumberOfRecords];
             Pointer = new ulong[NumberOfRecords];
             for (int i = 0; i < NumberOfRecords; i++)
             {
                 Keys[i] = EndianUtilities.ToUInt64BigEndian(buffer, offset + i * 0x8);
             }
-            offset += ((buffer.Length - offset)/16)*8;
+            offset += ((buffer.Length - offset) / 16) * 8;
             for (int i = 0; i < NumberOfRecords; i++)
             {
                 Pointer[i] = EndianUtilities.ToUInt64BigEndian(buffer, offset + i * 0x8);
@@ -64,14 +59,7 @@ namespace DiscUtils.Xfs
             return Size;
         }
 
-
-        /// <inheritdoc />
-        public void WriteTo(byte[] buffer, int offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void LoadBtree(Context context)
+        public override void LoadBtree(Context context)
         {
             Children = new Dictionary<ulong, BTreeExtentHeader>(NumberOfRecords);
             for (int i = 0; i < NumberOfRecords; i++)
@@ -79,22 +67,17 @@ namespace DiscUtils.Xfs
                 BTreeExtentHeader child;
                 if (Level == 1)
                 {
-                    child = new BTreeExtentLeaf();
-                    if (context.SuperBlock.SbVersion == 5)
-                        child = new BTreeExtentLeafV5();
+                    child = new BTreeExtentLeafV5();
                 }
                 else
                 {
-                    child = new BTreeExtentNode();
-                    if (context.SuperBlock.SbVersion == 5)
-                        child = new BTreeExtentNodeV5();
+                    child = new BTreeExtentNodeV5();
                 }
                 var data = context.RawStream;
                 data.Position = Extent.GetOffset(context, Pointer[i]);
                 var buffer = StreamUtilities.ReadExact(data, (int)context.SuperBlock.Blocksize);
                 child.ReadFrom(buffer, 0);
-                if (context.SuperBlock.SbVersion < 5 && child.Magic != BTreeExtentHeader.BtreeMagic ||
-                    context.SuperBlock.SbVersion == 5 && child.Magic != BTreeExtentHeaderV5.BtreeMagicV5)
+                if (child.Magic != BtreeMagicV5)
                 {
                     throw new IOException("invalid btree directory magic");
                 }
@@ -103,7 +86,8 @@ namespace DiscUtils.Xfs
             }
         }
 
-        public List<Extent> GetExtents()
+        /// <inheritdoc />
+        public override IList<Extent> GetExtents()
         {
             var result = new List<Extent>();
             foreach (var child in Children)
