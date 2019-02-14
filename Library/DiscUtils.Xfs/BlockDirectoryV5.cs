@@ -63,7 +63,7 @@ namespace DiscUtils.Xfs
             BlockNumber = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x08);
             LogSequenceNumber = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x10);
             Uuid = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x18);
-            Owner = EndianUtilities.ToUInt64BigEndian(buffer, 0x2C);
+            Owner = EndianUtilities.ToUInt64BigEndian(buffer, 0x28);
             return 0x30;
         }
     }
