@@ -39,9 +39,9 @@ namespace LibraryTests.Xfs
                 {
                     Assert.IsType<XfsFileSystem>(xfs);
 
-                    Assert.Equal(9081729024, xfs.AvailableSpace);
+                    Assert.Equal(9081139200, xfs.AvailableSpace);
                     Assert.Equal(10725863424, xfs.Size);
-                    Assert.Equal(1644134400, xfs.UsedSpace);
+                    Assert.Equal(1644724224, xfs.UsedSpace);
                     ValidateContent(xfs);
                 }
             }
@@ -71,9 +71,9 @@ namespace LibraryTests.Xfs
                 {
                     Assert.IsType<XfsFileSystem>(xfs);
 
-                    Assert.Equal(9077555200, xfs.AvailableSpace);
+                    Assert.Equal(9080827904, xfs.AvailableSpace);
                     Assert.Equal(10725883904, xfs.Size);
-                    Assert.Equal(1648328704, xfs.UsedSpace);
+                    Assert.Equal(1645056000, xfs.UsedSpace);
                     ValidateContent(xfs);
                 }
             }
