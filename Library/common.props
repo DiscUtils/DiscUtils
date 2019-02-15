@@ -1,6 +1,38 @@
 <Project>
+  <!-- Package related stuff -->
   <PropertyGroup>
-    <VersionPrefix>0.13.0</VersionPrefix>
+    <VersionPrefix>0.14.1</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
+    
+    <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  
+  <!-- Assembly stuff -->
+  <PropertyGroup>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+    
+    <GeneratePackageOnBuild Condition="'$(Configuration)' != 'Debug'">True</GeneratePackageOnBuild>
+  </PropertyGroup>
+  
+  <!-- Assembly Signing -->
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)../SigningKey.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  
+  <!-- Constants -->
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.5'">$(DefineConstants);NETCORE</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net20'">$(DefineConstants);NET20</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net40'">$(DefineConstants);NET40</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'net45'">$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
 </Project>

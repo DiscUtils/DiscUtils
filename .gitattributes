@@ -6,6 +6,9 @@
 # EOL behaviour, default:
 * text=auto
 
+# Binary files
+*.gz binary
+
 # Special handling
 *.sln        text eol=crlf
 *.csproj     text eol=crlf

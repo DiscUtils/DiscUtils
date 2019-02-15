@@ -105,7 +105,7 @@ namespace DiscUtils.Ext
             get
             {
                 return (IncompatibleFeatures & IncompatibleFeatures.SixtyFourBit) ==
-                       IncompatibleFeatures.SixtyFourBit && DescriptorSize == 8;
+                       IncompatibleFeatures.SixtyFourBit && DescriptorSize >= 64;
             }
         }
 

@@ -7,17 +7,17 @@ build_script:
 
     Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
 - cmd: REM Build
-- cmd: msbuild /t:Build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal /p:VersionSuffix=alpha%APPVEYOR_BUILD_NUMBER%
+- cmd: msbuild /t:Build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal /p:VersionSuffix=alpha
 test_script:
 - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
 - cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
 install:
-- msbuild /t:Restore /Verbosity:Minimal /p:VersionSuffix=alpha%APPVEYOR_BUILD_NUMBER%
+- msbuild /t:Restore /Verbosity:Minimal /p:VersionSuffix=alpha
 artifacts:
 - path: '**\*.nupkg'
 deploy:
 - provider: NuGet
   api_key:
-    secure: dgfUEGXULcqCTyNcS6UEDK8BCBi8y+M2+d4IFjnb3Gf9DqV34fMSp1XjxJg2AVRC
+    secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
   on:
     branch: nuget

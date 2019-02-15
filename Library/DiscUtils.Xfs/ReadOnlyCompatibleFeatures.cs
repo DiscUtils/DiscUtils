@@ -23,8 +23,6 @@
 namespace DiscUtils.Xfs
 {
     using System;
-    using System.Collections.Generic;
-    using System.Text;
 
     /// <summary>
     /// Feature flags for features backwards compatible with read-only mounting.
@@ -33,17 +31,24 @@ namespace DiscUtils.Xfs
     internal enum ReadOnlyCompatibleFeatures : uint
     {
         /// <summary>
-        /// free inode btree
+        /// Free inode B+tree. Each allocation group contains a
+        /// B+tree to track inode chunks containing free inodes.
+        /// This is a performance optimization to reduce the
+        /// time required to allocate inodes.
         /// </summary>
         FINOBT = (1 << 0),
 
         /// <summary>
-        /// reverse map btree
+        /// Reverse mapping B+tree. Each allocation group
+        /// contains a B+tree containing records mapping AG
+        /// blocks to their owners.
         /// </summary>
         RMAPBT = (1 << 1),
 
         /// <summary>
-        /// reflinked files
+        /// Reference count B+tree. Each allocation group
+        /// contains a B+tree to track the reference counts of AG
+        /// blocks. This enables files to share data blocks safely.
         /// </summary>
         REFLINK = (1 << 2),
 

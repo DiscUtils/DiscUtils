@@ -31,10 +31,6 @@ namespace DiscUtils.Xfs
     {
         public const uint XfsMagic = 0x58465342;
 
-        public const uint XfsSbVersionNumbits = 0x000f;
-
-        public const uint XfsSbVersion5 = 5;
-
         /// <summary>
         /// magic number == XFS_SB_MAGIC
         /// </summary>
@@ -112,7 +108,7 @@ namespace DiscUtils.Xfs
         /// <summary>
         /// header version == XFS_SB_VERSION
         /// </summary>
-        public ushort Version { get; private set; }
+        public VersionFlags Version { get; private set; }
 
         /// <summary>
         /// volume sector size, bytes
@@ -266,7 +262,7 @@ namespace DiscUtils.Xfs
         /// <summary>
         /// additional feature bits
         /// </summary>
-        public uint Features2 { get; private set; }
+        public Version2Features Features2 { get; private set; }
 
         /*
         * bad features2 field as a result of failing to pad the sb structure to
@@ -295,7 +291,7 @@ namespace DiscUtils.Xfs
 
         public ReadOnlyCompatibleFeatures ReadOnlyCompatibleFeatures { get; private set; }
 
-        public uint IncompatibleFeatures { get; private set; }
+        public IncompatibleFeatures IncompatibleFeatures { get; private set; }
 
         public uint LogIncompatibleFeatures { get; private set; }
 
@@ -336,7 +332,7 @@ namespace DiscUtils.Xfs
         {
             get
             {
-                if (SbVersion >= XfsSbVersion5)
+                if (SbVersion >= 5)
                 {
                     return 264;
                 }
@@ -344,9 +340,23 @@ namespace DiscUtils.Xfs
             }
         }
 
-        public uint SbVersion
+        public ushort SbVersion
         {
-            get { return Version & XfsSbVersionNumbits; }
+            get { return (ushort)(Version & VersionFlags.NumberFlag); }
+        }
+
+        public bool SbVersionHasMoreBits
+        {
+            get { return (Version & VersionFlags.Features2) == VersionFlags.Features2; }
+        }
+
+        public bool HasFType
+        {
+            get
+            {
+                return SbVersion == 5 && ((IncompatibleFeatures & IncompatibleFeatures.FType) == IncompatibleFeatures.FType) ||
+                       SbVersionHasMoreBits && ((Features2 & Version2Features.FType) == Version2Features.FType);
+            }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -368,7 +378,7 @@ namespace DiscUtils.Xfs
             AgCount = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x58);
             RealtimeBitmapBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x5C);
             LogBlocks = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x60);
-            Version = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x64);
+            Version = (VersionFlags)EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x64);
             SectorSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x66);
             InodeSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x68);
             InodesPerBlock = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6A);
@@ -397,20 +407,22 @@ namespace DiscUtils.Xfs
             LogSectorSizeLog2 = buffer[offset + 0xC1];
             LogSectorSize = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0xC2);
             LogUnitSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC4);
-            Features2 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC8);
+            Features2 = (Version2Features)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xC8);
             BadFeatures2 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xCC);
             
-            if (SbVersion >= XfsSbVersion5)
+            if (SbVersion >= (ushort)VersionFlags.Version5)
             {
-                CompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset);
-                ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x04);
-                IncompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x08);
-                LogIncompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x0C);
-                Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x10);
-                SparseInodeAlignment = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x14);
-                ProjectQuotaInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x18);
-                Lsn = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x20);
-                MetaUuid = EndianUtilities.ToGuidBigEndian(buffer, offset + 0x28);
+                CompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xD0);
+                ReadOnlyCompatibleFeatures = (ReadOnlyCompatibleFeatures)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xD4);
+                IncompatibleFeatures = (IncompatibleFeatures)EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xD8);
+                LogIncompatibleFeatures = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xDC);
+                Crc = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xE0);
+                SparseInodeAlignment = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0xE4);
+                ProjectQuotaInode = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0xE8);
+                Lsn = EndianUtilities.ToInt64BigEndian(buffer, offset + 0xF0);
+                MetaUuid = EndianUtilities.ToGuidBigEndian(buffer, offset + 0xF8);
+                if ((IncompatibleFeatures & IncompatibleFeatures.Supported)!= IncompatibleFeatures.Supported)
+                    throw new NotSupportedException("XFS Features not supported");
             }
             
             var agOffset = AgBlocksLog2 + InodesPerBlockLog2;
