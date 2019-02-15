@@ -79,15 +79,17 @@ namespace DiscUtils.Xfs
                 BTreeExtentHeader child;
                 if (Level == 1)
                 {
-                    child = new BTreeExtentLeaf();
                     if (context.SuperBlock.SbVersion == 5)
                         child = new BTreeExtentLeafV5();
+                    else
+                        child = new BTreeExtentLeaf();
                 }
                 else
                 {
-                    child = new BTreeExtentNode();
                     if (context.SuperBlock.SbVersion == 5)
                         child = new BTreeExtentNodeV5();
+                    else
+                        child = new BTreeExtentNode();
                 }
                 var data = context.RawStream;
                 data.Position = Extent.GetOffset(context, Pointer[i]);
