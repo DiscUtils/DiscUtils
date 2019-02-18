@@ -1,7 +1,7 @@
 <Project>
   <!-- Package related stuff -->
   <PropertyGroup>
-    <VersionPrefix>0.14.1</VersionPrefix>
+    <VersionPrefix>0.14.2</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
     
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
