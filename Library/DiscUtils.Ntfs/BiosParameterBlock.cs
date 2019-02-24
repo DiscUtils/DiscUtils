@@ -126,27 +126,29 @@ namespace DiscUtils.Ntfs
         internal static BiosParameterBlock FromBytes(byte[] bytes, int offset)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
-            bpb.OemId = EndianUtilities.BytesToString(bytes, offset + 0x03, 8);
             bpb.BytesPerSector = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x0B);
+            bpb.TotalSectors16 = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x13);
+            bpb.TotalSectors32 = EndianUtilities.ToUInt32LittleEndian(bytes, offset + 0x20);
+            bpb.SignatureByte = bytes[offset + 0x26];
+            bpb.TotalSectors64 = EndianUtilities.ToInt64LittleEndian(bytes, offset + 0x28);
+            bpb.MftCluster = EndianUtilities.ToInt64LittleEndian(bytes, offset + 0x30);
+            bpb.RawMftRecordSize = bytes[offset + 0x40];
             bpb.SectorsPerCluster = bytes[offset + 0x0D];
+            if (!bpb.IsValid(long.MaxValue)) return bpb;
+
+            bpb.OemId = EndianUtilities.BytesToString(bytes, offset + 0x03, 8);
             bpb.ReservedSectors = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x0E);
             bpb.NumFats = bytes[offset + 0x10];
             bpb.FatRootEntriesCount = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x11);
-            bpb.TotalSectors16 = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x13);
             bpb.Media = bytes[offset + 0x15];
             bpb.FatSize16 = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x16);
             bpb.SectorsPerTrack = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x18);
             bpb.NumHeads = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x1A);
             bpb.HiddenSectors = EndianUtilities.ToUInt32LittleEndian(bytes, offset + 0x1C);
-            bpb.TotalSectors32 = EndianUtilities.ToUInt32LittleEndian(bytes, offset + 0x20);
             bpb.BiosDriveNumber = bytes[offset + 0x24];
             bpb.ChkDskFlags = bytes[offset + 0x25];
-            bpb.SignatureByte = bytes[offset + 0x26];
             bpb.PaddingByte = bytes[offset + 0x27];
-            bpb.TotalSectors64 = EndianUtilities.ToInt64LittleEndian(bytes, offset + 0x28);
-            bpb.MftCluster = EndianUtilities.ToInt64LittleEndian(bytes, offset + 0x30);
             bpb.MftMirrorCluster = EndianUtilities.ToInt64LittleEndian(bytes, offset + 0x38);
-            bpb.RawMftRecordSize = bytes[offset + 0x40];
             bpb.RawIndexBufferSize = bytes[offset + 0x44];
             bpb.VolumeSerialNumber = EndianUtilities.ToUInt64LittleEndian(bytes, offset + 0x48);
 
@@ -187,6 +189,18 @@ namespace DiscUtils.Ntfs
                 return 1 << -(sbyte)rawSize;
             }
             return rawSize * SectorsPerCluster * BytesPerSector;
+        }
+
+        internal bool IsValid(long volumeSize)
+        {
+            if (SignatureByte != 0x80 || TotalSectors16 != 0 || TotalSectors32 != 0
+                || TotalSectors64 == 0 || MftRecordSize == 0 || MftCluster == 0 || BytesPerSector == 0)
+            {
+                return false;
+            }
+
+            long mftPos = MftCluster * SectorsPerCluster * BytesPerSector;
+            return mftPos < TotalSectors64 * BytesPerSector && mftPos < volumeSize;
         }
 
         private static ulong GenSerialNumber()

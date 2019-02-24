@@ -52,6 +52,9 @@ namespace DiscUtils.Swap
 
         public int ReadFrom(byte[] buffer, int offset)
         {
+            Magic = EndianUtilities.BytesToString(buffer, PageSize - 10, 10);
+            if (Magic != Magic1 && Magic != Magic2) return Size;
+
             Version = EndianUtilities.ToUInt32LittleEndian(buffer, 0x400);
             LastPage = EndianUtilities.ToUInt32LittleEndian(buffer, 0x404);
             BadPages = EndianUtilities.ToUInt32LittleEndian(buffer, 0x408);
@@ -60,7 +63,6 @@ namespace DiscUtils.Swap
             var nullIndex = Array.IndexOf(volume, (byte)0);
             if (nullIndex > 0)
                 Volume = Encoding.UTF8.GetString(volume, 0, nullIndex);
-            Magic = EndianUtilities.BytesToString(buffer, PageSize - 10, 10);
             return Size;
         }
 

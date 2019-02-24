@@ -57,6 +57,8 @@ namespace DiscUtils.SquashFs
         public int ReadFrom(byte[] buffer, int offset)
         {
             Magic = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
+            if (Magic != SquashFsMagic) return Size;
+
             InodesCount = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 4);
             CreationTime = ((long) EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8)).FromUnixTimeSeconds().DateTime;
             BlockSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 12);

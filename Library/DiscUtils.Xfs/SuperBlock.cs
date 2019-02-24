@@ -362,6 +362,8 @@ namespace DiscUtils.Xfs
         public int ReadFrom(byte[] buffer, int offset)
         {
             Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
+            if (Magic != XfsMagic) return Size;
+
             Blocksize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 0x4);
             DataBlocks = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x8);
             RealtimeBlocks = EndianUtilities.ToUInt64BigEndian(buffer, offset + 0x10);

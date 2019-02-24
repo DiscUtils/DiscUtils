@@ -76,6 +76,8 @@ namespace DiscUtils.HfsPlus
         public int ReadFrom(byte[] buffer, int offset)
         {
             Signature = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0);
+            if (!IsValid) return Size;
+
             Version = EndianUtilities.ToUInt16BigEndian(buffer, offset + 2);
             Attributes = (VolumeAttributes)EndianUtilities.ToUInt32BigEndian(buffer, offset + 4);
             LastMountedVersion = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);

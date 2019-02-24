@@ -28,14 +28,14 @@ namespace DiscUtils.Swap
     [VfsFileSystemFactory]
     internal class FileSystemFactory : VfsFileSystemFactory
     {
-        public override DiscUtils.FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
+        public override FileSystemInfo[] Detect(Stream stream, VolumeInfo volume)
         {
             if (SwapFileSystem.Detect(stream))
             {
-                return new DiscUtils.FileSystemInfo[] { new VfsFileSystemInfo("Swap", "Linux Swap", Open) };
+                return new FileSystemInfo[] { new VfsFileSystemInfo("Swap", "Linux Swap", Open) };
             }
 
-            return new DiscUtils.FileSystemInfo[0];
+            return new FileSystemInfo[0];
         }
 
         private DiscFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
