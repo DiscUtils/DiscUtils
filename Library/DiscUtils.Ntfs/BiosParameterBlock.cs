@@ -195,7 +195,8 @@ namespace DiscUtils.Ntfs
 
         internal bool IsValidOemId()
         {
-            return (!String.IsNullOrEmpty(OemId) && String.Compare(OemId, 0, NTFS_OEM_ID, 0, 8) == 0);
+            return (!String.IsNullOrEmpty(OemId) && OemId.Length == NTFS_OEM_ID.Length
+                    && String.Compare(OemId, 0, NTFS_OEM_ID, 0, NTFS_OEM_ID.Length) == 0);
         }
 
         internal bool IsValid(long volumeSize)
