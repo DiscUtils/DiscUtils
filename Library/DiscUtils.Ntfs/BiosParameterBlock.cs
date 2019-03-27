@@ -29,6 +29,8 @@ namespace DiscUtils.Ntfs
 {
     internal class BiosParameterBlock
     {
+        const string NTFS_OEM_ID = "NTFS    ";
+
         public byte BiosDriveNumber; // Value: 0x80 (first hard disk)
         public ushort BytesPerSector;
         public byte ChkDskFlags; // Value: 0x00
@@ -98,7 +100,7 @@ namespace DiscUtils.Ntfs
                                                        long partitionSizeLba, int mftRecordSize, int indexBufferSize)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
-            bpb.OemId = "NTFS    ";
+            bpb.OemId = NTFS_OEM_ID;
             bpb.BytesPerSector = Sizes.Sector;
             bpb.SectorsPerCluster = (byte)(clusterSize / bpb.BytesPerSector);
             bpb.ReservedSectors = 0;
@@ -126,6 +128,7 @@ namespace DiscUtils.Ntfs
         internal static BiosParameterBlock FromBytes(byte[] bytes, int offset)
         {
             BiosParameterBlock bpb = new BiosParameterBlock();
+            bpb.OemId = EndianUtilities.BytesToString(bytes, offset + 0x03, 8);
             bpb.BytesPerSector = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x0B);
             bpb.TotalSectors16 = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x13);
             bpb.TotalSectors32 = EndianUtilities.ToUInt32LittleEndian(bytes, offset + 0x20);
@@ -136,7 +139,6 @@ namespace DiscUtils.Ntfs
             bpb.SectorsPerCluster = bytes[offset + 0x0D];
             if (!bpb.IsValid(long.MaxValue)) return bpb;
 
-            bpb.OemId = EndianUtilities.BytesToString(bytes, offset + 0x03, 8);
             bpb.ReservedSectors = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x0E);
             bpb.NumFats = bytes[offset + 0x10];
             bpb.FatRootEntriesCount = EndianUtilities.ToUInt16LittleEndian(bytes, offset + 0x11);
@@ -191,9 +193,21 @@ namespace DiscUtils.Ntfs
             return rawSize * SectorsPerCluster * BytesPerSector;
         }
 
+        internal bool IsValidOemId()
+        {
+            return (!String.IsNullOrEmpty(OemId) && OemId.Length == NTFS_OEM_ID.Length
+                    && String.Compare(OemId, 0, NTFS_OEM_ID, 0, NTFS_OEM_ID.Length) == 0);
+        }
+
         internal bool IsValid(long volumeSize)
         {
-            if (SignatureByte != 0x80 || TotalSectors16 != 0 || TotalSectors32 != 0
+            /*
+             * Some filesystem creation tools are not very strict and DO NOT
+             * set the Signature byte to 0x80 (Version "8.0" NTFS BPB).
+             *
+             * Let's rather check OemId here, so we don't fail hard.
+             */
+            if (!IsValidOemId() || TotalSectors16 != 0 || TotalSectors32 != 0
                 || TotalSectors64 == 0 || MftRecordSize == 0 || MftCluster == 0 || BytesPerSector == 0)
             {
                 return false;
