@@ -1458,6 +1458,10 @@ namespace DiscUtils.Fat
         private static FatType DetectFATType(byte[] bpb)
         {
             uint bpbBytesPerSec = EndianUtilities.ToUInt16LittleEndian(bpb, 11);
+            if (bpbBytesPerSec == 0)
+            {
+                throw new InvalidFileSystemException("Bytes per sector is 0, invalid or corrupt filesystem.");
+            }
             uint bpbRootEntCnt = EndianUtilities.ToUInt16LittleEndian(bpb, 17);
             uint bpbFATSz16 = EndianUtilities.ToUInt16LittleEndian(bpb, 22);
             uint bpbFATSz32 = EndianUtilities.ToUInt32LittleEndian(bpb, 36);
