@@ -236,6 +236,7 @@ namespace LibraryTests.Fat
             SparseMemoryStream stream = new SparseMemoryStream();
             byte[] buffer = new byte[1024 * 1024];
             stream.Write(buffer, 0, 1024 * 1024);
+            stream.Position = 0;
             Assert.Throws<InvalidFileSystemException>(() => new FatFileSystem(stream));
         }
     }
