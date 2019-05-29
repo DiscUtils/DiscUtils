@@ -15,6 +15,7 @@ install:
 - msbuild /t:Restore /Verbosity:Minimal /p:VersionSuffix=alpha
 artifacts:
 - path: '**\*.nupkg'
+- path: '**\*.snupkg'
 deploy:
 - provider: NuGet
   api_key:
