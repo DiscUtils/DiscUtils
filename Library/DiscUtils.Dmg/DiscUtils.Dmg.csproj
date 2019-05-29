@@ -12,4 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
-  </ItemGroup></Project>
+  </ItemGroup>
+
+</Project>
