@@ -4,7 +4,7 @@
     <VersionPrefix>0.14.2</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
     
-    <TargetFrameworks>netstandard2.0;netstandard1.5;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard1.5;net20;net40;net45</TargetFrameworks>
     
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
