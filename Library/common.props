@@ -5,7 +5,7 @@
     <VersionSuffix>alpha</VersionSuffix>
     
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
