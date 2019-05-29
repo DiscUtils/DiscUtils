@@ -6,7 +6,6 @@
     <Description>DiscUtils, complete meta-package</Description>
     <AssemblyTitle>DiscUtils</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils</AssemblyName>
     <PackageId>DiscUtils</PackageId>
     <PackageTags>DiscUtils</PackageTags>

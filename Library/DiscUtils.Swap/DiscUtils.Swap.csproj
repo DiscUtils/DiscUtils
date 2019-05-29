@@ -5,7 +5,6 @@
     <Description>DiscUtils Swap</Description>
     <AssemblyTitle>DiscUtils.Swap</AssemblyTitle>
     <Authors>Bianco Veigel</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Swap</AssemblyName>
     <PackageId>DiscUtils.Swap</PackageId>
     <PackageTags>DiscUtils;Swap</PackageTags>
@@ -13,23 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

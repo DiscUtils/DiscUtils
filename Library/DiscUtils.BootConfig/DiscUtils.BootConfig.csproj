@@ -5,7 +5,6 @@
     <Description>DiscUtils BootConfig parser</Description>
     <AssemblyTitle>DiscUtils.BootConfig</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.BootConfig</AssemblyName>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
