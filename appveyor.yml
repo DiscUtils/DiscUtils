@@ -1,27 +1,39 @@
-image: Visual Studio 2017
-build_script:
-- ps: >-
-    [xml]$doc = (Get-Content .\Library\DiscUtils.Core\DiscUtils.Core.csproj)
-
-    $version = $doc.Project.PropertyGroup.VersionPrefix
-
-    Update-AppveyorBuild -Version "$version build $env:APPVEYOR_BUILD_NUMBER"
-- cmd: REM Build
-- cmd: msbuild /t:Build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal /p:VersionSuffix=alpha
-test_script:
-- cmd: cd Tests\LibraryTests\bin\Release\netcoreapp1.1
-- cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
+image: Visual Studio 2019
 install:
-- msbuild /t:Restore /Verbosity:Minimal /p:VersionSuffix=alpha
+  - choco install gitversion.portable -pre -y
+
+before_build:
+  - ps: >-
+      $versionJson = $(GitVersion) -join ""
+      $version = ConvertFrom-Json $versionJson
+      
+      $content = Get-Content .\Library\Version.template.props -Raw
+      $content = $content.Replace("&InformationalVersion&", $version.InformationalVersion)
+      $content = $content.Replace("&FileVersion&", $version.AssemblySemFileVer)
+      $content = $content.Replace("&AssemblyVersion&", $version.AssemblySemVer)
+      $content = $content.Replace("&NugetVersion&", $version.NuGetVersion)
+      Set-Content .\Library\Version.props $content
+      
+      Update-AppveyorBuild -Version $version.NuGetVersion
+  - msbuild /t:Restore /Verbosity:Minimal
+
+build_script:
+  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal
+
+test_script:
+  - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp2.0
+  - cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
+
 artifacts:
-- path: '**\*.nupkg'
-- path: '**\*.snupkg'
+  - path: '**\*.nupkg'
+  - path: '**\*.snupkg'
+
 deploy:
-- provider: NuGet
-  server: https://api.nuget.org/v3/index.json
-  symbol_server: https://api.nuget.org/v3/index.json
-  artifact: /.*\.s?nupkg/
-  api_key:
-    secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
-  on:
-    branch: nuget
+  - provider: NuGet
+    server: https://api.nuget.org/v3/index.json
+    symbol_server: https://api.nuget.org/v3/index.json
+    artifact: /.*\.s?nupkg/
+    api_key:
+      secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
+    on:
+      branch: nuget
