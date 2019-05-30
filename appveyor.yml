@@ -17,10 +17,10 @@ before_build:
   - msbuild /t:Restore /Verbosity:Minimal
 
 build_script:
-  - cmd: msbuild /t:build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal
+  - cmd: msbuild /t:build /p:Configuration=Release /Verbosity:Minimal
 
 after_build:
-  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal
+  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
 
 test_script:
   - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp2.0
