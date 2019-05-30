@@ -4,6 +4,8 @@
     <VersionPrefix>0.14.2</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
     
+    <TargetFrameworks>netstandard2.0;netstandard1.5;net20;net40;net45</TargetFrameworks>
+    
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
@@ -41,6 +43,7 @@
   <!-- Constants -->
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.5'">$(DefineConstants);NETCORE</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETCORE</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net20'">$(DefineConstants);NET20</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net40'">$(DefineConstants);NET40</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net45'">$(DefineConstants);NET45</DefineConstants>

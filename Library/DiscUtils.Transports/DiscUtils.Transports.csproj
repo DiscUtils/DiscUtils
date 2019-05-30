@@ -5,7 +5,6 @@
     <Description>DiscUtils, meta-package with transports, such as iSCSI and NFS</Description>
     <AssemblyTitle>DiscUtils.Transports</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Transports</AssemblyName>
     <PackageId>DiscUtils.Transports</PackageId>
     <PackageTags>DiscUtils;iSCSI;NFS</PackageTags>
@@ -16,23 +15,6 @@
     <ProjectReference Include="..\DiscUtils.Iscsi\DiscUtils.Iscsi.csproj" />
     <ProjectReference Include="..\DiscUtils.Nfs\DiscUtils.Nfs.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDisk\DiscUtils.OpticalDisk.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

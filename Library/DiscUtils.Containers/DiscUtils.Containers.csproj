@@ -5,7 +5,6 @@
     <Description>DiscUtils, meta-package with container formats such as WIM, DMG, VHD, VHDX, XVA, VMDK</Description>
     <AssemblyTitle>DiscUtils.Containers</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Containers</AssemblyName>
     <PackageId>DiscUtils.Containers</PackageId>
     <PackageTags>DiscUtils;VHD;VHDX;XVA;VMDK;DMG</PackageTags>
@@ -22,21 +21,8 @@
     <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
-    <Reference Include="System" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

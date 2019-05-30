@@ -2,10 +2,10 @@
   <Import Project="../common.props" />
 
   <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net20;net40;net45</TargetFrameworks>
     <Description>DiscUtils OpticalDiscSharing</Description>
     <AssemblyTitle>DiscUtils.OpticalDiscSharing</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <TargetFrameworks>net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.OpticalDiscSharing</AssemblyName>
     <PackageId>DiscUtils.OpticalDiscSharing</PackageId>
     <PackageTags>DiscUtils;OpticalDiscSharing</PackageTags>
@@ -14,20 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
     <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
-    <Reference Include="System" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>
