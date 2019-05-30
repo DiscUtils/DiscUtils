@@ -25,16 +25,27 @@ test_script:
 artifacts:
   - path: '**\*.nupkg'
   - path: '**\*.snupkg'
-  
-for:
-- branches:
-    only:
-      - master
-  after_test:
-    - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
-  deploy:
-    - provider: NuGet
-      api_key:
-        secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
-      on:
-        branch: master
+
+after_test:
+  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
+
+deploy:
+  - provider: NuGet
+    api_key:
+      secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
+    on:
+      # Only push on tagged master commits
+      branch: master
+      APPVEYOR_REPO_TAG: true
+      
+  - provider: GitHub
+    description: 'Automated release from Appveyor'
+    auth_token:
+      secure: PzHMfZUHtddDN/+S4C0K6emflG2EpgynNlu/p/T4hizDb8M7UChpohLUSd4BkFRU
+    artifact: /.*\.s?nupkg/
+    draft: false
+    prerelease: false
+    on:
+      # Only add releases on tagged master commits
+      branch: master
+      APPVEYOR_REPO_TAG: true
