@@ -17,7 +17,7 @@
         /// <returns>DateTimeOffset.</returns>
         public static DateTimeOffset FromUnixTimeSeconds(this long seconds)
         {
-#if NETCORE
+#if NETSTANDARD
             return DateTimeOffset.FromUnixTimeSeconds(seconds);
 #else
             DateTimeOffset dateTimeOffset = new DateTimeOffset(DateTimeOffsetExtensions.UnixEpoch);
@@ -26,7 +26,7 @@
 #endif
         }
 
-#if !NETCORE
+#if !NETSTANDARD1_5
         /// <summary>
         /// Converts the current DateTimeOffset to Unix time.
         /// </summary>

@@ -27,7 +27,7 @@ using DiscUtils.Streams;
 
 namespace DiscUtils.Xva
 {
-#if NETCORE
+#if NETSTANDARD
     internal class HashStreamCore : Stream
     {
         private readonly IncrementalHash _hashAlg;

@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 
-#if !NETCORE
+#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 #endif
@@ -33,7 +33,7 @@ namespace DiscUtils.Nfs
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
-#if !NETCORE
+#if !NETSTANDARD1_5
     [Serializable]
 #endif
     public sealed class Nfs3Exception : IOException
@@ -79,7 +79,7 @@ namespace DiscUtils.Nfs
             NfsStatus = status;
         }
 
-#if !NETCORE
+#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
@@ -97,7 +97,7 @@ namespace DiscUtils.Nfs
         /// </summary>
         public Nfs3Status NfsStatus { get; } = Nfs3Status.Unknown;
 
-#if !NETCORE
+#if !NETSTANDARD1_5
         /// <summary>
         /// Serializes this exception.
         /// </summary>

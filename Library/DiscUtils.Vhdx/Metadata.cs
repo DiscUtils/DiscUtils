@@ -25,8 +25,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using DiscUtils.CoreCompat;
 using DiscUtils.Streams;
-#if !NETCORE
-    using System.Security.Permissions;
+#if !NETSTANDARD
+using System.Security.Permissions;
 #endif
 
 namespace DiscUtils.Vhdx
@@ -117,10 +117,9 @@ namespace DiscUtils.Vhdx
             return entry.Length;
         }
 
-#if !NETCORE
+#if !NETSTANDARD
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 #endif
-
         private static uint AddEntryValue<T>(T data, Writer<T> writer, Guid id, MetadataEntryFlags flags,
                                              MetadataTable header, uint dataOffset, Stream stream)
         {
@@ -156,10 +155,9 @@ namespace DiscUtils.Vhdx
             return default(T);
         }
 
-#if !NETCORE
+#if !NETSTANDARD
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 #endif
-
         private T ReadValue<T>(Guid itemId, bool isUser, Reader<T> reader)
         {
             MetadataEntryKey key = new MetadataEntryKey(itemId, isUser);

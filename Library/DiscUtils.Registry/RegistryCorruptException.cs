@@ -24,14 +24,14 @@ using System;
 
 namespace DiscUtils.Registry
 {
-#if !NETCORE
+#if !NETSTANDARD1_5
     using System.Runtime.Serialization;
 #endif
 
     /// <summary>
     /// Exception thrown when some corruption is found in the registry hive.
     /// </summary>
-#if !NETCORE
+#if !NETSTANDARD1_5
     [Serializable]
 #endif
     public class RegistryCorruptException : Exception
@@ -56,13 +56,12 @@ namespace DiscUtils.Registry
         public RegistryCorruptException(string message, Exception innerException)
             : base(message, innerException) {}
 
-#if !NETCORE
-
-/// <summary>
-/// Initializes a new instance of the RegistryCorruptException class.
-/// </summary>
-/// <param name="info">The serialization info.</param>
-/// <param name="context">The streaming context.</param>
+#if !NETSTANDARD1_5
+        /// <summary>
+        /// Initializes a new instance of the RegistryCorruptException class.
+        /// </summary>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         protected RegistryCorruptException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
