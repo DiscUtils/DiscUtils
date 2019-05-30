@@ -19,12 +19,11 @@ before_build:
 build_script:
   - cmd: msbuild /t:build /p:Configuration=Release /Verbosity:Minimal
 
-after_build:
-  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
-
 test_script:
-  - cmd: cd Tests\LibraryTests\bin\Release\netcoreapp2.0
-  - cmd: dotnet test ..\..\..\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
+  - cmd: dotnet test Tests\LibraryTests\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
+
+after_test:
+  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
 
 artifacts:
   - path: '**\*.nupkg'
