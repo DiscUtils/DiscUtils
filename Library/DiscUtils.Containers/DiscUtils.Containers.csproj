@@ -22,7 +22,7 @@
     <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
   </ItemGroup>
 
