@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils VHD</Description>
-    <AssemblyTitle>DiscUtils.Vhd</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Vhd</AssemblyName>
-    <PackageId>DiscUtils.Vhd</PackageId>
     <PackageTags>DiscUtils;VHD</PackageTags>
   </PropertyGroup>
 

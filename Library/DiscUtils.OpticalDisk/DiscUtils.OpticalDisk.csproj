@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils OpticalDisk</Description>
-    <AssemblyTitle>DiscUtils.OpticalDisk</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.OpticalDisk</AssemblyName>
-    <PackageId>DiscUtils.OpticalDisk</PackageId>
     <PackageTags>DiscUtils;Optical;OpticalDisk</PackageTags>
   </PropertyGroup>
 

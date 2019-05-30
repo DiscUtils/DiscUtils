@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net40</TargetFramework>
-    <AssemblyName>NTFSDump</AssemblyName>
     <OutputType>Exe</OutputType>
-    <PackageId>NTFSDump</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -17,11 +15,6 @@
     <ProjectReference Include="..\..\Library\DiscUtils.Containers\DiscUtils.Containers.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Transports\DiscUtils.Transports.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

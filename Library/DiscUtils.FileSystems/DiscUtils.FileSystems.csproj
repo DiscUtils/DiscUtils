@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils, meta-package with filesystems</Description>
-    <AssemblyTitle>DiscUtils.FileSystems</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.FileSystems</AssemblyName>
-    <PackageId>DiscUtils.FileSystems</PackageId>
     <PackageTags>DiscUtils;Filesystem;NTFS;ext;Hfs+;HfsPlus;FAT</PackageTags>
   </PropertyGroup>
 

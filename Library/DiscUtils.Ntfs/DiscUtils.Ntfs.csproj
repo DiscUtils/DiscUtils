@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils NTFS filesystem parser</Description>
-    <AssemblyTitle>DiscUtils.Ntfs</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Ntfs</AssemblyName>
-    <PackageId>DiscUtils.Ntfs</PackageId>
     <PackageTags>DiscUtils;Filesystem;NTFS</PackageTags>
   </PropertyGroup>
 

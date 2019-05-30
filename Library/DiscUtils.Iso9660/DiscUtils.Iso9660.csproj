@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils Iso9660</Description>
-    <AssemblyTitle>DiscUtils.Iso9660</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Iso9660</AssemblyName>
-    <PackageId>DiscUtils.Iso9660</PackageId>
     <PackageTags>DiscUtils;Optical;Iso9660</PackageTags>
   </PropertyGroup>
 

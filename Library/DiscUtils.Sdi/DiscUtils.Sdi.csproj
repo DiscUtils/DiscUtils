@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils Sdi</Description>
-    <AssemblyTitle>DiscUtils.Sdi</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Sdi</AssemblyName>
-    <PackageId>DiscUtils.Sdi</PackageId>
     <PackageTags>DiscUtils;Sdi</PackageTags>
   </PropertyGroup>
 

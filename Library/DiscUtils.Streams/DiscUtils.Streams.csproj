@@ -3,32 +3,8 @@
 
   <PropertyGroup>
     <Description>DiscUtils Streams</Description>
-    <AssemblyTitle>DiscUtils.Streams</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike;Bianco Veigel</Authors>
-    <AssemblyName>DiscUtils.Streams</AssemblyName>
-    <PackageId>DiscUtils.Streams</PackageId>
     <PackageTags>DiscUtils;Streams</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Block\" />
-  </ItemGroup>
 
 </Project>
