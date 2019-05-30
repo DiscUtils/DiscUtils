@@ -5,7 +5,6 @@
     <Description>DiscUtils Streams</Description>
     <AssemblyTitle>DiscUtils.Streams</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike;Bianco Veigel</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Streams</AssemblyName>
     <PackageId>DiscUtils.Streams</PackageId>
     <PackageTags>DiscUtils;Streams</PackageTags>
