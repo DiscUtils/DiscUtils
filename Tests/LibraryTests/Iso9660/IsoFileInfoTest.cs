@@ -128,7 +128,7 @@ namespace LibraryTests.Iso9660
         }
 
         [Fact]
-        public void Equals()
+        public void FileInfoEquals()
         {
             CDBuilder builder = new CDBuilder();
             CDReader fs = new CDReader(builder.Build(), false);

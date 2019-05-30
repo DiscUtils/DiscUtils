@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common.props" />
+  <Import Project="../common-library.props" />
   
   <PropertyGroup>
     <Description>DiscUtils, complete meta-package</Description>

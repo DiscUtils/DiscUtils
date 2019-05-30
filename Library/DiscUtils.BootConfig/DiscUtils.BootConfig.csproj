@@ -1,19 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common.props" />
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../common-library.props" />
 
   <PropertyGroup>
     <Description>DiscUtils BootConfig parser</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
     <PackageTags>DiscUtils;BootConfig</PackageTags>
-    <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GeneratePackageOnBuild Condition="'$(Configuration)' != 'Debug'">True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

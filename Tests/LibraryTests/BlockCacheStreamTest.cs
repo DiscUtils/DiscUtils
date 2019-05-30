@@ -27,7 +27,7 @@ using Xunit;
 
 namespace LibraryTests
 {
-    internal sealed class BlockCacheStreamTest
+    public sealed class BlockCacheStreamTest
     {
         [Fact]
         public void Bug5203_IncreaseSize()

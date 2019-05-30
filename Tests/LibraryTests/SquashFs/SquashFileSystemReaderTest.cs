@@ -26,7 +26,7 @@ using Xunit;
 
 namespace LibraryTests.SquashFs
 {
-    internal sealed class SquashFileSystemReaderTest
+    public sealed class SquashFileSystemReaderTest
     {
         [Fact]
         public void Detect()

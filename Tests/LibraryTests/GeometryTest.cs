@@ -83,7 +83,7 @@ namespace LibraryTests
         }
 
         [Fact]
-        public void Equals()
+        public void GeometryEquals()
         {
             Assert.Equal(Geometry.FromCapacity(1024 * 1024 * 32), Geometry.FromCapacity(1024 * 1024 * 32));
         }
