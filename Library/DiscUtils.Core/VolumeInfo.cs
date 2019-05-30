@@ -20,7 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#if !NETCORE
+#if !NETSTANDARD
 using System;
 #endif
 using DiscUtils.Streams;

@@ -1,4 +1,4 @@
-﻿#if NETCORE
+﻿#if NETSTANDARD1_5
 using System.Globalization;
 
 namespace DiscUtils.CoreCompat

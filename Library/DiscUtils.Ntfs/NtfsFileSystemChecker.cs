@@ -27,7 +27,7 @@ using System.IO;
 using System.Text;
 using DiscUtils.Streams;
 
-#if !NETCORE
+#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 #endif
 

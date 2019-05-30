@@ -1,4 +1,4 @@
-﻿#if NETCORE
+﻿#if NETSTANDARD
 using System.Text;
 #endif
 
@@ -15,7 +15,7 @@ namespace DiscUtils.CoreCompat
 
             _registered = true;
 
-#if NETCORE
+#if NETSTANDARD
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
         }
