@@ -624,7 +624,7 @@ namespace DiscUtils.Ntfs
             }
         }
 
-#if !NETCORE
+#if !NETSTANDARD1_5
         [Serializable]
 #endif
         private sealed class AbortException : InvalidFileSystemException

@@ -23,7 +23,7 @@
 using System;
 using System.IO;
 
-#if !NETCORE
+#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 #endif
 
@@ -32,7 +32,7 @@ namespace DiscUtils
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
-#if !NETCORE
+#if !NETSTANDARD1_5
     [Serializable]
 #endif
     public class InvalidFileSystemException : IOException
@@ -57,13 +57,12 @@ namespace DiscUtils
         public InvalidFileSystemException(string message, Exception innerException)
             : base(message, innerException) {}
 
-#if !NETCORE
-
-/// <summary>
-/// Initializes a new instance of the InvalidFileSystemException class.
-/// </summary>
-/// <param name="info">The serialization info.</param>
-/// <param name="context">The streaming context.</param>
+#if !NETSTANDARD1_5
+        /// <summary>
+        /// Initializes a new instance of the InvalidFileSystemException class.
+        /// </summary>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">The streaming context.</param>
         protected InvalidFileSystemException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

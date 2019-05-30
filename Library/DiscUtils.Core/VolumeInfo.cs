@@ -31,7 +31,7 @@ namespace DiscUtils
     /// Base class that holds information about a disk volume.
     /// </summary>
     public abstract class VolumeInfo
-#if !NETCORE
+#if !NETSTANDARD
         : MarshalByRefObject
 #endif
     {

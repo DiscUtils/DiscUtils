@@ -42,7 +42,7 @@ namespace DiscUtils
     /// ways for data redundancy or other purposes.</para>
     /// </remarks>
     public sealed class VolumeManager
-#if !NETCORE
+#if !NETSTANDARD
         : MarshalByRefObject
 #endif
     {

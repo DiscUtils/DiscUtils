@@ -34,7 +34,7 @@ namespace DiscUtils
     /// Base class representing virtual hard disks.
     /// </summary>
     public abstract class VirtualDisk :
-#if !NETCORE
+#if !NETSTANDARD
         MarshalByRefObject, 
 #endif
         IDisposable

@@ -139,7 +139,7 @@ namespace DiscUtils.Xva
                             }
 
                             Stream chunkHashStream;
-#if NETCORE
+#if NETSTANDARD
                             IncrementalHash hashAlgCore = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
                             chunkHashStream = new HashStreamCore(chunkStream, Ownership.Dispose, hashAlgCore);
 #else
@@ -150,7 +150,7 @@ namespace DiscUtils.Xva
                             tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}", diskIds[diskIdx], i), chunkHashStream);
 
                             byte[] hash;
-#if NETCORE
+#if NETSTANDARD
                             hash = hashAlgCore.GetHashAndReset();
 #else
                             hashAlgDotnet.TransformFinalBlock(new byte[0], 0, 0);
@@ -173,7 +173,7 @@ namespace DiscUtils.Xva
                     Stream chunkStream = new ZeroStream(Sizes.OneMiB);
 
                     Stream chunkHashStream;
-#if NETCORE
+#if NETSTANDARD
                     IncrementalHash hashAlgCore = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
                     chunkHashStream = new HashStreamCore(chunkStream, Ownership.Dispose, hashAlgCore);
 #else
@@ -184,7 +184,7 @@ namespace DiscUtils.Xva
                     tarBuilder.AddFile(string.Format(CultureInfo.InvariantCulture, "Ref:{0}/{1:D8}", diskIds[diskIdx], lastActualChunk), chunkHashStream);
 
                     byte[] hash;
-#if NETCORE
+#if NETSTANDARD
                     hash = hashAlgCore.GetHashAndReset();
 #else
                     hashAlgDotnet.TransformFinalBlock(new byte[0], 0, 0);

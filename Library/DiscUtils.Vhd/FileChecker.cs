@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using DiscUtils.Internal;
 using DiscUtils.Streams;
-#if !NETCORE
+#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 #endif
 
@@ -418,7 +418,7 @@ namespace DiscUtils.Vhd
             }
         }
 
-#if !NETCORE
+#if !NETSTANDARD1_5
         [Serializable]
 #endif
         private sealed class AbortException : InvalidFileSystemException

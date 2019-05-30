@@ -22,7 +22,7 @@
 
 using System;
 
-#if !NETCORE
+#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 #endif
 
@@ -31,7 +31,7 @@ namespace DiscUtils.Iscsi
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>
-#if !NETCORE
+#if !NETSTANDARD1_5
     [Serializable]
 #endif
     public class InvalidProtocolException : IscsiException
@@ -56,13 +56,12 @@ namespace DiscUtils.Iscsi
         public InvalidProtocolException(string message, Exception innerException)
             : base(message, innerException) {}
 
-#if !NETCORE
-
-/// <summary>
-/// Initializes a new instance of the InvalidProtocolException class.
-/// </summary>
-/// <param name="info">The serialization info.</param>
-/// <param name="context">Ther context.</param>
+#if !NETSTANDARD1_5
+        /// <summary>
+        /// Initializes a new instance of the InvalidProtocolException class.
+        /// </summary>
+        /// <param name="info">The serialization info.</param>
+        /// <param name="context">Ther context.</param>
         protected InvalidProtocolException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

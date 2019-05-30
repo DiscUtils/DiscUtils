@@ -46,7 +46,7 @@ namespace DiscUtils.Iscsi
             Session = session;
             _authenticators = authenticators;
 
-#if NETCORE
+#if NETSTANDARD1_5
             TcpClient client = new TcpClient();
             client.ConnectAsync(address.NetworkAddress, address.NetworkPort).Wait();
 #else

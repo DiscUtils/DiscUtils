@@ -21,9 +21,8 @@
 //
 
 using System.Collections.Generic;
-
-#if !NETCORE
-    using System;
+#if !NETSTANDARD
+using System;
 #endif
 
 namespace DiscUtils.Streams
@@ -32,7 +31,7 @@ namespace DiscUtils.Streams
     /// Abstract base class for implementations of IBuffer.
     /// </summary>
     public abstract class Buffer :
-#if !NETCORE
+#if !NETSTANDARD
         MarshalByRefObject, 
 #endif
         IBuffer
