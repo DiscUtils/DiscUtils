@@ -4,20 +4,22 @@ install:
 
 before_build:
   - ps: >-
-      $versionJson = $(GitVersion) -join ""
-      $version = ConvertFrom-Json $versionJson
+      $version = ConvertFrom-Json $($(GitVersion) -join "")
       
-      $content = Get-Content .\Library\Version.template.props -Raw
-      $content = $content.Replace("&InformationalVersion&", $version.InformationalVersion)
-      $content = $content.Replace("&FileVersion&", $version.AssemblySemFileVer)
-      $content = $content.Replace("&AssemblyVersion&", $version.AssemblySemVer)
-      $content = $content.Replace("&NugetVersion&", $version.NuGetVersion)
-      Set-Content .\Library\Version.props $content
+      $content = Get-Content .\Version.template.props -Raw;
+      $content = $content.Replace("&InformationalVersion&", $version.InformationalVersion);
+      $content = $content.Replace("&FileVersion&", $version.AssemblySemFileVer);
+      $content = $content.Replace("&AssemblyVersion&", $version.AssemblySemVer);
+      $content = $content.Replace("&NugetVersion&", $version.NuGetVersion);
+      Set-Content .\Version.props $content;
       
       Update-AppveyorBuild -Version $version.NuGetVersion
   - msbuild /t:Restore /Verbosity:Minimal
 
 build_script:
+  - cmd: msbuild /t:build /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal
+
+after_build:
   - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=True /Verbosity:Minimal
 
 test_script:
