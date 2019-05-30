@@ -31,6 +31,14 @@ after_test:
 
 deploy:
   - provider: NuGet
+    server: https://www.myget.org/F/discutils/api/v2/package
+    api_key:
+      secure: foGROcPrYEku4LqHLdwidY8kXnpLsAB1YOBufMY0P9AptYpUzySgx5gezRcZ9vma
+    on:
+      # We push on all develop commits
+      branch: develop
+  
+  - provider: NuGet
     api_key:
       secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
     on:

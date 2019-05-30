@@ -104,3 +104,20 @@ using (FileStream fs = File.Create(@"myfloppy.vfd"))
 ``` 
 
 Again, start browsing the file system at floppy.Root.
+
+## Development releases
+
+Automated CI builds are available on Myget. Add this source to your nuget configuration:
+
+> https://www.myget.org/F/discutils/api/v3/index.json 
+
+.. or add this to a `NuGet.Config` file (Casing important on linux), in your repository:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="DiscUtils" value="https://www.myget.org/F/discutils/api/v3/index.json" />
+  </packageSources>
+</configuration>
+```
