@@ -22,23 +22,19 @@ build_script:
 test_script:
   - cmd: dotnet test Tests\LibraryTests\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
 
+artifacts:
+  - path: '**\*.nupkg'
+  - path: '**\*.snupkg'
+  
 for:
 - branches:
     only:
       - master
   after_test:
     - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
-
-artifacts:
-  - path: '**\*.nupkg'
-  - path: '**\*.snupkg'
-
-deploy:
-  - provider: NuGet
-    server: https://api.nuget.org/v3/index.json
-    symbol_server: https://api.nuget.org/v3/index.json
-    artifact: /.*\.s?nupkg/
-    api_key:
-      secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
-    on:
-      branch: master
+  deploy:
+    - provider: NuGet
+      api_key:
+        secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
+      on:
+        branch: master
