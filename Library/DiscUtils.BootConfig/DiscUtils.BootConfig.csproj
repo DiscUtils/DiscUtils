@@ -12,7 +12,6 @@
     <PackageId>DiscUtils.BootConfig</PackageId>
     <PackageTags>DiscUtils;BootConfig</PackageTags>
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
