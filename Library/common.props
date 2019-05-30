@@ -1,9 +1,6 @@
 <Project>
   <!-- Package related stuff -->
   <PropertyGroup>
-    <VersionPrefix>0.14.2</VersionPrefix>
-    <VersionSuffix>alpha</VersionSuffix>
-    
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/DiscUtils/DiscUtils/blob/master/LICENSE.txt</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/DiscUtils/DiscUtils</RepositoryUrl>
@@ -35,4 +32,9 @@
     <DefineConstants Condition="'$(TargetFramework)' == 'net40'">$(DefineConstants);NET40</DefineConstants>
     <DefineConstants Condition="'$(TargetFramework)' == 'net45'">$(DefineConstants);NET45</DefineConstants>
   </PropertyGroup>
+  
+  <!-- Automatic versioning -->
+  <ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="2.3.167" PrivateAssets="All" />
+  </ItemGroup>
 </Project>
