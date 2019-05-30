@@ -2,7 +2,6 @@
   <Import Project="../common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net20;net40;net45</TargetFrameworks>
     <Description>DiscUtils, meta-package with container formats such as WIM, DMG, VHD, VHDX, XVA, VMDK</Description>
     <AssemblyTitle>DiscUtils.Containers</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>

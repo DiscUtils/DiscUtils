@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <Import Project="../common.props" />
   
   <PropertyGroup>
@@ -42,21 +41,21 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
     <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
-    <Reference Include="System" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
     <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <ProjectReference Include="..\DiscUtils.Net\DiscUtils.Net.csproj" />
+    <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
   </ItemGroup>
 
 </Project>

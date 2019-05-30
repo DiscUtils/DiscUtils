@@ -5,7 +5,6 @@
     <Description>DiscUtils Sdi</Description>
     <AssemblyTitle>DiscUtils.Sdi</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <AssemblyName>DiscUtils.Sdi</AssemblyName>
     <PackageId>DiscUtils.Sdi</PackageId>
     <PackageTags>DiscUtils;Sdi</PackageTags>

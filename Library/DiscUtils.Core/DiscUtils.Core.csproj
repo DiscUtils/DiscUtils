@@ -5,22 +5,21 @@
     <Description>Implementation of the ISO, UDF, FAT and NTFS file systems is now fairly stable. VHD, XVA, VMDK and VDI disk formats are implemented, as well as read/write Registry support. The library also includes a simple iSCSI initiator, for accessing disks via iSCSI and an NFS client implementation.</Description>
     <AssemblyTitle>DiscUtils (for .NET and .NET Core), core library that supports parts of DiscUtils</AssemblyTitle>
     <Authors>Kenneth Bell;Quamotion;LordMike</Authors>
-    <TargetFrameworks>netstandard1.5;net20;net40;net45</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>DiscUtils.Core</AssemblyName>
     <PackageId>DiscUtils.Core</PackageId>
     <PackageTags>DiscUtils;VHD;VDI;XVA;VMDK;ISO;NTFS;EXT2FS</PackageTags>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\DiscUtils.Streams\DiscUtils.Streams.csproj" />
+  </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' or '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Security.AccessControl" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.IO.FileSystem.DriveInfo" Version="4.3.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\DiscUtils.Streams\DiscUtils.Streams.csproj" />
   </ItemGroup>
 
 </Project>
