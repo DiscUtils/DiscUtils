@@ -1,7 +1,7 @@
 image: Visual Studio 2017
 build_script:
 - dotnet restore
-- dotnet build -c Release
+- msbuild /t:Build /p:Configuration=Release /Verbosity:Minimal
 - dotnet pack -c Release
 test_script:
 - dotnet test Tests\LibraryTests\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
