@@ -9,7 +9,7 @@ namespace DiscUtils.CoreCompat
     {
         public static bool IsEnum(Type type)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return type.GetTypeInfo().IsEnum;
 #else
             return type.IsEnum;
@@ -18,7 +18,7 @@ namespace DiscUtils.CoreCompat
 
         public static Attribute GetCustomAttribute(PropertyInfo property, Type attributeType)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return property.GetCustomAttribute(attributeType);
 #else
             return Attribute.GetCustomAttribute(property, attributeType);
@@ -27,7 +27,7 @@ namespace DiscUtils.CoreCompat
 
         public static Attribute GetCustomAttribute(PropertyInfo property, Type attributeType, bool inherit)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return property.GetCustomAttribute(attributeType, inherit);
 #else
             return Attribute.GetCustomAttribute(property, attributeType, inherit);
@@ -36,7 +36,7 @@ namespace DiscUtils.CoreCompat
 
         public static Attribute GetCustomAttribute(FieldInfo field, Type attributeType)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return field.GetCustomAttribute(attributeType);
 #else
             return Attribute.GetCustomAttribute(field, attributeType);
@@ -45,7 +45,7 @@ namespace DiscUtils.CoreCompat
 
         public static Attribute GetCustomAttribute(Type type, Type attributeType)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return type.GetTypeInfo().GetCustomAttribute(attributeType);
 #else
             return Attribute.GetCustomAttribute(type, attributeType);
@@ -54,7 +54,7 @@ namespace DiscUtils.CoreCompat
 
         public static Attribute GetCustomAttribute(Type type, Type attributeType, bool inherit)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return type.GetTypeInfo().GetCustomAttribute(attributeType, inherit);
 #else
             return Attribute.GetCustomAttribute(type, attributeType);
@@ -63,7 +63,7 @@ namespace DiscUtils.CoreCompat
 
         public static IEnumerable<Attribute> GetCustomAttributes(Type type, Type attributeType, bool inherit)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return type.GetTypeInfo().GetCustomAttributes(attributeType, inherit);
 #else
             return Attribute.GetCustomAttributes(type, attributeType);
@@ -72,7 +72,7 @@ namespace DiscUtils.CoreCompat
 
         public static Assembly GetAssembly(Type type)
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return type.GetTypeInfo().Assembly;
 #else
             return type.Assembly;
@@ -81,7 +81,7 @@ namespace DiscUtils.CoreCompat
 
         public static int SizeOf<T>()
         {
-#if NETCORE
+#if NETSTANDARD1_5
             return Marshal.SizeOf<T>();
 #else
             return Marshal.SizeOf(typeof(T));
