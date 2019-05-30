@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net40</TargetFramework>
-    <AssemblyName>DiscUtils.PowerShell</AssemblyName>
-    <PackageId>DiscUtils.PowerShell</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>

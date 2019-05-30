@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils XVA</Description>
-    <AssemblyTitle>DiscUtils.Xva</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Xva</AssemblyName>
-    <PackageId>DiscUtils.Xva</PackageId>
     <PackageTags>DiscUtils;XVA</PackageTags>
   </PropertyGroup>
 

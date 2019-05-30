@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils, meta-package with transports, such as iSCSI and NFS</Description>
-    <AssemblyTitle>DiscUtils.Transports</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Transports</AssemblyName>
-    <PackageId>DiscUtils.Transports</PackageId>
     <PackageTags>DiscUtils;iSCSI;NFS</PackageTags>
   </PropertyGroup>
 

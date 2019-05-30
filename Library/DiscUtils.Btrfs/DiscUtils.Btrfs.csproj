@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils Btrfs</Description>
-    <AssemblyTitle>DiscUtils.Btrfs</AssemblyTitle>
     <Authors>Bianco Veigel</Authors>
-    <AssemblyName>DiscUtils.Btrfs</AssemblyName>
-    <PackageId>DiscUtils.Btrfs</PackageId>
     <PackageTags>DiscUtils;Btrfs</PackageTags>
   </PropertyGroup>
 

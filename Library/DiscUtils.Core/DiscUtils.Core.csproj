@@ -6,8 +6,6 @@
     <AssemblyTitle>DiscUtils (for .NET and .NET Core), core library that supports parts of DiscUtils</AssemblyTitle>
     <Authors>Kenneth Bell;Quamotion;LordMike</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AssemblyName>DiscUtils.Core</AssemblyName>
-    <PackageId>DiscUtils.Core</PackageId>
     <PackageTags>DiscUtils;VHD;VDI;XVA;VMDK;ISO;NTFS;EXT2FS</PackageTags>
   </PropertyGroup>
   

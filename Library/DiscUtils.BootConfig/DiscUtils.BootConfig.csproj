@@ -3,12 +3,9 @@
 
   <PropertyGroup>
     <Description>DiscUtils BootConfig parser</Description>
-    <AssemblyTitle>DiscUtils.BootConfig</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.BootConfig</AssemblyName>
     <AssemblyOriginatorKeyFile>../../SigningKey.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PackageId>DiscUtils.BootConfig</PackageId>
     <PackageTags>DiscUtils;BootConfig</PackageTags>
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>

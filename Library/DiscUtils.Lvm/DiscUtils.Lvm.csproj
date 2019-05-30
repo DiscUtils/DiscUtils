@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils LVM</Description>
-    <AssemblyTitle>DiscUtils.Lvm</AssemblyTitle>
     <Authors>Bianco Veigel</Authors>
-    <AssemblyName>DiscUtils.Lvm</AssemblyName>
-    <PackageId>DiscUtils.Lvm</PackageId>
     <PackageTags>DiscUtils;Lvm</PackageTags>
   </PropertyGroup>
 

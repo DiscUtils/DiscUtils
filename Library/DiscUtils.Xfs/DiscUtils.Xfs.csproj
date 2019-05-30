@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils XFS</Description>
-    <AssemblyTitle>DiscUtils.Xfs</AssemblyTitle>
     <Authors>Bianco Veigel</Authors>
-    <AssemblyName>DiscUtils.Xfs</AssemblyName>
-    <PackageId>DiscUtils.Xfs</PackageId>
     <PackageTags>DiscUtils;Xfs</PackageTags>
   </PropertyGroup>
 

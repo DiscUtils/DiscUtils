@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils Hfs+ filesystem parser</Description>
-    <AssemblyTitle>DiscUtils.HfsPlus</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.HfsPlus</AssemblyName>
-    <PackageId>DiscUtils.HfsPlus</PackageId>
     <PackageTags>DiscUtils;Filesystem;Hfs+;HfsPlus</PackageTags>
   </PropertyGroup>
 

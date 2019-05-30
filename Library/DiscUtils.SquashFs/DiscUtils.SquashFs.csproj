@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils SquashFs filesystem parser</Description>
-    <AssemblyTitle>DiscUtils.SquashFs</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.SquashFs</AssemblyName>
-    <PackageId>DiscUtils.SquashFs</PackageId>
     <PackageTags>DiscUtils;Filesystem;SquashFs</PackageTags>
   </PropertyGroup>
 

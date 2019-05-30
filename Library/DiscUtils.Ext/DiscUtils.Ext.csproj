@@ -3,10 +3,7 @@
 
   <PropertyGroup>
     <Description>DiscUtils ext filesystem parser</Description>
-    <AssemblyTitle>DiscUtils.Ext</AssemblyTitle>
     <Authors>Kenneth Bell;LordMike</Authors>
-    <AssemblyName>DiscUtils.Ext</AssemblyName>
-    <PackageId>DiscUtils.Ext</PackageId>
     <PackageTags>DiscUtils;Filesystem;ext</PackageTags>
   </PropertyGroup>
 
