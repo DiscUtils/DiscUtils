@@ -37,4 +37,4 @@ deploy:
     api_key:
       secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
     on:
-      branch: nuget
+      branch: master
