@@ -18,6 +18,9 @@ artifacts:
 - path: '**\*.snupkg'
 deploy:
 - provider: NuGet
+  server: https://api.nuget.org/v3/index.json
+  symbol_server: https://api.nuget.org/v3/index.json
+  artifact: /.*\.s?nupkg/
   api_key:
     secure: 1zdVvAQJbpFDsKJS/TXQLc6GI6SlZueTSCcL7xbK6QMisvL8V5nhLFgrceLfp1Ak
   on:
