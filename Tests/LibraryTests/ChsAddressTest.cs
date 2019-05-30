@@ -37,7 +37,7 @@ namespace LibraryTests
         }
 
         [Fact]
-        public void Equals()
+        public void ChksAddressEquals()
         {
             Assert.Equal(new ChsAddress(333, 22, 11), new ChsAddress(333, 22, 11));
         }
