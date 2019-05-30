@@ -26,7 +26,7 @@ using Xunit;
 
 namespace LibraryTests
 {
-    internal sealed class FileSystemManagerTest
+    public sealed class FileSystemManagerTest
     {
         [Fact]
         public void Detect()

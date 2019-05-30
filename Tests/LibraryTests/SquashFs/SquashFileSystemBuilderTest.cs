@@ -27,7 +27,7 @@ using Xunit;
 
 namespace LibraryTests.SquashFs
 {
-    internal sealed class SquashFileSystemBuilderTest
+    public sealed class SquashFileSystemBuilderTest
     {
         [Fact]
         public void SingleFile()
