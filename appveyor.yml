@@ -22,8 +22,12 @@ build_script:
 test_script:
   - cmd: dotnet test Tests\LibraryTests\LibraryTests.csproj -c Release --no-build --logger:trx -- RunConfiguration.TargetPlatform="x64" RunConfiguration.DisableParallelization="true"
 
-after_test:
-  - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
+for:
+- branches:
+    only:
+      - master
+  after_test:
+    - cmd: msbuild /t:pack /p:Configuration=Release /p:IncludeSymbols=true /Verbosity:Minimal /p:NoBuild=true
 
 artifacts:
   - path: '**\*.nupkg'
