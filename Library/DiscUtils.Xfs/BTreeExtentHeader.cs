@@ -40,18 +40,15 @@ namespace DiscUtils.Xfs
 
         public long RightSibling { get; private set; }
 
-        public virtual int Size
-        {
-            get { return 24; }
-        }
+        public virtual int Size => 24;
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
             Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             Level = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x4);
             NumberOfRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6);
-            LeftSibling = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x8);
-            RightSibling = EndianUtilities.ToInt64BigEndian(buffer, offset + 0xC);
+            LeftSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x8);
+            RightSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0xC);
             return 24;
         }
 

@@ -31,6 +31,7 @@ namespace DiscUtils.Xfs
     {
         public Inode(ulong number, Context context)
         {
+            Number = number;
             var sb = context.SuperBlock;
             RelativeInodeNumber = (uint) (number & sb.RelativeInodeMask);
             AllocationGroup = (uint) ((number & sb.AgInodeMask) >> (sb.AgBlocksLog2 + sb.InodesPerBlockLog2));
@@ -56,6 +57,8 @@ namespace DiscUtils.Xfs
         public uint AgBlock { get; private set; }
 
         public uint BlockOffset { get; private set; }
+
+        public ulong Number { get; }
 
         public const ushort InodeMagic = 0x494e;
         /// <summary>
@@ -318,6 +321,11 @@ namespace DiscUtils.Xfs
                 builderExtents.Add(new BuilderSparseStreamExtent((long) extent.StartOffset * context.SuperBlock.Blocksize, substream));
             }
             return new StreamBuffer(new ExtentStream((long) this.Length, builderExtents), Ownership.Dispose);
+        }
+
+        public override string ToString()
+        {
+            return "inode " + Number;
         }
     }
 }
