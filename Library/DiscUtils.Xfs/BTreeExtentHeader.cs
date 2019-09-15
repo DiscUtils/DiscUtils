@@ -30,6 +30,8 @@ namespace DiscUtils.Xfs
     {
         public const uint BtreeMagic = 0x424d4150;
 
+        public const int HeaderSize = 24;
+
         public uint Magic { get; private set; }
 
         public ushort Level { get; protected set; }
@@ -40,16 +42,16 @@ namespace DiscUtils.Xfs
 
         public long RightSibling { get; private set; }
 
-        public virtual int Size => 24;
+        public virtual int Size => HeaderSize;
 
         public virtual int ReadFrom(byte[] buffer, int offset)
         {
             Magic = EndianUtilities.ToUInt32BigEndian(buffer, offset);
             Level = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x4);
             NumberOfRecords = EndianUtilities.ToUInt16BigEndian(buffer, offset + 0x6);
-            LeftSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0x8);
-            RightSibling = EndianUtilities.ToInt32BigEndian(buffer, offset + 0xC);
-            return 24;
+            LeftSibling = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x8);
+            RightSibling = EndianUtilities.ToInt64BigEndian(buffer, offset + 0x10);
+            return HeaderSize;
         }
 
         public virtual void WriteTo(byte[] buffer, int offset)
