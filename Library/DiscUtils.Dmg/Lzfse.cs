@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2019, Quamotion bvba
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,18 +20,37 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+
 namespace DiscUtils.Dmg
 {
-    internal enum RunType : uint
+    public class Lzfse
     {
-        None = 0x00000000,
-        Raw = 0x00000001,
-        Zeros = 0x00000002,
-        AdcCompressed = 0x80000004,
-        ZlibCompressed = 0x80000005,
-        BZlibCompressed = 0x80000006,
-        LzfseCompressed = 0x80000007,
-        Comment = 0x7FFFFFFE,
-        Terminator = 0xFFFFFFFF
+        /// <summary>
+        /// Decompresses a LZFSE compressed buffer
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to decompress
+        /// </param>
+        /// <param name="uncompressedSize">
+        /// The buffer into which to decompress the data.
+        /// </param>
+        public static unsafe int Decompress(byte[] buffer, byte[] decompressedBuffer)
+        {
+            int actualDecompressedSize = 0;
+
+            fixed (byte* decompressedBufferPtr = decompressedBuffer)
+            fixed (byte* bufferPtr = buffer)
+            {
+                actualDecompressedSize = NativeMethods.lzfse_decode_buffer(decompressedBufferPtr, decompressedBuffer.Length, bufferPtr, buffer.Length, null);
+            }
+
+            if (actualDecompressedSize == 0)
+            {
+                throw new Exception("There was an error decompressing the specified buffer.");
+            }
+
+            return actualDecompressedSize;
+        }
     }
 }

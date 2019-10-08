@@ -3,8 +3,9 @@
 
   <PropertyGroup>
     <Description>DiscUtils dmg parser. Works with apple disk (.dmg) files</Description>
-    <Authors>Kenneth Bell;LordMike</Authors>
+    <Authors>Kenneth Bell;LordMike;quamotion</Authors>
     <PackageTags>DiscUtils;dmg</PackageTags>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

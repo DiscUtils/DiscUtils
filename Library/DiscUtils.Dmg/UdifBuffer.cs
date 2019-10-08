@@ -97,6 +97,7 @@ namespace DiscUtils.Dmg
                     case RunType.AdcCompressed:
                     case RunType.ZlibCompressed:
                     case RunType.BZlibCompressed:
+                    case RunType.LzfseCompressed:
                         Array.Copy(_decompBuffer, bufferOffset, buffer, offset + totalCopied, toCopy);
                         break;
 
@@ -301,6 +302,16 @@ namespace DiscUtils.Dmg
                                 Ownership.None))
                     {
                         StreamUtilities.ReadExact(ds, _decompBuffer, 0, toCopy);
+                    }
+
+                    break;
+
+                case RunType.LzfseCompressed:
+                    _stream.Position = run.CompOffset;
+                    byte[] lzfseCompressed = StreamUtilities.ReadExact(_stream, (int)run.CompLength);
+                    if (Lzfse.Decompress(lzfseCompressed, _decompBuffer) != toCopy)
+                    {
+                        throw new InvalidDataException("Run too short when decompressed");
                     }
 
                     break;
