@@ -105,6 +105,7 @@ namespace DiscUtils.LogicalDiskManager
                         if (part.GuidType == GuidPartitionTypes.WindowsLdmMetadata)
                         {
                             headerPos = part.LastSector * Sizes.Sector;
+                            break;
                         }
                     }
                 }

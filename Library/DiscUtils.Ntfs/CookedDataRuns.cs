@@ -281,7 +281,7 @@ namespace DiscUtils.Ntfs
                     _runs[i + 1].AttributeExtent.RemoveRun(_runs[i + 1].DataRun);
                     _runs.RemoveAt(i + 1);
                 }
-                else if (!_runs[i].IsSparse && !_runs[i].IsSparse &&
+                else if (!_runs[i].IsSparse && !_runs[i + 1].IsSparse &&
                          _runs[i].StartLcn + _runs[i].Length == _runs[i + 1].StartLcn)
                 {
                     _runs[i].Length += _runs[i + 1].Length;

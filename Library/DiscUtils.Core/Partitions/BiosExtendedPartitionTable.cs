@@ -106,6 +106,7 @@ namespace DiscUtils.Partitions
                         if (thisPart.PartitionType == 0x05 || thisPart.PartitionType == 0x0F)
                         {
                             nextPartPos = _firstSector + thisPart.LBAStart;
+                            break;
                         }
                     }
                 }
