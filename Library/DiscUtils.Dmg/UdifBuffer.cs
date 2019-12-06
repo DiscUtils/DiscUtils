@@ -309,7 +309,7 @@ namespace DiscUtils.Dmg
                 case RunType.LzfseCompressed:
                     _stream.Position = run.CompOffset;
                     byte[] lzfseCompressed = StreamUtilities.ReadExact(_stream, (int)run.CompLength);
-                    if (Lzfse.Decompress(lzfseCompressed, _decompBuffer) != toCopy)
+                    if (Lzfse.LzfseCompressor.Decompress(lzfseCompressed, _decompBuffer) != toCopy)
                     {
                         throw new InvalidDataException("Run too short when decompressed");
                     }
