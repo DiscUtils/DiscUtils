@@ -41,17 +41,16 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
 
 */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace System
+namespace DiscUtils.Nfs
 {
     // xxHash32 is used for the hash code.
     // https://github.com/Cyan4973/xxHash
-    // Only define this below .NET Standard 2.1/.NET Core 3.0 where it was added to the official System namespace
-#if (NETFRAMEWORK || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2 || NETSTANDARD1_3 || NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0)
-    public struct HashCode
+    internal struct HashCode
     {
         private static readonly uint s_seed = GenerateGlobalSeed();
 
@@ -421,5 +420,4 @@ namespace System
         public override bool Equals(object obj) => throw new NotSupportedException();
 #pragma warning restore 0809
     }
-#endif
 }
