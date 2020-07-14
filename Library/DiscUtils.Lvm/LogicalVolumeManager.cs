@@ -84,7 +84,8 @@ namespace DiscUtils.Lvm
             var partition = volumeInfo.Partition;
             if (partition == null) return false;
             return partition.BiosType == BiosPartitionTypes.LinuxLvm ||
-                   partition.GuidType == GuidPartitionTypes.LinuxLvm;
+                   partition.GuidType == GuidPartitionTypes.LinuxLvm ||
+                   PhysicalVolume.TryOpen(partition, out _);
         }
 
         /// <summary>
