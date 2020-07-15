@@ -85,7 +85,7 @@ namespace DiscUtils.Lvm
             if (partition == null) return false;
             return partition.BiosType == BiosPartitionTypes.LinuxLvm ||
                    partition.GuidType == GuidPartitionTypes.LinuxLvm ||
-                   PhysicalVolume.TryOpen(partition, out _);
+                   PhysicalVolume.CanOpen(partition);
         }
 
         /// <summary>

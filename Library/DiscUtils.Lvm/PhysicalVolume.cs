@@ -72,6 +72,14 @@ namespace DiscUtils.Lvm
             return true;
         }
 
+        public static bool CanOpen(PartitionInfo volumeInfo)
+        {
+            using (var content = volumeInfo.Open())
+            {
+                return SearchLabel(content, out _);
+            }
+        }
+
         private static bool SearchLabel(Stream content, out PhysicalVolumeLabel pvLabel)
         {
             pvLabel = null;
