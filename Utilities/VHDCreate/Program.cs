@@ -33,6 +33,7 @@ namespace VHDCreate
     {
         private CommandLineParameter _sourceFile;
         private CommandLineParameter _destFile;
+        private CommandLineSwitch _formatSwitch;
         private CommandLineSwitch _typeSwitch;
         private CommandLineSwitch _blockSizeSwitch;
 
@@ -46,11 +47,14 @@ namespace VHDCreate
         {
             _destFile = new CommandLineParameter("new.vhd", "Path to the VHD file to create.", false);
             _sourceFile = new CommandLineParameter("base.vhd", "For differencing disks, the path to the base disk.", true);
+            _formatSwitch = new CommandLineSwitch("ft", "format", "format", "The format type, leave blank if the disk doesn't need formatting");
             _typeSwitch = new CommandLineSwitch("t", "type", "type", "The type of disk to create, one of: fixed, dynamic, diff.  The default is dynamic.");
+            _sourceFile = new CommandLineParameter("base.vhd", "For differencing disks, the path to the base disk.", true);
             _blockSizeSwitch = new CommandLineSwitch("bs", "blocksize", "size", "For dynamic disks, the allocation uint size for new disk regions in bytes.  The default is 2MB.    Use B, KB, MB, GB to specify units (units default to bytes if not specified).");
 
             parser.AddParameter(_destFile);
             parser.AddParameter(_sourceFile);
+            parser.AddSwitch(_formatSwitch);
             parser.AddSwitch(_typeSwitch);
             parser.AddSwitch(_blockSizeSwitch);
 
