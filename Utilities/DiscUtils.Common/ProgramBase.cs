@@ -269,20 +269,27 @@ namespace DiscUtils.Common
                     }
                 }
             }
+            try {
 
-            if (_timeSwitch.IsPresent)
-            {
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-                DoRun();
-                stopWatch.Stop();
+                if (_timeSwitch.IsPresent)
+                {
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    DoRun();
+                    stopWatch.Stop();
 
-                Console.WriteLine();
-                Console.WriteLine("Time taken: {0}", stopWatch.Elapsed);
+                    Console.WriteLine();
+                    Console.WriteLine("Time taken: {0}", stopWatch.Elapsed);
+                }
+                else
+                {
+                    DoRun();
+                }
             }
-            else
-            {
-                DoRun();
+            catch (Exception ex) {
+                Console.WriteLine("An exception occurred");
+                Console.WriteLine(ex.ToString());
+                Environment.ExitCode = 1;
             }
         }
 
