@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using DiscUtils;
+using DiscUtils.Complete;
 using DiscUtils.Common;
 using DiscUtils.LogicalDiskManager;
 using DiscUtils.Partitions;
@@ -71,6 +72,7 @@ namespace DiskDump
         protected override void DoRun()
         {
             DiscUtils.FileSystems.SetupHelper.SetupFileSystems();
+            DiscUtils.Complete.SetupHelper.SetupComplete(); // From DiscUtils.Complete
 
             Console.OutputEncoding = Encoding.UTF8;
 
