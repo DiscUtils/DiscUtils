@@ -33,7 +33,7 @@ for delete_file in glob.iglob(delete_path):
 print(f"Deleted {delete_count} DLL files")
 
 
-utilities_i_care_about = ["VHDCreate"]
+utilities_i_care_about = ["VHDCreate", "DiskFormat", "DiskDump"]
 msbuild = "msbuild"
 exes = {}
 for util in utilities_i_care_about:
@@ -53,11 +53,20 @@ for found_file in glob.iglob(find_path,recursive=True):
 
 # running commands
 commands = [
-    ('VHDCreate.exe', '-ft FAT32 -sz 20MB test.vhd')
+    ('VHDCreate.exe', '-sz 20MB test.vhd'),
+    ('DiskFormat.exe', '-ft fat -ptt guid test.vhd'),
+    #('VHDDump.exe', 'test.vhd'),
+    ('DiskDump.exe', '-sf test.vhd'),
 ]
 
 for cmd, args in commands:
+    if cmd not in exes:
+        print(exes)
+        print(f"{cmd} not found")
+        sys.exit(1)
     print(f"Running {cmd} {args}")
     cmd_path = exes[cmd]
     cmd_dir = os.path.dirname(cmd_path)
     ret = RunCmd(cmd_path, args, outstream=sys.stdout)
+    if ret != 0:
+        sys.exit(ret)
