@@ -89,25 +89,15 @@ namespace FileInsert
             using (DiscFileSystem fs = fsInfo.Open(volInfo, FileSystemParameters))
             {
                 using (FileStream inFile = new FileStream(_inFilePath.Value, FileMode.Open, FileAccess.Read)){
-                    Console.WriteLine("Opened real "+ _inFilePath.Value );
                     using (Stream outStream = fs.OpenFile(_outFilePath.Value, FileMode.Create, FileAccess.ReadWrite)) {
-                        Console.WriteLine("Opened virtual "+ _outFilePath.Value );
                         PumpStreams(inFile, outStream);
                     }
+                    if (_hexDump.IsPresent)
+                    {
+                        inFile.Position = 0;
+                        HexDump.Generate(inFile, Console.Out);
+                    }
                 }
-                // using (Stream source = fs.OpenFile(_inFilePath.Value, FileMode.Open, FileAccess.Read))
-                // {
-                    
-                //     {
-                //         PumpStreams(source, outFile);
-                //     }
-
-                //     if (_hexDump.IsPresent)
-                //     {
-                //         source.Position = 0;
-                //         HexDump.Generate(source, Console.Out);
-                //     }
-                // }
             }
         }
 
