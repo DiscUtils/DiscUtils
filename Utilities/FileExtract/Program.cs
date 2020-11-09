@@ -38,6 +38,7 @@ namespace FileExtract
 
         static void Main(string[] args)
         {
+            DiscUtils.Complete.SetupHelper.SetupComplete(); // From DiscUtils.Complete
             SetupHelper.SetupFileSystems();
 
             Program program = new Program();
