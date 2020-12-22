@@ -198,7 +198,7 @@ namespace DiscUtils.HfsPlus
                             return new StreamBuffer(
                                 new MemoryStream(
                                     compressionAttributeData,
-                                    CompressionAttribute.Size,
+                                    CompressionAttribute.Size + 1,
                                     (int)compressionAttribute.UncompressedSize,
                                     false),
                                 Ownership.Dispose);

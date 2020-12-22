@@ -80,6 +80,9 @@ namespace LibraryTests.HfsPlus
                             Assert.NotEqual(0, systemVersionStream.Length);
                             systemVersionStream.CopyTo(copyStream);
                             Assert.Equal(systemVersionStream.Length, copyStream.Length);
+
+                            copyStream.Seek(0, SeekOrigin.Begin);
+                            Plist.Parse(copyStream);
                         }
                     }
                 }
