@@ -193,6 +193,16 @@ namespace DiscUtils.HfsPlus
                             ConcatStream concatStream = new ConcatStream(Ownership.Dispose, streams);
                             return new ZlibBuffer(concatStream, Ownership.Dispose);
 
+                        case FileCompressionType.RawAttribute:
+                            // Inline, no compression, very small file
+                            return new StreamBuffer(
+                                new MemoryStream(
+                                    compressionAttributeData,
+                                    CompressionAttribute.Size,
+                                    (int)compressionAttribute.UncompressedSize,
+                                    false),
+                                Ownership.Dispose);
+
                         default:
                             throw new NotSupportedException($"The HfsPlus compression type {compressionAttribute.CompressionType} is not supported by DiscUtils.HfsPlus");
                     }
