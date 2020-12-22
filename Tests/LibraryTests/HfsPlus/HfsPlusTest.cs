@@ -22,25 +22,43 @@
 
 using DiscUtils;
 using DiscUtils.Dmg;
+using DiscUtils.HfsPlus;
+using DiscUtils.Setup;
 using DiscUtils.Streams;
+using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace LibraryTests.HfsPlus
 {
     public class HfsPlusTest
     {
-#if NETCOREAPP
-        [Fact]
-        public void ReadFilesystemTest()
+        private const string SystemVersionPath = @"System\Library\CoreServices\SystemVersion.plist";
+        private const string DeviceSupportPath = "/Applications/Xcode.app/Content/Developer/Platforms/iPhoneOS.Platform/DeviceSupport/";
+        static HfsPlusTest()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            SetupHelper.RegisterAssembly(typeof(HfsPlusFileSystem).Assembly);
+        }
+
+#if NETCOREAPP
+        public static IEnumerable<object[]> GetDeveloperDiskImages()
+        {
+            if (!Directory.Exists(DeviceSupportPath))
             {
-                return;
+                yield break;
             }
 
-            using (Stream developerDiskImageStream = File.OpenRead(@"/Applications/Xcode.app/Content/Developer/Platforms/iPhoneOS.Platform/DeviceSupport/13.0/DeveloperDiskImage.dmg"))
+            foreach (var directory in Directory.GetDirectories(DeviceSupportPath))
+            {
+                yield return new object[] { Path.Combine(directory, "DeveloperDiskImage.dmg") };
+            }
+        }
+
+        [MemberData(nameof(GetDeveloperDiskImages))]
+        [MacOSOnlyTheory]
+        public void ReadFilesystemTest(string path)
+        {
+            using (Stream developerDiskImageStream = File.OpenRead(path))
             using (var disk = new Disk(developerDiskImageStream, Ownership.None))
             {
                 // Find the first (and supposedly, only, HFS partition)
@@ -48,10 +66,20 @@ namespace LibraryTests.HfsPlus
                 foreach (var volume in volumes)
                 {
                     var fileSystems = FileSystemManager.DetectFileSystems(volume);
-                    foreach (var fileSystem in fileSystems)
+
+                    var fileSystem = Assert.Single(fileSystems);
+                    Assert.Equal("HFS+", fileSystem.Name);
+
+                    using (HfsPlusFileSystem hfs = (HfsPlusFileSystem)fileSystem.Open(volume))
                     {
-                        if (fileSystem.Name == "HFS+")
+                        Assert.True(hfs.FileExists(SystemVersionPath));
+
+                        using (Stream systemVersionStream = hfs.OpenFile(SystemVersionPath, FileMode.Open, FileAccess.Read))
+                        using (MemoryStream copyStream = new MemoryStream())
                         {
+                            Assert.NotEqual(0, systemVersionStream.Length);
+                            systemVersionStream.CopyTo(copyStream);
+                            Assert.Equal(systemVersionStream.Length, copyStream.Length);
                         }
                     }
                 }

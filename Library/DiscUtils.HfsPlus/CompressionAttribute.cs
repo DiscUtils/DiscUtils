@@ -45,7 +45,7 @@ namespace DiscUtils.HfsPlus
             get { return Encoding.ASCII.GetString(BitConverter.GetBytes(_compressionMagic)); }
         }
 
-        public uint CompressionType { get; private set; }
+        public FileCompressionType CompressionType { get; private set; }
 
         public static int Size
         {
@@ -61,7 +61,7 @@ namespace DiscUtils.HfsPlus
             _reserved1 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 8);
             AttrSize = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
             _compressionMagic = EndianUtilities.ToUInt32BigEndian(buffer, offset + 16);
-            CompressionType = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
+            CompressionType = (FileCompressionType)EndianUtilities.ToUInt32LittleEndian(buffer, offset + 20);
             UncompressedSize = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 24);
             _reserved3 = EndianUtilities.ToUInt32BigEndian(buffer, offset + 28);
 
