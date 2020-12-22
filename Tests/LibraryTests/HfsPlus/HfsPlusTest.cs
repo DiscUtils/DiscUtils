@@ -27,7 +27,6 @@ using DiscUtils.Setup;
 using DiscUtils.Streams;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Xunit;
 
 namespace LibraryTests.HfsPlus
@@ -44,8 +43,7 @@ namespace LibraryTests.HfsPlus
 #if NETCOREAPP
         public static IEnumerable<object[]> GetDeveloperDiskImages()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
-                || !Directory.Exists(DeviceSupportPath))
+            if (!Directory.Exists(DeviceSupportPath))
             {
                 yield break;
             }
@@ -57,7 +55,7 @@ namespace LibraryTests.HfsPlus
         }
 
         [MemberData(nameof(GetDeveloperDiskImages))]
-        [Theory]
+        [MacOSOnlyTheory]
         public void ReadFilesystemTest(string path)
         {
             using (Stream developerDiskImageStream = File.OpenRead(path))
