@@ -529,7 +529,7 @@ namespace LibraryTests
 
         [Theory]
         [MemberData(nameof(FileSystemSource.ReadWriteFileSystems), MemberType = typeof(FileSystemSource))]
-        public void Equals(NewFileSystemDelegate fsFactory)
+        public void FileInfo_Equals(NewFileSystemDelegate fsFactory)
         {
             DiscFileSystem fs = fsFactory();
 
