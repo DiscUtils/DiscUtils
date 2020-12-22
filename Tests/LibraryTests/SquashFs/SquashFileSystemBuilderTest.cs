@@ -39,7 +39,7 @@ namespace LibraryTests.SquashFs
             builder.Build(fsImage);
 
             SquashFileSystemReader reader = new SquashFileSystemReader(fsImage);
-            Assert.Equal(1, reader.GetFileSystemEntries("\\").Length);
+            Assert.Single(reader.GetFileSystemEntries("\\"));
             Assert.Equal(4, reader.GetFileLength("file"));
             Assert.True(reader.FileExists("file"));
             Assert.False(reader.DirectoryExists("file"));

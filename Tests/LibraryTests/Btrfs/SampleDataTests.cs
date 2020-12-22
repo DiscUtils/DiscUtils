@@ -26,11 +26,11 @@ namespace LibraryTests.Btrfs
             {
                 var manager = new VolumeManager(disk);
                 var logicalVolumes = manager.GetLogicalVolumes();
-                Assert.Equal(1, logicalVolumes.Length);
+                Assert.Single(logicalVolumes);
 
                 var volume = logicalVolumes[0];
                 var filesystems = FileSystemManager.DetectFileSystems(volume);
-                Assert.Equal(1, filesystems.Length);
+                Assert.Single(filesystems);
 
                 var filesystem = filesystems[0];
                 Assert.Equal("btrfs", filesystem.Name);
@@ -44,7 +44,7 @@ namespace LibraryTests.Btrfs
                     Assert.Equal(98304, btrfs.UsedSpace);
 
                     var subvolumes = ((BtrfsFileSystem)btrfs).GetSubvolumes();
-                    Assert.Equal(1, subvolumes.Length);
+                    Assert.Single(subvolumes);
                     Assert.Equal(256UL, subvolumes[0].Id);
                     Assert.Equal("subvolume", subvolumes[0].Name);
 

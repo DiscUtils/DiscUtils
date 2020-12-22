@@ -65,7 +65,7 @@ namespace LibraryTests.Ntfs
 
             Assert.Equal(12345, rp.Tag);
             Assert.NotNull(rp.Content);
-            Assert.Equal(0, rp.Content.Length);
+            Assert.Empty(rp.Content);
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace LibraryTests.Ntfs
             }
 
             var ranges = ntfs.PathToClusters("file");
-            Assert.Equal(1, ranges.Length);
+            Assert.Single(ranges);
             Assert.Equal(1, ranges[0].Count);
 
 
@@ -127,7 +127,7 @@ namespace LibraryTests.Ntfs
                 s.WriteByte(1);
             }
             ranges = ntfs.PathToClusters("file2");
-            Assert.Equal(0, ranges.Length);
+            Assert.Empty(ranges);
         }
 
         [Fact]
@@ -149,7 +149,7 @@ namespace LibraryTests.Ntfs
                 }
 
                 var extents = ntfs.PathToExtents("file");
-                Assert.Equal(1, extents.Length);
+                Assert.Single(extents);
                 Assert.Equal(ntfs.ClusterSize, extents[0].Length);
 
                 ms.Position = extents[0].Start;
@@ -166,7 +166,7 @@ namespace LibraryTests.Ntfs
                     s.WriteByte(0x2C);
                 }
                 extents = ntfs.PathToExtents("file2");
-                Assert.Equal(1, extents.Length);
+                Assert.Single(extents);
                 Assert.Equal(3, extents[0].Length);
 
                 byte[] read = new byte[100];
@@ -210,11 +210,11 @@ namespace LibraryTests.Ntfs
                 ntfs.DeleteFile("hl" + i);
             }
 
-            Assert.Equal(1, ntfs.GetFiles(@"\").Length);
+            Assert.Single(ntfs.GetFiles(@"\"));
 
             ntfs.DeleteFile("file");
 
-            Assert.Equal(0, ntfs.GetFiles(@"\").Length);
+            Assert.Empty(ntfs.GetFiles(@"\"));
         }
 
         [Fact]
@@ -323,10 +323,10 @@ namespace LibraryTests.Ntfs
             NtfsFileSystem ntfs = FileSystemSource.NtfsFileSystem();
 
             ntfs.OpenFile("AFILE.TXT", FileMode.Create).Dispose();
-            Assert.Equal(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.Empty(ntfs.GetAlternateDataStreams("AFILE.TXT"));
 
             ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Dispose();
-            Assert.Equal(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.Single(ntfs.GetAlternateDataStreams("AFILE.TXT"));
             Assert.Equal("ALTSTREAM", ntfs.GetAlternateDataStreams("AFILE.TXT")[0]);
         }
 
@@ -337,11 +337,11 @@ namespace LibraryTests.Ntfs
 
             ntfs.OpenFile("AFILE.TXT", FileMode.Create).Dispose();
             ntfs.OpenFile("AFILE.TXT:ALTSTREAM", FileMode.Create).Dispose();
-            Assert.Equal(1, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.Single(ntfs.GetAlternateDataStreams("AFILE.TXT"));
 
             ntfs.DeleteFile("AFILE.TXT:ALTSTREAM");
-            Assert.Equal(1, ntfs.GetFileSystemEntries("").Length);
-            Assert.Equal(0, ntfs.GetAlternateDataStreams("AFILE.TXT").Length);
+            Assert.Single(ntfs.GetFileSystemEntries(""));
+            Assert.Empty(ntfs.GetAlternateDataStreams("AFILE.TXT"));
         }
 
         [Fact]
