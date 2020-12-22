@@ -47,7 +47,7 @@ namespace LibraryTests.Vmdk
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.Equal(1, paths.Count);
+                Assert.Single(paths);
                 Assert.Equal("a-flat.vmdk", paths[0]);
             }
         }
@@ -63,7 +63,7 @@ namespace LibraryTests.Vmdk
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.Equal(1, paths.Count);
+                Assert.Single(paths);
                 Assert.Equal("a-flat.vmdk", paths[0]);
             }
         }
@@ -89,7 +89,7 @@ namespace LibraryTests.Vmdk
 
                 List<DiskImageFile> links = new List<DiskImageFile>(disk.Links);
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.Equal(1, paths.Count);
+                Assert.Single(paths);
                 Assert.Equal("a.vmdk", paths[0]);
             }
         }
@@ -111,7 +111,7 @@ namespace LibraryTests.Vmdk
                 Assert.Equal(2, links.Count);
 
                 List<string> paths = new List<string>(links[0].ExtentPaths);
-                Assert.Equal(1, paths.Count);
+                Assert.Single(paths);
                 Assert.Equal("diff.vmdk", paths[0]);
             }
             Assert.True(fs.GetFileLength(@"\diff\diff.vmdk") > 2 * 1024 * 1024);

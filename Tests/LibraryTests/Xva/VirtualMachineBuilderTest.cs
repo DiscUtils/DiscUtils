@@ -43,7 +43,7 @@ namespace LibraryTests.Xva
 
             VirtualMachine vm = new VirtualMachine(xvaStream);
             List<Disk> disks = new List<Disk>(vm.Disks);
-            Assert.Equal(1, disks.Count);
+            Assert.Single(disks);
             Assert.Equal(0, disks[0].Capacity);
         }
 
@@ -67,7 +67,7 @@ namespace LibraryTests.Xva
 
             VirtualMachine vm = new VirtualMachine(xvaStream);
             List<Disk> disks = new List<Disk>(vm.Disks);
-            Assert.Equal(1, disks.Count);
+            Assert.Single(disks);
             Assert.Equal(10 * 1024 * 1024, disks[0].Capacity);
 
             Stream diskContent = disks[0].Content;
