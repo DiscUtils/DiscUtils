@@ -15,9 +15,9 @@ See more up to date documentation at the [Wiki](https://github.com/DiscUtils/Dis
 
 ### Implementation in this repository
 
-This repository has performed a few changes to the core DiscUtils library. For starters, all projects have been converted to .NET Core, and are targeting .NET 2.0 through 4.5, in addition to NETStandard 1.5 (thanks [Quamotion](https://github.com/Quamotion)). 
+This repository has performed a few changes to the core DiscUtils library. For starters, all projects have been converted to .NET Core, and are targeting .NET 2.0 through 5.0, in addition to .NET Standard 2.0 (thanks [Quamotion](https://github.com/Quamotion)). 
 
-The DiscUtils library has been split into 25 independent projects, which can function without the others present. This reduces the "cost" of having DiscUtils immensely, as we're down from the 1 MB binary it used to be. 
+The DiscUtils library has been split into 25 independent projects, which can function without the others present. This reduces the "cost" of having DiscUtils immensely, as we're down from the 1 MB binary it used to be.
 
 To work with this, four Meta packages have been created:
 
