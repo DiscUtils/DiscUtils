@@ -3,7 +3,7 @@
   
   <!-- Package related stuff -->
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net40;net45;net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MSBuildRuntimeType)' == 'Full'">$(TargetFrameworks);net20</TargetFrameworks>
     
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>

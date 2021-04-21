@@ -24,16 +24,12 @@ using System;
 
 namespace DiscUtils.Registry
 {
-#if !NETSTANDARD1_5
     using System.Runtime.Serialization;
-#endif
 
     /// <summary>
     /// Exception thrown when some corruption is found in the registry hive.
     /// </summary>
-#if !NETSTANDARD1_5
     [Serializable]
-#endif
     public class RegistryCorruptException : Exception
     {
         /// <summary>
@@ -56,7 +52,6 @@ namespace DiscUtils.Registry
         public RegistryCorruptException(string message, Exception innerException)
             : base(message, innerException) {}
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the RegistryCorruptException class.
         /// </summary>
@@ -66,6 +61,5 @@ namespace DiscUtils.Registry
             : base(info, context)
         {
         }
-#endif
     }
 }

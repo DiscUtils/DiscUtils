@@ -24,9 +24,7 @@ using System;
 using System.IO;
 using DiscUtils.Internal;
 using DiscUtils.Streams;
-#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
-#endif
 
 namespace DiscUtils.Vhd
 {
@@ -418,9 +416,7 @@ namespace DiscUtils.Vhd
             }
         }
 
-#if !NETSTANDARD1_5
         [Serializable]
-#endif
         private sealed class AbortException : InvalidFileSystemException
         {
             

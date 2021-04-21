@@ -22,19 +22,14 @@
 
 using System;
 using System.IO;
-
-#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
-#endif
 
 namespace DiscUtils
 {
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
-#if !NETSTANDARD1_5
     [Serializable]
-#endif
     public class InvalidFileSystemException : IOException
     {
         /// <summary>
@@ -57,7 +52,6 @@ namespace DiscUtils
         public InvalidFileSystemException(string message, Exception innerException)
             : base(message, innerException) {}
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the InvalidFileSystemException class.
         /// </summary>
@@ -67,6 +61,5 @@ namespace DiscUtils
             : base(info, context)
         {
         }
-#endif
     }
 }

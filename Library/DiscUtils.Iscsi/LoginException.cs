@@ -24,16 +24,12 @@ using System;
 
 namespace DiscUtils.Iscsi
 {
-#if !NETSTANDARD1_5
     using System.Runtime.Serialization;
-#endif
 
     /// <summary>
     /// Exception thrown when an authentication exception occurs.
     /// </summary>
-#if !NETSTANDARD1_5
     [Serializable]
-#endif
     public class LoginException : IscsiException
     {
         /// <summary>
@@ -64,7 +60,6 @@ namespace DiscUtils.Iscsi
         public LoginException(string message, LoginStatusCode code)
             : base("iSCSI login failure (" + code + "):" + message) {}
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the LoginException class.
         /// </summary>
@@ -74,6 +69,5 @@ namespace DiscUtils.Iscsi
             : base(info, context)
         {
         }
-#endif
     }
 }
