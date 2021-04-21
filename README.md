@@ -34,10 +34,12 @@ DiscUtils has a number of detection helpers. These provide services like "which 
 
 Where `assembly` is the assembly you wish to register. Note that the metapackages have helpers:
 
-    SetupHelper.SetupComplete(); // From DiscUtils.Complete
-    SetupHelper.SetupContainers(); // From DiscUtils.Containers
-    SetupHelper.SetupFileSystems(); // From DiscUtils.FileSystems
-    SetupHelper.SetupTransports(); // From DiscUtils.Transports
+```csharp
+SetupHelper.SetupComplete(); // From DiscUtils.Complete
+SetupHelper.SetupContainers(); // From DiscUtils.Containers
+SetupHelper.SetupFileSystems(); // From DiscUtils.FileSystems
+SetupHelper.SetupTransports(); // From DiscUtils.Transports
+```
 
 ## How to use the Library
 
@@ -45,7 +47,7 @@ Here's a few really simple examples.
 
 ### How to create a new ISO:
 
-``` 
+```csharp
 CDBuilder builder = new CDBuilder();
 builder.UseJoliet = true;
 builder.VolumeIdentifier = "A_SAMPLE_DISK";
@@ -58,7 +60,7 @@ You can add files as byte arrays (shown above), as files from the Windows filesy
 
 ### How to extract a file from an ISO:
 
-``` 
+```csharp
 using (FileStream isoStream = File.Open(@"C:\temp\sample.iso"))
 {
   CDReader cd = new CDReader(isoStream, true);
@@ -71,7 +73,7 @@ You can also browse through the directory hierarchy, starting at cd.Root.
 
 ### How to create a virtual hard disk:
 
-``` 
+```csharp
 long diskSize = 30 * 1024 * 1024; //30MB
 using (Stream vhdStream = File.Create(@"C:\TEMP\mydisk.vhd"))
 {
@@ -90,7 +92,7 @@ As with ISOs, you can browse the file system, starting at fs.Root.
 
 ### How to create a virtual floppy disk:
 
-``` 
+```csharp
 using (FileStream fs = File.Create(@"myfloppy.vfd"))
 {
     using (FatFileSystem floppy = FatFileSystem.FormatFloppy(fs, FloppyDiskType.HighDensity, "MY FLOPPY  "))
