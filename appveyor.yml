@@ -1,10 +1,10 @@
 image: Visual Studio 2019
 install:
-  - choco install gitversion.portable -pre -y
+  - dotnet tool install --global GitVersion.Tool
 
 before_build:
   - ps: >-
-      $version = ConvertFrom-Json $($(GitVersion) -join "")
+      $version = ConvertFrom-Json $($(dotnet gitversion) -join "")
       
       $content = Get-Content .\Version.template.props -Raw;
       $content = $content.Replace("&InformationalVersion&", $version.InformationalVersion);
