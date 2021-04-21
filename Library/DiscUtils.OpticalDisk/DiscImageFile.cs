@@ -91,7 +91,7 @@ namespace DiscUtils.OpticalDisk
             }
         }
 
-        internal override long Capacity
+        public override long Capacity
         {
             get { return Content.Length; }
         }
@@ -128,7 +128,7 @@ namespace DiscUtils.OpticalDisk
             get { return false; }
         }
 
-        internal override FileLocator RelativeFileLocator
+        public override FileLocator RelativeFileLocator
         {
             get { return null; }
         }

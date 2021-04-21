@@ -43,7 +43,7 @@ namespace DiscUtils.OpticalDiscSharing
             Content = new BlockCacheStream(Content, Ownership.Dispose);
         }
 
-        internal override long Capacity
+        public override long Capacity
         {
             get { return Content.Length; }
         }
@@ -66,7 +66,7 @@ namespace DiscUtils.OpticalDiscSharing
             get { return false; }
         }
 
-        internal override FileLocator RelativeFileLocator
+        public override FileLocator RelativeFileLocator
         {
             get { return null; }
         }

@@ -25,7 +25,7 @@ using System.IO;
 
 namespace DiscUtils.Internal
 {
-    internal abstract class VirtualDiskFactory
+    public abstract class VirtualDiskFactory
     {
         public abstract string[] Variants { get; }
 

@@ -72,7 +72,7 @@ namespace DiscUtils.ApplePartitionMap
             get { return Type; }
         }
 
-        internal override PhysicalVolumeType VolumeType
+        public override PhysicalVolumeType VolumeType
         {
             get { return PhysicalVolumeType.ApplePartition; }
         }
