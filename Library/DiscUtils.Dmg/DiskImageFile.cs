@@ -63,7 +63,7 @@ namespace DiscUtils.Dmg
 
         public UdifBuffer Buffer { get; }
 
-        internal override long Capacity
+        public override long Capacity
         {
             get { return Buffer == null ? _stream.Length : Buffer.Capacity; }
         }
@@ -89,7 +89,7 @@ namespace DiscUtils.Dmg
             get { return false; }
         }
 
-        internal override FileLocator RelativeFileLocator
+        public override FileLocator RelativeFileLocator
         {
             get { throw new NotImplementedException(); }
         }

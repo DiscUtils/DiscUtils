@@ -44,7 +44,7 @@ namespace DiscUtils.Xva
         /// <summary>
         /// Gets the capacity of the layer (in bytes).
         /// </summary>
-        internal override long Capacity
+        public override long Capacity
         {
             get { return _capacity; }
         }
@@ -76,7 +76,7 @@ namespace DiscUtils.Xva
             get { return false; }
         }
 
-        internal override FileLocator RelativeFileLocator
+        public override FileLocator RelativeFileLocator
         {
             get { return null; }
         }

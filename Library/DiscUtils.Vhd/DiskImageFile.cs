@@ -129,7 +129,7 @@ namespace DiscUtils.Vhd
             }
         }
 
-        internal override long Capacity
+        public override long Capacity
         {
             get { return _footer.CurrentSize; }
         }
@@ -211,7 +211,7 @@ namespace DiscUtils.Vhd
             get { return _dynamicHeader == null ? Guid.Empty : _dynamicHeader.ParentUniqueId; }
         }
 
-        internal override FileLocator RelativeFileLocator
+        public override FileLocator RelativeFileLocator
         {
             get { return _fileLocator; }
         }
