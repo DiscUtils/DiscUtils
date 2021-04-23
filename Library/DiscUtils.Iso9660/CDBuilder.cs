@@ -248,11 +248,16 @@ namespace DiscUtils.Iso9660
 
             Encoding suppEncoding = _buildParams.UseJoliet ? Encoding.BigEndianUnicode : Encoding.ASCII;
 
+            int sectorCount = 2; // Primary, End (fixed at end...)
             Dictionary<BuildDirectoryMember, uint> primaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
-            Dictionary<BuildDirectoryMember, uint> supplementaryLocationTable =
-                new Dictionary<BuildDirectoryMember, uint>();
+            Dictionary<BuildDirectoryMember, uint> supplementaryLocationTable = null;
+            if (UseJoliet)
+            {
+                supplementaryLocationTable = new Dictionary<BuildDirectoryMember, uint>();
+                sectorCount = 3; // Extra sector for Supplementary
+            }             
 
-            long focus = DiskStart + 3 * IsoUtilities.SectorSize; // Primary, Supplementary, End (fixed at end...)
+            long focus = DiskStart + sectorCount * IsoUtilities.SectorSize;
             if (_bootEntry != null)
             {
                 focus += IsoUtilities.SectorSize;
@@ -290,7 +295,10 @@ namespace DiscUtils.Iso9660
             foreach (BuildFileInfo fi in _files)
             {
                 primaryLocationTable.Add(fi, (uint)(focus / IsoUtilities.SectorSize));
-                supplementaryLocationTable.Add(fi, (uint)(focus / IsoUtilities.SectorSize));
+
+                if (UseJoliet)
+                    supplementaryLocationTable.Add(fi, (uint)(focus / IsoUtilities.SectorSize));
+
                 FileExtent extent = new FileExtent(fi, focus);
 
                 // Only remember files of non-zero length (otherwise we'll stomp on a valid file)
@@ -322,12 +330,16 @@ namespace DiscUtils.Iso9660
 
             // Find end of the second directory table, fixing supplementary directories in place.
             long startOfSecondDirData = focus;
-            foreach (BuildDirectoryInfo di in _dirs)
+
+            if (UseJoliet)
             {
-                supplementaryLocationTable.Add(di, (uint)(focus / IsoUtilities.SectorSize));
-                DirectoryExtent extent = new DirectoryExtent(di, supplementaryLocationTable, suppEncoding, focus);
-                fixedRegions.Add(extent);
-                focus += MathUtilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+                foreach (BuildDirectoryInfo di in _dirs)
+                {
+                    supplementaryLocationTable.Add(di, (uint)(focus / IsoUtilities.SectorSize));
+                    DirectoryExtent extent = new DirectoryExtent(di, supplementaryLocationTable, suppEncoding, focus);
+                    fixedRegions.Add(extent);
+                    focus += MathUtilities.RoundUp(extent.Length, IsoUtilities.SectorSize);
+                }
             }
 
             // ####################################################################
@@ -353,15 +365,20 @@ namespace DiscUtils.Iso9660
             focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
 
             long startOfThirdPathTable = focus;
-            pathTable = new PathTable(false, suppEncoding, _dirs, supplementaryLocationTable, focus);
-            fixedRegions.Add(pathTable);
-            focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
-            long supplementaryPathTableLength = pathTable.Length;
+            long supplementaryPathTableLength = 0;
+            long startOfFourthPathTable = 0;
+            if (UseJoliet)
+            {
+                pathTable = new PathTable(false, suppEncoding, _dirs, supplementaryLocationTable, focus);
+                fixedRegions.Add(pathTable);
+                focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+                supplementaryPathTableLength = pathTable.Length;
 
-            long startOfFourthPathTable = focus;
-            pathTable = new PathTable(true, suppEncoding, _dirs, supplementaryLocationTable, focus);
-            fixedRegions.Add(pathTable);
-            focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);
+                startOfFourthPathTable = focus;
+                pathTable = new PathTable(true, suppEncoding, _dirs, supplementaryLocationTable, focus);
+                fixedRegions.Add(pathTable);
+                focus += MathUtilities.RoundUp(pathTable.Length, IsoUtilities.SectorSize);   
+            }
 
             // Find the end of the disk
             totalLength = focus;
@@ -393,19 +410,22 @@ namespace DiscUtils.Iso9660
                 focus += IsoUtilities.SectorSize;
             }
 
-            SupplementaryVolumeDescriptor svDesc = new SupplementaryVolumeDescriptor(
-                (uint)(totalLength / IsoUtilities.SectorSize), // VolumeSpaceSize
-                (uint)supplementaryPathTableLength, // PathTableSize
-                (uint)(startOfThirdPathTable / IsoUtilities.SectorSize), // TypeLPathTableLocation
-                (uint)(startOfFourthPathTable / IsoUtilities.SectorSize), // TypeMPathTableLocation
-                (uint)(startOfSecondDirData / IsoUtilities.SectorSize), // RootDirectory.LocationOfExtent
-                (uint)_rootDirectory.GetDataSize(suppEncoding), // RootDirectory.DataLength
-                buildTime,
-                suppEncoding);
-            svDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
-            SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, focus);
-            fixedRegions.Insert(regionIdx++, svdr);
-            focus += IsoUtilities.SectorSize;
+            if (UseJoliet)
+            {
+                SupplementaryVolumeDescriptor svDesc = new SupplementaryVolumeDescriptor(
+                    (uint)(totalLength / IsoUtilities.SectorSize), // VolumeSpaceSize
+                    (uint)supplementaryPathTableLength, // PathTableSize
+                    (uint)(startOfThirdPathTable / IsoUtilities.SectorSize), // TypeLPathTableLocation
+                    (uint)(startOfFourthPathTable / IsoUtilities.SectorSize), // TypeMPathTableLocation
+                    (uint)(startOfSecondDirData / IsoUtilities.SectorSize), // RootDirectory.LocationOfExtent
+                    (uint)_rootDirectory.GetDataSize(suppEncoding), // RootDirectory.DataLength
+                    buildTime,
+                    suppEncoding);
+                svDesc.VolumeIdentifier = _buildParams.VolumeIdentifier;
+                SupplementaryVolumeDescriptorRegion svdr = new SupplementaryVolumeDescriptorRegion(svDesc, focus);
+                fixedRegions.Insert(regionIdx++, svdr);
+                focus += IsoUtilities.SectorSize;   
+            }
 
             VolumeDescriptorSetTerminator evDesc = new VolumeDescriptorSetTerminator();
             VolumeDescriptorSetTerminatorRegion evdr = new VolumeDescriptorSetTerminatorRegion(evDesc, focus);
