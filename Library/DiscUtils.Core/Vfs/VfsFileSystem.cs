@@ -507,7 +507,7 @@ namespace DiscUtils.Vfs
             return file.FileLength;
         }
 
-        internal TFile GetFile(TDirEntry dirEntry)
+        protected TFile GetFile(TDirEntry dirEntry)
         {
             long cacheKey = dirEntry.UniqueCacheId;
 
@@ -521,7 +521,7 @@ namespace DiscUtils.Vfs
             return file;
         }
 
-        internal TDirectory GetDirectory(string path)
+        protected TDirectory GetDirectory(string path)
         {
             if (IsRoot(path))
             {
@@ -543,7 +543,7 @@ namespace DiscUtils.Vfs
             return (TDirectory)GetFile(dirEntry);
         }
 
-        internal TDirEntry GetDirectoryEntry(string path)
+        protected TDirEntry GetDirectoryEntry(string path)
         {
             return GetDirectoryEntry(RootDirectory, path);
         }
