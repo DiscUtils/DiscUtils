@@ -834,7 +834,7 @@ namespace DiscUtils.Fat
                 FileName name;
                 try
                 {
-                    name = new FileName(pathElements[i], FatOptions.FileNameEncoding);
+                    name = new FileName(pathElements[i], FatOptions.FileNameEncoding, false);
                 }
                 catch (ArgumentException ae)
                 {
@@ -1601,7 +1601,7 @@ namespace DiscUtils.Fat
                 parent = null;
                 return 0;
             }
-            entryId = dir.FindEntry(new FileName(pathEntries[pathOffset], FatOptions.FileNameEncoding));
+            entryId = dir.FindEntry(new FileName(pathEntries[pathOffset], FatOptions.FileNameEncoding, true));
             if (entryId >= 0)
             {
                 if (pathOffset == pathEntries.Length - 1)

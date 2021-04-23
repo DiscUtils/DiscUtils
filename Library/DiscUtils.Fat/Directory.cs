@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using DiscUtils.Streams;
 
 namespace DiscUtils.Fat
@@ -351,6 +352,9 @@ namespace DiscUtils.Fat
             _selfEntryLocation = -1;
             _parentEntryLocation = -1;
 
+            Stack<Slot> slotList = new Stack<Slot>();
+            bool errorDuringSlotDetection = false;
+
             while (_dirStream.Position < _dirStream.Length)
             {
                 long streamPos = _dirStream.Position;
@@ -360,6 +364,19 @@ namespace DiscUtils.Fat
                     (FatAttributes.ReadOnly | FatAttributes.Hidden | FatAttributes.System | FatAttributes.VolumeId))
                 {
                     // Long File Name entry
+                    _dirStream.Position = streamPos;
+                    try
+                    {
+                        slotList.Push(new Slot(_dirStream));
+                    }
+                    catch
+                    {
+                        slotList.Clear();
+                        errorDuringSlotDetection = true;
+                    }
+                    // continue with the next element, since we don't want to empty the slot list in this case
+                    continue;
+
                 }
                 else if (entry.Name.IsDeleted())
                 {
@@ -384,8 +401,31 @@ namespace DiscUtils.Fat
                 }
                 else
                 {
+                    if (!errorDuringSlotDetection && slotList.Count > 0)
+                    {
+                        var checksum = entry.Name.ComputeChecksum();
+
+                        bool validChecksum = true;
+                        var sb = new StringBuilder();
+                        foreach (var slot in slotList)
+                        {
+                            if (slot.AliasChecksum != checksum)
+                            {
+                                validChecksum = false;
+                                break;
+                            }
+                            sb.Append(slot.Name.ToUpperInvariant());
+                        }
+
+                        if (validChecksum)
+                            entry.Name.LongName = sb.ToString();
+                    }
+
                     _entries.Add(streamPos, entry);
                 }
+
+                slotList.Clear();
+                errorDuringSlotDetection = false;
             }
         }
 
