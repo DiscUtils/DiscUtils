@@ -67,6 +67,9 @@ namespace LibraryTests.Compression
             int numRead = decoder.Read(buffer, 0, 1024);
             Assert.Equal(21, numRead);
 
+            // Reading beyond the end of the stream will return 0 bytes
+            Assert.Equal(0, decoder.Read(buffer, numRead, 1024 - numRead));
+
             string s = Encoding.ASCII.GetString(buffer, 0, numRead);
             Assert.Equal("This is a test string", s);
         }
