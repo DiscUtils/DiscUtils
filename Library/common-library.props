@@ -1,6 +1,6 @@
 <Project>
   <Import Project="..\Version.props" Condition="Exists('..\Version.props')"/>
-  
+
   <!-- Package related stuff -->
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net40;net45;net5.0</TargetFrameworks>
@@ -11,9 +11,17 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Ignore warning CS1591 'Missing XML comment for publicly visible type or member' -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
   <!-- SourceLink support -->
   <PropertyGroup>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DebugType>portable</DebugType>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
