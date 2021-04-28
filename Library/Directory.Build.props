@@ -5,7 +5,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net40;net45;net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MSBuildRuntimeType)' == 'Full'">$(TargetFrameworks);net20</TargetFrameworks>
-    
+
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
@@ -18,6 +18,11 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
+  <!-- Versioning -->
+  <ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="3.4.194" PrivateAssets="all" />
+  </ItemGroup>
+
   <!-- SourceLink support -->
   <PropertyGroup>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -29,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
-  
+
   <!-- Assembly Signing -->
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)../SigningKey.snk</AssemblyOriginatorKeyFile>
