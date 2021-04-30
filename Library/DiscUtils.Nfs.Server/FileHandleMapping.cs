@@ -1,5 +1,5 @@
-//
-// Copyright (c) 2008-2011, Kenneth Bell
+﻿//
+// Copyright (c) 2017, Quamotion
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -20,30 +20,17 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-namespace DiscUtils.Nfs
+namespace DiscUtils.Nfs.Server
 {
-    public sealed class Nfs3RenameResult : Nfs3CallResult
+    public struct FileHandleMapping
     {
-        public Nfs3RenameResult()
+        public IFileSystem FileSystem { get; set; }
+
+        public string Path { get; set; }
+
+        public override string ToString()
         {
-        }
-
-        internal Nfs3RenameResult(XdrDataReader reader)
-        {
-            Status = (Nfs3Status)reader.ReadInt32();
-            FromDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);
-            ToDirCacheConsistency = new Nfs3WeakCacheConsistency(reader);
-        }
-
-        public Nfs3WeakCacheConsistency FromDirCacheConsistency { get; set; }
-
-        public Nfs3WeakCacheConsistency ToDirCacheConsistency { get; set; }
-
-        public override void Write(XdrDataWriter writer)
-        {
-            writer.Write((int)Status);
-            FromDirCacheConsistency.Write(writer);
-            ToDirCacheConsistency.Write(writer);
+            return Path;
         }
     }
 }
