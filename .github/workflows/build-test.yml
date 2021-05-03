@@ -1,0 +1,40 @@
+name: CI Build
+
+on: [push, pull_request]
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 50
+        lfs: 'true'
+    - run: git fetch --tags
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build -c Debug --no-restore
+
+    - name: Test
+      run: dotnet test -c Debug
+
+    - name: Pack
+      if: github.ref == 'refs/heads/develop'
+      run: dotnet pack -c Release -o Build
+
+    - name: "Github packages: Nuget push"
+      if: github.ref == 'refs/heads/develop'
+      run: dotnet nuget push --no-symbols 1 --skip-duplicate -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" Build/*.nupkg
