@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using DiscUtils.CoreCompat;
 using DiscUtils.Internal;
 using DiscUtils.Streams;
 
@@ -69,6 +70,11 @@ namespace DiscUtils.Fat
         private string _bsVolLab;
         private Stream _data;
         private Directory _rootDir;
+        
+        static FatFileSystem()
+        {
+            EncodingHelper.RegisterEncodings();
+        }
 
         /// <summary>
         /// Initializes a new instance of the FatFileSystem class.
