@@ -25,10 +25,12 @@ jobs:
         dotnet-version: '5.0.x'
 
     - name: Pack
-      run: dotnet pack -c Release -o Build
+      run: dotnet pack -c Release -o ${{ github.workspace }}/build
 
-    - name: NuGet push (github)
-      run: dotnet nuget push --no-symbols 1 --skip-duplicate -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" Build/*.nupkg
+    - name: NuGet push (GitHub)
+      run: dotnet nuget push *.nupkg --no-symbols 1 --skip-duplicate -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+      working-directory: ${{ github.workspace }}/build
       
     - name: NuGet push 
-      run: dotnet nuget push --skip-duplicate -k ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json Build/*.nupkg
+      run: dotnet nuget push *.nupkg --skip-duplicate -k ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json
+      working-directory: ${{ github.workspace }}/build
