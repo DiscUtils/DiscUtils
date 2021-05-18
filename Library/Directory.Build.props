@@ -1,19 +1,30 @@
 <Project>
-  <Import Project="..\Version.props" Condition="Exists('..\Version.props')"/>
-  
   <!-- Package related stuff -->
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net40;net45;net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MSBuildRuntimeType)' == 'Full'">$(TargetFrameworks);net20</TargetFrameworks>
-    
+
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Ignore warning CS1591 'Missing XML comment for publicly visible type or member' -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Versioning -->
+  <ItemGroup>
+    <PackageReference Include="NerdBank.GitVersioning" Version="3.4.194" PrivateAssets="all" />
+  </ItemGroup>
+
   <!-- SourceLink support -->
   <PropertyGroup>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DebugType>portable</DebugType>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
@@ -21,7 +32,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
-  
+
   <!-- Assembly Signing -->
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)../SigningKey.snk</AssemblyOriginatorKeyFile>

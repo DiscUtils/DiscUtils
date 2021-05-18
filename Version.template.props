@@ -1,8 +1,0 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <FileVersion>&FileVersion&</FileVersion>
-    <InformationalVersion>&InformationalVersion&</InformationalVersion>
-    <AssemblyVersion>&AssemblyVersion&</AssemblyVersion>
-    <PackageVersion>&NugetVersion&</PackageVersion>
-  </PropertyGroup>
-</Project>

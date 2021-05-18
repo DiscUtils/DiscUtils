@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common-library.props" />
-
   <PropertyGroup>
     <Description>DiscUtils UDF filesystem parser.</Description>
     <Authors>Kenneth Bell;LordMike</Authors>

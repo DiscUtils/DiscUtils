@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{E20ADC28-C578-4EF4-A6A2-18DCE2C40984}"
 EndProject
@@ -115,6 +115,27 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscUtils.Swap", "Library\DiscUtils.Swap\DiscUtils.Swap.csproj", "{FB283ACD-CADD-467E-A8FF-87A4B9061954}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscUtils.Btrfs", "Library\DiscUtils.Btrfs\DiscUtils.Btrfs.csproj", "{FAA5ADC9-49ED-4949-B53B-9EC93AE35893}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69329D18-A45F-4055-AE45-4CC048470335}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{47342984-3E8B-46C6-8509-015FB0EF465A}"
+	ProjectSection(SolutionItems) = preProject
+		Utilities\common-utilities.props = Utilities\common-utilities.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Library", "Library", "{4A85443A-9720-43C2-9EE3-781D513E84AB}"
+	ProjectSection(SolutionItems) = preProject
+		Library\common-library.props = Library\common-library.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{01CE6ECD-B864-4D57-9E69-8F3B86851668}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\common-tests.props = Tests\common-tests.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -397,5 +418,11 @@ Global
 		{A17F10BD-E853-4397-8F2B-FC44431F63DF} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
 		{FB283ACD-CADD-467E-A8FF-87A4B9061954} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
 		{FAA5ADC9-49ED-4949-B53B-9EC93AE35893} = {E20ADC28-C578-4EF4-A6A2-18DCE2C40984}
+		{47342984-3E8B-46C6-8509-015FB0EF465A} = {69329D18-A45F-4055-AE45-4CC048470335}
+		{4A85443A-9720-43C2-9EE3-781D513E84AB} = {69329D18-A45F-4055-AE45-4CC048470335}
+		{01CE6ECD-B864-4D57-9E69-8F3B86851668} = {69329D18-A45F-4055-AE45-4CC048470335}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E33CB8CF-093C-444D-8950-DF55A62FA36E}
 	EndGlobalSection
 EndGlobal
