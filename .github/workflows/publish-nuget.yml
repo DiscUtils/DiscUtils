@@ -16,6 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
+        fetch-depth: 50
         lfs: 'true'
     # We do not need to fetch tags, as we're already at a tagged build - it should be available automatically
 
@@ -27,10 +28,6 @@ jobs:
     - name: Pack
       run: dotnet pack -c Release -o ${{ github.workspace }}/build
 
-    - name: NuGet push (GitHub)
-      run: dotnet nuget push *.nupkg --no-symbols 1 --skip-duplicate -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-      working-directory: ${{ github.workspace }}/build
-      
     - name: NuGet push 
       run: dotnet nuget push *.nupkg --skip-duplicate -k ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json
       working-directory: ${{ github.workspace }}/build

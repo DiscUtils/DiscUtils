@@ -35,7 +35,7 @@ jobs:
       if: github.ref == 'refs/heads/develop'
       run: dotnet pack -c Release -o ${{ github.workspace }}/build
 
-    - name: "Github packages: Nuget push"
+    - name: "GitHub packages: NuGet push"
       if: github.ref == 'refs/heads/develop'
       run: dotnet nuget push *.nupkg --no-symbols 1 --skip-duplicate -k ${{ secrets.GITHUB_TOKEN }} -s "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
       working-directory: ${{ github.workspace }}/build
