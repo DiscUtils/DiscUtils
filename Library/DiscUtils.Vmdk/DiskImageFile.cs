@@ -871,7 +871,7 @@ namespace DiscUtils.Vmdk
             }
             else
             {
-                throw new NotImplementedException("Extent type not implemented");
+                throw new NotImplementedException($"Extent type '{ExtentDescriptor.FormatExtentType(type)}' not implemented");
             }
         }
 
@@ -912,6 +912,12 @@ namespace DiscUtils.Vmdk
 
                 case DiskCreateType.VmfsSparse:
                     return ExtentType.VmfsSparse;
+
+                case DiskCreateType.SeSparse:
+                    return ExtentType.SeSparse;
+
+                case DiskCreateType.VsanSparse:
+                    return ExtentType.VsanSparse;
 
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unable to convert {0}",
@@ -977,7 +983,7 @@ namespace DiscUtils.Vmdk
                         ownsParent);
 
                 default:
-                    throw new NotSupportedException();
+                    throw new NotSupportedException($"Extent type '{ExtentDescriptor.FormatExtentType(extent.Type)}' not supported");
             }
         }
 

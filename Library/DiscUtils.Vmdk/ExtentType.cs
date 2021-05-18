@@ -8,6 +8,8 @@ namespace DiscUtils.Vmdk
         Vmfs = 3,
         VmfsSparse = 4,
         VmfsRdm = 5,
-        VmfsRaw = 6
+        VmfsRaw = 6,
+        SeSparse = 7,
+        VsanSparse = 8
     }
 }
