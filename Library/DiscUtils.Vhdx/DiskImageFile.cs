@@ -130,7 +130,8 @@ namespace DiscUtils.Vhdx
 
         internal DiskImageFile(FileLocator locator, string path, FileAccess access)
         {
-            FileShare share = access == FileAccess.Read ? FileShare.Read : FileShare.None;
+            // FileShare.ReadWrite makes it possible to create children from attached parents!
+            FileShare share = access == FileAccess.Read ? FileShare.ReadWrite : FileShare.None;
             _fileStream = locator.Open(path, FileMode.Open, access, share);
             _ownsStream = Ownership.Dispose;
 
@@ -588,7 +589,6 @@ namespace DiscUtils.Vhdx
                 BlockSize = (uint)blockSize,
                 Flags = FileParametersFlags.None
             };
-            ParentLocator parentLocator = new ParentLocator();
 
             Stream metadataStream = new SubStream(stream, metadataRegion.FileOffset, metadataRegion.Length);
             Metadata metadata = Metadata.Initialize(metadataStream, fileParams, (ulong)capacity,
@@ -598,7 +598,88 @@ namespace DiscUtils.Vhdx
         private static void InitializeDifferencingInternal(Stream stream, DiskImageFile parent,
                                                            string parentAbsolutePath, string parentRelativePath, DateTime parentModificationTimeUtc)
         {
-            throw new NotImplementedException();
+            uint logicalSectorSize = parent._metadata.LogicalSectorSize;
+            uint physicalSectorSize = parent._metadata.PhysicalSectorSize;
+            uint blockSize = parent._metadata.FileParameters.BlockSize;
+            ulong capacity = parent._metadata.DiskSize;
+
+            long chunkRatio = 0x800000L * logicalSectorSize / blockSize;
+            long dataBlocksCount = MathUtilities.Ceil((long)capacity, blockSize);
+            long sectorBitmapBlocksCount = MathUtilities.Ceil(dataBlocksCount, chunkRatio);
+            long totalBatEntriesDynamic = dataBlocksCount + (dataBlocksCount - 1) / chunkRatio;
+
+            FileHeader fileHeader = new FileHeader { Creator = ".NET DiscUtils" };
+
+            long fileEnd = Sizes.OneMiB;
+
+            VhdxHeader header1 = new VhdxHeader();
+            header1.SequenceNumber = 0;
+            header1.FileWriteGuid = Guid.NewGuid();
+            header1.DataWriteGuid = Guid.NewGuid();
+            header1.LogGuid = Guid.Empty;
+            header1.LogVersion = 0;
+            header1.Version = 1;
+            header1.LogLength = (uint)Sizes.OneMiB;
+            header1.LogOffset = (ulong)fileEnd;
+            header1.CalcChecksum();
+
+            fileEnd += header1.LogLength;
+
+            VhdxHeader header2 = new VhdxHeader(header1);
+            header2.SequenceNumber = 1;
+            header2.CalcChecksum();
+
+            RegionTable regionTable = new RegionTable();
+
+            RegionEntry metadataRegion = new RegionEntry();
+            metadataRegion.Guid = RegionEntry.MetadataRegionGuid;
+            metadataRegion.FileOffset = fileEnd;
+            metadataRegion.Length = (uint)Sizes.OneMiB;
+            metadataRegion.Flags = RegionFlags.Required;
+            regionTable.Regions.Add(metadataRegion.Guid, metadataRegion);
+
+            fileEnd += metadataRegion.Length;
+            
+            RegionEntry batRegion = new RegionEntry();
+            batRegion.Guid = RegionEntry.BatGuid;
+            batRegion.FileOffset = 3 * Sizes.OneMiB;
+            batRegion.Length = (uint)MathUtilities.RoundUp(totalBatEntriesDynamic * 8, Sizes.OneMiB);
+            batRegion.Flags = RegionFlags.Required;
+            regionTable.Regions.Add(batRegion.Guid, batRegion);
+
+            fileEnd += batRegion.Length;
+
+            stream.Position = 0;
+            StreamUtilities.WriteStruct(stream, fileHeader);
+
+            stream.Position = 64 * Sizes.OneKiB;
+            StreamUtilities.WriteStruct(stream, header1);
+
+            stream.Position = 128 * Sizes.OneKiB;
+            StreamUtilities.WriteStruct(stream, header2);
+
+            stream.Position = 192 * Sizes.OneKiB;
+            StreamUtilities.WriteStruct(stream, regionTable);
+
+            stream.Position = 256 * Sizes.OneKiB;
+            StreamUtilities.WriteStruct(stream, regionTable);
+
+            // Set stream to min size
+            stream.Position = fileEnd - 1;
+            stream.WriteByte(0);
+
+            // Metadata
+            FileParameters fileParams = new FileParameters
+            {
+                BlockSize = (uint)blockSize,
+                Flags = FileParametersFlags.HasParent
+            };
+            ParentLocator parentLocator = new ParentLocator("{" + parent._header.DataWriteGuid.ToString() + "}", parentRelativePath, parentAbsolutePath);
+
+            Stream metadataStream = new SubStream(stream, metadataRegion.FileOffset, metadataRegion.Length);
+            Metadata metadata = Metadata.Initialize(metadataStream, fileParams, (ulong)capacity,
+                (uint)logicalSectorSize, (uint)physicalSectorSize, parentLocator);
+            
         }
 
         private void Initialize()

@@ -38,16 +38,30 @@ namespace DiscUtils.Vhdx
 
         public Dictionary<string, string> Entries { get; private set; } = new Dictionary<string, string>();
 
+        public ParentLocator()
+        {
+
+        }
+
+        public ParentLocator(String parentUid, String relativePath, String absolutePath)
+        {
+            Entries.Add("parent_linkage", parentUid);
+            Entries.Add("relative_path", relativePath);
+            Entries.Add("absolute_win32_path", @"\\?\" + absolutePath);
+        }
+
         public int Size
         {
             get
             {
-                if (Entries.Count != 0)
+                int size = 20 + Entries.Count * 12;
+                foreach (var entry in Entries)
                 {
-                    throw new NotImplementedException();
+                    size += Encoding.Unicode.GetByteCount(entry.Key);
+                    size += Encoding.Unicode.GetByteCount(entry.Value);
                 }
 
-                return 20;
+                return size;
             }
         }
 
@@ -81,16 +95,33 @@ namespace DiscUtils.Vhdx
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            if (Entries.Count != 0)
-            {
-                throw new NotImplementedException();
-            }
-
             Count = (ushort)Entries.Count;
 
             EndianUtilities.WriteBytesLittleEndian(LocatorType, buffer, offset + 0);
             EndianUtilities.WriteBytesLittleEndian(Reserved, buffer, offset + 16);
             EndianUtilities.WriteBytesLittleEndian(Count, buffer, offset + 18);
+
+            int entryOffset = 0;
+            int item = 0;
+            foreach(var entry in Entries)
+            {
+                byte[] keyData = Encoding.Unicode.GetBytes(entry.Key);
+                byte[] valueData = Encoding.Unicode.GetBytes(entry.Value);
+
+                Array.Copy(keyData, 0, buffer, offset + 20 + Count * 12 + entryOffset, keyData.Length);
+                EndianUtilities.WriteBytesLittleEndian((offset + 20 + Count * 12 + entryOffset), buffer, offset + 20 + item * 12);
+                EndianUtilities.WriteBytesLittleEndian((ushort)keyData.Length, buffer, offset + 20 + item * 12 + 8);
+                entryOffset += keyData.Length;
+
+                Array.Copy(valueData, 0, buffer, offset + 20 + Count * 12 + entryOffset, valueData.Length);
+                EndianUtilities.WriteBytesLittleEndian((offset + 20 + Count * 12 + entryOffset), buffer, offset + 20 + item * 12 + 4);
+                EndianUtilities.WriteBytesLittleEndian((ushort)valueData.Length, buffer, offset + 20 + item * 12 + 10);
+                entryOffset += valueData.Length;
+
+                ++item;
+            }
+
+            
         }
     }
 }
