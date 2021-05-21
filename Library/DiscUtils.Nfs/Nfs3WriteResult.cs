@@ -21,9 +21,6 @@
 //
 
 using System;
-#if !NET20
-using System.Linq;
-#endif
 
 namespace DiscUtils.Nfs
 {
