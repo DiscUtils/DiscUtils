@@ -22,8 +22,4 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
-    <PackageReference Include="System.Diagnostics.StackTrace" Version="4.3.0" />
-  </ItemGroup>
-
 </Project>
