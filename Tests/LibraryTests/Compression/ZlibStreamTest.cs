@@ -83,5 +83,28 @@ namespace LibraryTests.Compression
                 }
             });
         }
+
+        /// <summary>
+        /// <see cref="ZlibStream.Dispose(bool)"/> does not throw when disposing of a stream which has not been
+        /// read fully.
+        /// </summary>
+        [Fact]
+        public void Dispose_NoDataRead_DoesNotThrow()
+        {
+            byte[] testData = Encoding.ASCII.GetBytes("This is a test string");
+
+            MemoryStream compressedStream = new MemoryStream();
+
+            using (ZlibStream zs = new ZlibStream(compressedStream, CompressionMode.Compress, true))
+            {
+                zs.Write(testData, 0, testData.Length);
+            }
+
+            compressedStream.Position = 0;
+            using (ZlibStream uzs = new ZlibStream(compressedStream, CompressionMode.Decompress, true))
+            {
+                uzs.Dispose();
+            }
+        }
     }
 }

@@ -38,6 +38,8 @@ namespace DiscUtils.Compression
         private readonly CompressionMode _mode;
         private readonly Stream _stream;
 
+        private bool endOfStream = false;
+
         /// <summary>
         /// Initializes a new instance of the ZlibStream class.
         /// </summary>
@@ -135,14 +137,17 @@ namespace DiscUtils.Compression
         {
             if (_mode == CompressionMode.Decompress)
             {
+                // If we processed the entire stream, we can verify the Adler checksum.
                 // Can only check Adler checksum on seekable streams.  Since DeflateStream
                 // aggresively caches input, it normally has already consumed the footer.
-                if (_stream.CanSeek)
+                if (this.endOfStream && _stream.CanSeek)
                 {
                     _stream.Seek(-4, SeekOrigin.End);
                     byte[] footerBuffer = StreamUtilities.ReadExact(_stream, 4);
                     if (EndianUtilities.ToInt32BigEndian(footerBuffer, 0) != _adler32.Value)
                     {
+                        // It questionable whether we should really throw in .Dispose(), but this
+                        // is the historic behavior of this class.
                         throw new InvalidDataException("Corrupt decompressed data detected");
                     }
                 }
@@ -182,6 +187,8 @@ namespace DiscUtils.Compression
 
             int numRead = _deflateStream.Read(buffer, offset, count);
             _adler32.Process(buffer, offset, numRead);
+
+            this.endOfStream = numRead == 0;
             return numRead;
         }
 
