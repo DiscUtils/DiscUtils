@@ -46,12 +46,7 @@ namespace DiscUtils.Iscsi
             Session = session;
             _authenticators = authenticators;
 
-#if NETSTANDARD1_5
-            TcpClient client = new TcpClient();
-            client.ConnectAsync(address.NetworkAddress, address.NetworkPort).Wait();
-#else
             TcpClient client = new TcpClient(address.NetworkAddress, address.NetworkPort);
-#endif
             client.NoDelay = true;
             _stream = client.GetStream();
 
