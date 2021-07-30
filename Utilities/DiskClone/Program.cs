@@ -27,6 +27,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using DiscUtils;
 using DiscUtils.Common;
+using DiscUtils.Containers;
 using DiscUtils.Ntfs;
 using DiscUtils.Partitions;
 using DiscUtils.Streams;
@@ -49,6 +50,7 @@ namespace DiskClone
 
         static void Main(string[] args)
         {
+            SetupHelper.SetupContainers();
             Program program = new Program();
             program.Run(args);
         }
