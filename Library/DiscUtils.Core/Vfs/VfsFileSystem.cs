@@ -698,7 +698,7 @@ namespace DiscUtils.Vfs
                     {
                         results.Add(Utilities.CombinePaths(resultPrefixPath, FormatFileName(entry.FileName)));
                     }
-               }
+                }
 
                 if (subFolders && isDir)
                 {
