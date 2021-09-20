@@ -994,8 +994,15 @@ namespace DiscUtils.Vmdk
             if (header.Length < Sizes.Sector ||
                 EndianUtilities.ToUInt32LittleEndian(header, 0) != HostedSparseExtentHeader.VmdkMagicNumber)
             {
-                s.Position = 0;
-                _descriptor = new DescriptorFile(s);
+                try
+                {
+                    s.Position = 0;
+                    _descriptor = new DescriptorFile(s);
+                } catch (DescriptorFileHasEncodingException e)
+                {
+                    s.Position = 0;
+                    _descriptor = new DescriptorFile(s, e.encoding);
+                }
                 if (_access != FileAccess.Read)
                 {
                     _descriptor.ContentId = (uint)_rng.Next();
@@ -1012,7 +1019,14 @@ namespace DiscUtils.Vmdk
                 {
                     Stream descriptorStream = new SubStream(s, hdr.DescriptorOffset * Sizes.Sector,
                         hdr.DescriptorSize * Sizes.Sector);
-                    _descriptor = new DescriptorFile(descriptorStream);
+                    try
+                    {
+                        _descriptor = new DescriptorFile(descriptorStream);
+                    } catch (DescriptorFileHasEncodingException e)
+                    {
+                        descriptorStream.Seek(0, SeekOrigin.Begin);
+                        _descriptor = new DescriptorFile(descriptorStream, e.encoding);
+                    }
                     if (_access != FileAccess.Read)
                     {
                         _descriptor.ContentId = (uint)_rng.Next();

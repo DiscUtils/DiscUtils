@@ -29,6 +29,17 @@ using DiscUtils.Streams;
 
 namespace DiscUtils.Vmdk
 {
+
+    internal class DescriptorFileHasEncodingException: Exception
+    {
+        public string encoding { get; private set; }
+
+        public DescriptorFileHasEncodingException(string encoding)
+        {
+            this.encoding = encoding;
+        }
+    }
+
     internal class DescriptorFile
     {
         private const string HeaderVersion = "version";
@@ -64,13 +75,13 @@ namespace DiscUtils.Vmdk
             _header.Add(new DescriptorFileEntry(HeaderCreateType, string.Empty, DescriptorFileEntryType.Quoted));
         }
 
-        public DescriptorFile(Stream source)
+        public DescriptorFile(Stream source, string encoding = null)
         {
             _header = new List<DescriptorFileEntry>();
             Extents = new List<ExtentDescriptor>();
             _diskDataBase = new List<DescriptorFileEntry>();
 
-            Load(source);
+            Load(source, encoding);
         }
 
         public DiskAdapterType AdapterType
@@ -415,7 +426,7 @@ namespace DiscUtils.Vmdk
             _diskDataBase.Add(new DescriptorFileEntry(key, value, DescriptorFileEntryType.Quoted));
         }
 
-        private void Load(Stream source)
+        private void Load(Stream source, string encoding = null)
         {
             if (source.Length - source.Position > MaxSize)
             {
@@ -423,7 +434,15 @@ namespace DiscUtils.Vmdk
                     "Invalid VMDK descriptor file, more than {0} bytes in length", MaxSize));
             }
 
-            StreamReader reader = new StreamReader(source);
+            StreamReader reader;
+            if (encoding == null)
+            {
+                reader = new StreamReader(source);
+            } else
+            {
+                reader = new StreamReader(source, Encoding.GetEncoding(encoding));
+            }
+
             string line = reader.ReadLine();
             while (line != null)
             {
@@ -446,6 +465,10 @@ namespace DiscUtils.Vmdk
                     else
                     {
                         DescriptorFileEntry entry = DescriptorFileEntry.Parse(line);
+                        if (entry.Key == "encoding" && (encoding == null || (entry.Value != encoding))) 
+                        {
+                            throw new DescriptorFileHasEncodingException(entry.Value);
+                        }
                         if (entry.Key.StartsWith("ddb.", StringComparison.Ordinal))
                         {
                             _diskDataBase.Add(entry);
