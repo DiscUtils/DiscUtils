@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Library\DiscUtils.Containers\DiscUtils.Containers.csproj" />
     <ProjectReference Include="..\DiscUtils.Common\DiscUtils.Common.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Core\DiscUtils.Core.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />

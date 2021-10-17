@@ -34,8 +34,6 @@ namespace DiscUtils
     /// </summary>
     public abstract class DiskImageBuilder
     {
-        private static Dictionary<string, VirtualDiskFactory> _typeMap;
-
         /// <summary>
         /// Gets or sets the geometry of this disk, as reported by the BIOS, will be implied from the content stream if not set.
         /// </summary>
@@ -64,19 +62,6 @@ namespace DiscUtils
             get { return false; }
         }
 
-        private static Dictionary<string, VirtualDiskFactory> TypeMap
-        {
-            get
-            {
-                if (_typeMap == null)
-                {
-                    InitializeMaps();
-                }
-
-                return _typeMap;
-            }
-        }
-
         /// <summary>
         /// Gets an instance that constructs the specified type (and variant) of virtual disk image.
         /// </summary>
@@ -86,7 +71,7 @@ namespace DiscUtils
         public static DiskImageBuilder GetBuilder(string type, string variant)
         {
             VirtualDiskFactory factory;
-            if (!TypeMap.TryGetValue(type, out factory))
+            if (!VirtualDiskManager.TypeMap.TryGetValue(type, out factory))
             {
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Unknown disk type '{0}'", type), nameof(type));
             }
@@ -105,22 +90,5 @@ namespace DiscUtils
         /// to each logical file that comprises the disk image.  For example, given a base name
         /// 'foo', the files 'foo.vmdk' and 'foo-flat.vmdk' could be returned.</remarks>
         public abstract DiskImageFileSpecification[] Build(string baseName);
-
-        private static void InitializeMaps()
-        {
-            Dictionary<string, VirtualDiskFactory> typeMap = new Dictionary<string, VirtualDiskFactory>();
-
-            foreach (Type type in ReflectionHelper.GetAssembly(typeof(VirtualDisk)).GetTypes())
-            {
-                VirtualDiskFactoryAttribute attr = (VirtualDiskFactoryAttribute)ReflectionHelper.GetCustomAttribute(type, typeof(VirtualDiskFactoryAttribute), false);
-                if (attr != null)
-                {
-                    VirtualDiskFactory factory = (VirtualDiskFactory)Activator.CreateInstance(type);
-                    typeMap.Add(attr.Type, factory);
-                }
-            }
-
-            _typeMap = typeMap;
-        }
     }
 }
