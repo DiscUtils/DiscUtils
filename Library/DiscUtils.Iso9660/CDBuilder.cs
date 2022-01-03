@@ -108,6 +108,26 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets or sets the Manufacturer ID for the ISO file.
+        /// </summary>
+        /// <remarks>
+        /// Must be a valid identifier, i.e. max 23 characters.
+        /// </remarks>
+        public string ManufacturerId
+        {
+            get { return _buildParams.ManufacturerId; }
+
+            set
+            {
+                if (value.Length > 23)
+                {
+                    throw new ArgumentException("Not a valid volume identifier");
+                }
+                _buildParams.ManufacturerId = value;
+            }
+        }
+
+        /// <summary>
         /// Sets the boot image for the ISO image.
         /// </summary>
         /// <param name="image">Stream containing the boot image.</param>
@@ -276,6 +296,7 @@ namespace DiscUtils.Iso9660
 
                 byte[] bootCatalog = new byte[IsoUtilities.SectorSize];
                 BootValidationEntry bve = new BootValidationEntry();
+                bve.ManfId = ManufacturerId;
                 bve.WriteTo(bootCatalog, 0x00);
                 _bootEntry.ImageStart = (uint)MathUtilities.Ceil(bootImagePos, IsoUtilities.SectorSize);
                 if (_bootEntry.BootMediaType != BootDeviceEmulation.NoEmulation)

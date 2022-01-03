@@ -26,12 +26,16 @@ namespace DiscUtils.Iso9660
     {
         public BuildParameters()
         {
+            ManufacturerId = ".Net DiscUtils";
             VolumeIdentifier = string.Empty;
             UseJoliet = true;
         }
 
+        public string ManufacturerId { get; set; }
+
         public bool UseJoliet { get; set; }
 
         public string VolumeIdentifier { get; set; }
+
     }
 }
