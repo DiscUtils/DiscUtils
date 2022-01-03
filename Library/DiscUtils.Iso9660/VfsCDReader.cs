@@ -396,13 +396,95 @@ namespace DiscUtils.Iso9660
             return file.UnixFileInfo;
         }
 
+        /// <summary>
+        /// Detects size of FAT file system from a disk's boot sector.
+        /// </summary>
+        /// <param name="stream">The stream to inspect.</param>
+        /// <returns><c>Sector count</c> if the stream appears to be a FAT file system, else <c>0</c>.</returns>
+        public static ushort DetectSectorCountFromBootSector(Stream stream)
+        {
+            if (stream.Length < 512)
+            {
+                return 0;
+            }
+
+            stream.Position = 0;
+            byte[] bytes = StreamUtilities.ReadExact(stream, 512);
+            ushort bpbBytesPerSec = EndianUtilities.ToUInt16LittleEndian(bytes, 11);
+            if (bpbBytesPerSec != 512)
+            {
+                return 0;
+            }
+
+            byte bpbNumFATs = bytes[16];
+            if (bpbNumFATs == 0 || bpbNumFATs > 2)
+            {
+                return 0;
+            }
+
+            ushort bpbTotSec16 = EndianUtilities.ToUInt16LittleEndian(bytes, 19);
+            uint bpbTotSec32 = EndianUtilities.ToUInt32LittleEndian(bytes, 32);
+
+            if (!((bpbTotSec16 == 0) ^ (bpbTotSec32 == 0)))
+            {
+                return 0;
+            }
+
+            uint totalSectors = bpbTotSec16 + bpbTotSec32;
+            // Can't be greater than unsigned short
+            if (totalSectors > 65535)
+            {
+                return 0;
+            }
+            return (ushort)totalSectors;
+        }
+
+
+        /// <summary>
+        /// Returns the actual sector count for a boot image (vs. reported).
+        /// 
+        /// Boot Images with MBR or floppy boot sectors will have boot Entries that 
+        /// list their sector count as 1.
+        /// This is incorrect and is either determined by the emulation type or what
+        /// the boot sector lists the partition as having.
+        /// </summary>
+        /// <returns>int: sector count in 512 bytes</returns>
+        public long GetActualBootImageSectorCount()
+        {
+            switch (BootEmulation)
+            {
+                case BootDeviceEmulation.Diskette1440KiB:
+                    return 1440 * 1024 / Sizes.Sector;
+                case BootDeviceEmulation.Diskette1200KiB:
+                    return 1200 * 1024 / Sizes.Sector;
+                case BootDeviceEmulation.Diskette2880KiB:
+                    return 2880 * 1024 / Sizes.Sector;
+                case BootDeviceEmulation.HardDisk:
+                case BootDeviceEmulation.NoEmulation:
+                default:
+                    BootInitialEntry initialEntry = GetBootInitialEntry();
+                    var BytesToStart = initialEntry.ImageStart * IsoUtilities.SectorSize;
+                    var sectorCount = DetectSectorCountFromBootSector(
+                        new SubStream(_data, BytesToStart, Sizes.Sector)
+                        );
+                    // Invalid length read from BootSector
+                    if (sectorCount == 0 || sectorCount * Sizes.Sector + BytesToStart > _data.Length)
+                    {
+                        sectorCount = initialEntry.SectorCount;
+                    }
+                    return sectorCount;
+            }
+            
+        }
+
         public Stream OpenBootImage()
         {
             BootInitialEntry initialEntry = GetBootInitialEntry();
+            long sectorCount = GetActualBootImageSectorCount();
             if (initialEntry != null)
             {
                 return new SubStream(_data, initialEntry.ImageStart * IsoUtilities.SectorSize,
-                    initialEntry.SectorCount * Sizes.Sector);
+                    sectorCount * Sizes.Sector);
             }
             throw new InvalidOperationException("No valid boot image");
         }
