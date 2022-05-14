@@ -27,7 +27,7 @@
     <PackageReference Include="xunit" Version="2.4.1" />
   </ItemGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 

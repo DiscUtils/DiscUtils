@@ -1,7 +1,7 @@
 <Project>
   <!-- Package related stuff -->
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net40;net45;net5.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net5.0</TargetFrameworks>
     <PackageProjectUrl>https://github.com/DiscUtils/DiscUtils</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
