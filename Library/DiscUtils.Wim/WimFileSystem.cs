@@ -531,17 +531,17 @@ namespace DiscUtils.Wim
         /// <param name="disposing"><c>true</c> if disposing, else <c>false</c>.</param>
         protected override void Dispose(bool disposing)
         {
-            try
+            if (disposing)
             {
-                _metaDataStream.Dispose();
-                _metaDataStream = null;
+                if (_metaDataStream != null)
+                {
+                    _metaDataStream.Dispose();
+                    _metaDataStream = null;
+                }
 
                 _file = null;
             }
-            finally
-            {
-                base.Dispose(disposing);
-            }
+            base.Dispose(disposing);
         }
 
         private static void SplitFileName(string path, out string filePart, out string altStreamPart)
