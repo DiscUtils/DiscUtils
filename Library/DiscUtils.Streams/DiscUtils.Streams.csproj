@@ -3,6 +3,7 @@
     <Description>DiscUtils Streams</Description>
     <Authors>Kenneth Bell;LordMike;Bianco Veigel</Authors>
     <PackageTags>DiscUtils;Streams</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
 </Project>

@@ -3,6 +3,7 @@
     <Description>DiscUtils Iso9660</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
     <PackageTags>DiscUtils;Optical;Iso9660</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -22,12 +22,10 @@
 
 namespace MSBuildTask
 {
-    using System;
-    using System.Collections.Generic;
-    using DiscUtils.Iso9660;
+    using DiscUtils.SquashFs;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Utilities;
-    using DiscUtils.SquashFs;
+    using System;
 
     public class CreateSquashFileSystem : Task
     {

@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>DiscUtils BootConfig parser</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
     <PackageTags>DiscUtils;BootConfig</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

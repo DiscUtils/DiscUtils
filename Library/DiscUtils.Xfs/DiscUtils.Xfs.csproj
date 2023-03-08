@@ -3,6 +3,7 @@
     <Description>DiscUtils XFS</Description>
     <Authors>Bianco Veigel</Authors>
     <PackageTags>DiscUtils;Xfs</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

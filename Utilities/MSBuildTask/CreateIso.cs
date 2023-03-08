@@ -20,15 +20,13 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Threading.Tasks;
-
 namespace MSBuildTask
 {
-    using System;
-    using System.IO;
     using DiscUtils.Iso9660;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Utilities;
+    using System;
+    using System.IO;
 
     public class CreateIso : Task
     {

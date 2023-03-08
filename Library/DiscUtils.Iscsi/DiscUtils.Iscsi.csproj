@@ -3,6 +3,7 @@
     <Description>DiscUtils iSCSI</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
     <PackageTags>DiscUtils;iSCSI</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

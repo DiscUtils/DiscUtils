@@ -3,6 +3,7 @@
     <Description>DiscUtils, meta-package with container formats such as WIM, DMG, VHD, VHDX, XVA, VMDK</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
     <PackageTags>DiscUtils;VHD;VHDX;XVA;VMDK;DMG</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

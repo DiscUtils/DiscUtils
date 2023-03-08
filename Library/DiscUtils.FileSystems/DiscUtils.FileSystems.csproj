@@ -3,6 +3,7 @@
     <Description>DiscUtils, meta-package with filesystems</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
     <PackageTags>DiscUtils;Filesystem;NTFS;ext;Hfs+;HfsPlus;FAT</PackageTags>
+    <TargetFrameworks>netstandard2.0;net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
