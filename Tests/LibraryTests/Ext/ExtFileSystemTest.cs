@@ -1,9 +1,10 @@
-using System.IO;
-using System.Linq;
-using System.Text;
 using DiscUtils;
 using DiscUtils.Ext;
 using LibraryTests.Helpers;
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace LibraryTests.Ext
@@ -13,7 +14,9 @@ namespace LibraryTests.Ext
         [Fact]
         public void LoadFileSystem()
         {
-            using (var data = Helpers.Helpers.LoadDataFile("data.ext4.dat"))
+            var d = Environment.CurrentDirectory;
+
+            using (var data = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Ext", "Data", "data.ext4.dat.gz")))
             using (var fs = new ExtFileSystem(data, new FileSystemParameters()))
             {
                 Assert.Collection(fs.Root.GetFileSystemInfos()

@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using DiscUtils;
+﻿using DiscUtils;
 using DiscUtils.Complete;
 using DiscUtils.Streams;
 using DiscUtils.Vhdx;
-using LibraryTests.Utilities;
+using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace LibraryTests.Lvm
@@ -15,8 +14,8 @@ namespace LibraryTests.Lvm
         public void Lvm2VhdxZip()
         {
             SetupHelper.SetupComplete();
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Lvm", "Data", "lvm2.zip")))
-            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+
+            using (var vhdx = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Lvm", "Data", "lvm2.vhdx.gz")))
             using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
             using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {

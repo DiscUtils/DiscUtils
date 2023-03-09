@@ -14,7 +14,7 @@ namespace LibraryTests.Utilities
             CheckResolvePath(@"\TEMP\Foo.txt", @"..\..\Bar.txt", @"\Bar.txt");
         }
 
-        private void CheckResolvePath(string basePath, string relativePath, string expectedResult)
+        private static void CheckResolvePath(string basePath, string relativePath, string expectedResult)
         {
             var result = DiscUtils.Internal.Utilities.ResolvePath(basePath, relativePath);
             Assert.Equal(expectedResult, result);

@@ -1,13 +1,12 @@
-﻿using System;
+﻿using DiscUtils;
+using DiscUtils.Btrfs;
+using DiscUtils.Streams;
+using DiscUtils.Vhdx;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
-using DiscUtils;
-using DiscUtils.Btrfs;
-using DiscUtils.Streams;
-using DiscUtils.Vhdx;
-using LibraryTests.Utilities;
 using Xunit;
 
 namespace LibraryTests.Btrfs
@@ -19,8 +18,8 @@ namespace LibraryTests.Btrfs
         {
             DiscUtils.Setup.SetupHelper.RegisterAssembly(typeof(Disk).GetTypeInfo().Assembly);
             DiscUtils.Setup.SetupHelper.RegisterAssembly(typeof(BtrfsFileSystem).GetTypeInfo().Assembly);
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Btrfs", "Data", "btrfs.zip")))
-            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+
+            using (var vhdx = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Btrfs", "Data", "btrfs.vhdx.gz")))
             using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
             using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {

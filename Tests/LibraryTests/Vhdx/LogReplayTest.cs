@@ -20,12 +20,10 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-using System.Collections.Generic;
-using System.IO;
-using DiscUtils;
 using DiscUtils.Streams;
 using DiscUtils.Vhdx;
-using LibraryTests.Utilities;
+using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace LibraryTests.Vhdx
@@ -35,8 +33,7 @@ namespace LibraryTests.Vhdx
         [Fact]
         public void ReplayLog()
         {
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Vhdx", "Data", "vhdx-log-replay.zip")))
-            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+            using (var vhdx = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Vhdx", "Data", "vhdx-log-replay.vhdx.gz")))
             using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
             using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {

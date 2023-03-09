@@ -1,9 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
-using DiscUtils.CoreCompat;
 
 namespace LibraryTests.Helpers
 {
@@ -18,31 +15,27 @@ namespace LibraryTests.Helpers
             }
         }
 
-        public static Stream LoadDataFile(string name)
+        public static Stream LoadDataFileFromGZipFile(string path)
         {
-            Assembly assembly = ReflectionHelper.GetAssembly(typeof(Helpers));
-
-            string formattedName = $"{assembly.GetName().Name}._Data.{name}";
-            if (assembly.GetManifestResourceNames().Contains(formattedName))
-                return assembly.GetManifestResourceStream(formattedName);
-
-            // Try GZ
-            formattedName += ".gz";
-
-            if (assembly.GetManifestResourceNames().Contains(formattedName))
+            using (var fs = File.OpenRead(path))
+            using (var gz = new GZipStream(fs, CompressionMode.Decompress))
             {
                 MemoryStream ms = new MemoryStream();
 
-                using (Stream stream = assembly.GetManifestResourceStream(formattedName))
-                using (GZipStream gz = new GZipStream(stream, CompressionMode.Decompress))
+                try
+                {
                     gz.CopyTo(ms);
+                }
+                catch (Exception)
+                {
+                    ms.Dispose();
+                    throw;
+                }
 
                 ms.Seek(0, SeekOrigin.Begin);
 
                 return ms;
             }
-
-            throw new Exception($"Unable to locate embedded resource {name}");
         }
     }
 }

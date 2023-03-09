@@ -1,11 +1,10 @@
-using System.Collections.Generic;
-using System.IO;
 using DiscUtils;
 using DiscUtils.Complete;
 using DiscUtils.Streams;
 using DiscUtils.Swap;
 using DiscUtils.Vhdx;
-using LibraryTests.Utilities;
+using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace LibraryTests.Swap
@@ -16,8 +15,8 @@ namespace LibraryTests.Swap
         public void SwapVhdxGzip()
         {
             SetupHelper.SetupComplete();
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Swap", "Data", "swap.zip")))
-            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+
+            using (var vhdx = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Swap", "Data", "swap.vhdx.gz")))
             using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
             using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {

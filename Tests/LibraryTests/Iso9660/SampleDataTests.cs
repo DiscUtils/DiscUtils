@@ -1,7 +1,6 @@
-using System.IO;
 using DiscUtils;
 using DiscUtils.Iso9660;
-using LibraryTests.Utilities;
+using System.IO;
 using Xunit;
 
 namespace LibraryTests.Iso9660
@@ -9,11 +8,10 @@ namespace LibraryTests.Iso9660
     public class SampleDataTests
     {
         [Fact]
-        public void AppleTestZip()
+        public void BrokenAppleIsoTest()
         {
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Iso9660", "Data", "apple-test.zip")))
-            using (Stream iso = ZipUtilities.ReadFileFromZip(fs))
-            using (CDReader cr = new CDReader(iso, false))
+            using (var iso = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Iso9660", "Data", "apple-test.iso.gz")))
+            using (var cr = new CDReader(iso, false))
             {
                 DiscDirectoryInfo dir = cr.GetDirectoryInfo("sub-directory");
                 Assert.NotNull(dir);

@@ -1,15 +1,13 @@
-﻿using System;
+﻿using DiscUtils;
+using DiscUtils.Complete;
+using DiscUtils.Streams;
+using DiscUtils.Vhdx;
+using DiscUtils.Xfs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using DiscUtils;
-using DiscUtils.Complete;
-using DiscUtils.Streams;
-using DiscUtils.Xfs;
-using DiscUtils.Vhdx;
-using LibraryTests.Utilities;
 using Xunit;
-using File=System.IO.File;
 
 namespace LibraryTests.Xfs
 {
@@ -19,8 +17,8 @@ namespace LibraryTests.Xfs
         public void XfsVhdxZip()
         {
             SetupHelper.SetupComplete();
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Xfs", "Data", "xfs.zip")))
-            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+
+            using (var vhdx = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Xfs", "Data", "xfs.vhdx.gz")))
             using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
             using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {
@@ -51,8 +49,8 @@ namespace LibraryTests.Xfs
         public void Xfs5VhdxZip()
         {
             SetupHelper.SetupComplete();
-            using (FileStream fs = File.OpenRead(Path.Combine("..", "..", "..", "Xfs", "Data", "xfs5.zip")))
-            using (Stream vhdx = ZipUtilities.ReadFileFromZip(fs))
+
+            using (var vhdx = Helpers.Helpers.LoadDataFileFromGZipFile(Path.Combine("..", "..", "..", "Xfs", "Data", "xfs5.vhdx.gz")))
             using (var diskImage = new DiskImageFile(vhdx, Ownership.Dispose))
             using (var disk = new Disk(new List<DiskImageFile> { diskImage }, Ownership.Dispose))
             {
@@ -79,7 +77,7 @@ namespace LibraryTests.Xfs
             }
         }
 
-        private void ValidateContent(DiscFileSystem xfs)
+        private static void ValidateContent(DiscFileSystem xfs)
         {
             Assert.True(xfs.DirectoryExists(""));
             Assert.True(xfs.FileExists("folder\\nested\\file"));
