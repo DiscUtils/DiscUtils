@@ -106,17 +106,10 @@ namespace DiscUtils.Vhdx
                 return false;
             }
 
-            uint sig = EndianUtilities.ToUInt32LittleEndian(sectorBuffer, 0);
-            if (sig != LogEntryHeader.LogEntrySignature)
-            {
-                entry = null;
-                return false;
-            }
-
             LogEntryHeader header = new LogEntryHeader();
             header.ReadFrom(sectorBuffer, 0);
 
-            if (!header.IsValid || header.EntryLength > logStream.Length)
+            if (!header.IsValid)
             {
                 entry = null;
                 return false;
@@ -125,11 +118,16 @@ namespace DiscUtils.Vhdx
             byte[] logEntryBuffer = new byte[header.EntryLength];
             Array.Copy(sectorBuffer, logEntryBuffer, LogSectorSize);
 
-            StreamUtilities.ReadExact(logStream, logEntryBuffer, LogSectorSize, logEntryBuffer.Length - LogSectorSize);
+            int bytesToRead = logEntryBuffer.Length - LogSectorSize;
+            if (StreamUtilities.ReadMaximum(logStream, logEntryBuffer, LogSectorSize, bytesToRead) != bytesToRead)
+            {
+                entry = null;
+                return false;
+            }
 
             EndianUtilities.WriteBytesLittleEndian(0, logEntryBuffer, 4);
             if (header.Checksum !=
-                Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, (int)header.EntryLength))
+                Crc32LittleEndian.Compute(Crc32Algorithm.Castagnoli, logEntryBuffer, 0, logEntryBuffer.Length))
             {
                 entry = null;
                 return false;
