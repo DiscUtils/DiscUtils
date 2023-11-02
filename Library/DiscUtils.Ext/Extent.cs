@@ -46,6 +46,7 @@ namespace DiscUtils.Ext
         {
             FirstLogicalBlock = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 0);
             NumBlocks = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
+            NumBlocks &= 0x7FFF;  // workaround for issue where high-order bit is erroneously set; assumes that extent is under 32k blocks
             FirstPhysicalBlockHi = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 6);
             FirstPhysicalBlockLow = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
             return 12;

@@ -56,7 +56,7 @@ namespace DiscUtils.Ext
 
         public override int Read(long pos, byte[] buffer, int offset, int count)
         {
-            if (pos > _inode.FileSize)
+            if (pos >= _inode.FileSize)
             {
                 return 0;
             }
@@ -70,34 +70,44 @@ namespace DiscUtils.Ext
 
             while (totalBytesRemaining > 0)
             {
-                uint logicalBlock = (uint)((pos + totalRead) / blockSize);
-                int blockOffset = (int)(pos + totalRead - logicalBlock * blockSize);
+                uint logicalBlock = (uint)((pos + totalRead) / blockSize);  // logical block containing the next byte to read
+                int blockOffset = (int)(pos + totalRead - logicalBlock * blockSize);  // offset within 'logicalBlock' of the next byte to read
 
                 int numRead = 0;
 
+                // Find the extent containing 'logicalBlock' or, if none, the first extent beyond it.
                 Extent extent = FindExtent(extents, logicalBlock);
+
                 if (extent == null)
                 {
-                    throw new IOException("Unable to find extent for block " + logicalBlock);
+                    // The remainder of the sparse file is one big hole; all bytes remaining to be read in the file are zeroes.
+                    numRead = totalBytesRemaining;
+                    Array.Clear(buffer, offset + totalRead, numRead);
                 }
-                if (extent.FirstLogicalBlock > logicalBlock)
+                else if (extent.FirstLogicalBlock > logicalBlock)
                 {
-                    numRead =
-                        (int)
+                    // We're reading from a hole in the sparse file that ends at 'extent'.  Implicitly read zeroes
+                    // for the remainder of 'logicalBlock', and for all subsequent blocks before the beginning of 'extent'.
+                    numRead = (int)
                         Math.Min(totalBytesRemaining,
-                            (extent.FirstLogicalBlock - logicalBlock) * blockSize - blockOffset);
+                                 (extent.FirstLogicalBlock - logicalBlock) * blockSize - blockOffset);
                     Array.Clear(buffer, offset + totalRead, numRead);
                 }
                 else
                 {
-                    long physicalBlock = logicalBlock - extent.FirstLogicalBlock + (long)extent.FirstPhysicalBlock;
-                    int toRead =
-                        (int)
+                    // We found the extent containing 'logicalblock'.  Read all bytes from 'logicalBlock' until the end of this extent.
+                    int toRead = (int)
                         Math.Min(totalBytesRemaining,
-                            (extent.NumBlocks - (logicalBlock - extent.FirstLogicalBlock)) * blockSize - blockOffset);
+                                 (extent.FirstLogicalBlock + extent.NumBlocks - logicalBlock) * blockSize - blockOffset);
 
+                    long physicalBlock = logicalBlock - extent.FirstLogicalBlock + (long)extent.FirstPhysicalBlock;
                     _context.RawStream.Position = physicalBlock * blockSize + blockOffset;
                     numRead = _context.RawStream.Read(buffer, offset + totalRead, toRead);
+                }
+
+                if (numRead == 0)
+                {
+                    throw new IOException($"Unable to read logical block {logicalBlock};  extent?.FirstLogicalBlock: {extent?.FirstLogicalBlock}");
                 }
 
                 totalBytesRemaining -= numRead;
@@ -124,69 +134,91 @@ namespace DiscUtils.Ext
                 new StreamExtent(start, count));
         }
 
+        /// <summary>
+        /// Returns the first extent containing a logical block greater than or equal to the given one.
+        /// Returns null if no such extent exists.
+        /// </summary>
         private Extent FindExtent(ExtentBlock node, uint logicalBlock)
         {
-            if (node.Index != null)
+            if (node.Extents != null)
             {
-                ExtentIndex idxEntry = null;
+                return FindExtent(node.Extents, logicalBlock);
+            }
+            else if (node.Index != null)
+            {
+                return FindExtent(node.Index, logicalBlock);
+            }
+            else
+            {
+                return null;
+            }
+        }
 
-                if (node.Index.Length == 0)
+        /// <summary>
+        /// Returns the first extent containing a logical block greater than or equal to the given one.
+        /// Returns null if no such extent exists.
+        /// </summary>
+        private Extent FindExtent(Extent[] extents, uint logicalBlock)
+        {
+            for (int i = 0; i < extents.Length; ++i)
+            {
+                Extent extent = extents[i];
+                if (extent.FirstLogicalBlock >= logicalBlock ||
+                    extent.FirstLogicalBlock + extent.NumBlocks > logicalBlock)
                 {
-                    return null;
+                    return extent;
                 }
-                if (node.Index[0].FirstLogicalBlock >= logicalBlock)
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the first extent containing a logical block greater than or equal to the given one.
+        /// Returns null if no such extent exists.
+        /// </summary>
+        private Extent FindExtent(ExtentIndex[] indexes, uint logicalBlock)
+        {
+            // Find indexBefore -- the last ExtentIndex (if any) that starts before logicalBlock.
+            // Find indexAfter -- the first ExtentIndex (if any) that starts at or after logicalBlock.
+            // The extent we want will be in one of those.
+            ExtentIndex indexBefore = null;
+            ExtentIndex indexAfter = null;
+            for (int i = 0; i < indexes.Length; ++i)
+            {
+                if (indexes[i].FirstLogicalBlock < logicalBlock)
                 {
-                    idxEntry = node.Index[0];
+                    indexBefore = indexes[i];
                 }
                 else
                 {
-                    for (int i = 0; i < node.Index.Length; ++i)
+                    indexAfter = indexes[i];
+                    // As an optimization, we can ignore indexBefore if indexAfter starts exactly at logicalBlock.
+                    if (indexAfter.FirstLogicalBlock == logicalBlock)
                     {
-                        if (node.Index[i].FirstLogicalBlock > logicalBlock)
-                        {
-                            idxEntry = node.Index[i - 1];
-                            break;
-                        }
+                        indexBefore = null;
                     }
+                    break;
                 }
-
-                if (idxEntry == null)
-                {
-                    idxEntry = node.Index[node.Index.Length - 1];
-                }
-
-                ExtentBlock subBlock = LoadExtentBlock(idxEntry);
-                return FindExtent(subBlock, logicalBlock);
             }
-            if (node.Extents != null)
+
+            Extent extent = null;
+
+            // Look for the desired extent in the ExtentIndex before logicalBlock.
+            if (indexBefore != null)
             {
-                Extent entry = null;
-
-                if (node.Extents.Length == 0)
-                {
-                    return null;
-                }
-                if (node.Extents[0].FirstLogicalBlock >= logicalBlock)
-                {
-                    return node.Extents[0];
-                }
-                for (int i = 0; i < node.Extents.Length; ++i)
-                {
-                    if (node.Extents[i].FirstLogicalBlock > logicalBlock)
-                    {
-                        entry = node.Extents[i - 1];
-                        break;
-                    }
-                }
-
-                if (entry == null)
-                {
-                    entry = node.Extents[node.Extents.Length - 1];
-                }
-
-                return entry;
+                ExtentBlock subBlock = LoadExtentBlock(indexBefore);
+                extent = FindExtent(subBlock, logicalBlock);
             }
-            return null;
+
+            // If the desired extent wasn't found above, look for it in the next ExtentIndex.
+            if (extent == null && indexAfter != null)
+            {
+                ExtentBlock subBlock = LoadExtentBlock(indexAfter);
+                extent = FindExtent(subBlock, logicalBlock);
+            }
+
+            return extent;
         }
 
         private ExtentBlock LoadExtentBlock(ExtentIndex idxEntry)
