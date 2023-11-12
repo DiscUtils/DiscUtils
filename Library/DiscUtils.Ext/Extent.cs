@@ -31,6 +31,7 @@ namespace DiscUtils.Ext
         public ushort FirstPhysicalBlockHi;
         public uint FirstPhysicalBlockLow;
         public ushort NumBlocks;
+        public bool IsInitialized;
 
         public ulong FirstPhysicalBlock
         {
@@ -48,6 +49,14 @@ namespace DiscUtils.Ext
             NumBlocks = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 4);
             FirstPhysicalBlockHi = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 6);
             FirstPhysicalBlockLow = EndianUtilities.ToUInt32LittleEndian(buffer, offset + 8);
+
+            // Mask out high-order bit of NumBlocks if needed.  See https://www.kernel.org/doc/html/v4.19/filesystems/ext4/ondisk/#extent-tree
+            IsInitialized = NumBlocks <= 0x8000;
+            if (!IsInitialized)
+            {
+                NumBlocks &= 0x7FFF;
+            }
+
             return 12;
         }
 
