@@ -108,6 +108,26 @@ namespace DiscUtils.Iso9660
         }
 
         /// <summary>
+        /// Gets or sets the Manufacturer ID for the ISO file.
+        /// </summary>
+        /// <remarks>
+        /// Must be a valid identifier, i.e. max 23 characters.
+        /// </remarks>
+        public string ManufacturerId
+        {
+            get { return _buildParams.ManufacturerId; }
+
+            set
+            {
+                if (value.Length > 23)
+                {
+                    throw new ArgumentException("Not a valid volume identifier");
+                }
+                _buildParams.ManufacturerId = value;
+            }
+        }
+
+        /// <summary>
         /// Sets the boot image for the ISO image.
         /// </summary>
         /// <param name="image">Stream containing the boot image.</param>
@@ -264,6 +284,9 @@ namespace DiscUtils.Iso9660
             long bootCatalogPos = 0;
             if (_bootEntry != null)
             {
+                // Boot catalog MUST be at beginning
+                bootCatalogPos = focus;
+                focus += IsoUtilities.SectorSize;
                 long bootImagePos = focus;
                 Stream realBootImage = PatchBootImage(_bootImage, (uint)(DiskStart / IsoUtilities.SectorSize),
                     (uint)(bootImagePos / IsoUtilities.SectorSize));
@@ -271,15 +294,23 @@ namespace DiscUtils.Iso9660
                 fixedRegions.Add(bootImageExtent);
                 focus += MathUtilities.RoundUp(bootImageExtent.Length, IsoUtilities.SectorSize);
 
-                bootCatalogPos = focus;
                 byte[] bootCatalog = new byte[IsoUtilities.SectorSize];
                 BootValidationEntry bve = new BootValidationEntry();
+                bve.ManfId = ManufacturerId;
                 bve.WriteTo(bootCatalog, 0x00);
                 _bootEntry.ImageStart = (uint)MathUtilities.Ceil(bootImagePos, IsoUtilities.SectorSize);
-                _bootEntry.SectorCount = (ushort)MathUtilities.Ceil(_bootImage.Length, Sizes.Sector);
+                if (_bootEntry.BootMediaType != BootDeviceEmulation.NoEmulation)
+                {
+                    _bootEntry.SectorCount = 1;
+                }
+                else
+                {
+                    _bootEntry.SectorCount = (ushort)MathUtilities.Ceil(_bootImage.Length, Sizes.Sector);
+                }
                 _bootEntry.WriteTo(bootCatalog, 0x20);
                 fixedRegions.Add(new BuilderBufferExtent(bootCatalogPos, bootCatalog));
-                focus += IsoUtilities.SectorSize;
+
+                // Don't add to focus, we already skipped the length of the bootCatalog
             }
 
             // ####################################################################
