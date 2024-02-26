@@ -460,7 +460,6 @@ namespace DiscUtils.Iso9660
                 case BootDeviceEmulation.Diskette2880KiB:
                     return 2880 * 1024 / Sizes.Sector;
                 case BootDeviceEmulation.HardDisk:
-                    return GetBootInitialEntry().SectorCount;
                 case BootDeviceEmulation.NoEmulation:
                 default:
                     BootInitialEntry initialEntry = GetBootInitialEntry();
