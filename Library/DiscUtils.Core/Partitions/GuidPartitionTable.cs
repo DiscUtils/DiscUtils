@@ -392,7 +392,11 @@ namespace DiscUtils.Partitions
             if (_secondaryHeader == null)
             {
                 _secondaryHeader = new GptHeader(diskGeometry.BytesPerSector);
-                disk.Position = disk.Length - diskGeometry.BytesPerSector;
+                // Since we have a valid primary header, try to read the secondary header based
+                // on where the primary header thinks it should be. This is notably not necessarily
+                // the end of the disk - an example is if the disk was recently grown by a tool
+                // that isn't partition aware.
+                disk.Position = _primaryHeader.AlternateHeaderLba * diskGeometry.BytesPerSector;
                 disk.Read(sector, 0, sector.Length);
                 if (!_secondaryHeader.ReadFrom(sector, 0) || !ReadEntries(_secondaryHeader))
                 {
