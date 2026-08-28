@@ -22,9 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !NET20
 using System.Linq;
-#endif
 
 namespace DiscUtils.Nfs
 {
@@ -105,9 +103,7 @@ namespace DiscUtils.Nfs
             return other.Status == Status
                 && object.Equals(other.DirAttributes, DirAttributes)
                 && other.CookieVerifier == CookieVerifier
-#if !NET20
                 && Enumerable.SequenceEqual(other.DirEntries, DirEntries)
-#endif
                 && other.Eof == Eof;
         }
 

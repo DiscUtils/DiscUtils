@@ -23,11 +23,11 @@ namespace LibraryTests.Swap
             {
                 var manager = new VolumeManager(disk);
                 var logicalVolumes = manager.GetLogicalVolumes();
-                Assert.Equal(1, logicalVolumes.Length);
+                Assert.Single(logicalVolumes);
 
                 var volume = logicalVolumes[0];
                 var filesystems = FileSystemManager.DetectFileSystems(volume);
-                Assert.Equal(1, filesystems.Length);
+                Assert.Single(filesystems);
 
                 var filesystem = filesystems[0];
                 Assert.Equal("Swap", filesystem.Name);

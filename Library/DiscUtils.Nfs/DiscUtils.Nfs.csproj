@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common-library.props" />
-
   <PropertyGroup>
     <Description>DiscUtils Nfs</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
@@ -9,11 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' OR '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Net.Sockets" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

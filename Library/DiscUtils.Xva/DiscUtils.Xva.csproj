@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common-library.props" />
-
   <PropertyGroup>
     <Description>DiscUtils XVA</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
@@ -11,7 +9,7 @@
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' OR '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Xml.XPath" Version="4.3.0" />

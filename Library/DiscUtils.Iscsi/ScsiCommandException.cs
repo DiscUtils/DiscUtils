@@ -22,19 +22,15 @@
 
 using System;
 
-#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-#endif
 
 namespace DiscUtils.Iscsi
 {
     /// <summary>
     /// Exception thrown when a low-level iSCSI failure is detected.
     /// </summary>
-#if !NETSTANDARD1_5
     [Serializable]
-#endif
     public class ScsiCommandException : IscsiException
     {
         private readonly byte[] _senseData;
@@ -113,7 +109,6 @@ namespace DiscUtils.Iscsi
             Status = status;
         }
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the ScsiCommandException class.
         /// </summary>
@@ -125,7 +120,6 @@ namespace DiscUtils.Iscsi
             Status = (ScsiStatus)info.GetByte("status");
             _senseData = (byte[])info.GetValue("senseData", typeof(byte[]));
         }
-#endif
 
         /// <summary>
         /// Gets the SCSI status associated with this exception.
@@ -137,8 +131,7 @@ namespace DiscUtils.Iscsi
         /// </summary>
         /// <param name="info">The serialization info.</param>
         /// <param name="context">The serialization context.</param>
-#if !NETSTANDARD1_5
-#if !NETSTANDARD
+#if !NETCOREAPP2_0_OR_GREATER
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -147,7 +140,6 @@ namespace DiscUtils.Iscsi
             info.AddValue("status", (byte)Status);
             info.AddValue("senseData", _senseData);
         }
-#endif
 
         /// <summary>
         /// Gets the SCSI sense data (if any) associated with this exception.

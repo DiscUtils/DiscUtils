@@ -21,9 +21,7 @@
 //
 
 using System;
-#if !NET20
 using System.Linq;
-#endif
 
 namespace DiscUtils.Nfs
 {
@@ -90,9 +88,7 @@ namespace DiscUtils.Nfs
             return other.Status == Status
                 && object.Equals(other.FileAttributes, FileAttributes)
                 && other.Count == Count
-#if !NET20
                 && Enumerable.SequenceEqual(other.Data, Data)
-#endif
                 && other.Eof == Eof;
         }
 

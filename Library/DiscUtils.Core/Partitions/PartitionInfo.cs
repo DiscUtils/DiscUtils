@@ -72,7 +72,7 @@ namespace DiscUtils.Partitions
         /// <summary>
         /// Gets the physical volume type for this type of partition.
         /// </summary>
-        internal abstract PhysicalVolumeType VolumeType { get; }
+        public abstract PhysicalVolumeType VolumeType { get; }
 
         /// <summary>
         /// Opens a stream that accesses the partition's contents.

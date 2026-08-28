@@ -103,7 +103,7 @@ namespace DiscUtils.Partitions
             get { return _entry.FriendlyPartitionType; }
         }
 
-        internal override PhysicalVolumeType VolumeType
+        public override PhysicalVolumeType VolumeType
         {
             get { return PhysicalVolumeType.GptPartition; }
         }

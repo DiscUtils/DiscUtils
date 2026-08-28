@@ -27,7 +27,7 @@ using DiscUtils.Setup;
 
 namespace DiscUtils
 {
-    internal abstract class FileLocator
+    public abstract class FileLocator
     {
         public abstract bool Exists(string fileName);
 

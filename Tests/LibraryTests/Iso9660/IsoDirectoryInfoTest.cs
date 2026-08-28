@@ -89,20 +89,20 @@ namespace LibraryTests.Iso9660
             Assert.Equal(2, fs.Root.GetDirectories().Length);
 
             DiscDirectoryInfo someDir = fs.Root.GetDirectories(@"SoMeDir")[0];
-            Assert.Equal(1, fs.Root.GetDirectories("SOMEDIR").Length);
+            Assert.Single(fs.Root.GetDirectories("SOMEDIR"));
             Assert.Equal("SOMEDIR", someDir.Name);
 
-            Assert.Equal(1, someDir.GetDirectories("*.*").Length);
+            Assert.Single(someDir.GetDirectories("*.*"));
             Assert.Equal("CHILD", someDir.GetDirectories("*.*")[0].Name);
             Assert.Equal(2, someDir.GetDirectories("*.*", SearchOption.AllDirectories).Length);
 
             Assert.Equal(4, fs.Root.GetDirectories("*.*", SearchOption.AllDirectories).Length);
             Assert.Equal(2, fs.Root.GetDirectories("*.*", SearchOption.TopDirectoryOnly).Length);
 
-            Assert.Equal(1, fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories).Length);
+            Assert.Single(fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories));
             Assert.Equal(@"A.DIR\", fs.Root.GetDirectories("*.DIR", SearchOption.AllDirectories)[0].FullName);
 
-            Assert.Equal(1, fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories).Length);
+            Assert.Single(fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories));
             Assert.Equal(@"SOMEDIR\CHILD\GCHILD\", fs.Root.GetDirectories("GCHILD", SearchOption.AllDirectories)[0].FullName);
         }
 
@@ -118,13 +118,13 @@ namespace LibraryTests.Iso9660
             builder.AddFile(@"SOMEDIR\CHILD\GCHILD\BAR.TXT", new byte[10]);
             CDReader fs = new CDReader(builder.Build(), false);
 
-            Assert.Equal(1, fs.Root.GetFiles().Length);
+            Assert.Single(fs.Root.GetFiles());
             Assert.Equal("FOO.TXT", fs.Root.GetFiles()[0].FullName);
 
             Assert.Equal(2, fs.Root.GetDirectories("SOMEDIR")[0].GetFiles("*.TXT").Length);
             Assert.Equal(4, fs.Root.GetFiles("*.TXT", SearchOption.AllDirectories).Length);
 
-            Assert.Equal(0, fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories).Length);
+            Assert.Empty(fs.Root.GetFiles("*.DIR", SearchOption.AllDirectories));
         }
 
         [Fact]
@@ -141,7 +141,7 @@ namespace LibraryTests.Iso9660
 
             Assert.Equal(3, fs.Root.GetFileSystemInfos().Length);
 
-            Assert.Equal(1, fs.Root.GetFileSystemInfos("*.EXT").Length);
+            Assert.Single(fs.Root.GetFileSystemInfos("*.EXT"));
             Assert.Equal(2, fs.Root.GetFileSystemInfos("*.?XT").Length);
         }
 

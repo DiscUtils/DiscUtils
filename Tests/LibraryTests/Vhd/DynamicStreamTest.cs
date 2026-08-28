@@ -176,23 +176,23 @@ namespace LibraryTests.Vhd
 
                 // Starts before first extent, ends before end of extent
                 List<StreamExtent> extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(0, 21 * 512));
-                Assert.Equal(1, extents.Count);
+                Assert.Single(extents);
                 Assert.Equal(20 * 512, extents[0].Start);
                 Assert.Equal(1 * 512, extents[0].Length);
 
                 // Limit to disk content length
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * 512, 20 * 512));
-                Assert.Equal(1, extents.Count);
+                Assert.Single(extents);
                 Assert.Equal(21 * 512, extents[0].Start);
                 Assert.Equal(3 * 512, extents[0].Length);
 
                 // Out of range
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(25 * 512, 4 * 512));
-                Assert.Equal(0, extents.Count);
+                Assert.Empty(extents);
 
                 // Non-sector multiples
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * 512 + 10, 20 * 512));
-                Assert.Equal(1, extents.Count);
+                Assert.Single(extents);
                 Assert.Equal(21 * 512 + 10, extents[0].Start);
                 Assert.Equal(3 * 512 - 10, extents[0].Length);
             }

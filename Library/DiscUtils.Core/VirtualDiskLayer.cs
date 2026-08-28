@@ -43,7 +43,7 @@ namespace DiscUtils
         /// <summary>
         /// Gets the capacity of the disk (in bytes).
         /// </summary>
-        internal abstract long Capacity { get; }
+        public abstract long Capacity { get; }
 
         /// <summary>
         /// Gets and sets the logical extents that make up this layer.
@@ -82,7 +82,7 @@ namespace DiscUtils
         /// <remarks>
         /// Typically used to locate parent disks.
         /// </remarks>
-        internal abstract FileLocator RelativeFileLocator { get; }
+        public abstract FileLocator RelativeFileLocator { get; }
 
         /// <summary>
         /// Disposes of this instance, freeing underlying resources.

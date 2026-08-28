@@ -119,7 +119,7 @@ namespace DiscUtils.Partitions
             get { return _record.FriendlyPartitionType; }
         }
 
-        internal override PhysicalVolumeType VolumeType
+        public override PhysicalVolumeType VolumeType
         {
             get { return PhysicalVolumeType.BiosPartition; }
         }

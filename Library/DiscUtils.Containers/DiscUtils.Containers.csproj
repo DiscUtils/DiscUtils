@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common-library.props" />
-
   <PropertyGroup>
     <Description>DiscUtils, meta-package with container formats such as WIM, DMG, VHD, VHDX, XVA, VMDK</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
@@ -16,9 +14,6 @@
     <ProjectReference Include="..\DiscUtils.Vmdk\DiscUtils.Vmdk.csproj" />
     <ProjectReference Include="..\DiscUtils.Wim\DiscUtils.Wim.csproj" />
     <ProjectReference Include="..\DiscUtils.Xva\DiscUtils.Xva.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard1.5'">
     <ProjectReference Include="..\DiscUtils.OpticalDiscSharing\DiscUtils.OpticalDiscSharing.csproj" />
   </ItemGroup>
 

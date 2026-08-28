@@ -2,7 +2,7 @@
   <Import Project="../common-utilities.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net40;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
     <DebugType>portable</DebugType>
   </PropertyGroup>
 

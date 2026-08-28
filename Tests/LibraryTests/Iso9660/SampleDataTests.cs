@@ -20,7 +20,7 @@ namespace LibraryTests.Iso9660
                 Assert.Equal("sub-directory", dir.Name);
 
                 DiscFileInfo[] file = dir.GetFiles("apple-test.txt");
-                Assert.Equal(1, file.Length);
+                Assert.Single(file);
                 Assert.Equal(21, file[0].Length);
                 Assert.Equal("apple-test.txt", file[0].Name);
                 Assert.Equal(dir, file[0].Directory);

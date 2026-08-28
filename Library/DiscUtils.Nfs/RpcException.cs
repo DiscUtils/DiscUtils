@@ -26,16 +26,12 @@ using System.IO;
 
 namespace DiscUtils.Nfs
 {
-#if !NETSTANDARD1_5
     using System.Runtime.Serialization;
-#endif
 
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
-#if !NETSTANDARD1_5
     [Serializable]
-#endif
     public sealed class RpcException : IOException
     {
         /// <summary>
@@ -65,7 +61,6 @@ namespace DiscUtils.Nfs
         internal RpcException(RpcReplyHeader reply)
             : base(GenerateMessage(reply)) {}
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the RpcException class.
         /// </summary>
@@ -75,7 +70,6 @@ namespace DiscUtils.Nfs
             : base(info, context)
         {
         }
-#endif
 
         private static string GenerateMessage(RpcReplyHeader reply)
         {

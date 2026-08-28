@@ -1,0 +1,33 @@
+name: NuGet push (tag)
+
+on: 
+  push:
+    tags:
+    - 'v[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 50
+        lfs: 'true'
+    # We do not need to fetch tags, as we're already at a tagged build - it should be available automatically
+
+    - name: Setup .NET Core 5.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Pack
+      run: dotnet pack -c Release -o ${{ github.workspace }}/build
+
+    - name: NuGet push 
+      run: dotnet nuget push *.nupkg --skip-duplicate -k ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json
+      working-directory: ${{ github.workspace }}/build

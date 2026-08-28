@@ -25,7 +25,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using DiscUtils.CoreCompat;
 using DiscUtils.Streams;
-#if !NETSTANDARD
+#if !NET5_0_OR_GREATER
 using System.Security.Permissions;
 #endif
 
@@ -117,7 +117,7 @@ namespace DiscUtils.Vhdx
             return entry.Length;
         }
 
-#if !NETSTANDARD
+#if !NET5_0_OR_GREATER
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 #endif
         private static uint AddEntryValue<T>(T data, Writer<T> writer, Guid id, MetadataEntryFlags flags,
@@ -155,7 +155,7 @@ namespace DiscUtils.Vhdx
             return default(T);
         }
 
-#if !NETSTANDARD
+#if !NET5_0_OR_GREATER
         [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
 #endif
         private T ReadValue<T>(Guid itemId, bool isUser, Reader<T> reader)

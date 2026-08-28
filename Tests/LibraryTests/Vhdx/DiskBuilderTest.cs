@@ -57,7 +57,7 @@ namespace LibraryTests.Vhdx
 
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
-            Assert.Equal(1, fileSpecs.Length);
+            Assert.Single(fileSpecs);
             Assert.Equal("foo.vhdx", fileSpecs[0].Name);
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
@@ -82,7 +82,7 @@ namespace LibraryTests.Vhdx
 
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
-            Assert.Equal(1, fileSpecs.Length);
+            Assert.Single(fileSpecs);
             Assert.Equal("foo.vhdx", fileSpecs[0].Name);
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))
@@ -99,7 +99,7 @@ namespace LibraryTests.Vhdx
             builder.Content = diskContent;
 
             DiskImageFileSpecification[] fileSpecs = builder.Build("foo");
-            Assert.Equal(1, fileSpecs.Length);
+            Assert.Single(fileSpecs);
             Assert.Equal("foo.vhdx", fileSpecs[0].Name);
 
             using (Disk disk = new Disk(fileSpecs[0].OpenStream(), Ownership.Dispose))

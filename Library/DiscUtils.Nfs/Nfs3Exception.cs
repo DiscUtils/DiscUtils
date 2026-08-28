@@ -22,20 +22,15 @@
 
 using System;
 using System.IO;
-
-#if !NETSTANDARD1_5
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-#endif
 
 namespace DiscUtils.Nfs
 {
     /// <summary>
     /// Exception thrown when some invalid file system data is found, indicating probably corruption.
     /// </summary>
-#if !NETSTANDARD1_5
     [Serializable]
-#endif
     public sealed class Nfs3Exception : IOException
     {
         /// <summary>
@@ -79,7 +74,6 @@ namespace DiscUtils.Nfs
             NfsStatus = status;
         }
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Initializes a new instance of the Nfs3Exception class.
         /// </summary>
@@ -90,26 +84,25 @@ namespace DiscUtils.Nfs
         {
             NfsStatus = (Nfs3Status)info.GetInt32("Status");
         }
-#endif
 
         /// <summary>
         /// Gets the NFS status code that lead to the exception.
         /// </summary>
         public Nfs3Status NfsStatus { get; } = Nfs3Status.Unknown;
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Serializes this exception.
         /// </summary>
         /// <param name="info">The object to populate with serialized data.</param>
         /// <param name="context">The context for this serialization.</param>
+#if !NETCOREAPP2_0_OR_GREATER
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Status", (int)NfsStatus);
             base.GetObjectData(info, context);
         }
-#endif
 
         private static string GenerateMessage(Nfs3Status status)
         {

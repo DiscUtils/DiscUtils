@@ -67,7 +67,7 @@ namespace DiscUtils.Dmg
             get { return GetType().FullName; }
         }
 
-        internal override PhysicalVolumeType VolumeType
+        public override PhysicalVolumeType VolumeType
         {
             get { return PhysicalVolumeType.ApplePartition; }
         }

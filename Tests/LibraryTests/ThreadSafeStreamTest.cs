@@ -98,12 +98,12 @@ namespace LibraryTests
             tss.WriteByte(99);
 
             List<StreamExtent> extents = new List<StreamExtent>(altView.Extents);
-            Assert.Equal(1, extents.Count);
+            Assert.Single(extents);
             Assert.Equal(100, extents[0].Start);
             Assert.Equal(1, extents[0].Length);
 
             extents = new List<StreamExtent>(altView.GetExtentsInRange(10, 300));
-            Assert.Equal(1, extents.Count);
+            Assert.Single(extents);
             Assert.Equal(100, extents[0].Start);
             Assert.Equal(1, extents[0].Length);
         }
@@ -169,11 +169,11 @@ namespace LibraryTests
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
             ThreadSafeStream tss = new ThreadSafeStream(memStream);
-            Assert.Equal(true, tss.CanWrite);
+            Assert.True(tss.CanWrite);
 
             memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.Read);
             tss = new ThreadSafeStream(memStream);
-            Assert.Equal(false, tss.CanWrite);
+            Assert.False(tss.CanWrite);
         }
 
         [Fact]
@@ -181,11 +181,11 @@ namespace LibraryTests
         {
             SparseMemoryStream memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.ReadWrite);
             ThreadSafeStream tss = new ThreadSafeStream(memStream);
-            Assert.Equal(true, tss.CanRead);
+            Assert.True(tss.CanRead);
 
             memStream = new SparseMemoryStream(new SparseMemoryBuffer(1), FileAccess.Write);
             tss = new ThreadSafeStream(memStream);
-            Assert.Equal(false, tss.CanRead);
+            Assert.False(tss.CanRead);
         }
     }
 }

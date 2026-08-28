@@ -1,6 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common-library.props" />
-
   <PropertyGroup>
     <Description>DiscUtils Registry</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
@@ -12,9 +10,9 @@
     <ProjectReference Include="..\DiscUtils.Streams\DiscUtils.Streams.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' OR '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Win32.Registry.AccessControl" Version="4.3.0" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' OR '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Win32.Registry.AccessControl" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

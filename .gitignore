@@ -1,6 +1,6 @@
 bin/
 obj/
-Buildlog-*\.txt
+Build/
 
 *.suo
 *.user
@@ -8,8 +8,6 @@ Buildlog-*\.txt
 LaunchSettings.json
 
 .vs/
-Nuget/
-packages/
 
 # Tests
 Tests/LibraryTests/TestResults/

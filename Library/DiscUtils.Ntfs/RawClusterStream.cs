@@ -223,13 +223,8 @@ namespace DiscUtils.Ntfs
                     long lcn = runIdx == 0 ? 0 : _cookedRuns[runIdx - 1].StartLcn;
                     foreach (Tuple<long, long> allocation in alloced)
                     {
-#if NET20
                         runs.Add(new DataRun(allocation.Item1 - lcn, allocation.Item2, false));
                         lcn = allocation.Item1;
-#else
-                        runs.Add(new DataRun(allocation.Item1 - lcn, allocation.Item2, false));
-                        lcn = allocation.Item1;
-#endif
                     }
 
                     _cookedRuns.MakeNonSparse(runIdx, runs);

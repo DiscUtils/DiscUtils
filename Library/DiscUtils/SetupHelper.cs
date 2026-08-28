@@ -15,11 +15,8 @@ using DiscUtils.SquashFs;
 using DiscUtils.Udf;
 using DiscUtils.Wim;
 using DiscUtils.Xfs;
-
-#if !NETSTANDARD1_5
 using DiscUtils.Net.Dns;
 using DiscUtils.OpticalDiscSharing;
-#endif
 
 namespace DiscUtils.Complete
 {
@@ -35,14 +32,10 @@ namespace DiscUtils.Complete
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(HfsPlusFileSystem)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Iscsi.Disk)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(BuildFileInfo)));
-#if !NETSTANDARD1_5
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(DnsClient)));
-#endif
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Nfs3Status)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(NtfsFileSystem)));
-#if !NETSTANDARD1_5
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(DiscInfo)));
-#endif
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(Disc)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(RegistryHive)));
             Setup.SetupHelper.RegisterAssembly(ReflectionHelper.GetAssembly(typeof(SdiFile)));

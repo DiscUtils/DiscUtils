@@ -27,10 +27,6 @@ using System.IO;
 using System.Text;
 using DiscUtils.Streams;
 
-#if !NETSTANDARD1_5
-using System.Runtime.Serialization;
-#endif
-
 namespace DiscUtils.Ntfs
 {
     /// <summary>
@@ -624,9 +620,6 @@ namespace DiscUtils.Ntfs
             }
         }
 
-#if !NETSTANDARD1_5
-        [Serializable]
-#endif
         private sealed class AbortException : InvalidFileSystemException
         {
 

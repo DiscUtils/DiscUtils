@@ -195,7 +195,7 @@ namespace LibraryTests
 
             List<Range<long,long>> ranges = new List<Range<long,long>>(StreamExtent.Blocks(s, 10));
 
-            Assert.Equal(1, ranges.Count);
+            Assert.Single(ranges);
             Assert.Equal(0, ranges[0].Offset);
             Assert.Equal(2, ranges[0].Count);
 
@@ -206,7 +206,7 @@ namespace LibraryTests
 
             ranges = new List<Range<long, long>>(StreamExtent.Blocks(s, 10));
 
-            Assert.Equal(1, ranges.Count);
+            Assert.Single(ranges);
             Assert.Equal(0, ranges[0].Offset);
             Assert.Equal(2, ranges[0].Count);
 
@@ -226,7 +226,7 @@ namespace LibraryTests
         }
 
 
-        public void Compare(IEnumerable<StreamExtent> expected, IEnumerable<StreamExtent> actual)
+        private void Compare(IEnumerable<StreamExtent> expected, IEnumerable<StreamExtent> actual)
         {
             List<StreamExtent> eList = new List<StreamExtent>(expected);
             List<StreamExtent> aList = new List<StreamExtent>(actual);

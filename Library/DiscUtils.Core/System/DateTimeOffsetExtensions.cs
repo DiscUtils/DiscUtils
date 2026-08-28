@@ -26,7 +26,6 @@
 #endif
         }
 
-#if !NETSTANDARD1_5
         /// <summary>
         /// Converts the current DateTimeOffset to Unix time.
         /// </summary>
@@ -37,6 +36,5 @@
             long unixTimeStampInTicks = (dateTimeOffset.ToUniversalTime() - DateTimeOffsetExtensions.UnixEpoch).Ticks;
             return unixTimeStampInTicks / TimeSpan.TicksPerSecond;
         }
-#endif
     }
 }

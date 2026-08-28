@@ -54,11 +54,7 @@ namespace DiscUtils.Internal
             string combinedPath = Path.Combine(_dir, path);
             if (string.IsNullOrEmpty(combinedPath))
             {
-#if NETSTANDARD1_5
-                return Directory.GetCurrentDirectory();
-#else
                 return Environment.CurrentDirectory;
-#endif
             }
             return Path.GetFullPath(combinedPath);
         }

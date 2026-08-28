@@ -22,9 +22,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !NET20
 using System.Linq;
-#endif
 
 namespace DiscUtils.Nfs
 {
@@ -87,9 +85,7 @@ namespace DiscUtils.Nfs
             }
 
             return other.Status == Status
-#if !NET20
                 && Enumerable.SequenceEqual(other.AuthFlavours, AuthFlavours)
-#endif
                 && object.Equals(other.FileHandle, FileHandle);
         }
 

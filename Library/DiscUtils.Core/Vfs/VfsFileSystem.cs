@@ -507,7 +507,7 @@ namespace DiscUtils.Vfs
             return file.FileLength;
         }
 
-        internal TFile GetFile(TDirEntry dirEntry)
+        protected TFile GetFile(TDirEntry dirEntry)
         {
             long cacheKey = dirEntry.UniqueCacheId;
 
@@ -521,7 +521,7 @@ namespace DiscUtils.Vfs
             return file;
         }
 
-        internal TDirectory GetDirectory(string path)
+        protected TDirectory GetDirectory(string path)
         {
             if (IsRoot(path))
             {
@@ -543,7 +543,7 @@ namespace DiscUtils.Vfs
             return (TDirectory)GetFile(dirEntry);
         }
 
-        internal TDirEntry GetDirectoryEntry(string path)
+        protected TDirEntry GetDirectoryEntry(string path)
         {
             return GetDirectoryEntry(RootDirectory, path);
         }
@@ -685,6 +685,10 @@ namespace DiscUtils.Vfs
                 {
                     entry = ResolveSymlink(entry, path + "\\" + entry.FileName);
                 }
+                if(entry == null)
+                {
+                    continue;
+                }
 
                 bool isDir = entry.IsDirectory;
 
@@ -723,15 +727,16 @@ namespace DiscUtils.Vfs
 
                 currentPath = Utilities.ResolvePath(currentPath.TrimEnd('\\'), symlink.TargetPath);
                 currentEntry = GetDirectoryEntry(currentPath);
+
                 if (currentEntry == null)
                 {
-                    throw new FileNotFoundException("Unable to resolve symlink", path);
+                    break;
                 }
 
                 --resolvesLeft;
             }
 
-            if (currentEntry.IsSymlink)
+            if (currentEntry != null && currentEntry.IsSymlink)
             {
                 throw new FileNotFoundException("Unable to resolve symlink - too many links", path);
             }

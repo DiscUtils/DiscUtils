@@ -32,10 +32,10 @@ namespace LibraryTests
         public void Detect()
         {
             MemoryStream shortStream = new MemoryStream(new byte[5]);
-            Assert.Equal(0, FileSystemManager.DetectFileSystems(shortStream).Length);
+            Assert.Empty(FileSystemManager.DetectFileSystems(shortStream));
 
             MemoryStream longStream = new MemoryStream(new byte[100000]);
-            Assert.Equal(0, FileSystemManager.DetectFileSystems(longStream).Length);
+            Assert.Empty(FileSystemManager.DetectFileSystems(longStream));
         }
     }
 }

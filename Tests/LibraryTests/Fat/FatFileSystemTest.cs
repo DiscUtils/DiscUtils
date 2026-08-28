@@ -63,7 +63,7 @@ namespace LibraryTests.Fat
                 fs.CreateDirectory(name);
 
                 string[] dirs = fs.GetDirectories("");
-                Assert.Equal(1, dirs.Length);
+                Assert.Single(dirs);
                 Assert.Equal(upperDE, dirs[0]); // Uppercase
 
                 Assert.True(fs.DirectoryExists(lowerDE));
@@ -73,7 +73,7 @@ namespace LibraryTests.Fat
                 Assert.Equal(2, fs.GetDirectories("").Length);
 
                 fs.DeleteDirectory(lowerDE + lowerDE + lowerDE);
-                Assert.Equal(1, fs.GetDirectories("").Length);
+                Assert.Single(fs.GetDirectories(""));
             }
 
             FileSystemInfo[] detectDefaultFileSystems = FileSystemManager.DetectFileSystems(ms);
@@ -84,7 +84,7 @@ namespace LibraryTests.Fat
 
             Assert.True(fs2.DirectoryExists(lowerDE));
             Assert.True(fs2.DirectoryExists(upperDE));
-            Assert.Equal(1, fs2.GetDirectories("").Length);
+            Assert.Single(fs2.GetDirectories(""));
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace LibraryTests.Fat
             fs.CreateDirectory(name);
 
             string[] dirs = fs.GetDirectories("");
-            Assert.Equal(1, dirs.Length);
+            Assert.Single(dirs);
             Assert.Equal(graphicChar, dirs[0]); // Uppercase
 
             Assert.True(fs.DirectoryExists(graphicChar));
@@ -117,7 +117,7 @@ namespace LibraryTests.Fat
             fs.CreateDirectory(@"DIRB\DIRC");
 
             FatFileSystem fs2 = new FatFileSystem(ms);
-            Assert.Equal(1, fs2.Root.GetDirectories().Length);
+            Assert.Single(fs2.Root.GetDirectories());
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace LibraryTests.Fat
         public void CanWrite()
         {
             FatFileSystem fs = FatFileSystem.FormatFloppy(new MemoryStream(), FloppyDiskType.HighDensity, "FLOPPY_IMG ");
-            Assert.Equal(true, fs.CanWrite);
+            Assert.True(fs.CanWrite);
         }
 
         [Fact]

@@ -25,7 +25,7 @@ using System;
 namespace DiscUtils.Internal
 {
     [AttributeUsage(AttributeTargets.Class)]
-    internal sealed class VirtualDiskFactoryAttribute : Attribute
+    public sealed class VirtualDiskFactoryAttribute : Attribute
     {
         public VirtualDiskFactoryAttribute(string type, string fileExtensions)
         {

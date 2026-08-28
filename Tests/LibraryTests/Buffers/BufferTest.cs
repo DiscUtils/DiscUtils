@@ -37,12 +37,12 @@ namespace LibraryTests.Buffers
             memoryBuffer.Write(0, buffer, 0, 20);
             Assert.Equal(2, memoryBuffer.AllocatedChunks.Count());
             memoryBuffer.Clear(0, 20);
-            Assert.Equal(0, memoryBuffer.AllocatedChunks.Count());
+            Assert.Empty(memoryBuffer.AllocatedChunks);
 
             memoryBuffer.Write(0, buffer, 0, 15);
             Assert.Equal(2, memoryBuffer.AllocatedChunks.Count());
             memoryBuffer.Clear(0, 15);
-            Assert.Equal(1, memoryBuffer.AllocatedChunks.Count());
+            Assert.Single(memoryBuffer.AllocatedChunks);
         }
     }
 }

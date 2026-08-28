@@ -15,9 +15,9 @@ See more up to date documentation at the [Wiki](https://github.com/DiscUtils/Dis
 
 ### Implementation in this repository
 
-This repository has performed a few changes to the core DiscUtils library. For starters, all projects have been converted to .NET Core, and are targeting .NET 2.0 through 4.5, in addition to NETStandard 1.5 (thanks [Quamotion](https://github.com/Quamotion)). 
+This repository has performed a few changes to the core DiscUtils library. For starters, all projects have been converted to .NET Core, and are targeting .NET 2.0 through 5.0, in addition to .NET Standard 2.0 (thanks [Quamotion](https://github.com/Quamotion)). 
 
-The DiscUtils library has been split into 25 independent projects, which can function without the others present. This reduces the "cost" of having DiscUtils immensely, as we're down from the 1 MB binary it used to be. 
+The DiscUtils library has been split into 25 independent projects, which can function without the others present. This reduces the "cost" of having DiscUtils immensely, as we're down from the 1 MB binary it used to be.
 
 To work with this, four Meta packages have been created:
 
@@ -34,10 +34,12 @@ DiscUtils has a number of detection helpers. These provide services like "which 
 
 Where `assembly` is the assembly you wish to register. Note that the metapackages have helpers:
 
-    SetupHelper.SetupComplete(); // From DiscUtils.Complete
-    SetupHelper.SetupContainers(); // From DiscUtils.Containers
-    SetupHelper.SetupFileSystems(); // From DiscUtils.FileSystems
-    SetupHelper.SetupTransports(); // From DiscUtils.Transports
+```csharp
+SetupHelper.SetupComplete(); // From DiscUtils.Complete
+SetupHelper.SetupContainers(); // From DiscUtils.Containers
+SetupHelper.SetupFileSystems(); // From DiscUtils.FileSystems
+SetupHelper.SetupTransports(); // From DiscUtils.Transports
+```
 
 ## How to use the Library
 
@@ -45,7 +47,7 @@ Here's a few really simple examples.
 
 ### How to create a new ISO:
 
-``` 
+```csharp
 CDBuilder builder = new CDBuilder();
 builder.UseJoliet = true;
 builder.VolumeIdentifier = "A_SAMPLE_DISK";
@@ -58,7 +60,7 @@ You can add files as byte arrays (shown above), as files from the Windows filesy
 
 ### How to extract a file from an ISO:
 
-``` 
+```csharp
 using (FileStream isoStream = File.Open(@"C:\temp\sample.iso"))
 {
   CDReader cd = new CDReader(isoStream, true);
@@ -71,7 +73,7 @@ You can also browse through the directory hierarchy, starting at cd.Root.
 
 ### How to create a virtual hard disk:
 
-``` 
+```csharp
 long diskSize = 30 * 1024 * 1024; //30MB
 using (Stream vhdStream = File.Create(@"C:\TEMP\mydisk.vhd"))
 {
@@ -90,7 +92,7 @@ As with ISOs, you can browse the file system, starting at fs.Root.
 
 ### How to create a virtual floppy disk:
 
-``` 
+```csharp
 using (FileStream fs = File.Create(@"myfloppy.vfd"))
 {
     using (FatFileSystem floppy = FatFileSystem.FormatFloppy(fs, FloppyDiskType.HighDensity, "MY FLOPPY  "))
@@ -104,3 +106,20 @@ using (FileStream fs = File.Create(@"myfloppy.vfd"))
 ``` 
 
 Again, start browsing the file system at floppy.Root.
+
+## Development releases
+
+Automated CI builds are available on Myget. Add this source to your nuget configuration:
+
+> https://www.myget.org/F/discutils/api/v3/index.json 
+
+.. or add this to a `NuGet.Config` file (Casing important on linux), in your repository:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="DiscUtils" value="https://www.myget.org/F/discutils/api/v3/index.json" />
+  </packageSources>
+</configuration>
+```

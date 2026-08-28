@@ -338,23 +338,23 @@ namespace LibraryTests.Vmdk
 
                 // Starts before first extent, ends before end of extent
                 List<StreamExtent> extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(0, 21 * unit));
-                Assert.Equal(1, extents.Count);
+                Assert.Single(extents);
                 Assert.Equal(20 * unit, extents[0].Start);
                 Assert.Equal(1 * unit, extents[0].Length);
 
                 // Limit to disk content length
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * unit, 20 * unit));
-                Assert.Equal(1, extents.Count);
+                Assert.Single(extents);
                 Assert.Equal(21 * unit, extents[0].Start);
                 Assert.Equal(3 * unit, extents[0].Length);
 
                 // Out of range
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(25 * unit, 4 * unit));
-                Assert.Equal(0, extents.Count);
+                Assert.Empty(extents);
 
                 // Non-unit multiples
                 extents = new List<StreamExtent>(disk.Content.GetExtentsInRange(21 * unit + 10, 20 * unit));
-                Assert.Equal(1, extents.Count);
+                Assert.Single(extents);
                 Assert.Equal(21 * unit + 10, extents[0].Start);
                 Assert.Equal(3 * unit - 10, extents[0].Length);
             }

@@ -71,7 +71,7 @@ namespace DiscUtils.Vdi
             ReadHeader();
         }
 
-        internal override long Capacity
+        public override long Capacity
         {
             get { return _header.DiskSize; }
         }
@@ -111,7 +111,7 @@ namespace DiscUtils.Vdi
             get { return _header.ImageType == ImageType.Differencing || _header.ImageType == ImageType.Undo; }
         }
 
-        internal override FileLocator RelativeFileLocator
+        public override FileLocator RelativeFileLocator
         {
             // Differencing disks not yet supported.
             get { return null; }

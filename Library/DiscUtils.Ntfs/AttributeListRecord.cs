@@ -42,7 +42,13 @@ namespace DiscUtils.Ntfs
         {
             get
             {
-                return MathUtilities.RoundUp(0x20 + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)),
+                // The $ATTRIBUTE_LIST entry fixed header is 0x1A (26) bytes:
+                // Type(4) + RecordLength(2) + NameLength(1) + NameOffset(1) + StartVcn(8)
+                // + BaseFileReference(8) + AttributeId(2). The attribute name (if any)
+                // packs immediately after it. Windows ntfs.sys requires the name to start
+                // at offset 26; using 0x20 here (and in WriteTo) mis-sizes/mis-places the
+                // entry and produces a file record the driver rejects as corrupt.
+                return MathUtilities.RoundUp(0x1A + (string.IsNullOrEmpty(Name) ? 0 : Encoding.Unicode.GetByteCount(Name)),
                     8);
             }
         }
@@ -76,7 +82,12 @@ namespace DiscUtils.Ntfs
 
         public void WriteTo(byte[] buffer, int offset)
         {
-            NameOffset = 0x20;
+            // The attribute name packs immediately after the 0x1A (26) byte fixed header.
+            // ntfs.sys requires NameOffset == 26; the previous value of 0x20 (32) caused the
+            // Windows NTFS driver to reject the file record as corrupt (STATUS_FILE_CORRUPT /
+            // ERROR_FILE_CORRUPT 1392) whenever a patched/rewritten file needed an
+            // $ATTRIBUTE_LIST (i.e. had enough hard links to overflow its base MFT record).
+            NameOffset = 0x1A;
             if (string.IsNullOrEmpty(Name))
             {
                 NameLength = 0;
