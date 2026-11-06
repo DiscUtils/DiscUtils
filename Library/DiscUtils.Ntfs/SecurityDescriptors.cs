@@ -32,13 +32,20 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
 {
     // File consists of pairs of duplicate blocks (one after the other), providing
     // redundancy.  When a pair is full, the next pair is used.
+    // Records start on 16-byte boundaries. chkdsk compares each block with its mirror
+    // byte for byte, so the padding between records and the unused rest of a full block
+    // must be identical (zero) in both copies.
     private const int BlockSize = 0x40000;
+    private const int RecordAlignment = 16;
 
     private readonly File _file;
     private readonly IndexView<HashIndexKey, HashIndexData> _hashIndex;
     private readonly IndexView<IdIndexKey, IdIndexData> _idIndex;
     private uint _nextId;
-    private long _nextSpace;
+
+    // End of the last record, before alignment. The primary block can hold stale data
+    // after this point (Windows leaves it there); its mirror usually ends here.
+    private long _usedEnd;
 
     public SecurityDescriptors(File file)
     {
@@ -54,9 +61,9 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
             }
 
             var end = entry.Value.SdsOffset + entry.Value.SdsLength;
-            if (end > _nextSpace)
+            if (end > _usedEnd)
             {
-                _nextSpace = end;
+                _usedEnd = end;
             }
         }
 
@@ -68,8 +75,6 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
         {
             _nextId++;
         }
-
-        _nextSpace = MathUtilities.RoundUp(_nextSpace, 16);
     }
 
     public void Dump(TextWriter writer, string indent)
@@ -192,8 +197,6 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
                 }
             }
 
-            var offset = _nextSpace;
-
             // Write the new descriptor to the end of the existing descriptors
             var record = new SecurityDescriptorRecord
             {
@@ -202,12 +205,19 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
                 Id = _nextId
             };
 
+            var offset = MathUtilities.RoundUp(_usedEnd, RecordAlignment);
+
+            // The alignment padding in front of the new record is zeroed in both copies.
+            // Without this, stale bytes in the primary block differ from the mirror.
+            var paddingEnd = offset;
+
             // If we'd overflow into our duplicate block, skip over it to the
-            // start of the next block
+            // start of the next block. The rest of the full block stays unused
+            // and is zeroed in both copies as well.
             if ((offset + record.Size) / BlockSize % 2 == 1)
             {
-                _nextSpace = MathUtilities.RoundUp(offset, BlockSize * 2);
-                offset = _nextSpace;
+                paddingEnd = (_usedEnd / (BlockSize * 2) * (BlockSize * 2)) + BlockSize;
+                offset = MathUtilities.RoundUp(offset, BlockSize * 2);
             }
 
             record.OffsetInFile = offset;
@@ -224,14 +234,17 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
 
                 using (var s = _file.OpenStream(AttributeType.Data, "$SDS", FileAccess.ReadWrite))
                 {
-                    s.Position = _nextSpace;
+                    WriteZeros(s, _usedEnd, paddingEnd - _usedEnd);
+                    WriteZeros(s, BlockSize + _usedEnd, paddingEnd - _usedEnd);
+
+                    s.Position = offset;
                     s.Write(buffer);
-                    s.Position = BlockSize + _nextSpace;
+                    s.Position = BlockSize + offset;
                     s.Write(buffer);
                 }
 
-                // Make the next descriptor land at the end of this one
-                _nextSpace = MathUtilities.RoundUp(_nextSpace + buffer.Length, 16);
+                // The next descriptor goes after this one (aligned when it is added)
+                _usedEnd = offset + buffer.Length;
                 _nextId++;
             }
             finally
@@ -284,6 +297,25 @@ internal sealed class SecurityDescriptors : IDiagnosticTraceable
             {
                 ArrayPool<byte>.Shared.Return(allocated);
             }
+        }
+    }
+
+    private static void WriteZeros(SparseStream stream, long position, long count)
+    {
+        if (count <= 0)
+        {
+            return;
+        }
+
+        Span<byte> zeros = stackalloc byte[4096];
+        zeros.Clear();
+
+        stream.Position = position;
+        while (count > 0)
+        {
+            var chunk = (int)Math.Min(count, zeros.Length);
+            stream.Write(zeros.Slice(0, chunk));
+            count -= chunk;
         }
     }
 
