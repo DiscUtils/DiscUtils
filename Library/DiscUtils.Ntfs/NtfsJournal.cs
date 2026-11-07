@@ -140,8 +140,13 @@ public sealed class NtfsJournalInfo
 
 /// <summary>
 /// Reads and replays the journal ($LogFile) of an NTFS volume, the way Windows does when it mounts a volume that
-/// was not shut down cleanly (a crash, a power cut, a hard power-off, or a hibernated or Fast Startup Windows).
+/// was not shut down cleanly (a crash, a power cut, a hard power-off).
 /// </summary>
+/// <remarks>
+/// The volume of a hibernated Windows (also after a shutdown with Fast Startup) is not shut down cleanly either,
+/// but Windows does not replay its journal: it resumes with the metadata it kept in memory. Replaying the journal
+/// of such a volume, like any other write to it, changes the volume behind Windows' back.
+/// </remarks>
 public static class NtfsJournal
 {
     /// <summary>
