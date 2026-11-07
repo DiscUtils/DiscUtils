@@ -2189,7 +2189,8 @@ public class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem,
             _context.Mft = null;
         }
 
-        if (_context.Options.Compressor is IDisposable disposableCompressor)
+        // _context is null when the constructor threw (e.g. the journal needed a replay that was refused).
+        if (_context?.Options.Compressor is IDisposable disposableCompressor)
         {
             if (disposing)
             {

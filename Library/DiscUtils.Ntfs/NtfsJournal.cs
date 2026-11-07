@@ -108,16 +108,19 @@ public sealed class NtfsJournalInfo
     /// <summary>Gets the log file service version, e.g. "2.0" (empty when there is no log).</summary>
     public string LogVersion { get; internal set; } = "";
 
+    /// <summary>Gets the LSN of the last record in the log (0 when there is no log to read).</summary>
+    public ulong LastLsn { get; internal set; }
+
     /// <summary>Gets the number of log records after the last checkpoint.</summary>
     public int RecordsAfterCheckpoint { get; internal set; }
 
-    /// <summary>Gets the number of log records whose redo action is (or was) missing on disk.</summary>
+    /// <summary>Gets the number of log records the redo pass applies (0 when replaying changes nothing).</summary>
     public int RecordsToRedo { get; internal set; }
 
     /// <summary>Gets the number of unfinished transactions to roll back.</summary>
     public int TransactionsToUndo { get; internal set; }
 
-    /// <summary>Gets the number of log records whose undo action is (or was) needed.</summary>
+    /// <summary>Gets the number of log records the undo pass applies.</summary>
     public int RecordsToUndo { get; internal set; }
 
     /// <summary>Gets the number of file records, index buffers and other pages the replay changes.</summary>
@@ -235,6 +238,7 @@ public static class NtfsJournal
         {
             var analysis = NtfsLogAnalysis.Run(log, layout);
             info.RecordsAfterCheckpoint = analysis.RecordsAfterCheckpoint;
+            info.LastLsn = analysis.LastLsn;
             var replayer = new NtfsLogReplayer(volume, layout, analysis);
             replayer.Redo();
             replayer.Undo();
@@ -248,8 +252,13 @@ public static class NtfsJournal
             info.PagesChanged = replayer.Pages.ChangedPageCount;
             if (clusters.Count == 0)
             {
+                // Replaying changes nothing (bitmap updates, for instance, end where the disk already is).
                 info.Status = NtfsJournalStatus.NothingToReplay;
                 info.Detail = "every logged change is already on disk";
+                info.RecordsToRedo = 0;
+                info.RecordsToUndo = 0;
+                info.TransactionsToUndo = 0;
+                info.FileRecordsChanged = [];
                 if (write)
                 {
                     ResetLog(log, analysis.LastLsn);
@@ -261,7 +270,7 @@ public static class NtfsJournal
             }
 
             info.Status = NtfsJournalStatus.NeedsReplay;
-            info.Detail = $"{info.RecordsToRedo} logged changes are missing on disk, {info.TransactionsToUndo} transactions are unfinished";
+            info.Detail = $"{info.PagesChanged} pages are out of date on disk; {info.TransactionsToUndo} unfinished transactions to roll back";
             changedClusters = clusters;
             if (write)
             {

@@ -115,7 +115,8 @@ internal sealed class NtfsLogReplayer
     {
         foreach (var loser in _analysis.Losers)
         {
-            UndoneTransactions++;
+            // Counted only if it changed pages: the checkpoint's table dumps also leave an "open" transaction.
+            var changesPages = false;
             var lsn = loser.Value.UndoNextLsn;
             var seen = new HashSet<ulong>();
             while (lsn != 0)
@@ -136,6 +137,7 @@ internal sealed class NtfsLogReplayer
                 var target = NtfsLogOperations.TargetOf(record.UndoOperation);
                 if (target != NtfsLogTarget.None && record.Lcns.Length > 0)
                 {
+                    changesPages = true;
                     var lcns = (long[])record.Lcns.Clone();
 
                     // A cluster the dirty page table says was freed holds nothing of this page any more.
@@ -159,6 +161,11 @@ internal sealed class NtfsLogReplayer
 
                 // A compensation record points past the changes that were already undone.
                 lsn = lfs.ClientUndoNextLsn;
+            }
+
+            if (changesPages)
+            {
+                UndoneTransactions++;
             }
         }
     }
@@ -260,7 +267,7 @@ internal sealed class NtfsLogReplayer
                 }
 
                 Array.Copy(data.Array, data.Offset, page.Data, record.RecordOffset, data.Count);
-                page.Valid = page.Signature == SignatureIndx;
+                page.Valid = page.Signature == SignatureIndx && HasFixupLayout(page.Data, 0, page.Data.Length);
                 page.Dirty = true;
                 return true;
             }
@@ -271,11 +278,19 @@ internal sealed class NtfsLogReplayer
                 return false;
             }
 
-            if (data.Count > 0)
+            if (data.Count == 0)
             {
-                _pages.WriteRaw(lcns, offset, data.Array, data.Offset, data.Count);
+                return false;
             }
 
+            var current = new byte[data.Count];
+            _pages.ReadRaw(lcns, offset, current, 0, current.Length);
+            if (current.AsSpan().SequenceEqual(data.AsSpan()))
+            {
+                return false;
+            }
+
+            _pages.WriteRaw(lcns, offset, data.Array, data.Offset, data.Count);
             return true;
         }
 
@@ -301,7 +316,13 @@ internal sealed class NtfsLogReplayer
 
         var bytes = new byte[byteCount];
         _pages.ReadRaw(lcns, byteStart, bytes, 0, byteCount);
+        var before = (byte[])bytes.Clone();
         NtfsLogActions.ChangeBits(bytes, (int)(firstBit & 7), (int)bits, op == NtfsLogOperation.SetBitsInNonresidentBitMap);
+        if (before.AsSpan().SequenceEqual(bytes))
+        {
+            return false;
+        }
+
         _pages.WriteRaw(lcns, byteStart, bytes, 0, byteCount);
         return true;
     }
@@ -333,9 +354,14 @@ internal sealed class NtfsLogReplayer
 
     private void Finish(LogicalPage page, NtfsLogRecord record, bool redo)
     {
-        page.Valid = true;
+        // An undo can turn a page back into "never written" (no signature); it is then written as it is.
+        var expected = page.Kind == PageKind.FileRecord ? SignatureFile : SignatureIndx;
+        page.Valid = page.Signature == expected && HasFixupLayout(page.Data, 0, page.Data.Length);
         page.Dirty = true;
-        page.Lsn = redo ? record.Lsn : _undoStamp;
+        if (page.Valid)
+        {
+            page.Lsn = redo ? record.Lsn : _undoStamp;
+        }
     }
 
     private int IndexBufferSize(NtfsLogRecord record)

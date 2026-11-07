@@ -120,6 +120,10 @@ internal static class JournalUtilities
         }
     }
 
+    /// <summary>Whether the header describes a plausible update sequence array for this length.</summary>
+    public static bool HasFixupLayout(byte[] buffer, int offset, int length) =>
+        TryGetFixupLayout(buffer, offset, length, out _, out _, out _);
+
     private static bool TryGetFixupLayout(byte[] buffer, int offset, int length, out int usaOffset, out int usaCount,
         out int stride)
     {

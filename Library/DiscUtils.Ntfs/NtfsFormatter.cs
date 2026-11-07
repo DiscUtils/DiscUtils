@@ -229,7 +229,8 @@ internal class NtfsFormatter
         }
 
         // XP-style security permissions setup
-        var ntfs = new NtfsFileSystem(stream);
+        // The volume is still being built; its journal is empty anyway.
+        var ntfs = new NtfsFileSystem(stream, NtfsJournalMode.Ignore);
 
         ntfs.SetSecurity(@"$MFT",
             new RawSecurityDescriptor($"O:{localAdminString}G:BAD:(A;;FR;;;SY)(A;;FR;;;BA)"));

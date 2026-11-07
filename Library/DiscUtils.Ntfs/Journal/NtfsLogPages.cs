@@ -72,6 +72,7 @@ internal sealed class NtfsLogPages
     private readonly JournalVolumeLayout _layout;
     private readonly Dictionary<long, LogicalPage> _logical = [];
     private readonly Dictionary<long, byte[]> _rawClusters = [];
+    private readonly Dictionary<long, byte[]> _rawOriginal = [];
     private readonly Dictionary<long, PageKind> _clusterUse = [];
 
     public NtfsLogPages(Stream volume, JournalVolumeLayout layout)
@@ -82,22 +83,8 @@ internal sealed class NtfsLogPages
 
     public int ClusterSize => _layout.BytesPerCluster;
 
-    public int ChangedPageCount
-    {
-        get
-        {
-            var count = _rawClusters.Count;
-            foreach (var page in _logical.Values)
-            {
-                if (page.Dirty)
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-    }
+    /// <summary>File records, index buffers and plain clusters whose bytes the replay changes (set by <see cref="Commit"/>).</summary>
+    public int ChangedPageCount { get; private set; }
 
     /// <summary>
     /// Gets a file record or index buffer of <paramref name="length"/> bytes that starts <paramref name="start"/>
@@ -168,13 +155,26 @@ internal sealed class NtfsLogPages
     /// </summary>
     public Dictionary<long, byte[]> Commit()
     {
-        var clusters = new Dictionary<long, byte[]>(_rawClusters);
+        // Plain clusters are replayed unconditionally; only those whose bytes really changed are written.
+        var clusters = new Dictionary<long, byte[]>();
+        var changed = 0;
+        foreach (var pair in _rawClusters)
+        {
+            if (!pair.Value.AsSpan().SequenceEqual(_rawOriginal[pair.Key]))
+            {
+                clusters[pair.Key] = pair.Value;
+                changed++;
+            }
+        }
+
         foreach (var page in _logical.Values)
         {
             if (!page.Dirty)
             {
                 continue;
             }
+
+            changed++;
 
             var bytes = (byte[])page.Data.Clone();
             if (page.Valid)
@@ -204,6 +204,7 @@ internal sealed class NtfsLogPages
             }
         }
 
+        ChangedPageCount = changed;
         return clusters;
     }
 
@@ -256,6 +257,7 @@ internal sealed class NtfsLogPages
             cluster = new byte[ClusterSize];
             ReadExactly(_volume, lcn * ClusterSize, cluster, 0, ClusterSize);
             _rawClusters[lcn] = cluster;
+            _rawOriginal[lcn] = (byte[])cluster.Clone();
         }
 
         return cluster;
