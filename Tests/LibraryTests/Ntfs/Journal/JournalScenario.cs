@@ -42,7 +42,7 @@ internal sealed class JournalScenario
     /// <summary>
     /// Formats a volume, runs <paramref name="change"/> on it with DiscUtils and turns the difference into log records.
     /// </summary>
-    public static JournalScenario Create(Action<NtfsFileSystem> change, int sizeMb = 16, Action<NtfsFileSystem> setup = null)
+    public static JournalScenario Create(Action<NtfsFileSystem> change, int sizeMb = 16, Action<NtfsFileSystem>? setup = null)
     {
         var volume = new MemoryStream();
         var geometry = Geometry.FromCapacity(sizeMb * 1024L * 1024);
@@ -78,7 +78,7 @@ internal sealed class JournalScenario
     /// transaction. Returns the writer (for the LSNs).
     /// </summary>
     public TestJournalWriter WriteJournal(Stream volume, bool committed, int majorVersion = 2, long? startOffset = null,
-        Action<TestJournalWriter> beforeRecords = null, Func<TestLogRecord, TestLogRecord> adjust = null)
+        Action<TestJournalWriter>? beforeRecords = null, Func<TestLogRecord, TestLogRecord>? adjust = null)
     {
         var writer = new TestJournalWriter(volume, majorVersion, startOffset);
         var restart = writer.Checkpoint(

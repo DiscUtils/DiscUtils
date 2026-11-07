@@ -362,7 +362,7 @@ public static class WindowsReplayDigest
 
         private static int Size(sbyte raw, int cluster) => raw < 0 ? 1 << -raw : raw * cluster;
 
-        private static (string Hash, ulong Lsn) UsedHash(byte[] all, int offset, int length, bool isIndex, ISet<long> excludedRecords = null)
+        private static (string Hash, ulong Lsn) UsedHash(byte[] all, int offset, int length, bool isIndex, ISet<long>? excludedRecords = null)
         {
             var b = Logical(all, offset, length);
             var signature = BitConverter.ToUInt32(b, 0);

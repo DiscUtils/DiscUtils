@@ -86,7 +86,7 @@ public partial class NtfsJournalEdgeCaseTest
         return bytes;
     }
 
-    private static TestLogRecord Raw(long lcn, byte[] redo, byte[] undo = null, ushort attribute = Data, uint tx = Tx) => new()
+    private static TestLogRecord Raw(long lcn, byte[] redo, byte[]? undo = null, ushort attribute = Data, uint tx = Tx) => new()
     {
         Redo = NtfsLogOperation.UpdateNonresidentValue,
         Undo = NtfsLogOperation.UpdateNonresidentValue,
@@ -99,7 +99,7 @@ public partial class NtfsJournalEdgeCaseTest
     };
 
     private static TestLogRecord Op(NtfsLogOperation op, byte[] data, ushort attribute, long vcn, long[] lcns, int recordOffset = 0,
-        int attributeOffset = 0, int blockOffset = 0, NtfsLogOperation undo = NtfsLogOperation.Noop, byte[] undoData = null) => new()
+        int attributeOffset = 0, int blockOffset = 0, NtfsLogOperation undo = NtfsLogOperation.Noop, byte[]? undoData = null) => new()
     {
         Redo = op,
         Undo = undo,

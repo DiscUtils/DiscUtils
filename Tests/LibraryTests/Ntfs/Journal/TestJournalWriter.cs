@@ -201,8 +201,8 @@ internal sealed class TestJournalWriter
     /// </summary>
     public ulong Checkpoint(
         IReadOnlyList<(ushort Offset, uint Type, ulong FileReference, uint BytesPerIndex, string Name)> openAttributes,
-        IReadOnlyList<(uint TargetAttribute, long Vcn, ulong OldestLsn, long[] Lcns)> dirtyPages = null,
-        IReadOnlyList<(uint Offset, TransactionState State, ulong FirstLsn, ulong UndoNextLsn)> transactions = null,
+        IReadOnlyList<(uint TargetAttribute, long Vcn, ulong OldestLsn, long[] Lcns)>? dirtyPages = null,
+        IReadOnlyList<(uint Offset, TransactionState State, ulong FirstLsn, ulong UndoNextLsn)>? transactions = null,
         int clustersPerPage = 1,
         ulong? checkpointLsn = null,
         uint ntfsVersion = 1)
