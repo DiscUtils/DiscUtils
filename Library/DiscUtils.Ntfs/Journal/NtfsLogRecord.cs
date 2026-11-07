@@ -141,6 +141,13 @@ internal sealed class NtfsLogRecord
             TargetVcn = (long)U64(data, 0x18),
         };
 
+        if (NtfsLogOperations.TargetOf(record.RedoOperation) == NtfsLogTarget.Unknown ||
+            NtfsLogOperations.TargetOf(record.UndoOperation) == NtfsLogTarget.Unknown)
+        {
+            error = $"Log record {lfs.Lsn:X} has an unsupported redo or undo operation ({record.RedoOperation}/{record.UndoOperation})";
+            return null;
+        }
+
         var lcnCount = U16(data, 0x0E);
         if (HeaderLength + (8 * lcnCount) > data.Length)
         {
@@ -224,6 +231,12 @@ internal sealed class NtfsRestartRecord
             throw new JournalException($"NTFS restart version {result.MajorVersion}.{result.MinorVersion} is not supported");
         }
 
+        if (result.OpenAttributeTableLength < 0 || result.AttributeNamesLength < 0 ||
+            result.DirtyPageTableLength < 0 || result.TransactionTableLength < 0)
+        {
+            throw new JournalException($"The NTFS restart record at {record.Lsn:X} has an invalid table length");
+        }
+
         return result;
     }
 }
@@ -295,19 +308,30 @@ internal sealed class DirtyPageEntry
     public static DirtyPageEntry Parse(byte[] b, int offset, int entrySize, uint version)
     {
         var lcnsOffset = version == 0 ? 0x24 : 0x20;
-        var lcnCount = (int)U32(b, offset + 0x0C);
-        if (lcnCount < 0 || lcnsOffset + (8 * lcnCount) > entrySize)
+        if (entrySize < lcnsOffset)
+        {
+            throw new JournalException("A dirty page table entry is too short");
+        }
+
+        var lcnCount = U32(b, offset + 0x0C);
+        if (lcnCount > (entrySize - lcnsOffset) / 8)
         {
             throw new JournalException("A dirty page table entry lists more clusters than it holds");
+        }
+
+        var vcn = (long)U64(b, offset + (version == 0 ? 0x14 : 0x10));
+        if (vcn < 0 || vcn > long.MaxValue - lcnCount)
+        {
+            throw new JournalException("A dirty page table entry has an invalid VCN range");
         }
 
         var entry = new DirtyPageEntry
         {
             TargetAttribute = U32(b, offset + 0x04),
             TransferLength = U32(b, offset + 0x08),
-            Vcn = (long)U64(b, offset + (version == 0 ? 0x14 : 0x10)),
+            Vcn = vcn,
             OldestLsn = U64(b, offset + (version == 0 ? 0x1C : 0x18)),
-            Lcns = new long[lcnCount],
+            Lcns = new long[(int)lcnCount],
         };
         for (var i = 0; i < lcnCount; i++)
         {
@@ -331,6 +355,8 @@ internal enum TransactionState : byte
 /// </summary>
 internal sealed class TransactionEntry
 {
+    public const int Size = 0x20;
+
     public TransactionState State { get; set; }
 
     public ulong FirstLsn { get; set; }
@@ -369,7 +395,7 @@ internal static class RestartTable
 
         int entrySize = U16(table, 0x00);
         int entryCount = U16(table, 0x02);
-        if (entrySize < 8 || HeaderLength + (entrySize * entryCount) > table.Length)
+        if (entrySize < 8 || entryCount > (table.Length - HeaderLength) / entrySize)
         {
             throw new JournalException("A restart table dump has an implausible header");
         }
@@ -390,7 +416,7 @@ internal static class RestartTable
     public static IEnumerable<(int Offset, string Name)> AttributeNames(byte[] dump)
     {
         var position = 0;
-        while (position + 4 <= dump.Length)
+        while (position <= dump.Length - 4)
         {
             int tableOffset = U16(dump, position);
             int nameBytes = U16(dump, position + 2);
@@ -399,7 +425,7 @@ internal static class RestartTable
                 yield break;
             }
 
-            if (position + 4 + nameBytes > dump.Length)
+            if (nameBytes > dump.Length - position - 4)
             {
                 throw new JournalException("The attribute names dump is damaged");
             }

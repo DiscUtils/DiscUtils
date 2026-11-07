@@ -101,6 +101,11 @@ internal sealed class NtfsLogPages
                 throw new JournalException($"The log uses the bytes at {key:X} both as {page.Kind} and as {kind}");
             }
 
+            if (!page.Lcns.AsSpan().SequenceEqual(spanLcns))
+            {
+                throw new JournalException($"The log gives conflicting cluster mappings for the page at {key:X}");
+            }
+
             return page;
         }
 
@@ -123,11 +128,13 @@ internal sealed class NtfsLogPages
     /// <summary>
     /// Reads bytes of a non-resident attribute page that has no update sequence array (bitmaps, plain data).
     /// </summary>
-    public void ReadRaw(long[] lcns, int start, byte[] buffer, int offset, int length)
+    public byte[] ReadRaw(long[] lcns, int start, int length)
     {
         var (spanLcns, startInFirst) = Span(lcns, start, length);
         Claim(spanLcns, PageKind.Raw);
-        ReadSpan(spanLcns, startInFirst, buffer, offset, length);
+        var buffer = new byte[length];
+        ReadSpan(spanLcns, startInFirst, buffer, 0, length);
+        return buffer;
     }
 
     public void WriteRaw(long[] lcns, int start, byte[] buffer, int offset, int length)
@@ -209,14 +216,20 @@ internal sealed class NtfsLogPages
     {
         // The callers checked that the range lies within the clusters (and that its first one was not freed).
         var firstIndex = start / ClusterSize;
-        var lastIndex = (start + length - 1) / ClusterSize;
+        var lastIndex = (int)((start + (long)length - 1) / ClusterSize);
         var span = new long[lastIndex - firstIndex + 1];
+        var seen = span.Length > 1 ? new HashSet<long>() : null;
         for (var i = 0; i < span.Length; i++)
         {
             var lcn = lcns[firstIndex + i];
-            if (lcn <= 0 || lcn >= _layout.TotalClusters)
+            if (!_layout.ContainsClusters(lcn, 1))
             {
                 throw new JournalException($"The log names cluster {lcn}, which is not on the volume");
+            }
+
+            if (seen != null && !seen.Add(lcn))
+            {
+                throw new JournalException($"The log maps more than one part of a page to cluster {lcn}");
             }
 
             span[i] = lcn;

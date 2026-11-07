@@ -127,9 +127,14 @@ internal static class JournalUtilities
     private static bool TryGetFixupLayout(byte[] buffer, int offset, int length, out int usaOffset, out int usaCount,
         out int stride)
     {
+        usaOffset = usaCount = stride = 0;
+        if (offset < 0 || length < 8 || offset > buffer.Length - length)
+        {
+            return false;
+        }
+
         usaOffset = U16(buffer, offset + 4);
         usaCount = U16(buffer, offset + 6);
-        stride = 0;
         if (usaCount < 2 || usaOffset < 8 || usaOffset + (2 * usaCount) > length || (usaOffset & 1) != 0)
         {
             return false;
@@ -142,7 +147,7 @@ internal static class JournalUtilities
         }
 
         stride = length / (usaCount - 1);
-        return stride is >= 256 and <= 4096 && (stride & (stride - 1)) == 0 && usaOffset + (2 * usaCount) <= stride;
+        return stride is >= 256 and <= 4096 && (stride & (stride - 1)) == 0 && usaOffset + (2 * usaCount) <= stride - 2;
     }
 
     public static void ReadExactly(Stream stream, long position, byte[] buffer, int offset, int count)
@@ -167,6 +172,8 @@ internal static class JournalUtilities
 /// </summary>
 internal sealed class JournalVolumeLayout
 {
+    private const int MaxClusterSize = 2 * 1024 * 1024;
+
     public int BytesPerSector { get; private set; }
 
     public int BytesPerCluster { get; private set; }
@@ -181,25 +188,51 @@ internal sealed class JournalVolumeLayout
 
     public long TotalClusters { get; private set; }
 
+    public bool ContainsClusters(long lcn, long count) => lcn > 0 && count > 0 &&
+        lcn < TotalClusters && count <= TotalClusters - lcn;
+
+    public static bool IsRecordSize(long size) => size is >= 256 and <= MaxClusterSize && (size & (size - 1)) == 0;
+
     public static JournalVolumeLayout Read(Stream volume)
     {
         var bytes = new byte[512];
         JournalUtilities.ReadExactly(volume, 0, bytes, 0, bytes.Length);
         var bpb = BiosParameterBlock.FromBytes(bytes);
-        if (!bpb.IsValid(volume.Length))
+        if (!bpb.IsValidOemId())
         {
             throw new InvalidFileSystemException("BIOS Parameter Block is invalid for an NTFS file system");
+        }
+
+        var clusterSize = (long)bpb.BytesPerSector * bpb.SectorsPerCluster;
+        var mftRecordSize = RecordSize(bpb.RawMftRecordSize, clusterSize);
+        var indexBufferSize = RecordSize(bpb.RawIndexBufferSize, clusterSize);
+        if (bpb.TotalSectors16 != 0 || bpb.TotalSectors32 != 0 || bpb.TotalSectors64 <= 0 ||
+            bpb.BytesPerSector is < 256 or > 4096 || (bpb.BytesPerSector & (bpb.BytesPerSector - 1)) != 0 ||
+            bpb.TotalSectors64 > long.MaxValue / bpb.BytesPerSector || bytes[0x0D] is > 0x80 and < (256 - 13) ||
+            clusterSize < bpb.BytesPerSector || clusterSize > MaxClusterSize || (clusterSize & (clusterSize - 1)) != 0 ||
+            !IsRecordSize(mftRecordSize) || !IsRecordSize(indexBufferSize))
+        {
+            throw new JournalException("The NTFS boot sector has invalid volume or record sizes");
+        }
+
+        var totalClusters = Math.Min(bpb.TotalSectors64 / bpb.SectorsPerCluster, volume.Length / clusterSize);
+        if (bpb.MftCluster <= 0 || bpb.MftCluster >= totalClusters)
+        {
+            throw new JournalException("The NTFS boot sector places $MFT outside the volume");
         }
 
         return new JournalVolumeLayout
         {
             BytesPerSector = bpb.BytesPerSector,
-            BytesPerCluster = bpb.BytesPerCluster,
-            MftRecordSize = bpb.MftRecordSize,
-            IndexBufferSize = bpb.IndexBufferSize,
+            BytesPerCluster = (int)clusterSize,
+            MftRecordSize = (int)mftRecordSize,
+            IndexBufferSize = (int)indexBufferSize,
             MftCluster = bpb.MftCluster,
             MftMirrorCluster = bpb.MftMirrorCluster,
-            TotalClusters = bpb.TotalSectors64 / bpb.SectorsPerCluster,
+            TotalClusters = totalClusters,
         };
     }
+
+    private static long RecordSize(byte raw, long clusterSize) => raw <= 0x80 ? raw * clusterSize :
+        raw >= 256 - 21 ? 1L << (256 - raw) : 0;
 }

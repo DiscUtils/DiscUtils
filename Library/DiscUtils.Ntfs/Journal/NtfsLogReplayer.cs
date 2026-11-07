@@ -70,13 +70,15 @@ internal sealed class NtfsLogReplayer
 
     public void Redo()
     {
-        if (_analysis.DirtyPages.Count == 0 || _analysis.RedoLsn == 0)
+        if (_analysis.RedoLsn == 0)
         {
             return;
         }
 
+        var foundStart = false;
         foreach (var lfs in _analysis.Log.ReadForward(_analysis.RedoLsn))
         {
+            foundStart = true;
             if (lfs.RecordType != LfsRecord.TypeClientRecord)
             {
                 continue;
@@ -108,6 +110,11 @@ internal sealed class NtfsLogReplayer
             {
                 RedoneRecords++;
             }
+        }
+
+        if (!foundStart && _analysis.DirtyPages.Count != 0)
+        {
+            throw new JournalException($"The redo start record {_analysis.RedoLsn:X} is not in the log");
         }
     }
 
@@ -181,6 +188,11 @@ internal sealed class NtfsLogReplayer
         {
             case NtfsLogTarget.FileRecord:
             {
+                if (record.TargetVcn < 0 || record.TargetVcn > (long.MaxValue - start) / _layout.BytesPerCluster)
+                {
+                    throw new JournalException($"Log record {record.Lsn:X} has an invalid file record VCN");
+                }
+
                 var length = _layout.MftRecordSize;
                 if (!Allocated(lcns, start, length))
                 {
@@ -288,8 +300,7 @@ internal sealed class NtfsLogReplayer
                 return false;
             }
 
-            var current = new byte[data.Count];
-            _pages.ReadRaw(lcns, offset, current, 0, current.Length);
+            var current = _pages.ReadRaw(lcns, offset, data.Count);
             if (current.AsSpan().SequenceEqual(data.AsSpan()))
             {
                 return false;
@@ -314,13 +325,17 @@ internal sealed class NtfsLogReplayer
             return false;
         }
 
+        if (bits > int.MaxValue - (firstBit & 7))
+        {
+            throw new JournalException($"Log record {record.Lsn:X} has an oversized bit range");
+        }
+
         if (!Allocated(lcns, byteStart, byteCount))
         {
             return false;
         }
 
-        var bytes = new byte[byteCount];
-        _pages.ReadRaw(lcns, byteStart, bytes, 0, byteCount);
+        var bytes = _pages.ReadRaw(lcns, byteStart, byteCount);
         var before = (byte[])bytes.Clone();
         NtfsLogActions.ChangeBits(bytes, (int)(firstBit & 7), (int)bits, op == NtfsLogOperation.SetBitsInNonresidentBitMap);
         if (before.AsSpan().SequenceEqual(bytes))
@@ -381,6 +396,11 @@ internal sealed class NtfsLogReplayer
     {
         if (_analysis.OpenAttributes.TryGetValue(record.TargetAttribute, out var attribute) && attribute.BytesPerIndexBuffer != 0)
         {
+            if (!JournalVolumeLayout.IsRecordSize(attribute.BytesPerIndexBuffer))
+            {
+                throw new JournalException($"Log record {record.Lsn:X} has an invalid index buffer size");
+            }
+
             return (int)attribute.BytesPerIndexBuffer;
         }
 
@@ -394,8 +414,8 @@ internal sealed class NtfsLogReplayer
     private bool Allocated(long[] lcns, int start, int length)
     {
         var first = start / _pages.ClusterSize;
-        var last = (start + length - 1) / _pages.ClusterSize;
-        if (last >= lcns.Length)
+        var last = (start + (long)length - 1) / _pages.ClusterSize;
+        if (start < 0 || length <= 0 || last >= lcns.Length)
         {
             throw new JournalException("A log record addresses bytes beyond the clusters it names");
         }

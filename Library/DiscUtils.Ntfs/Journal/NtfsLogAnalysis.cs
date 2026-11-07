@@ -187,8 +187,13 @@ internal sealed class NtfsLogAnalysis
         var transactions = ReadTableDump(r.TransactionTableLsn, r.TransactionTableLength, "transaction table");
         if (transactions != null)
         {
-            foreach (var (offset, _) in RestartTable.Entries(transactions))
+            foreach (var (offset, size) in RestartTable.Entries(transactions))
             {
+                if (size < TransactionEntry.Size)
+                {
+                    throw new JournalException("A transaction table entry is too short");
+                }
+
                 Transactions[(uint)offset] = TransactionEntry.Parse(transactions, offset);
             }
         }
@@ -207,16 +212,14 @@ internal sealed class NtfsLogAnalysis
         foreach (var lfs in Log.ReadForward(checkpoint))
         {
             LastLsn = lfs.Lsn;
-            if (lfs.Lsn == checkpoint)
+            var afterCheckpoint = lfs.Lsn != checkpoint;
+            if (afterCheckpoint)
             {
-                // Analysis starts with the record after the checkpoint.
-                continue;
-            }
-
-            RecordsAfterCheckpoint++;
-            if (firstAfterCheckpoint == 0)
-            {
-                firstAfterCheckpoint = lfs.Lsn;
+                RecordsAfterCheckpoint++;
+                if (firstAfterCheckpoint == 0)
+                {
+                    firstAfterCheckpoint = lfs.Lsn;
+                }
             }
 
             if (lfs.RecordType != LfsRecord.TypeClientRecord)
@@ -225,7 +228,10 @@ internal sealed class NtfsLogAnalysis
             }
 
             var record = NtfsLogRecord.TryParse(lfs, out var error) ?? throw new JournalException(error);
-            Analyze(record);
+            if (afterCheckpoint)
+            {
+                Analyze(record);
+            }
         }
 
         if (LastLsn == checkpoint && Log.ReadRecord(checkpoint) == null)
@@ -313,8 +319,12 @@ internal sealed class NtfsLogAnalysis
             return;
         }
 
-        // Every record that changes a page (also one DiscUtils cannot apply: the redo pass refuses it then) marks
-        // that page dirty from this LSN on, with the clusters the record names.
+        if (record.TargetVcn < 0 || record.TargetVcn > long.MaxValue - ClustersPerPage)
+        {
+            throw new JournalException($"Log record {record.Lsn:X} has an invalid target VCN");
+        }
+
+        // Every record that changes a page marks that page dirty from this LSN on, with the clusters it names.
         var page = FindDirtyPage(record.TargetAttribute, record.TargetVcn);
         if (page == null)
         {
@@ -344,6 +354,11 @@ internal sealed class NtfsLogAnalysis
         {
             var lcn = (long)U64(data.Array, data.Offset + i);
             var length = (long)U64(data.Array, data.Offset + i + 8);
+            if (lcn < 0 || length < 0 || length > long.MaxValue - lcn)
+            {
+                throw new JournalException($"Log record {record.Lsn:X} has an invalid range of freed clusters");
+            }
+
             foreach (var page in DirtyPages)
             {
                 for (var j = 0; j < page.Lcns.Length; j++)

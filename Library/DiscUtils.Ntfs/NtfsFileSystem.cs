@@ -63,9 +63,14 @@ public class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem,
     /// Initializes a new instance of the NtfsFileSystem class.
     /// </summary>
     /// <param name="stream">The stream containing the NTFS file system.</param>
-    /// <remarks>The journal is handled as <see cref="DefaultJournalMode"/> says.</remarks>
+    /// <remarks>
+    /// A writable stream requires a clean journal. On a read-only stream, journal replay is applied in memory
+    /// when supported. Use the overload with <see cref="NtfsJournalMode.Replay"/> to authorize writes at open.
+    /// When opening through <see cref="FileSystemManager"/>, set the <see cref="FileSystemParameters"/> entry
+    /// <c>NtfsJournalMode</c> to <c>Replay</c>, <c>Refuse</c> or <c>Ignore</c> to override the default for that open.
+    /// </remarks>
     public NtfsFileSystem(Stream stream)
-        : this(stream, DefaultJournalMode)
+        : this(stream, stream?.CanWrite == true ? NtfsJournalMode.Refuse : NtfsJournalMode.Replay)
     {
     }
 
@@ -76,9 +81,16 @@ public class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem,
     /// <param name="journalMode">What to do with the journal of a volume Windows did not shut down cleanly.</param>
     /// <exception cref="IOException">The journal needs a replay that <paramref name="journalMode"/> does not allow,
     /// or that DiscUtils cannot do on a writable stream.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="journalMode"/> is not a defined mode.</exception>
+    /// <seealso cref="NtfsJournal.Replay(Stream)"/>
     public NtfsFileSystem(Stream stream, NtfsJournalMode journalMode)
         : base(new NtfsOptions())
     {
+        if (stream == null)
+        {
+            throw new ArgumentNullException(nameof(stream));
+        }
+
         stream = HandleJournal(stream, journalMode, out var journal);
         JournalInfo = journal;
 
@@ -177,31 +189,29 @@ public class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem,
     /// </summary>
     public NtfsJournalInfo JournalInfo { get; }
 
-    /// <summary>
-    /// Gets or sets what <see cref="NtfsFileSystem(Stream)"/> (and opening through <see cref="FileSystemManager"/>)
-    /// does with the journal; <see cref="NtfsJournalMode.Replay"/> unless changed. A
-    /// <see cref="FileSystemParameters"/> entry "NtfsJournalMode" overrides it for one volume.
-    /// </summary>
-    public static NtfsJournalMode DefaultJournalMode { get; set; } = NtfsJournalMode.Replay;
-
-    private static Stream HandleJournal(Stream stream, NtfsJournalMode mode, out NtfsJournalInfo info)
+    private static Stream HandleJournal(Stream stream, NtfsJournalMode journalMode, out NtfsJournalInfo info)
     {
         info = null;
-        switch (mode)
+        switch (journalMode)
         {
             case NtfsJournalMode.Ignore:
                 return stream;
 
             case NtfsJournalMode.Refuse:
                 info = NtfsJournal.Analyze(stream);
-                if (info.Status is NtfsJournalStatus.NeedsReplay or NtfsJournalStatus.Unsupported)
+                if (info.Status == NtfsJournalStatus.Unsupported)
                 {
-                    throw new IOException($"The NTFS volume was not shut down cleanly and its journal needs a replay ({info.Detail})");
+                    throw new IOException($"The NTFS journal cannot be replayed: {info.Detail}");
+                }
+
+                if (info.Status == NtfsJournalStatus.NeedsReplay || (stream.CanWrite && info.Status == NtfsJournalStatus.NothingToReplay))
+                {
+                    throw new IOException($"The NTFS journal must be replayed or reset before this volume can be opened ({info.Detail})");
                 }
 
                 return stream;
 
-            default:
+            case NtfsJournalMode.Replay:
                 if (stream.CanWrite)
                 {
                     // Like Windows at mount: replay onto the volume, then reset the journal.
@@ -212,6 +222,9 @@ public class NtfsFileSystem : DiscFileSystem, IClusterBasedFileSystem,
                 // Read-only: show the replayed metadata from memory, never write the volume.
                 info = NtfsJournal.ReplayInMemory(stream, out var inMemory);
                 return inMemory ?? stream;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(journalMode), journalMode, "Unknown NTFS journal mode");
         }
     }
 

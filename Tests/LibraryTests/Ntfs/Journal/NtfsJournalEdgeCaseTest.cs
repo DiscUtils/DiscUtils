@@ -407,9 +407,9 @@ public partial class NtfsJournalEdgeCaseTest
     }
 
     [Fact]
-    public void ARecordWithAnImpossibleLength_OrATornContinuationPage_EndsTheLog()
+    public void InvalidRecordLengthsAreRefused_AndATornContinuationPageEndsTheLog()
     {
-        foreach (var damage in new[] { "length", "negative length", "continuation" })
+        foreach (var damage in new[] { "length", "negative length", "oversized NTFS payload", "continuation" })
         {
             var scenario = JournalScenario.Create(ntfs => ntfs.CreateDirectory(@"x\y"), setup: ntfs =>
             {
@@ -430,7 +430,13 @@ public partial class NtfsJournalEdgeCaseTest
                 var pageOffset = offset & ~(long)(TestJournalWriter.PageSize - 1);
                 writer.Storage.Read(pageOffset, page, 0, page.Length);
                 Assert.True(JournalUtilities.RemoveFixups(page, 0, page.Length));
-                EndianUtilities.WriteBytesLittleEndian(damage == "length" ? 0x7FFFFFFFu : 0xFFFFFFFFu, page, (int)(offset - pageOffset) + 0x18);
+                var length = damage switch
+                {
+                    "length" => 0x7FFFFFFFu,
+                    "negative length" => 0xFFFFFFFFu,
+                    _ => 0x100000u,
+                };
+                EndianUtilities.WriteBytesLittleEndian(length, page, (int)(offset - pageOffset) + 0x18);
                 JournalUtilities.ApplyFixups(page, 0, page.Length);
                 writer.Storage.Write(pageOffset, page, 0, page.Length);
             }
@@ -448,9 +454,16 @@ public partial class NtfsJournalEdgeCaseTest
                 writer.Storage.Write(continuation, page, 0, page.Length);
             }
 
-            // The transaction lost its end: it is rolled back.
-            var info = NtfsJournal.Analyze(volume);
-            Assert.True(info.TransactionsToUndo == 1, $"{damage}: {info}");
+            if (damage == "continuation")
+            {
+                // The transaction lost its end: it is rolled back.
+                var info = NtfsJournal.Analyze(volume);
+                Assert.True(info.TransactionsToUndo == 1, $"{damage}: {info}");
+            }
+            else
+            {
+                AssertReplayRefused(volume, "invalid client data length");
+            }
         }
     }
 
@@ -634,19 +647,19 @@ public partial class NtfsJournalEdgeCaseTest
     {
         // Two runs, the second before the first (a negative offset), then the end.
         var runs = new byte[] { 0x21, 0x10, 0x00, 0x01, 0x11, 0x08, 0xF0, 0x00 };
-        var extents = LogFileStorage.ParseRuns(runs, 0, runs.Length);
+        var extents = LogFileStorage.ParseRuns(runs, 0, runs.Length, 1024, "$LogFile");
         Assert.Equal([(0L, 0x100L, 0x10L), (0x10L, 0xF0L, 8L)], extents);
 
-        // A run list that fills its space without the end marker, and an eight-byte offset (nothing to extend).
-        Assert.Equal([(0L, 0x10L, 8L)], LogFileStorage.ParseRuns([0x11, 0x08, 0x10], 0, 3));
+        // An eight-byte offset (nothing to sign-extend).
         byte[] wide = [0x81, 0x02, 0x20, 0, 0, 0, 0, 0, 0, 0, 0];
-        Assert.Equal([(0L, 0x20L, 2L)], LogFileStorage.ParseRuns(wide, 0, wide.Length));
+        Assert.Equal([(0L, 0x20L, 2L)], LogFileStorage.ParseRuns(wide, 0, wide.Length, 1024, "$LogFile"));
 
         using var volume = Volume();
         var layout = JournalVolumeLayout.Read(volume);
         var storage = LogFileStorage.Open(volume, layout);
         Assert.Throws<JournalException>(() => storage.Read(storage.Length, new byte[16], 0, 16));
         Assert.Throws<JournalException>(() => storage.Read(-1, new byte[16], 0, 16));
+        Assert.Throws<JournalException>(() => storage.Read(long.MaxValue, new byte[16], 0, 16));
 
         // $LogFile's data longer than its clusters: the end cannot be read.
         long position;
@@ -666,9 +679,7 @@ public partial class NtfsJournalEdgeCaseTest
         JournalUtilities.ApplyFixups(record, 0, record.Length);
         volume.Position = position;
         volume.Write(record, 0, record.Length);
-        var longer = LogFileStorage.Open(volume, layout);
-        var ex = Assert.Throws<JournalException>(() => longer.Read(longer.Length - 4096, new byte[16], 0, 16));
-        Assert.Contains("no cluster", ex.Message);
+        AssertReplayRefused(volume, "invalid allocated, data or initialized lengths");
     }
 
     [Theory]

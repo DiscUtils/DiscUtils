@@ -75,6 +75,20 @@ public partial class NtfsLogActionsTest
             Put32(q, 0x1C, 0x2000);
             return (NtfsLogOperation.DeleteIndexEntryAllocation, q, Record(NtfsLogOperation.DeleteIndexEntryAllocation, NtfsLogOperation.Noop, [], [], attributeOffset: 0x40), true);
         },
+        ["buffer entry: a target at the end of the page"] = () =>
+        {
+            var q = IndexBuffer();
+            Put32(q, 0x18, 4096 - 0x18);
+            Put32(q, 0x1C, 4096 - 0x18);
+            return (NtfsLogOperation.DeleteIndexEntryAllocation, q, Record(NtfsLogOperation.DeleteIndexEntryAllocation, NtfsLogOperation.Noop, [], [], attributeOffset: 4096), true);
+        },
+        ["buffer entry: a truncated entry before the target"] = () =>
+        {
+            var q = IndexBuffer();
+            Put32(q, 0x18, 4096 - 0x18 - 4);
+            Put32(q, 0x1C, 4096 - 0x18);
+            return (NtfsLogOperation.AddIndexEntryAllocation, q, Record(NtfsLogOperation.AddIndexEntryAllocation, NtfsLogOperation.Noop, LastEntry(), [], attributeOffset: 4096), true);
+        },
         ["add: entry shorter than a header"] = () => (NtfsLogOperation.AddIndexEntryAllocation, IndexBuffer(LastEntry()), AddWithLength(0x08), true),
         ["add: entry longer than its data"] = () => (NtfsLogOperation.AddIndexEntryAllocation, IndexBuffer(LastEntry()), AddWithLength(0x100), true),
         ["add: entry length not aligned"] = () => (NtfsLogOperation.AddIndexEntryAllocation, IndexBuffer(LastEntry()), AddWithLength(0x1C), true),
@@ -89,6 +103,17 @@ public partial class NtfsLogActionsTest
         ["mapping pairs: a run length of nine bytes"] = () => (NtfsLogOperation.UpdateMappingPairs, FileRecord(Si(), Runs()), MappingPairs([0x19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], 0x40), false),
         ["mapping pairs: a run offset of nine bytes"] = () => (NtfsLogOperation.UpdateMappingPairs, FileRecord(Si(), Runs()), MappingPairs([0x91, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], 0x40), false),
         ["mapping pairs: a run past the attribute"] = () => (NtfsLogOperation.UpdateMappingPairs, FileRecord(Si(), Runs()), MappingPairs([0x11, 4, 0x20, 0x11, 4, 0x20, 0x11, 1], 0x40), false),
+        ["mapping pairs: a run that overflows the VCN"] = () =>
+        {
+            var r = FileRecord(Si(), NonResident([0x11, 1, 0x20, 0], long.MaxValue - 1, long.MaxValue - 1, 1));
+            return (NtfsLogOperation.UpdateMappingPairs, r, MappingPairs([0x11, 4, 0x20, 0], 0x40), false);
+        },
+        ["new sizes: truncated non-resident header"] = () =>
+        {
+            var r = FileRecord(Si(), Resident(0x80, [], 1));
+            r[0x98 + 8] = 1;
+            return (NtfsLogOperation.SetNewAttributeSizes, r, Record(NtfsLogOperation.SetNewAttributeSizes, NtfsLogOperation.Noop, new byte[24], [], recordOffset: 0x98), false);
+        },
         ["root: delete an entry of length 0"] = () =>
         {
             var r = FileRecord(Si(), IndexRoot(Entry(1, "a"), LastEntry()));
@@ -111,6 +136,12 @@ public partial class NtfsLogActionsTest
         {
             var r = FileRecord(Si(), IndexRoot(LastEntry()));
             Put32(r, 0x98 + 0x2C, 0x400);
+            return (NtfsLogOperation.SetIndexEntryVcnRoot, r, Record(NtfsLogOperation.SetIndexEntryVcnRoot, NtfsLogOperation.Noop, new byte[8], [], recordOffset: 0x98, attributeOffset: 0x38), false);
+        },
+        ["root header: resident value offset past the file record"] = () =>
+        {
+            var r = FileRecord(Si(), IndexRoot(LastEntry()));
+            Put16(r, 0x98 + 0x14, ushort.MaxValue);
             return (NtfsLogOperation.SetIndexEntryVcnRoot, r, Record(NtfsLogOperation.SetIndexEntryVcnRoot, NtfsLogOperation.Noop, new byte[8], [], recordOffset: 0x98, attributeOffset: 0x38), false);
         },
         ["record header: used past the record"] = () =>
@@ -154,6 +185,20 @@ public partial class NtfsLogActionsTest
             var r = FileRecord(Si(), Resident(0x80, [1], 1));
             Put32(r, 0x98 + 4, 0x300);
             return (NtfsLogOperation.DeleteAttribute, r, Record(NtfsLogOperation.DeleteAttribute, NtfsLogOperation.Noop, [], [], recordOffset: 0x98), false);
+        },
+        ["attribute: the length wraps around the record"] = () =>
+        {
+            var r = FileRecord(Si(), Resident(0x80, [1], 1));
+            Put32(r, 0x98 + 4, int.MaxValue - 7);
+            return (NtfsLogOperation.DeleteAttribute, r, Record(NtfsLogOperation.DeleteAttribute, NtfsLogOperation.Noop, [], [], recordOffset: 0x98), false);
+        },
+        ["attribute: type fits in the record but length does not"] = () =>
+        {
+            var r = FileRecord(Si());
+            Put32(r, 0x38 + 4, RecordSize - 0x38 - 4);
+            Put32(r, RecordSize - 4, 0x80);
+            Put32(r, 0x18, RecordSize);
+            return (NtfsLogOperation.DeleteAttribute, r, Record(NtfsLogOperation.DeleteAttribute, NtfsLogOperation.Noop, [], [], recordOffset: RecordSize - 4), false);
         },
     };
 

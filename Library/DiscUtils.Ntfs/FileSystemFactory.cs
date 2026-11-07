@@ -20,6 +20,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Vfs;
@@ -42,11 +43,17 @@ internal class FileSystemFactory : VfsFileSystemFactory
 
     private NtfsFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
     {
-        var mode = NtfsFileSystem.DefaultJournalMode;
-        if (parameters?.Parameters["NtfsJournalMode"] is { } text &&
-            System.Enum.TryParse<NtfsJournalMode>(text, ignoreCase: true, out var parsed))
+        const string key = "NtfsJournalMode";
+        if (parameters == null || !parameters.Parameters.ContainsKey(key))
         {
-            mode = parsed;
+            return new NtfsFileSystem(stream);
+        }
+
+        var text = parameters.Parameters[key]?.Trim();
+        if (!Enum.TryParse<NtfsJournalMode>(text, ignoreCase: true, out var mode) ||
+            !string.Equals(text, Enum.GetName(typeof(NtfsJournalMode), mode), StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($"{key} must be Replay, Refuse or Ignore", nameof(parameters));
         }
 
         return new NtfsFileSystem(stream, mode);

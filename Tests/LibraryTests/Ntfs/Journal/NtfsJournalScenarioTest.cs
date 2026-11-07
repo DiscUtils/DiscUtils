@@ -159,6 +159,7 @@ public class NtfsJournalScenarioTest
         {
             AssertStatus(NtfsJournalStatus.NeedsReplay, ntfs.JournalInfo);
             Assert.False(ntfs.JournalInfo.Replayed);
+            Assert.True(ntfs.JournalInfo.ReplayedInMemory);
             Assert.True(ntfs.FileExists(@"dir\file039.txt"));
             Assert.Equal(100 + (39 * 97), ntfs.GetFileLength(@"dir\file039.txt"));
         }
@@ -167,13 +168,13 @@ public class NtfsJournalScenarioTest
     }
 
     [Fact]
-    public void WritableOpen_ReplaysAndResetsTheJournal()
+    public void ExplicitWritableReplay_ReplaysAndResetsTheJournal()
     {
         var scenario = JournalScenario.Create(CreateFiles);
         using var volume = JournalScenario.Copy(scenario.Before);
         scenario.WriteJournal(volume, committed: true);
 
-        using (var ntfs = new NtfsFileSystem(volume))
+        using (var ntfs = new NtfsFileSystem(volume, NtfsJournalMode.Replay))
         {
             Assert.True(ntfs.JournalInfo.Replayed);
             Assert.True(ntfs.FileExists(@"dir\sub\big.bin"));

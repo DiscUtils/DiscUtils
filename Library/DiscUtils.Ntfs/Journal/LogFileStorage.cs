@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using static DiscUtils.Ntfs.Journal.JournalUtilities;
 
 namespace DiscUtils.Ntfs.Journal;
@@ -34,6 +35,7 @@ namespace DiscUtils.Ntfs.Journal;
 internal sealed class LogFileStorage
 {
     private const int LogFileRecordNumber = 2;
+    private const uint AttributeList = 0x20;
     private const uint AttributeData = 0x80;
     private const uint AttributeEnd = 0xFFFFFFFF;
 
@@ -58,45 +60,139 @@ internal sealed class LogFileStorage
                      ?? ReadLogFileRecord(volume, layout, layout.MftMirrorCluster)
                      ?? throw new JournalException("Neither $MFT nor $MFTMirr holds a valid record for $LogFile");
 
-        int attrOffset = U16(record, 0x14);
-        while (attrOffset + 8 <= record.Length)
+        var (extents, length) = ReadDataAttribute(record, layout, "$LogFile");
+        var mftPrefixClusters = (4L * layout.MftRecordSize + layout.BytesPerCluster - 1) / layout.BytesPerCluster;
+        foreach (var extent in extents)
         {
-            var type = U32(record, attrOffset);
-            var length = (int)U32(record, attrOffset + 4);
-            if (type == AttributeEnd || length < 0x18 || attrOffset + length > record.Length)
+            if (Overlaps(extent, layout.MftCluster, mftPrefixClusters) ||
+                (layout.ContainsClusters(layout.MftMirrorCluster, mftPrefixClusters) &&
+                 Overlaps(extent, layout.MftMirrorCluster, mftPrefixClusters)))
+            {
+                throw new JournalException("$LogFile overlaps $MFT or $MFTMirr");
+            }
+        }
+
+        return new LogFileStorage(volume, layout.BytesPerCluster, extents, length);
+    }
+
+    private static bool Overlaps((long Vcn, long Lcn, long Length) extent, long start, long count) =>
+        extent.Lcn < start + count && start < extent.Lcn + extent.Length;
+
+    public bool ContainsCluster(long lcn) => _extents.Any(extent => lcn >= extent.Lcn && lcn - extent.Lcn < extent.Length);
+
+    // Both $LogFile and the supported $MFTMirr layout can be checked from a single base record.
+    internal static (List<(long Vcn, long Lcn, long Length)> Extents, long Length) ReadDataAttribute(
+        byte[] record, JournalVolumeLayout layout, string fileName)
+    {
+        var used = U32(record, 0x18);
+        var firstAttribute = U16(record, 0x14);
+        if (U64(record, 0x20) != 0 || used > record.Length || firstAttribute < 0x2A || used < firstAttribute + 4)
+        {
+            throw new JournalException($"{fileName} has a damaged base file record");
+        }
+
+        var data = -1;
+        var dataAttributeLength = 0;
+        var end = (int)used;
+        for (var offset = (int)firstAttribute; offset <= end - 4;)
+        {
+            var type = U32(record, offset);
+            if (type == AttributeEnd)
+            {
+                if (data < 0)
+                {
+                    throw new JournalException($"{fileName} has no unnamed data attribute");
+                }
+
+                return ReadNonResidentData(record, data, dataAttributeLength, layout, fileName);
+            }
+
+            if (offset > end - 8)
             {
                 break;
             }
 
-            var nameLength = record[attrOffset + 9];
-            if (type == AttributeData && nameLength == 0)
+            var length = U32(record, offset + 4);
+            if (length < 0x18 || length > end - offset || (length & 7) != 0)
             {
-                if (record[attrOffset + 8] == 0)
-                {
-                    throw new JournalException("$LogFile has resident data, which NTFS never does");
-                }
-
-                var runsOffset = U16(record, attrOffset + 0x20);
-                var dataLength = (long)U64(record, attrOffset + 0x30);
-                var extents = ParseRuns(record, attrOffset + runsOffset, attrOffset + length);
-                return new LogFileStorage(volume, layout.BytesPerCluster, extents, dataLength);
+                break;
             }
 
-            attrOffset += length;
+            if (type == AttributeList)
+            {
+                throw new JournalException($"{fileName} has an $ATTRIBUTE_LIST, which DiscUtils does not support for replay");
+            }
+
+            if (type == AttributeData && record[offset + 9] == 0)
+            {
+                if (data >= 0)
+                {
+                    throw new JournalException($"{fileName} has split unnamed data, which DiscUtils does not support for replay");
+                }
+
+                data = offset;
+                dataAttributeLength = (int)length;
+            }
+
+            offset += (int)length;
         }
 
-        throw new JournalException("$LogFile has no data attribute");
+        throw new JournalException($"{fileName} has a damaged attribute list in its base file record");
+    }
+
+    private static (List<(long Vcn, long Lcn, long Length)> Extents, long Length) ReadNonResidentData(
+        byte[] record, int offset, int length, JournalVolumeLayout layout, string fileName)
+    {
+        if (record[offset + 8] != 1 || length < 0x40)
+        {
+            throw new JournalException($"{fileName} does not have a complete non-resident data header");
+        }
+
+        if (U64(record, offset + 0x10) != 0)
+        {
+            throw new JournalException($"{fileName} has a nonzero starting VCN, which DiscUtils does not support for replay");
+        }
+
+        if (U16(record, offset + 0x0C) != 0 || U16(record, offset + 0x22) != 0)
+        {
+            throw new JournalException($"{fileName} has unsupported data attribute flags or compression");
+        }
+
+        var runsOffset = U16(record, offset + 0x20);
+        if (runsOffset < 0x40 || runsOffset >= length)
+        {
+            throw new JournalException($"{fileName} has an invalid mapping pairs offset");
+        }
+
+        var allocated = (long)U64(record, offset + 0x28);
+        var dataLength = (long)U64(record, offset + 0x30);
+        var initialized = (long)U64(record, offset + 0x38);
+        if (dataLength <= 0 || dataLength > allocated || initialized != dataLength || allocated % layout.BytesPerCluster != 0)
+        {
+            throw new JournalException($"{fileName} has invalid allocated, data or initialized lengths");
+        }
+
+        var extents = ParseRuns(record, offset + runsOffset, offset + length, layout.TotalClusters, fileName);
+        var last = extents[extents.Count - 1];
+        var clusters = last.Vcn + last.Length;
+        if (U64(record, offset + 0x18) != (ulong)(clusters - 1) || clusters != allocated / layout.BytesPerCluster)
+        {
+            throw new JournalException($"{fileName} run list does not cover the declared allocation in one attribute extent");
+        }
+
+        return (extents, dataLength);
     }
 
     private static byte[] ReadLogFileRecord(Stream volume, JournalVolumeLayout layout, long mftCluster)
     {
-        var record = new byte[layout.MftRecordSize];
-        var position = (mftCluster * layout.BytesPerCluster) + ((long)LogFileRecordNumber * layout.MftRecordSize);
-        if (position < 0 || position + record.Length > volume.Length)
+        var end = (LogFileRecordNumber + 1L) * layout.MftRecordSize;
+        if (!layout.ContainsClusters(mftCluster, (end + layout.BytesPerCluster - 1) / layout.BytesPerCluster))
         {
             return null;
         }
 
+        var record = new byte[layout.MftRecordSize];
+        var position = (mftCluster * layout.BytesPerCluster) + (end - record.Length);
         ReadExactly(volume, position, record, 0, record.Length);
         if (U32(record, 0) != SignatureFile || !RemoveFixups(record, 0, record.Length) || (U16(record, 0x16) & 1) == 0)
         {
@@ -106,9 +202,10 @@ internal sealed class LogFileStorage
         return record;
     }
 
-    internal static List<(long Vcn, long Lcn, long Length)> ParseRuns(byte[] record, int offset, int end)
+    internal static List<(long Vcn, long Lcn, long Length)> ParseRuns(byte[] record, int offset, int end,
+        long totalClusters, string fileName)
     {
-        var extents = new List<(long, long, long)>();
+        var extents = new List<(long Vcn, long Lcn, long Length)>();
         long vcn = 0;
         long lcn = 0;
         while (offset < end && record[offset] != 0)
@@ -118,19 +215,46 @@ internal sealed class LogFileStorage
             var offsetSize = header >> 4;
             if (lengthSize is 0 or > 8 || offsetSize > 8 || offset + 1 + lengthSize + offsetSize > end)
             {
-                throw new JournalException("$LogFile has a damaged run list");
+                throw new JournalException($"{fileName} has a damaged run list");
             }
 
             var runLength = ReadUnsigned(record, offset + 1, lengthSize);
             if (offsetSize == 0)
             {
-                throw new JournalException("$LogFile is sparse, which NTFS never does");
+                throw new JournalException($"{fileName} has a sparse run");
             }
 
-            lcn += ReadSigned(record, offset + 1 + lengthSize, offsetSize);
+            var delta = ReadSigned(record, offset + 1 + lengthSize, offsetSize);
+            if (delta <= -lcn || delta > long.MaxValue - lcn)
+            {
+                throw new JournalException($"{fileName} run has an invalid or overflowing LCN");
+            }
+
+            lcn += delta;
+            if (runLength <= 0 || runLength > totalClusters - lcn || runLength > totalClusters - vcn)
+            {
+                throw new JournalException($"{fileName} run has an invalid length or extends outside the volume");
+            }
+
             extents.Add((vcn, lcn, runLength));
             vcn += runLength;
             offset += 1 + lengthSize + offsetSize;
+        }
+
+        if (extents.Count == 0 || offset == end)
+        {
+            throw new JournalException($"{fileName} run list is empty or has no terminator");
+        }
+
+        long previousEnd = 0;
+        foreach (var extent in extents.OrderBy(extent => extent.Lcn))
+        {
+            if (extent.Lcn < previousEnd)
+            {
+                throw new JournalException($"{fileName} has overlapping physical runs");
+            }
+
+            previousEnd = extent.Lcn + extent.Length;
         }
 
         return extents;
@@ -166,7 +290,7 @@ internal sealed class LogFileStorage
 
     private void Transfer(long position, byte[] buffer, int offset, int count, bool write)
     {
-        if (position < 0 || position + count > Length)
+        if (position < 0 || count < 0 || position > Length - count)
         {
             throw new JournalException($"Access beyond the end of $LogFile at {position}");
         }

@@ -117,11 +117,15 @@ internal static class NtfsLogActions
             case NtfsLogOperation.SetNewAttributeSizes:
                 RequireAttributeAt(p, roff, record);
                 Require(p[roff + ANonResident] != 0, record, "new sizes for a resident attribute");
+                var length = U32(p, roff + ALength);
+                Require(length >= NValidSize + 8, record, "the non-resident attribute header is too short");
+                var runsOffset = U16(p, roff + NRunsOffset);
+                Require(runsOffset >= NValidSize + 8 && runsOffset <= length, record, "the mapping pairs offset is invalid");
                 Require(data.Count >= 24, record, "the new sizes are too short");
                 Put64(p, roff + NAllocated, U64(data.Array, data.Offset));
                 Put64(p, roff + NValidSize, U64(data.Array, data.Offset + 8));
                 Put64(p, roff + NDataSize, U64(data.Array, data.Offset + 16));
-                if (data.Count >= 32 && U16(p, roff + NRunsOffset) >= NTotalSize + 8)
+                if (data.Count >= 32 && runsOffset >= NTotalSize + 8)
                 {
                     Put64(p, roff + NTotalSize, U64(data.Array, data.Offset + 24));
                 }
@@ -177,7 +181,7 @@ internal static class NtfsLogActions
         {
             case NtfsLogOperation.AddIndexEntryAllocation:
             {
-                RequireIndexBufferEntry(q, aoff, record);
+                RequireIndexBufferEntry(q, aoff, record, allowEnd: true);
                 var used = (int)U32(q, IndxHeader + IhUsed);
                 var total = (int)U32(q, IndxHeader + IhTotal);
                 var length = EntryLength(data, record);
@@ -203,7 +207,7 @@ internal static class NtfsLogActions
 
             case NtfsLogOperation.WriteEndOfIndexBuffer:
             {
-                RequireIndexBufferEntry(q, aoff, record);
+                RequireIndexBufferEntry(q, aoff, record, allowEnd: true);
                 var total = (int)U32(q, IndxHeader + IhTotal);
                 Require(aoff + data.Count <= IndxHeader + total && aoff + data.Count <= q.Length, record,
                     "the end of the index buffer does not fit");
@@ -312,7 +316,8 @@ internal static class NtfsLogActions
         // Otherwise a resident value is resized: it now ends where the data ends.
         Require(p[roff + ANonResident] == 0, record, "a resident value update of a non-resident attribute");
         var valueOffset = U16(p, roff + RValueOffset);
-        Require(aoff >= valueOffset, record, "the value update starts inside the attribute header");
+        Require(valueOffset >= 0x18 && valueOffset <= length && aoff >= valueOffset, record,
+            "the value update starts inside the attribute header or the value offset is invalid");
         var newLength = Align8(aoff + data.Count);
         ResizeAttribute(p, roff, length, newLength, record);
         Put32(p, roff + RValueLength, (uint)(aoff + data.Count - valueOffset));
@@ -326,16 +331,19 @@ internal static class NtfsLogActions
         RequireAttributeAt(p, roff, record);
         Require(p[roff + ANonResident] != 0, record, "a run list update of a resident attribute");
         var length = (int)U32(p, roff + ALength);
+        Require(length >= NValidSize + 8, record, "the non-resident attribute header is too short");
         var runsOffset = U16(p, roff + NRunsOffset);
-        Require(aoff >= runsOffset && aoff <= length, record, "the run list update is outside the run list");
+        Require(runsOffset >= NValidSize + 8 && aoff >= runsOffset && aoff <= length, record, "the run list update is outside the run list");
         var newLength = Align8(aoff + data.Count);
+        Require(newLength > runsOffset, record, "the updated attribute has no mapping pairs");
+        var vcn = (long)U64(p, roff + NStartVcn);
+        Require(vcn >= 0, record, "the run list has an invalid starting VCN");
         ResizeAttribute(p, roff, length, newLength, record);
         Copy(data, p, roff + aoff);
 
         // The attribute's last VCN follows from its runs.
         var position = roff + runsOffset;
         var end = roff + newLength;
-        var vcn = (long)U64(p, roff + NStartVcn);
         while (position < end && p[position] != 0)
         {
             var header = p[position];
@@ -349,6 +357,7 @@ internal static class NtfsLogActions
                 runLength = (runLength << 8) | p[position + 1 + i];
             }
 
+            Require(runLength > 0 && runLength <= long.MaxValue - vcn, record, "the new run list has an invalid length or VCN overflow");
             vcn += runLength;
             position += 1 + lengthSize + offsetSize;
         }
@@ -359,7 +368,7 @@ internal static class NtfsLogActions
     private static void AddIndexEntryRoot(byte[] p, NtfsLogRecord record, ArraySegment<byte> data)
     {
         var roff = record.RecordOffset;
-        var entry = RequireRootEntry(p, record, out var header);
+        var entry = RequireRootEntry(p, record, out var header, allowEnd: true);
         var length = EntryLength(data, record);
         var used = (int)U32(p, FrBytesInUse);
         Require(used + length <= p.Length, record, "the index entry does not fit in the file record");
@@ -435,7 +444,7 @@ internal static class NtfsLogActions
     {
         var used = (int)U32(p, FrBytesInUse);
         var position = (int)U16(p, FrFirstAttribute);
-        Require(used <= p.Length && position >= 0x30 - 0x10 && position < used, record, "the file record header is damaged");
+        Require(used <= p.Length && position >= 0x20 && used >= position + 4, record, "the file record header is damaged");
         while (position < roff)
         {
             Require(position + 8 <= used, record, "the attribute list runs past the used part");
@@ -445,7 +454,7 @@ internal static class NtfsLogActions
             }
 
             var length = (int)U32(p, position + ALength);
-            Require(length >= 0x18 && position + length <= used, record, "an attribute has a bad length");
+            Require(length >= 0x18 && length <= used - position, record, "an attribute has a bad length");
             position += length;
         }
 
@@ -456,49 +465,63 @@ internal static class NtfsLogActions
             return;
         }
 
-        var attributeLength = (int)U32(p, roff + ALength);
-        Require(attributeLength >= 0x18 && roff + attributeLength <= used, record, "the attribute has a bad length");
+        Require(roff + 8 <= used, record, "the attribute header is truncated");
+        var attributeLength = U32(p, roff + ALength);
+        Require(attributeLength >= 0x18 && attributeLength <= used - roff, record, "the attribute has a bad length");
     }
 
     /// <summary>
     /// Checks that an index entry of the INDEX_ROOT at the logged attribute offset starts at the logged entry
     /// offset; returns the entry's offset in the record and the index header's.
     /// </summary>
-    private static int RequireRootEntry(byte[] p, NtfsLogRecord record, out int header)
+    private static int RequireRootEntry(byte[] p, NtfsLogRecord record, out int header, bool allowEnd = false)
     {
         var roff = record.RecordOffset;
         RequireAttributeAt(p, roff, record);
         Require(U32(p, roff + AType) == AttributeIndexRoot && p[roff + ANonResident] == 0, record,
             "the attribute is not an index root");
         var attributeLength = (int)U32(p, roff + ALength);
-        header = roff + U16(p, roff + RValueOffset) + 0x10;
-        var entries = header + (int)U32(p, header + IhEntriesOffset);
-        var end = header + (int)U32(p, header + IhUsed);
-        Require(entries >= header + 0x10 && end <= roff + attributeLength, record, "the index root header is damaged");
+        var valueOffset = U16(p, roff + RValueOffset);
+        var valueLength = U32(p, roff + RValueLength);
+        Require(valueOffset >= 0x18 && valueLength >= 0x20 && valueLength <= attributeLength - valueOffset,
+            record, "the index root value is outside the attribute");
+        header = roff + valueOffset + 0x10;
         var target = roff + record.AttributeOffset;
-        RequireEntryChain(p, entries, end, target, record);
+        RequireIndexEntry(p, header, (int)valueLength - 0x10, target, record, allowEnd);
         return target;
     }
 
-    private static void RequireIndexBufferEntry(byte[] q, int aoff, NtfsLogRecord record)
-    {
-        var entries = IndxHeader + (int)U32(q, IndxHeader + IhEntriesOffset);
-        var end = IndxHeader + (int)U32(q, IndxHeader + IhUsed);
-        Require(entries >= IndxHeader + 0x10 && end <= q.Length, record, "the index buffer header is damaged");
-        RequireEntryChain(q, entries, end, aoff, record);
-    }
+    private static void RequireIndexBufferEntry(byte[] q, int aoff, NtfsLogRecord record, bool allowEnd = false) =>
+        RequireIndexEntry(q, IndxHeader, q.Length - IndxHeader, aoff, record, allowEnd);
 
-    /// <summary>The target must be reachable by walking the entries; it may be the end of the used part (append).</summary>
-    private static void RequireEntryChain(byte[] page, int position, int end, int target, NtfsLogRecord record)
+    private static void RequireIndexEntry(byte[] page, int header, int capacity, int target, NtfsLogRecord record, bool allowEnd)
     {
+        Require(capacity >= 0x10, record, "the index header is truncated");
+        var entries = U32(page, header + IhEntriesOffset);
+        var used = U32(page, header + IhUsed);
+        var total = U32(page, header + IhTotal);
+        Require(entries >= 0x10 && entries <= used && used <= total && total <= capacity,
+            record, "the index header is damaged");
+        var position = header + (int)entries;
+        var end = header + (int)used;
         while (position < target && position < end)
         {
-            var length = U16(page, position + IeLength);
-            Require(length >= 0x10, record, "an index entry has a bad length");
-            position += length;
+            position += CheckedEntryLength(page, position, end, record);
         }
 
         Require(position == target && target <= end, record, $"no index entry starts at offset {target:X}");
+        if (!allowEnd)
+        {
+            CheckedEntryLength(page, target, end, record);
+        }
+    }
+
+    private static int CheckedEntryLength(byte[] page, int offset, int end, NtfsLogRecord record)
+    {
+        Require(offset <= end - 0x10, record, "an index entry header is truncated");
+        var length = U16(page, offset + IeLength);
+        Require(length >= 0x10 && length <= end - offset, record, "an index entry has a bad length");
+        return length;
     }
 
     private static int EntryLength(ArraySegment<byte> data, NtfsLogRecord record)
