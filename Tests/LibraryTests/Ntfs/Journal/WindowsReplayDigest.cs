@@ -212,6 +212,12 @@ public static class WindowsReplayDigest
             }
         }
 
+        /// <summary>
+        /// DiscUtils returns paths with the platform's directory separator ('/' on Linux and macOS); the digests,
+        /// made on Windows, use '\'.
+        /// </summary>
+        private static string WindowsPath(string path) => path.Replace('/', '\\');
+
         public ulong RecordLsn(long n) => BitConverter.ToUInt64(_mft, (int)(n * _recordSize) + 8);
 
         public string RecordHash(long n) => UsedHash(_mft, (int)(n * _recordSize), _recordSize, isIndex: false).Hash;
@@ -235,7 +241,7 @@ public static class WindowsReplayDigest
                 for (var i = 0; (i + 1) * _indexSize <= bytes.Length; i++)
                 {
                     var (hash, lsn) = UsedHash(bytes, i * _indexSize, _indexSize, isIndex: true, excludedRecords);
-                    yield return (directory, i, hash, lsn);
+                    yield return (WindowsPath(directory), i, hash, lsn);
                 }
             }
         }
@@ -322,7 +328,7 @@ public static class WindowsReplayDigest
 
                 var info = _fs.GetFileSystemInfo(entry);
                 var isDirectory = _fs.DirectoryExists(entry);
-                var line = $"{entry}|{(isDirectory ? "dir" : _fs.GetFileLength(entry).ToString())}|{(int)info.Attributes:x}|{info.CreationTimeUtc.Ticks}|{info.LastWriteTimeUtc.Ticks}";
+                var line = $"{WindowsPath(entry)}|{(isDirectory ? "dir" : _fs.GetFileLength(entry).ToString())}|{(int)info.Attributes:x}|{info.CreationTimeUtc.Ticks}|{info.LastWriteTimeUtc.Ticks}";
                 if (!isDirectory)
                 {
                     line += "|" + ContentHash(entry);
