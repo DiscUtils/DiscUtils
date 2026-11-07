@@ -228,7 +228,8 @@ public static class NtfsJournal
             LogVersion = $"{log.Restart.MajorVersion}.{log.Restart.MinorVersion}",
         };
 
-        if (log.Restart.IsClean || log.Restart.InUseClient == null)
+        var client = log.Restart.InUseClient;
+        if (log.Restart.IsClean || client == null)
         {
             info.Detail = "Windows shut the volume down cleanly";
             return info;
@@ -236,7 +237,7 @@ public static class NtfsJournal
 
         try
         {
-            var analysis = NtfsLogAnalysis.Run(log, layout);
+            var analysis = NtfsLogAnalysis.Run(log, client, layout);
             info.RecordsAfterCheckpoint = analysis.RecordsAfterCheckpoint;
             info.LastLsn = analysis.LastLsn;
             var replayer = new NtfsLogReplayer(volume, layout, analysis);

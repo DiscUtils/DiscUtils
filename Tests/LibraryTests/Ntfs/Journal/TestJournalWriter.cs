@@ -127,6 +127,9 @@ internal sealed class TestJournalWriter
 
     public ulong LastLsn { get; private set; }
 
+    /// <summary>Where the next record goes (file offset in $LogFile).</summary>
+    public long Position => _position;
+
     /// <summary>Pages written to their place in the log (false: only to the tail copy area, as if the crash came first).</summary>
     public HashSet<long> PagesOnlyInTail { get; } = [];
 

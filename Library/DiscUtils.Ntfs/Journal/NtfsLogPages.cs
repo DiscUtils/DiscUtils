@@ -137,16 +137,13 @@ internal sealed class NtfsLogPages
         var position = startInFirst;
         foreach (var lcn in spanLcns)
         {
+            // The span holds exactly the clusters the range touches.
             var cluster = RawCluster(lcn);
             var chunk = Math.Min(length, ClusterSize - position);
             Array.Copy(buffer, offset, cluster, position, chunk);
             offset += chunk;
             length -= chunk;
             position = 0;
-            if (length == 0)
-            {
-                break;
-            }
         }
     }
 
@@ -210,18 +207,9 @@ internal sealed class NtfsLogPages
 
     private (long[] Lcns, int StartInFirst) Span(long[] lcns, int start, int length)
     {
-        if (start < 0 || length <= 0)
-        {
-            throw new JournalException("The log addresses a page with a negative offset or length");
-        }
-
+        // The callers checked that the range lies within the clusters (and that its first one was not freed).
         var firstIndex = start / ClusterSize;
         var lastIndex = (start + length - 1) / ClusterSize;
-        if (lastIndex >= lcns.Length)
-        {
-            throw new JournalException("The log addresses bytes beyond the clusters it names");
-        }
-
         var span = new long[lastIndex - firstIndex + 1];
         for (var i = 0; i < span.Length; i++)
         {

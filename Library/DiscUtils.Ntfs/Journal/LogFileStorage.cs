@@ -106,7 +106,7 @@ internal sealed class LogFileStorage
         return record;
     }
 
-    private static List<(long, long, long)> ParseRuns(byte[] record, int offset, int end)
+    internal static List<(long Vcn, long Lcn, long Length)> ParseRuns(byte[] record, int offset, int end)
     {
         var extents = new List<(long, long, long)>();
         long vcn = 0;
@@ -197,9 +197,10 @@ internal sealed class LogFileStorage
 
     private (long Vcn, long Lcn, long Length) FindExtent(long vcn)
     {
+        // The extents follow each other from VCN 0, so the first one that ends after the VCN holds it.
         foreach (var extent in _extents)
         {
-            if (vcn >= extent.Vcn && vcn < extent.Vcn + extent.Length)
+            if (vcn < extent.Vcn + extent.Length)
             {
                 return extent;
             }

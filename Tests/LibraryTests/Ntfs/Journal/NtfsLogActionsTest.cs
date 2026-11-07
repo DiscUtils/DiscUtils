@@ -10,7 +10,7 @@ namespace LibraryTests.Ntfs.Journal;
 /// The byte-level redo and undo actions, on file records and index buffers built here: every action applied and
 /// then undone with the undo action NTFS logs for it must give back the original used bytes.
 /// </summary>
-public class NtfsLogActionsTest
+public partial class NtfsLogActionsTest
 {
     private const int RecordSize = 1024;
     private const int FirstAttribute = 0x38;

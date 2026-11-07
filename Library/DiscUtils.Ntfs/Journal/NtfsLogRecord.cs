@@ -38,8 +38,6 @@ internal sealed class NtfsLogRecord
 
     public ulong Lsn => Lfs.Lsn;
 
-    public uint TransactionId => Lfs.TransactionId;
-
     public NtfsLogOperation RedoOperation { get; private set; }
 
     public NtfsLogOperation UndoOperation { get; private set; }
@@ -168,8 +166,6 @@ internal sealed class NtfsLogRecord
         return record;
     }
 
-    public override string ToString() =>
-        $"{Lsn:X} {RedoOperation}/{UndoOperation} attr {TargetAttribute:X} vcn {TargetVcn:X} +{ClusterBlockOffset * 512:X} rec {RecordOffset:X} at {AttributeOffset:X}";
 }
 
 /// <summary>
@@ -244,8 +240,6 @@ internal sealed class OpenAttributeEntry
 
     public ulong FileReference { get; set; }
 
-    public long FileRecordNumber => (long)(FileReference & 0x0000FFFFFFFFFFFF);
-
     public uint BytesPerIndexBuffer { get; set; }
 
     public ulong OpenRecordLsn { get; set; }
@@ -276,8 +270,6 @@ internal sealed class OpenAttributeEntry
             OpenRecordLsn = U64(b, offset + 0x18),
         };
     }
-
-    public override string ToString() => $"MFT {FileRecordNumber} type {AttributeType:X} '{Name}'";
 }
 
 /// <summary>

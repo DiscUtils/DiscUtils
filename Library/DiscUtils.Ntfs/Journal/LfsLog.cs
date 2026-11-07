@@ -103,11 +103,6 @@ internal sealed class LfsRestartPage
     /// </summary>
     public static LfsRestartPage TryRead(LogFileStorage storage, long offset)
     {
-        if (offset < 0 || offset + 512 > storage.Length)
-        {
-            return null;
-        }
-
         var head = new byte[512];
         storage.Read(offset, head, 0, head.Length);
         var signature = U32(head, 0);
@@ -234,11 +229,10 @@ internal sealed class LfsLog
     private readonly Dictionary<long, byte[]> _pages = [];
     private readonly Dictionary<long, List<byte[]>> _tailCopies = [];
 
-    private LfsLog(LogFileStorage storage, LfsRestartPage restart, LfsRestartPage[] restartPages)
+    private LfsLog(LogFileStorage storage, LfsRestartPage restart)
     {
         _storage = storage;
         Restart = restart;
-        RestartPages = restartPages;
         PageSize = restart.LogPageSize;
         SequenceNumberBits = restart.SequenceNumberBits;
         FileSize = restart.FileSize;
@@ -252,9 +246,6 @@ internal sealed class LfsLog
 
     /// <summary>The restart page in use (the valid copy with the highest current LSN).</summary>
     public LfsRestartPage Restart { get; }
-
-    /// <summary>Both restart pages as found (an entry is <c>null</c> when that copy is damaged).</summary>
-    public LfsRestartPage[] RestartPages { get; }
 
     public int PageSize { get; }
 
@@ -330,14 +321,15 @@ internal sealed class LfsLog
         }
 
         if (restart.SequenceNumberBits is < 16 or > 60 || restart.FileSize > storage.Length ||
-            restart.FileSize < 8L * restart.LogPageSize || restart.RecordHeaderLength != 0x30 ||
+            restart.FileSize < 8L * restart.LogPageSize || (restart.FileSize & (restart.LogPageSize - 1)) != 0 ||
+            restart.RecordHeaderLength != 0x30 ||
             restart.LogPageDataOffset < 0x28 || restart.LogPageDataOffset >= restart.LogPageSize)
         {
             throw new JournalException("$LogFile has an implausible restart area");
         }
 
         kind = Kind.Log;
-        return new LfsLog(storage, restart, [first, second]);
+        return new LfsLog(storage, restart);
     }
 
     public long LsnToOffset(ulong lsn) => (long)((lsn << SequenceNumberBits) >> (SequenceNumberBits - 3));
@@ -470,13 +462,7 @@ internal sealed class LfsLog
         while (record != null)
         {
             yield return record;
-            var next = NextLsn(record);
-            if (next <= record.Lsn)
-            {
-                yield break;
-            }
-
-            record = ReadRecord(next);
+            record = ReadRecord(NextLsn(record));
         }
     }
 
@@ -533,11 +519,6 @@ internal sealed class LfsLog
 
     private byte[] ReadLogPage(long pageOffset)
     {
-        if (pageOffset + PageSize > _storage.Length)
-        {
-            return null;
-        }
-
         var page = new byte[PageSize];
         _storage.Read(pageOffset, page, 0, page.Length);
         if (U32(page, 0) != SignatureRcrd || !RemoveFixups(page, 0, page.Length))

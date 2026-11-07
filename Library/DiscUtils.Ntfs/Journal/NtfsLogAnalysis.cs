@@ -68,9 +68,9 @@ internal sealed class NtfsLogAnalysis
     public IEnumerable<KeyValuePair<uint, TransactionEntry>> Losers =>
         Transactions.Where(t => t.Value.State == TransactionState.Active && t.Value.UndoNextLsn != 0);
 
-    public static NtfsLogAnalysis Run(LfsLog log, JournalVolumeLayout layout)
+    /// <summary>Analyzes the log of <paramref name="client"/> (NTFS, the client in use) from its last checkpoint.</summary>
+    public static NtfsLogAnalysis Run(LfsLog log, LfsClient client, JournalVolumeLayout layout)
     {
-        var client = log.Restart.InUseClient ?? throw new JournalException("The log has no client in use");
         var restartLfs = log.ReadRecord(client.RestartLsn)
                          ?? throw new JournalException($"The NTFS restart record at {client.RestartLsn:X} is not in the log");
         var analysis = new NtfsLogAnalysis(log, NtfsRestartRecord.Parse(restartLfs));
