@@ -116,8 +116,9 @@ internal sealed class JournalScenario
     /// </summary>
     public void AssertVolumeEquals(byte[] expected, Stream volume)
     {
-        var actual = ((MemoryStream)volume).ToArray();
-        Assert.Equal(expected.Length, actual.Length);
+        Assert.Equal(expected.Length, volume.Length);
+        var actual = new byte[expected.Length];
+        JournalUtilities.ReadExactly(volume, 0, actual, 0, actual.Length);
         for (long lcn = 0; lcn < expected.Length / ClusterSize; lcn++)
         {
             if (LogClusters.Contains(lcn))

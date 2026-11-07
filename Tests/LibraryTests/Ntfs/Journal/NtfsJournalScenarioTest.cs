@@ -81,11 +81,20 @@ public class NtfsJournalScenarioTest
         AssertStatus(NtfsJournalStatus.NeedsReplay, analysis);
         Assert.Equal(1, analysis.TransactionsToUndo);
         Assert.Equal(scenario.Records.Count, analysis.RecordsToUndo);
+        Assert.False(analysis.CanReplayPersistently);
 
-        NtfsJournal.Replay(volume);
-        scenario.AssertVolumeEquals(scenario.Before, volume);
+        var before = volume.ToArray();
+        Assert.Contains("metadata undo", Assert.Throws<IOException>(() => NtfsJournal.Replay(volume)).Message);
+        Assert.Equal(before, volume.ToArray());
 
-        using var ntfs = new NtfsFileSystem(volume);
+        NtfsJournal.ReplayInMemory(volume, out var overlay);
+        using (overlay)
+        {
+            scenario.AssertVolumeEquals(scenario.Before, overlay);
+        }
+
+        using var ntfs = new NtfsFileSystem(new MemoryStream(before, writable: false));
+        Assert.True(ntfs.JournalInfo.ReplayedInMemory);
         Assert.True(ntfs.FileExists(@"dir\file002.txt"));
         Assert.True(ntfs.FileExists(@"dir\sub\big.bin"));
         Assert.False(ntfs.DirectoryExists(@"dir\new"));
@@ -121,8 +130,8 @@ public class NtfsJournalScenarioTest
     public void Replay_IsIdempotent_AndAnInterruptedReplayReplaysToTheSameResult()
     {
         var scenario = JournalScenario.Create(ChangeFiles, setup: CreateFiles);
-        using var crashed = JournalScenario.Copy(scenario.After);
-        scenario.WriteJournal(crashed, committed: false);
+        using var crashed = JournalScenario.Copy(scenario.Before);
+        scenario.WriteJournal(crashed, committed: true);
         var crashedImage = crashed.ToArray();
 
         // An interruption after the pages were written but before the journal was reset: the pages are replayed,
@@ -136,9 +145,9 @@ public class NtfsJournalScenarioTest
         }
 
         using var again = JournalScenario.Copy(replayed);
-        AssertStatus(NtfsJournalStatus.NeedsReplay, NtfsJournal.Analyze(again));
+        AssertStatus(NtfsJournalStatus.NothingToReplay, NtfsJournal.Analyze(again));
         NtfsJournal.Replay(again);
-        scenario.AssertVolumeEquals(scenario.Before, again);
+        scenario.AssertVolumeEquals(scenario.After, again);
 
         // And a replay of a replayed volume does nothing.
         var info = NtfsJournal.Replay(again);
@@ -228,9 +237,10 @@ public class NtfsJournalScenarioTest
 
         var analysis = NtfsJournal.Analyze(volume);
         Assert.Equal(1, analysis.TransactionsToUndo);
-        NtfsJournal.Replay(volume);
+        Assert.False(analysis.CanReplayPersistently);
 
-        using var ntfs = new NtfsFileSystem(volume);
+        using var readOnly = new MemoryStream(volume.ToArray(), writable: false);
+        using var ntfs = new NtfsFileSystem(readOnly);
         Assert.True(ntfs.FileExists(@"dir\file002.txt"));
         Assert.False(ntfs.DirectoryExists(@"dir\new"));
     }

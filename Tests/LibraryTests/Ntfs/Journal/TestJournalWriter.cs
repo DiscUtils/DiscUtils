@@ -142,7 +142,8 @@ internal sealed class TestJournalWriter
         AppendRaw(record.ClientData(), LfsRecord.TypeClientRecord, record.TransactionId, record.UndoNextLsn, flags);
 
     /// <summary>Appends any LFS record (the client data as given) and returns its LSN.</summary>
-    public ulong AppendRaw(byte[] clientData, uint recordType, uint transactionId, ulong undoNextLsn, ushort flags = 0)
+    public ulong AppendRaw(byte[] clientData, uint recordType, uint transactionId, ulong undoNextLsn, ushort flags = 0,
+        ushort clientSequence = 0, ushort clientIndex = 0)
     {
         // A record starts after the page header, and on the next page when its header no longer fits.
         if (_position % PageSize == 0 || PageSize - (_position % PageSize) < HeaderLength)
@@ -156,6 +157,8 @@ internal sealed class TestJournalWriter
         Put64(header, 0x08, LastLsn);
         Put64(header, 0x10, undoNextLsn);
         Put32(header, 0x18, (uint)clientData.Length);
+        Put16(header, 0x1C, clientSequence);
+        Put16(header, 0x1E, clientIndex);
         Put32(header, 0x20, recordType);
         Put32(header, 0x24, transactionId);
         var multiPage = (_position % PageSize) + HeaderLength + clientData.Length > PageSize;

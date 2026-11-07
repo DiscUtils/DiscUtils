@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using static DiscUtils.Ntfs.Journal.JournalUtilities;
 
 namespace DiscUtils.Ntfs.Journal;
@@ -74,6 +75,7 @@ internal sealed class NtfsLogPages
     private readonly Dictionary<long, byte[]> _rawClusters = [];
     private readonly Dictionary<long, byte[]> _rawOriginal = [];
     private readonly Dictionary<long, PageKind> _clusterUse = [];
+    private readonly Dictionary<long, uint> _undoOwners = [];
 
     public NtfsLogPages(Stream volume, JournalVolumeLayout layout)
     {
@@ -86,13 +88,16 @@ internal sealed class NtfsLogPages
     /// <summary>File records, index buffers and plain clusters whose bytes the replay changes (set by <see cref="Commit"/>).</summary>
     public int ChangedPageCount { get; private set; }
 
+    public int UndoTransactionCount => _undoOwners.Values.Distinct().Count();
+
     /// <summary>
     /// Gets a file record or index buffer of <paramref name="length"/> bytes that starts <paramref name="start"/>
     /// bytes into the clusters <paramref name="lcns"/>.
     /// </summary>
-    public LogicalPage GetLogical(PageKind kind, long[] lcns, int start, int length)
+    public LogicalPage GetLogical(PageKind kind, long[] lcns, int start, int length, uint undoTransaction)
     {
         var (spanLcns, startInFirst) = Span(lcns, start, length);
+        Claim(spanLcns, kind, undoTransaction);
         var key = (spanLcns[0] * ClusterSize) + startInFirst;
         if (_logical.TryGetValue(key, out var page))
         {
@@ -109,7 +114,6 @@ internal sealed class NtfsLogPages
             return page;
         }
 
-        Claim(spanLcns, kind);
         var data = new byte[length];
         ReadSpan(spanLcns, startInFirst, data, 0, length);
         var expected = kind == PageKind.FileRecord ? SignatureFile : SignatureIndx;
@@ -128,10 +132,10 @@ internal sealed class NtfsLogPages
     /// <summary>
     /// Reads bytes of a non-resident attribute page that has no update sequence array (bitmaps, plain data).
     /// </summary>
-    public byte[] ReadRaw(long[] lcns, int start, int length)
+    public byte[] ReadRaw(long[] lcns, int start, int length, uint undoTransaction)
     {
         var (spanLcns, startInFirst) = Span(lcns, start, length);
-        Claim(spanLcns, PageKind.Raw);
+        Claim(spanLcns, PageKind.Raw, undoTransaction);
         var buffer = new byte[length];
         ReadSpan(spanLcns, startInFirst, buffer, 0, length);
         return buffer;
@@ -178,14 +182,19 @@ internal sealed class NtfsLogPages
                 continue;
             }
 
-            changed++;
-
             var bytes = (byte[])page.Data.Clone();
+            var replaced = new byte[bytes.Length];
+            ReadSpan(page.Lcns, page.StartInFirstCluster, replaced, 0, replaced.Length);
             if (page.Valid)
             {
-                ApplyFixups(bytes, 0, bytes.Length);
+                ApplyFixups(bytes, 0, bytes.Length, replaced);
+            }
+            else if (bytes.AsSpan().SequenceEqual(replaced))
+            {
+                continue;
             }
 
+            changed++;
             var position = page.StartInFirstCluster;
             var offset = 0;
             foreach (var lcn in page.Lcns)
@@ -238,7 +247,7 @@ internal sealed class NtfsLogPages
         return (span, start % ClusterSize);
     }
 
-    private void Claim(long[] lcns, PageKind kind)
+    private void Claim(long[] lcns, PageKind kind, uint undoTransaction = 0)
     {
         foreach (var lcn in lcns)
         {
@@ -248,6 +257,15 @@ internal sealed class NtfsLogPages
             }
 
             _clusterUse[lcn] = kind;
+            if (undoTransaction != 0)
+            {
+                if (_undoOwners.TryGetValue(lcn, out var owner) && owner != undoTransaction)
+                {
+                    throw new JournalException($"Undo for transactions {owner:X} and {undoTransaction:X} overlaps cluster {lcn}");
+                }
+
+                _undoOwners[lcn] = undoTransaction;
+            }
         }
     }
 

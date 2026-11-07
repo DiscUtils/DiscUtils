@@ -412,6 +412,7 @@ public partial class NtfsJournalEdgeCaseTest
     [InlineData(false, 0)]
     [InlineData(false, 1)]
     [InlineData(false, 2)]
+    [InlineData(false, 3)]
     [InlineData(true, 0)]
     [InlineData(true, 1)]
     public void ReplayFlushesMetadataBeforeTheResetAndPropagatesFlushFailures(bool alreadyApplied, int failFlush)
@@ -459,14 +460,17 @@ public partial class NtfsJournalEdgeCaseTest
         }
 
         Assert.Equal(expected, volume.Events.Take(expected.Count));
-        Assert.Equal(3, volume.Events.Count - expected.Count);
-        Assert.StartsWith("write ", volume.Events[expected.Count]);
-        Assert.StartsWith("write ", volume.Events[expected.Count + 1]);
-        Assert.Equal("flush", volume.Events.Last());
+        var resetEvents = volume.Events.Skip(expected.Count).ToArray();
+        Assert.Equal(failFlush == 2 ? 2 : 4, resetEvents.Length);
+        for (var i = 0; i < resetEvents.Length; i += 2)
+        {
+            Assert.StartsWith("write ", resetEvents[i]);
+            Assert.Equal("flush", resetEvents[i + 1]);
+        }
     }
 
     [Fact]
-    public void FileStreamReplay_RequestsDiskFlushesAtBothBoundaries()
+    public void FileStreamReplay_RequestsDiskFlushesAtEveryBoundary()
     {
         using var dirty = WithRecords(Forget());
         var path = Path.GetTempFileName();
@@ -475,7 +479,7 @@ public partial class NtfsJournalEdgeCaseTest
             File.WriteAllBytes(path, dirty.ToArray());
             using var file = new ReplayTrackingFile(path);
             Assert.True(NtfsJournal.Replay(file).Replayed);
-            Assert.Equal(new[] { true, true }, file.DiskFlushes);
+            Assert.Equal(new[] { true, true, true }, file.DiskFlushes);
         }
         finally
         {

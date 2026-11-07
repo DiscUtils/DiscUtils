@@ -194,12 +194,25 @@ public class NtfsJournalReplayDetailTest
             }
 
             writer.Finish(restart);
-            var info = NtfsJournal.Replay(volume);
+            Stream? overlay = null;
+            NtfsJournalInfo info;
+            if (committed)
+            {
+                info = NtfsJournal.Replay(volume);
+            }
+            else
+            {
+                info = NtfsJournal.ReplayInMemory(volume, out var replayed);
+                overlay = replayed;
+                Assert.NotNull(overlay);
+            }
+
+            using var overlayLifetime = overlay;
             Assert.Equal(NtfsJournalStatus.NeedsReplay, info.Status);
 
-            var result = ReadLogical(volume, lcn * 4096, 4096);
+            var result = ReadLogical(overlay ?? volume, lcn * 4096, 4096);
             Assert.True(result.AsSpan(entry + 0x18, 0x38).SequenceEqual(committed ? newInfo : oldInfo));
-            Assert.Equal(committed ? lsn : writer.LastLsn + 1, EndianUtilities.ToUInt64LittleEndian(result, 8));
+            Assert.Equal(lsn, EndianUtilities.ToUInt64LittleEndian(result, 8));
             Assert.Equal(committed ? 0 : 1, info.TransactionsToUndo);
         }
     }
@@ -272,14 +285,15 @@ public class NtfsJournalReplayDetailTest
             var restart = writer.Checkpoint(
                 [(Mft, 0x80, 0x0001000000000000UL, 0, ""), (data, 0x80, 0x0001000000000006UL, 0, "$X")],
                 [(data, lcn, change, [lcn])],
-                [(Tx, TransactionState.Active, change, change), (0x68, TransactionState.Committed, change, change), (0x90, TransactionState.Prepared, change, change)],
+                [(Tx, TransactionState.Active, change, change), (0x68, TransactionState.Committed, change, change)],
                 ntfsVersion: version);
             writer.Finish(restart, oldestLsn: change);
 
-            var info = NtfsJournal.Replay(volume);
+            var info = NtfsJournal.ReplayInMemory(volume, out var overlay);
+            using var recovered = overlay;
             Assert.True(info.Status == NtfsJournalStatus.NeedsReplay, $"v{version}: {info}");
             Assert.Equal(1, info.TransactionsToUndo);
-            Assert.True(before.AsSpan().SequenceEqual(ReadRaw(volume, lcn * 4096, 4096)));
+            Assert.True(before.AsSpan().SequenceEqual(ReadRaw(recovered, lcn * 4096, 4096)));
         }
     }
 
@@ -311,10 +325,11 @@ public class NtfsJournalReplayDetailTest
         Assert.True(b > a && c > b);
         writer.Finish(restart);
 
-        NtfsJournal.Replay(volume);
-        Assert.True(ReadRaw(volume, x * 4096, 64).SequenceEqual(zeros));
-        Assert.True(ReadRaw(volume, y * 4096, 64).SequenceEqual(Fill(0xEE)));
-        Assert.True(ReadRaw(volume, z * 4096, 64).SequenceEqual(Fill(0x11)));
+        NtfsJournal.ReplayInMemory(volume, out var overlay);
+        using var recovered = overlay;
+        Assert.True(ReadRaw(recovered, x * 4096, 64).SequenceEqual(zeros));
+        Assert.True(ReadRaw(recovered, y * 4096, 64).SequenceEqual(Fill(0xEE)));
+        Assert.True(ReadRaw(recovered, z * 4096, 64).SequenceEqual(Fill(0x11)));
     }
 
     [Fact]
@@ -643,7 +658,7 @@ public class NtfsJournalReplayDetailTest
                  {
                      (self => self, "loops"),
                      (self => self - 0x10, "belongs to"),
-                     (self => self + 0x1000, "not in the log"),
+                     (self => self + 0x1000, "points forward"),
                  })
         {
             using var volume = With((w, r) =>

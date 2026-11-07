@@ -346,7 +346,7 @@ public partial class NtfsJournalEdgeCaseTest
     }
 
     [Fact]
-    public void PreparedAndCommittedTransactions_AreKept_AndATransactionOlderThanTheCheckpointStartsRedo()
+    public void ResolvedPreparedTransactions_AreKept_AndAnOlderTransactionStartsRedo()
     {
         using var probe = Volume();
         var x = FreeCluster(probe);
@@ -363,6 +363,7 @@ public partial class NtfsJournalEdgeCaseTest
         var restart = w.Checkpoint(Attributes, transactions: [(0x90, TransactionState.Committed, early, early)], checkpointLsn: null);
         w.Append(Raw(x, Enumerable.Repeat((byte)0x11, 8).ToArray()));
         w.Append(new TestLogRecord { Redo = NtfsLogOperation.PrepareTransaction, Undo = NtfsLogOperation.Noop, TransactionId = Tx });
+        w.Append(new TestLogRecord { Redo = NtfsLogOperation.CommitTransaction, Undo = NtfsLogOperation.Noop, TransactionId = Tx });
         w.Append(Raw(y, Enumerable.Repeat((byte)0x22, 8).ToArray(), tx: 0x68));
         w.Append(new TestLogRecord { Redo = NtfsLogOperation.CommitTransaction, Undo = NtfsLogOperation.Noop, TransactionId = 0x68 });
         w.Finish(restart);

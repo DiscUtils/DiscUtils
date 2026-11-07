@@ -194,7 +194,13 @@ internal sealed class NtfsLogAnalysis
                     throw new JournalException("A transaction table entry is too short");
                 }
 
-                Transactions[(uint)offset] = TransactionEntry.Parse(transactions, offset);
+                var transaction = TransactionEntry.Parse(transactions, offset);
+                if (transaction.State is not (TransactionState.Active or TransactionState.Prepared or TransactionState.Committed))
+                {
+                    throw new JournalException($"Transaction {offset:X} has an invalid checkpoint state ({transaction.State})");
+                }
+
+                Transactions[(uint)offset] = transaction;
             }
         }
 
@@ -248,8 +254,14 @@ internal sealed class NtfsLogAnalysis
             }
         }
 
-        foreach (var transaction in Transactions.Values)
+        foreach (var entry in Transactions)
         {
+            var transaction = entry.Value;
+            if (transaction.State == TransactionState.Prepared)
+            {
+                throw new JournalException($"Prepared transaction {entry.Key:X} has no recorded outcome");
+            }
+
             if (transaction.FirstLsn != 0 && (redo == 0 || transaction.FirstLsn < redo))
             {
                 redo = transaction.FirstLsn;

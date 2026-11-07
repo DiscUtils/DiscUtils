@@ -98,6 +98,38 @@ internal sealed class LfsRestartPage
 
     public LfsClient InUseClient => InUseClientList == NoClient ? null : Clients[InUseClientList];
 
+    public bool RequiresRecovery => !IsClean && InUseClientList != NoClient;
+
+    /// <summary>Builds the logical image of the clean LFS 1.1 restart page used by DiscUtils.</summary>
+    public byte[] CreateResetImage(ulong lastLsn)
+    {
+        var page = (byte[])Page.Clone();
+        var ra = RestartAreaOffset;
+        Put16(page, 0x1A, 1);
+        Put16(page, 0x1C, 1);
+        Put64(page, ra, Math.Max(lastLsn, CurrentLsn));
+        Put16(page, ra + 0x0A, 0);
+        Put16(page, ra + 0x0C, NoClient);
+        Put16(page, ra + 0x0E, FlagCleanDismount);
+        Put32(page, ra + 0x28, OpenLogCount + 1);
+        return page;
+    }
+
+    public bool MatchesResetOf(LfsRestartPage source)
+    {
+        if (!IsClean || InUseClientList != NoClient || MajorVersion != 1 || MinorVersion != 1 ||
+            CurrentLsn < source.CurrentLsn || OpenLogCount != source.OpenLogCount + 1 || Page.Length != source.Page.Length)
+        {
+            return false;
+        }
+
+        var expected = source.CreateResetImage(CurrentLsn);
+        var usa = U16(expected, 4);
+        var usaEnd = usa + 2 * U16(expected, 6);
+        return expected.AsSpan(0, usa).SequenceEqual(Page.AsSpan(0, usa)) &&
+               expected.AsSpan(usaEnd).SequenceEqual(Page.AsSpan(usaEnd));
+    }
+
     /// <summary>
     /// Reads a restart page at <paramref name="offset"/>; <c>null</c> if there is none or it is damaged.
     /// </summary>
@@ -239,10 +271,11 @@ internal sealed class LfsLog
     private readonly Dictionary<long, byte[]> _pages = [];
     private readonly Dictionary<long, List<byte[]>> _tailCopies = [];
 
-    private LfsLog(LogFileStorage storage, LfsRestartPage restart)
+    private LfsLog(LogFileStorage storage, LfsRestartPage restart, LfsRestartPage publishedReset)
     {
         _storage = storage;
         Restart = restart;
+        PublishedReset = publishedReset;
         PageSize = restart.LogPageSize;
         SequenceNumberBits = restart.SequenceNumberBits;
         FileSize = restart.FileSize;
@@ -254,8 +287,11 @@ internal sealed class LfsLog
 
     public LogFileStorage Storage => _storage;
 
-    /// <summary>The restart page in use (the valid copy with the highest current LSN).</summary>
+    /// <summary>The restart page used for analysis.</summary>
     public LfsRestartPage Restart { get; }
+
+    /// <summary>A clean reset image whose sibling is still the source of that reset.</summary>
+    public LfsRestartPage PublishedReset { get; }
 
     public int PageSize { get; }
 
@@ -324,6 +360,29 @@ internal sealed class LfsLog
         }
 
         var restart = first == null || (second != null && second.CurrentLsn > first.CurrentLsn) ? second : first;
+        LfsRestartPage publishedReset = null;
+        if (first != null && second != null && first.RequiresRecovery != second.RequiresRecovery)
+        {
+            var dirty = first.RequiresRecovery ? first : second;
+            var clean = first.RequiresRecovery ? second : first;
+            if (clean.MatchesResetOf(dirty))
+            {
+                // Finish an interrupted DiscUtils reset only after rechecking the metadata against the old log.
+                restart = dirty;
+                publishedReset = clean;
+            }
+            else if (first.CurrentLsn == second.CurrentLsn)
+            {
+                throw new JournalException("The $LogFile restart pages disagree about recovery at the same LSN");
+            }
+        }
+        else if (first != null && second != null && first.RequiresRecovery && first.CurrentLsn == second.CurrentLsn &&
+                 (first.InUseClientList != second.InUseClientList || first.InUseClient.SequenceNumber != second.InUseClient.SequenceNumber ||
+                  first.InUseClient.RestartLsn != second.InUseClient.RestartLsn || first.InUseClient.OldestLsn != second.InUseClient.OldestLsn))
+        {
+            throw new JournalException("The $LogFile restart pages disagree about the checkpoint at the same LSN");
+        }
+
         if (restart.MajorVersion is not (1 or 2))
         {
             throw new JournalException(
@@ -341,7 +400,7 @@ internal sealed class LfsLog
         }
 
         kind = Kind.Log;
-        return new LfsLog(storage, restart);
+        return new LfsLog(storage, restart, publishedReset);
     }
 
     public long LsnToOffset(ulong lsn) => (long)((lsn << SequenceNumberBits) >> (SequenceNumberBits - 3));

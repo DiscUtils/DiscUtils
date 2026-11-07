@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using DiscUtils.Streams;
 
@@ -97,17 +98,28 @@ internal static class JournalUtilities
     /// Protects a multi-sector structure before it is written: increments the update sequence number and puts it
     /// at the end of every stride, saving the original bytes in the array.
     /// </summary>
-    public static void ApplyFixups(byte[] buffer, int offset, int length)
+    public static void ApplyFixups(byte[] buffer, int offset, int length, byte[] replacedBytes = null)
     {
         if (!TryGetFixupLayout(buffer, offset, length, out var usaOffset, out var usaCount, out var stride))
         {
             throw new JournalException("A changed record has no valid update sequence array");
         }
 
-        var usn = (ushort)(U16(buffer, offset + usaOffset) + 1);
-        if (usn is 0 or 0xFFFF)
+        var usn = NextUpdateSequence(U16(buffer, offset + usaOffset));
+        if (replacedBytes != null)
         {
-            usn = 1;
+            // The logged image can carry an older USA than the bytes at this destination. A retained sector
+            // must fail the fixup check even if the destination already held a partially written page.
+            var oldTrailers = new HashSet<ushort>();
+            for (var i = 1; i < usaCount; i++)
+            {
+                oldTrailers.Add(U16(replacedBytes, (i * stride) - 2));
+            }
+
+            while (oldTrailers.Contains(usn))
+            {
+                usn = NextUpdateSequence(usn);
+            }
         }
 
         Put16(buffer, offset + usaOffset, usn);
@@ -119,6 +131,8 @@ internal static class JournalUtilities
             Put16(buffer, end, usn);
         }
     }
+
+    private static ushort NextUpdateSequence(ushort usn) => usn >= 0xFFFE ? (ushort)1 : (ushort)(usn + 1);
 
     /// <summary>Whether the header describes a plausible update sequence array for this length.</summary>
     public static bool HasFixupLayout(byte[] buffer, int offset, int length) =>

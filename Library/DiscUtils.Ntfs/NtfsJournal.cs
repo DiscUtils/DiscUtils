@@ -65,10 +65,10 @@ public enum NtfsJournalStatus
 public enum NtfsJournalMode
 {
     /// <summary>
-    /// Look at the journal and replay it like Windows does at mount: on a writable stream the replay is written
-    /// to the volume and the journal is reset; on a read-only stream it is kept in memory, so the file system
-    /// shows the up-to-date metadata without writing anything. A journal DiscUtils cannot replay makes opening a
-    /// writable stream fail with an <see cref="IOException"/>; a read-only stream is opened as it is.
+    /// Replay supported journal changes. On a writable stream, replay writes metadata and resets the journal
+    /// only when <see cref="NtfsJournalInfo.CanReplayPersistently"/> is true. On a read-only stream, replay uses
+    /// an in-memory overlay. A journal DiscUtils cannot replay makes opening a writable stream fail with an
+    /// <see cref="IOException"/>; a read-only stream is opened as it is.
     /// </summary>
     Replay,
 
@@ -114,7 +114,7 @@ public sealed class NtfsJournalInfo
     /// <summary>Gets the number of log records the redo pass applies (0 when replaying changes nothing).</summary>
     public int RecordsToRedo { get; internal set; }
 
-    /// <summary>Gets the number of unfinished transactions to roll back.</summary>
+    /// <summary>Gets the number of unfinished transactions with undo actions targeting metadata.</summary>
     public int TransactionsToUndo { get; internal set; }
 
     /// <summary>Gets the number of log records the undo pass applies.</summary>
@@ -135,6 +135,12 @@ public sealed class NtfsJournalInfo
     /// <summary>Gets a value indicating whether the read-only mount uses an in-memory replay overlay.</summary>
     public bool ReplayedInMemory { get; internal set; }
 
+    /// <summary>
+    /// Gets whether this journal is eligible for persistent replay. Metadata undo requires compensation records
+    /// for recoverable on-disk replay and is available only in memory. This does not describe stream capabilities.
+    /// </summary>
+    public bool CanReplayPersistently => Status != NtfsJournalStatus.Unsupported && TransactionsToUndo == 0;
+
     /// <inheritdoc />
     public override string ToString() =>
         $"{Status}: {Detail} (LFS {LogVersion}, {RecordsAfterCheckpoint} records after the checkpoint, redo {RecordsToRedo}, " +
@@ -142,8 +148,7 @@ public sealed class NtfsJournalInfo
 }
 
 /// <summary>
-/// Reads and replays the journal ($LogFile) of an NTFS volume, the way Windows does when it mounts a volume that
-/// was not shut down cleanly (a crash, a power cut, a hard power-off).
+/// Reads and replays supported journal ($LogFile) records on an NTFS volume after an unclean shutdown.
 /// </summary>
 /// <remarks>
 /// The volume of a hibernated Windows (also after a shutdown with Fast Startup) is not shut down cleanly either,
@@ -165,10 +170,12 @@ public static class NtfsJournal
     /// <param name="volume">The NTFS volume (the partition, not the whole disk); must be writable.</param>
     /// <remarks>
     /// Replay prepares the changes before writing. If the MFT mirror changes, it is written and flushed before
-    /// the primary records. Replay flushes metadata before writing the restart pages and again after the reset.
+    /// the primary records. Replay flushes metadata before resetting the restart pages. It writes and flushes
+    /// the alternate restart page before replacing and flushing the source page.
     /// A <see cref="FileStream"/> uses <c>Flush(true)</c>. For other streams, durability and ordering after a crash
     /// depend on whether <see cref="Stream.Flush()"/> reaches all backing storage layers.
     /// Replay is not atomic. An I/O error during the writes or flushes can leave a partially updated volume.
+    /// Journals that require metadata undo cannot be written by this API.
     /// </remarks>
     /// <exception cref="IOException">The stream is read-only, the journal is unsupported (before writing), or an I/O error occurred.</exception>
     public static NtfsJournalInfo Replay(Stream volume)
@@ -254,14 +261,17 @@ public static class NtfsJournal
         };
 
         var client = log.Restart.InUseClient;
-        if (log.Restart.IsClean || client == null)
+        if (!log.Restart.RequiresRecovery)
         {
             info.Detail = "Windows shut the volume down cleanly";
             return info;
         }
 
         Dictionary<long, byte[]> clusters;
-        byte[] restartPage;
+        byte[] alternateRestart = null;
+        byte[] sourceRestart = null;
+        var sourceOffset = log.Restart.Offset;
+        var alternateOffset = log.Restart.SystemPageSize - sourceOffset;
         long mirrorClusterCount;
         try
         {
@@ -275,6 +285,10 @@ public static class NtfsJournal
             info.RecordsToUndo = replayer.UndoneRecords;
             info.TransactionsToUndo = replayer.UndoneTransactions;
             info.FileRecordsChanged = [.. replayer.ChangedFileRecords];
+            if (write && !info.CanReplayPersistently)
+            {
+                throw new JournalException("Persistent replay requires metadata undo, which DiscUtils supports only in memory");
+            }
 
             clusters = replayer.Pages.Commit();
             mirrorClusterCount = AddMftMirror(volume, layout, clusters);
@@ -283,16 +297,35 @@ public static class NtfsJournal
                 throw new JournalException("A metadata replay write overlaps $LogFile");
             }
 
-            restartPage = write ? PrepareLogReset(log.Restart, analysis.LastLsn) : null;
+            if (log.PublishedReset is { } published &&
+                (published.CurrentLsn != Math.Max(analysis.LastLsn, log.Restart.CurrentLsn) || clusters.Count != 0 || !info.CanReplayPersistently))
+            {
+                throw new JournalException("A partial $LogFile reset disagrees with recovery from its remaining dirty page");
+            }
+
+            if (write)
+            {
+                if (log.PublishedReset == null)
+                {
+                    alternateRestart = PrepareLogReset(log, analysis.LastLsn, alternateOffset);
+                }
+
+                sourceRestart = PrepareLogReset(log, analysis.LastLsn, sourceOffset);
+            }
+
             info.PagesChanged = replayer.Pages.ChangedPageCount;
             if (clusters.Count == 0)
             {
                 // Replaying changes nothing (bitmap updates, for instance, end where the disk already is).
                 info.Status = NtfsJournalStatus.NothingToReplay;
-                info.Detail = "the journal is still open, but replay would not change metadata";
-                info.RecordsToRedo = 0;
-                info.RecordsToUndo = 0;
-                info.TransactionsToUndo = 0;
+                info.Detail = log.PublishedReset == null ? "the journal is still open, but replay would not change metadata" :
+                    "one restart page still needs to be reset";
+                if (info.CanReplayPersistently)
+                {
+                    info.RecordsToRedo = 0;
+                    info.RecordsToUndo = 0;
+                }
+
                 info.FileRecordsChanged = [];
             }
             else
@@ -324,8 +357,13 @@ public static class NtfsJournal
             WriteClusters(volume, clusters.Where(cluster => !IsMirrorCluster(cluster)), clusterSize);
             // Flush even when no pages changed. A previous attempt may have left visible but buffered metadata.
             FlushReplayWrites(volume);
-            storage.Write(0, restartPage, 0, restartPage.Length);
-            storage.Write(log.Restart.SystemPageSize, restartPage, 0, restartPage.Length);
+            if (alternateRestart != null)
+            {
+                storage.Write(alternateOffset, alternateRestart, 0, alternateRestart.Length);
+                FlushReplayWrites(volume);
+            }
+
+            storage.Write(sourceOffset, sourceRestart, 0, sourceRestart.Length);
             FlushReplayWrites(volume);
             info.Replayed = true;
         }
@@ -452,19 +490,12 @@ public static class NtfsJournal
     /// Leaves an empty journal: both restart pages say log file service 1.1, shut down cleanly, no client in use,
     /// with the end of the log as current LSN. Windows starts a new log from there at the next mount.
     /// </summary>
-    private static byte[] PrepareLogReset(LfsRestartPage source, ulong lastLsn)
+    private static byte[] PrepareLogReset(LfsLog log, ulong lastLsn, long offset)
     {
-        var page = (byte[])source.Page.Clone();
-        var ra = source.RestartAreaOffset;
-        Put16(page, 0x1A, 1);
-        Put16(page, 0x1C, 1);
-        Put64(page, ra + 0x00, Math.Max(lastLsn, source.CurrentLsn));
-        Put16(page, ra + 0x0A, 0);
-        Put16(page, ra + 0x0C, LfsRestartPage.NoClient);
-        Put16(page, ra + 0x0E, LfsRestartPage.FlagCleanDismount);
-        Put32(page, ra + 0x28, source.OpenLogCount + 1);
-        Put32(page, 0, SignatureRstr);
-        ApplyFixups(page, 0, page.Length);
+        var page = log.Restart.CreateResetImage(lastLsn);
+        var replaced = new byte[page.Length];
+        log.Storage.Read(offset, replaced, 0, replaced.Length);
+        ApplyFixups(page, 0, page.Length, replaced);
         return page;
     }
 }
