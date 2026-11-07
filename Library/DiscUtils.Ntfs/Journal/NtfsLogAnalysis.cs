@@ -29,9 +29,9 @@ using static DiscUtils.Ntfs.Journal.JournalUtilities;
 namespace DiscUtils.Ntfs.Journal;
 
 /// <summary>
-/// The analysis pass of NTFS recovery: starting from the tables of the last checkpoint, it reads every record
-/// after the checkpoint and works out which pages may be stale on disk (the dirty page table) and which
-/// transactions were not finished (the transaction table).
+/// The analysis pass of NTFS recovery: starting from the tables of the last checkpoint, it reads the active NTFS
+/// client's records after the checkpoint and works out which pages may be stale on disk (the dirty page table)
+/// and which transactions were not finished (the transaction table).
 /// </summary>
 internal sealed class NtfsLogAnalysis
 {
@@ -68,11 +68,13 @@ internal sealed class NtfsLogAnalysis
     public IEnumerable<KeyValuePair<uint, TransactionEntry>> Losers =>
         Transactions.Where(t => t.Value.State == TransactionState.Active && t.Value.UndoNextLsn != 0);
 
-    /// <summary>Analyzes the log of <paramref name="client"/> (NTFS, the client in use) from its last checkpoint.</summary>
-    public static NtfsLogAnalysis Run(LfsLog log, LfsClient client, JournalVolumeLayout layout)
+    /// <summary>Analyzes the active NTFS client's log from its last checkpoint.</summary>
+    public static NtfsLogAnalysis Run(LfsLog log, JournalVolumeLayout layout)
     {
+        var client = log.NtfsClient;
         var restartLfs = log.ReadRecord(client.RestartLsn)
                          ?? throw new JournalException($"The NTFS restart record at {client.RestartLsn:X} is not in the log");
+        log.RequireNtfsRecord(restartLfs, "NTFS restart record");
         var analysis = new NtfsLogAnalysis(log, NtfsRestartRecord.Parse(restartLfs));
         analysis.LoadCheckpointTables(layout);
         analysis.ReadAfterCheckpoint();
@@ -113,12 +115,13 @@ internal sealed class NtfsLogAnalysis
 
     private byte[] ReadTableDump(ulong lsn, int length, string name)
     {
-        if (lsn == 0 || length == 0)
+        if (length == 0)
         {
             return null;
         }
 
         var lfs = Log.ReadRecord(lsn) ?? throw new JournalException($"The {name} dump at {lsn:X} is not in the log");
+        Log.RequireNtfsRecord(lfs, $"{name} dump", LfsRecord.TypeClientRecord);
         var record = NtfsLogRecord.TryParse(lfs, out var error) ?? throw new JournalException(error);
         var data = record.RedoData;
         if (data.Count < length)
@@ -175,7 +178,9 @@ internal sealed class NtfsLogAnalysis
                     first = false;
                 }
 
-                DirtyPages.Add(DirtyPageEntry.Parse(dirtyPages, offset, size, version));
+                var page = DirtyPageEntry.Parse(dirtyPages, offset, size, version);
+                CheckHistoryRecord(page.OldestLsn, "dirty page's oldest record");
+                DirtyPages.Add(page);
             }
 
             if (first && dirtyPages.Length >= 2)
@@ -200,6 +205,9 @@ internal sealed class NtfsLogAnalysis
                     throw new JournalException($"Transaction {offset:X} has an invalid checkpoint state ({transaction.State})");
                 }
 
+                CheckHistoryRecord(transaction.FirstLsn, "transaction's first record");
+                CheckHistoryRecord(transaction.PreviousLsn, "transaction's previous record");
+                CheckHistoryRecord(transaction.UndoNextLsn, "transaction's next undo record");
                 Transactions[(uint)offset] = transaction;
             }
         }
@@ -210,22 +218,41 @@ internal sealed class NtfsLogAnalysis
         }
     }
 
+    private void CheckHistoryRecord(ulong lsn, string role)
+    {
+        // Check retained history here. Redo and undo still decide which records must be present to recover.
+        if (Log.ReadRecord(lsn, readClientData: false) is { } record)
+        {
+            Log.RequireNtfsRecord(record, role, LfsRecord.TypeClientRecord);
+        }
+    }
+
     private void ReadAfterCheckpoint()
     {
         var checkpoint = RestartRecord.CheckpointLsn;
         ulong firstAfterCheckpoint = 0;
-        LastLsn = checkpoint;
         foreach (var lfs in Log.ReadForward(checkpoint))
         {
+            // The end of the shared LFS log is used for the restart pages and as an upper bound for page LSNs.
             LastLsn = lfs.Lsn;
             var afterCheckpoint = lfs.Lsn != checkpoint;
             if (afterCheckpoint)
             {
                 RecordsAfterCheckpoint++;
-                if (firstAfterCheckpoint == 0)
-                {
-                    firstAfterCheckpoint = lfs.Lsn;
-                }
+            }
+            else
+            {
+                Log.RequireNtfsRecord(lfs, "checkpoint record");
+            }
+
+            if (!Log.IsForNtfsClient(lfs))
+            {
+                continue;
+            }
+
+            if (afterCheckpoint && firstAfterCheckpoint == 0)
+            {
+                firstAfterCheckpoint = lfs.Lsn;
             }
 
             if (lfs.RecordType != LfsRecord.TypeClientRecord)
@@ -240,7 +267,7 @@ internal sealed class NtfsLogAnalysis
             }
         }
 
-        if (LastLsn == checkpoint && Log.ReadRecord(checkpoint) == null)
+        if (LastLsn == 0)
         {
             throw new JournalException($"The checkpoint record {checkpoint:X} is not in the log");
         }

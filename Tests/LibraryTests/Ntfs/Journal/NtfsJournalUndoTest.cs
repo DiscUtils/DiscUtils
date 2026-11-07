@@ -181,18 +181,26 @@ public partial class NtfsJournalEdgeCaseTest
     }
 
     [Theory]
-    [InlineData(LfsRecord.TypeClientRecord, 0, 1)]
-    [InlineData(LfsRecord.TypeClientRecord, 1, 0)]
-    [InlineData(LfsRecord.TypeClientRestart, 0, 0)]
-    public void UndoPointersMustNameRecordsOfTheActiveClient(uint recordType, int clientIndex, int clientSequence)
+    [InlineData(LfsRecord.TypeClientRecord, 0, 0, "does not belong to the active NTFS client")]
+    [InlineData(LfsRecord.TypeClientRecord, 1, ActiveClientSequence, "does not belong to the active NTFS client")]
+    [InlineData(LfsRecord.TypeClientRestart, 0, ActiveClientSequence, "wrong LFS record type")]
+    public void UndoPointersMustNameRecordsOfTheActiveClient(uint recordType, int clientIndex, int clientSequence, string reason)
     {
         using var volume = Volume();
-        var writer = new TestJournalWriter(volume);
+        var writer = new TestJournalWriter(volume) { ClientSequenceNumber = ActiveClientSequence };
+        var restart = writer.Checkpoint(Attributes);
         var record = Raw(FreeCluster(volume), Pattern);
-        var lsn = writer.AppendRaw(record.ClientData(), recordType, Tx, 0, clientSequence: (ushort)clientSequence, clientIndex: (ushort)clientIndex);
-        var restart = writer.Checkpoint(Attributes, transactions: [(Tx, TransactionState.Active, lsn, lsn)]);
+        writer.Append(record);
+        record.UndoNextLsn = writer.AppendRaw(record.ClientData(), recordType, Tx, 0,
+            clientSequence: (ushort)clientSequence, clientIndex: (ushort)clientIndex);
+        writer.Append(record);
         writer.Finish(restart);
-        AssertReplayRefused(volume, "does not belong to the active NTFS client");
+        if (clientIndex != 0)
+        {
+            AddFreeClientSlot(writer);
+        }
+
+        AssertReplayRefused(volume, reason);
     }
 
     [Theory]

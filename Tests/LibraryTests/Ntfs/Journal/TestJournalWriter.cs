@@ -91,6 +91,7 @@ internal sealed class TestJournalWriter
     private readonly LogFileStorage _storage;
     private readonly Dictionary<long, byte[]> _pages = [];
     private readonly Dictionary<long, (ulong LastLsn, ulong LastEndLsn, int NextFree, bool RecordEnds)> _pageInfo = [];
+    private readonly Dictionary<(ushort Index, ushort Sequence), ulong> _lastClientLsns = [];
     private long _position;
     private ulong _sequence;
 
@@ -127,6 +128,8 @@ internal sealed class TestJournalWriter
 
     public ulong LastLsn { get; private set; }
 
+    public ushort ClientSequenceNumber { get; set; }
+
     /// <summary>Where the next record goes (file offset in $LogFile).</summary>
     public long Position => _position;
 
@@ -143,7 +146,7 @@ internal sealed class TestJournalWriter
 
     /// <summary>Appends any LFS record (the client data as given) and returns its LSN.</summary>
     public ulong AppendRaw(byte[] clientData, uint recordType, uint transactionId, ulong undoNextLsn, ushort flags = 0,
-        ushort clientSequence = 0, ushort clientIndex = 0)
+        ushort? clientSequence = null, ushort clientIndex = 0)
     {
         // A record starts after the page header, and on the next page when its header no longer fits.
         if (_position % PageSize == 0 || PageSize - (_position % PageSize) < HeaderLength)
@@ -152,12 +155,14 @@ internal sealed class TestJournalWriter
         }
 
         var lsn = LsnOf(_position, _sequence);
+        var clientId = (Index: clientIndex, Sequence: clientSequence ?? ClientSequenceNumber);
+        _lastClientLsns.TryGetValue(clientId, out var previousLsn);
         var header = new byte[HeaderLength];
         Put64(header, 0x00, lsn);
-        Put64(header, 0x08, LastLsn);
+        Put64(header, 0x08, previousLsn);
         Put64(header, 0x10, undoNextLsn);
         Put32(header, 0x18, (uint)clientData.Length);
-        Put16(header, 0x1C, clientSequence);
+        Put16(header, 0x1C, clientId.Sequence);
         Put16(header, 0x1E, clientIndex);
         Put32(header, 0x20, recordType);
         Put32(header, 0x24, transactionId);
@@ -194,6 +199,7 @@ internal sealed class TestJournalWriter
         }
 
         _position = (_position + 7) & ~7L;
+        _lastClientLsns[clientId] = lsn;
         LastLsn = lsn;
         return lsn;
     }
@@ -398,6 +404,7 @@ internal sealed class TestJournalWriter
         Put64(page, client + 0x08, restartLsn);
         Put16(page, client + 0x10, 0xFFFF);
         Put16(page, client + 0x12, 0xFFFF);
+        Put16(page, client + 0x14, ClientSequenceNumber);
         Put32(page, client + 0x1C, 8);
         Encoding.Unicode.GetBytes("NTFS").CopyTo(page, client + 0x20);
         JournalUtilities.ApplyFixups(page, 0, PageSize);

@@ -74,7 +74,7 @@ internal sealed class NtfsLogReplayer
         foreach (var lfs in _analysis.Log.ReadForward(_analysis.RedoLsn))
         {
             foundStart = true;
-            if (lfs.RecordType != LfsRecord.TypeClientRecord)
+            if (!_analysis.Log.IsForNtfsClient(lfs) || lfs.RecordType != LfsRecord.TypeClientRecord)
             {
                 continue;
             }
@@ -127,12 +127,7 @@ internal sealed class NtfsLogReplayer
             {
                 var lfs = _analysis.Log.ReadRecord(lsn)
                           ?? throw new JournalException($"Record {lsn:X} to undo is not in the log");
-                var restart = _analysis.Log.Restart;
-                if (lfs.RecordType != LfsRecord.TypeClientRecord || lfs.ClientIndex != restart.InUseClientList ||
-                    lfs.ClientSequenceNumber != restart.InUseClient.SequenceNumber)
-                {
-                    throw new JournalException($"Record {lsn:X} in the undo chain does not belong to the active NTFS client");
-                }
+                _analysis.Log.RequireNtfsRecord(lfs, "undo chain record", LfsRecord.TypeClientRecord);
 
                 if (lfs.TransactionId != loser.Key)
                 {

@@ -137,9 +137,12 @@ public sealed class NtfsJournalInfo
 
     /// <summary>
     /// Gets whether this journal is eligible for persistent replay. Metadata undo requires compensation records
-    /// for recoverable on-disk replay and is available only in memory. This does not describe stream capabilities.
+    /// for recoverable on-disk replay and is available only in memory. Resetting a log with multiple client slots
+    /// is unsupported. This does not describe stream capabilities.
     /// </summary>
-    public bool CanReplayPersistently => Status != NtfsJournalStatus.Unsupported && TransactionsToUndo == 0;
+    public bool CanReplayPersistently => Status != NtfsJournalStatus.Unsupported && TransactionsToUndo == 0 && !HasMultipleClientSlots;
+
+    internal bool HasMultipleClientSlots { get; set; }
 
     /// <inheritdoc />
     public override string ToString() =>
@@ -260,7 +263,6 @@ public static class NtfsJournal
             LogVersion = $"{log.Restart.MajorVersion}.{log.Restart.MinorVersion}",
         };
 
-        var client = log.Restart.InUseClient;
         if (!log.Restart.RequiresRecovery)
         {
             info.Detail = "Windows shut the volume down cleanly";
@@ -275,7 +277,7 @@ public static class NtfsJournal
         long mirrorClusterCount;
         try
         {
-            var analysis = NtfsLogAnalysis.Run(log, client, layout);
+            var analysis = NtfsLogAnalysis.Run(log, layout);
             info.RecordsAfterCheckpoint = analysis.RecordsAfterCheckpoint;
             info.LastLsn = analysis.LastLsn;
             var replayer = new NtfsLogReplayer(volume, layout, analysis);
@@ -285,9 +287,12 @@ public static class NtfsJournal
             info.RecordsToUndo = replayer.UndoneRecords;
             info.TransactionsToUndo = replayer.UndoneTransactions;
             info.FileRecordsChanged = [.. replayer.ChangedFileRecords];
+            info.HasMultipleClientSlots = log.Restart.LogClients != 1;
             if (write && !info.CanReplayPersistently)
             {
-                throw new JournalException("Persistent replay requires metadata undo, which DiscUtils supports only in memory");
+                // The reset image closes the log and puts slot zero on the free list.
+                throw new JournalException(info.HasMultipleClientSlots ? "Persistent replay can only reset a log with a single LFS client slot" :
+                    "Persistent replay requires metadata undo, which DiscUtils supports only in memory");
             }
 
             clusters = replayer.Pages.Commit();
@@ -320,7 +325,7 @@ public static class NtfsJournal
                 info.Status = NtfsJournalStatus.NothingToReplay;
                 info.Detail = log.PublishedReset == null ? "the journal is still open, but replay would not change metadata" :
                     "one restart page still needs to be reset";
-                if (info.CanReplayPersistently)
+                if (info.TransactionsToUndo == 0)
                 {
                     info.RecordsToRedo = 0;
                     info.RecordsToUndo = 0;

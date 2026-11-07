@@ -157,7 +157,7 @@ public partial class NtfsJournalEdgeCaseTest
 
         var layout = JournalVolumeLayout.Read(volume);
         var log = LfsLog.Open(LogFileStorage.Open(volume, layout), out _);
-        var analysis = NtfsLogAnalysis.Run(log, log.Restart.InUseClient, layout);
+        var analysis = NtfsLogAnalysis.Run(log, layout);
         Assert.Equal(0, analysis.RecordsAfterCheckpoint);
         Assert.Equal(change, analysis.RedoLsn);
 
