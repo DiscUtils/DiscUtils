@@ -42,6 +42,13 @@ internal class FileSystemFactory : VfsFileSystemFactory
 
     private NtfsFileSystem Open(Stream stream, VolumeInfo volumeInfo, FileSystemParameters parameters)
     {
-        return new NtfsFileSystem(stream);
+        var mode = NtfsFileSystem.DefaultJournalMode;
+        if (parameters?.Parameters["NtfsJournalMode"] is { } text &&
+            System.Enum.TryParse<NtfsJournalMode>(text, ignoreCase: true, out var parsed))
+        {
+            mode = parsed;
+        }
+
+        return new NtfsFileSystem(stream, mode);
     }
 }
