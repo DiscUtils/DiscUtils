@@ -201,7 +201,8 @@ internal sealed class TestJournalWriter
         IReadOnlyList<(uint TargetAttribute, long Vcn, ulong OldestLsn, long[] Lcns)> dirtyPages = null,
         IReadOnlyList<(uint Offset, TransactionState State, ulong FirstLsn, ulong UndoNextLsn)> transactions = null,
         int clustersPerPage = 1,
-        ulong? checkpointLsn = null)
+        ulong? checkpointLsn = null,
+        uint ntfsVersion = 1)
     {
         var start = Append(new TestLogRecord { Redo = NtfsLogOperation.Noop, Undo = NtfsLogOperation.Noop, TransactionId = 0x18 });
 
@@ -215,14 +216,13 @@ internal sealed class TestJournalWriter
                 max = Math.Max(max, a.Offset);
             }
 
-            var table = Table(0x28, (max - 0x18) / 0x28 + 1);
+            var entrySize = ntfsVersion == 0 ? 0x2C : 0x28;
+            var table = Table(entrySize, (max - 0x18) / entrySize + 1);
             var names = new MemoryStream();
             foreach (var a in openAttributes)
             {
                 Put32(table, a.Offset, 0xFFFFFFFF);
-                Put32(table, a.Offset + 0x04, a.BytesPerIndex);
-                Put32(table, a.Offset + 0x08, a.Type);
-                Put64(table, a.Offset + 0x10, a.FileReference);
+                OpenAttributeEntryBytes(a.Type, a.FileReference, a.BytesPerIndex, ntfsVersion).AsSpan(4).CopyTo(table.AsSpan(a.Offset + 4));
                 if (!string.IsNullOrEmpty(a.Name))
                 {
                     var name = Encoding.Unicode.GetBytes(a.Name);
@@ -246,7 +246,8 @@ internal sealed class TestJournalWriter
 
         if (dirtyPages is { Count: > 0 })
         {
-            var size = 0x20 + (8 * clustersPerPage);
+            var lcnsOffset = ntfsVersion == 0 ? 0x24 : 0x20;
+            var size = lcnsOffset + (8 * clustersPerPage);
             var table = Table(size, dirtyPages.Count);
             for (var i = 0; i < dirtyPages.Count; i++)
             {
@@ -256,11 +257,11 @@ internal sealed class TestJournalWriter
                 Put32(table, e + 0x04, page.TargetAttribute);
                 Put32(table, e + 0x08, (uint)(clustersPerPage * Layout.BytesPerCluster));
                 Put32(table, e + 0x0C, (uint)clustersPerPage);
-                Put64(table, e + 0x10, (ulong)page.Vcn);
-                Put64(table, e + 0x18, page.OldestLsn);
+                Put64(table, e + (ntfsVersion == 0 ? 0x14 : 0x10), (ulong)page.Vcn);
+                Put64(table, e + (ntfsVersion == 0 ? 0x1C : 0x18), page.OldestLsn);
                 for (var j = 0; j < page.Lcns.Length; j++)
                 {
-                    Put64(table, e + 0x20 + (8 * j), (ulong)page.Lcns[j]);
+                    Put64(table, e + lcnsOffset + (8 * j), (ulong)page.Lcns[j]);
                 }
             }
 
@@ -292,7 +293,7 @@ internal sealed class TestJournalWriter
         }
 
         var restart = new byte[0x40];
-        Put32(restart, 0x00, 1);
+        Put32(restart, 0x00, ntfsVersion);
         Put32(restart, 0x04, 0);
         Put64(restart, 0x08, checkpointLsn ?? start);
         Put64(restart, 0x10, oatLsn);
@@ -409,6 +410,27 @@ internal sealed class TestJournalWriter
     }
 
     public LogFileStorage Storage => _storage;
+
+    /// <summary>An open attribute table entry in the layout of NTFS restart version 0 or 1 (also the redo data of OpenNonresidentAttribute).</summary>
+    public static byte[] OpenAttributeEntryBytes(uint type, ulong fileReference, uint bytesPerIndex, uint ntfsVersion = 1)
+    {
+        var e = new byte[ntfsVersion == 0 ? 0x2C : 0x28];
+        Put32(e, 0, 0xFFFFFFFF);
+        if (ntfsVersion == 0)
+        {
+            Put64(e, 0x08, fileReference);
+            Put32(e, 0x1C, type);
+            Put32(e, 0x28, bytesPerIndex);
+        }
+        else
+        {
+            Put32(e, 0x04, bytesPerIndex);
+            Put32(e, 0x08, type);
+            Put64(e, 0x10, fileReference);
+        }
+
+        return e;
+    }
 
     private static TestLogRecord Dump(NtfsLogOperation op, byte[] table) =>
         new() { Redo = op, Undo = NtfsLogOperation.Noop, TransactionId = 0x18, RedoData = table };

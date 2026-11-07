@@ -20,10 +20,18 @@ namespace LibraryTests.Ntfs.Journal;
 public class NtfsJournalWindowsSampleTest
 {
     /// <summary>Sample, what the journal needs, and the cluster size.</summary>
+    /// <remarks>
+    /// s512: 512-byte clusters (file records and index buffers span clusters). s64k: 64K clusters (several dirty
+    /// pages per cluster). x4k-a, x4k-c: compressed and sparse files, object ids, symbolic links and quota tracking
+    /// (Windows' zero-data records). s4kn: a disk with 4096-byte sectors, flushed before the crash.
+    /// </remarks>
     public static IEnumerable<object[]> Samples =>
     [
-        ["s4k-c", NtfsJournalStatus.NothingToReplay, 4096],
-        ["s1k", NtfsJournalStatus.NothingToReplay, 1024],
+        ["s512", NtfsJournalStatus.NeedsReplay, 512],
+        ["s64k", NtfsJournalStatus.NeedsReplay, 65536],
+        ["x4k-a", NtfsJournalStatus.NeedsReplay, 4096],
+        ["x4k-c", NtfsJournalStatus.NeedsReplay, 4096],
+        ["s4kn", NtfsJournalStatus.NothingToReplay, 4096],
     ];
 
     internal static MemoryStream LoadVolume(string name) => Load($"journal-{name}.ntfs.gz");
@@ -77,6 +85,32 @@ public class NtfsJournalWindowsSampleTest
         var info = NtfsJournal.Analyze(volume);
         Assert.True(info.Status == expected, $"{name}: expected {expected}, got {info}");
         Assert.Equal("2.0", info.LogVersion);
+
+        var bootSector = new byte[512];
+
+        DiscUtils.Ntfs.Journal.JournalUtilities.ReadExactly(volume, 0, bootSector, 0, 512);
+        Assert.Equal(clusterSize, BitConverter.ToUInt16(bootSector, 0x0B) * bootSector[0x0D]);
+    }
+
+    [Theory]
+    [MemberData(nameof(Samples))]
+    public void WithoutReplay_TheVolumeIsOutOfDate(string name, NtfsJournalStatus expected, int clusterSize)
+    {
+        // Why replaying matters: as it is on disk, the volume differs from what Windows makes of it.
+        using var volume = LoadVolume(name);
+        var digest = LoadDigest(name);
+        int differences;
+        try
+        {
+            differences = WindowsReplayDigest.Check(volume, digest).Count(l => !l.StartsWith("file ", StringComparison.Ordinal));
+        }
+        catch (IOException)
+        {
+            // Directories the stale metadata cannot even find (the index points at entries that are not there yet).
+            differences = int.MaxValue;
+        }
+
+        Assert.True(expected == NtfsJournalStatus.NeedsReplay ? differences > 0 : differences == 0, $"{name}: {differences}");
         Assert.True(clusterSize > 0);
     }
 

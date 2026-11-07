@@ -299,19 +299,20 @@ internal static class NtfsLogActions
         var roff = record.RecordOffset;
         var aoff = record.AttributeOffset;
         RequireAttributeAt(p, roff, record);
-        Require(p[roff + ANonResident] == 0, record, "a resident value update of a non-resident attribute");
         var length = (int)U32(p, roff + ALength);
-        var valueOffset = U16(p, roff + RValueOffset);
-        Require(aoff >= valueOffset, record, "the value update starts inside the attribute header");
         if (record.RedoLength == record.UndoLength)
         {
-            // Same size before and after: an in-place overwrite.
+            // Same size before and after: an in-place overwrite of bytes of the attribute record. Windows also
+            // uses it for headers, of non-resident attributes too (e.g. the compressed or sparse flag).
             Require(aoff + data.Count <= length, record, "the value update runs past the attribute");
             Copy(data, p, roff + aoff);
             return;
         }
 
-        // Otherwise the value now ends where the data ends.
+        // Otherwise a resident value is resized: it now ends where the data ends.
+        Require(p[roff + ANonResident] == 0, record, "a resident value update of a non-resident attribute");
+        var valueOffset = U16(p, roff + RValueOffset);
+        Require(aoff >= valueOffset, record, "the value update starts inside the attribute header");
         var newLength = Align8(aoff + data.Count);
         ResizeAttribute(p, roff, length, newLength, record);
         Put32(p, roff + RValueLength, (uint)(aoff + data.Count - valueOffset));

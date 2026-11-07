@@ -95,7 +95,7 @@ internal sealed class NtfsLogReplayer
             }
 
             var page = _analysis.FindDirtyPage(record.TargetAttribute, record.TargetVcn);
-            if (page == null || record.Lsn < page.OldestLsn)
+            if (page == null || record.Lsn < _analysis.OldestLsnFor(record.TargetAttribute, record.TargetVcn))
             {
                 continue;
             }
@@ -195,12 +195,17 @@ internal sealed class NtfsLogReplayer
 
                 if (!page.Valid)
                 {
-                    if (op != NtfsLogOperation.InitializeFileRecordSegment)
+                    // A record that was never written can be rebuilt (InitializeFileRecordSegment) or freed again
+                    // (DeallocateFileRecordSegment, the compensation of a creation that never reached the disk;
+                    // Windows then only changes the header fields). Anything else needs a real record.
+                    if (op == NtfsLogOperation.InitializeFileRecordSegment)
+                    {
+                        Array.Clear(page.Data, 0, page.Data.Length);
+                    }
+                    else if (op != NtfsLogOperation.DeallocateFileRecordSegment || page.Signature == SignatureFile)
                     {
                         throw new JournalException($"Log record {record.Lsn:X} changes file record at cluster {lcns[start / _pages.ClusterSize]}, which is damaged");
                     }
-
-                    Array.Clear(page.Data, 0, page.Data.Length);
                 }
 
                 NtfsLogActions.ApplyToFileRecord(op, record, page.Data, data);
@@ -343,12 +348,13 @@ internal sealed class NtfsLogReplayer
             return false;
         }
 
-        if (!page.Valid)
+        // A torn record (signature, but the update sequence array does not match) has no trustworthy LSN.
+        if (!page.Valid && (page.Signature == SignatureFile || page.Signature == SignatureIndx))
         {
-            // A never-written or torn file record can only be rebuilt from scratch.
             return true;
         }
 
+        // Otherwise the LSN is at offset 8, also in a record that was never written (0): Windows checks it there.
         return redo ? page.Lsn < record.Lsn : page.Lsn < _undoStamp;
     }
 
@@ -358,9 +364,16 @@ internal sealed class NtfsLogReplayer
         var expected = page.Kind == PageKind.FileRecord ? SignatureFile : SignatureIndx;
         page.Valid = page.Signature == expected && HasFixupLayout(page.Data, 0, page.Data.Length);
         page.Dirty = true;
-        if (page.Valid)
+
+        // Redo stamps the record's LSN, as Windows does even in a page that is not a valid record yet (it is then
+        // written without an update sequence array). Undo stamps only real records.
+        if (redo)
         {
-            page.Lsn = redo ? record.Lsn : _undoStamp;
+            page.Lsn = record.Lsn;
+        }
+        else if (page.Valid)
+        {
+            page.Lsn = _undoStamp;
         }
     }
 

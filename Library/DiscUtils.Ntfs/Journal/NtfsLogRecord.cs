@@ -69,22 +69,34 @@ internal sealed class NtfsLogRecord
     /// <summary>The clusters of the target page when the record was written, one per VCN from <see cref="TargetVcn"/>.</summary>
     public long[] Lcns { get; private set; }
 
+    /// <summary>LFS header flag: the redo data is all zeros and not stored (its place may hold the undo data).</summary>
+    public const ushort FlagRedoDataZero = 0x0002;
+
+    /// <summary>LFS header flag: the undo data is all zeros and not stored.</summary>
+    public const ushort FlagUndoDataZero = 0x0004;
+
     /// <summary>
-    /// The redo data. Windows leaves bytes out of the record when they are zeros (or not needed, like the data
-    /// of an attribute being deleted): the record then ends before the declared length, and the missing bytes
-    /// count as zeros. Records that leave data out have flag 0x2 (redo) or 0x4 (undo) set in the LFS header.
+    /// The redo data. Windows does not store data that is all zeros: flag 0x2 in the LFS header marks zero redo
+    /// data (seen when a resident value is zeroed, e.g. by making a range of a file sparse; the bytes at the redo
+    /// offset are then the undo data, stored once), flag 0x4 zero undo data. A record can also end before the
+    /// declared data does; the missing bytes count as zeros as well.
     /// </summary>
-    public ArraySegment<byte> RedoData => Data(RedoOffset, RedoLength);
+    public ArraySegment<byte> RedoData => Data(RedoOffset, RedoLength, (Lfs.Flags & FlagRedoDataZero) != 0);
 
-    /// <summary>The undo data; missing bytes count as zeros (see <see cref="RedoData"/>).</summary>
-    public ArraySegment<byte> UndoData => Data(UndoOffset, UndoLength);
+    /// <summary>The undo data (see <see cref="RedoData"/>).</summary>
+    public ArraySegment<byte> UndoData => Data(UndoOffset, UndoLength, (Lfs.Flags & FlagUndoDataZero) != 0);
 
-    private ArraySegment<byte> Data(int offset, int length)
+    private ArraySegment<byte> Data(int offset, int length, bool zero)
     {
         var bytes = Lfs.ClientData;
         if (length == 0)
         {
             return new ArraySegment<byte>(bytes, 0, 0);
+        }
+
+        if (zero)
+        {
+            return new ArraySegment<byte>(new byte[length]);
         }
 
         if (offset + length <= bytes.Length)

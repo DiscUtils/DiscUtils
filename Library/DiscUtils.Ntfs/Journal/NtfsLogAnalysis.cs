@@ -92,6 +92,25 @@ internal sealed class NtfsLogAnalysis
         return null;
     }
 
+    /// <summary>
+    /// The oldest LSN from which changes to the page at (<paramref name="targetAttribute"/>, <paramref name="vcn"/>)
+    /// may be missing. With clusters bigger than a page (64K clusters, 4K pages) several entries share one VCN
+    /// without saying which page of the cluster they are; the oldest of them counts.
+    /// </summary>
+    public ulong OldestLsnFor(uint targetAttribute, long vcn)
+    {
+        ulong oldest = ulong.MaxValue;
+        foreach (var page in DirtyPages)
+        {
+            if (page.Covers(targetAttribute, vcn) && page.OldestLsn < oldest)
+            {
+                oldest = page.OldestLsn;
+            }
+        }
+
+        return oldest;
+    }
+
     private byte[] ReadTableDump(ulong lsn, int length, string name)
     {
         if (lsn == 0 || length == 0)

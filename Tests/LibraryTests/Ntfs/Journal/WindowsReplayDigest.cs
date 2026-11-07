@@ -26,8 +26,18 @@ public static class WindowsReplayDigest
         var windows = new Volume(windowsVolume);
         var ours = new Volume(replayedVolume);
 
-        // $Extend\$RmMetadata\$TxfLog (record 30): Windows updates its timestamps at mount without logging.
+        // $Extend\$RmMetadata\$TxfLog (record 30) and System Volume Information: Windows writes into them at mount
+        // and refreshes their timestamps without logging.
         var excludedRecords = new SortedSet<long> { 30 };
+        // $Extend\$Quota too: Windows charges the files it creates at mount to their owner without logging.
+        foreach (var path in new[] { @"\System Volume Information", @"\$Extend\$Quota" })
+        {
+            if (windows.RecordOf(path) is { } record)
+            {
+                excludedRecords.Add(record);
+            }
+        }
+
         for (long n = 0; n < windows.RecordCount; n++)
         {
             if (windows.RecordLsn(n) > lastLsn)
@@ -80,8 +90,8 @@ public static class WindowsReplayDigest
     public static List<string> Check(Stream replayedVolume, IReadOnlyList<string> digest)
     {
         var ours = new Volume(replayedVolume);
-        var excludedRecords = Numbers(digest.First(l => l.StartsWith("excluded-records ")));
-        var excludedClusters = Numbers(digest.First(l => l.StartsWith("excluded-clusters ")));
+        var excludedRecords = Numbers(digest.First(l => l.StartsWith("excluded-records ", StringComparison.Ordinal)));
+        var excludedClusters = Numbers(digest.First(l => l.StartsWith("excluded-clusters ", StringComparison.Ordinal)));
         var indx = ours.IndexBuffers(excludedRecords).ToDictionary(b => $"{b.Directory}|{b.Index}", b => b.Hash);
         var listing = new HashSet<string>(ours.Listing().Select(l => "file " + l));
         var expectedFiles = 0;
@@ -183,6 +193,24 @@ public static class WindowsReplayDigest
         }
 
         public long RecordCount => _mft.Length / _recordSize;
+
+        public long? RecordOf(string path)
+        {
+            // Metafiles ($Extend\...) are hidden by default.
+            _fs.NtfsOptions.HideMetafiles = false;
+            try
+            {
+                return _fs.GetFileId(path) & 0x0000FFFFFFFFFFFF;
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+            finally
+            {
+                _fs.NtfsOptions.HideMetafiles = true;
+            }
+        }
 
         public ulong RecordLsn(long n) => BitConverter.ToUInt64(_mft, (int)(n * _recordSize) + 8);
 
@@ -312,8 +340,16 @@ public static class WindowsReplayDigest
 
         private string ContentHash(string path)
         {
-            var bytes = ReadAll(path);
-            return bytes.Length + "/" + Hash(bytes, 0, bytes.Length);
+            try
+            {
+                var bytes = ReadAll(path);
+                return bytes.Length + "/" + Hash(bytes, 0, bytes.Length);
+            }
+            catch (NotImplementedException)
+            {
+                // DiscUtils cannot read every kind of file (e.g. compressed and sparse at once).
+                return "unreadable";
+            }
         }
 
         private byte[] ReadAll(string path)
