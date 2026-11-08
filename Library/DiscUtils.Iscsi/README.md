@@ -22,6 +22,12 @@ dotnet add package LTRData.DiscUtils.Iscsi
 
 Initiator and Session provide explicit connections and LUN access. The package also supplies an iscsi transport for generic disk opening. This is a client library, not an iSCSI server or an operating-system initiator driver. Registration is AOT-compatible; protocol-key reflection elsewhere in iSCSI is outside that guarantee.
 
+### Write-cache synchronization
+
+`Disk.Content.Flush()` and `Disk.Content.Flush(true)` issue SCSI `SYNCHRONIZE CACHE (10)` for the entire LUN, with `IMMED` clear. The request is sent even when the current stream has not written anything: a stream-local dirty flag cannot establish whether the target has outstanding cached writes from an earlier session or another stream. `FlushAsync()` requests the same synchronization.
+
+An unsupported command (including SCSI `ILLEGAL REQUEST` / ASC `0x20`) or other synchronization failure is reported to the caller. An unsupported command does **not** establish that the target has no volatile write cache. The `Disk` disposal flush remains best-effort and suppresses errors; applications that need a durability barrier must call and check `Content.Flush(true)` explicitly before disposal. Even a successful command depends on the target and backing storage honoring SCSI cache synchronization.
+
 ## Registration
 
 For automatic discovery, register the providers implemented by this package:

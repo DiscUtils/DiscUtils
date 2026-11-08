@@ -9,4 +9,8 @@
     <ProjectReference Include="..\DiscUtils.Core\DiscUtils.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="LibraryTests" />
+  </ItemGroup>
+
 </Project>

@@ -180,7 +180,7 @@ public class Disk : VirtualDisk
         {
             try
             {
-                _stream?.Flush();
+                _stream?.Flush(flushToDisk: true);
             }
             catch (Exception e) when (e is IOException or ObjectDisposedException)
             {
