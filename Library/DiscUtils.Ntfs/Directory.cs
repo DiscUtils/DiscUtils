@@ -109,7 +109,7 @@ internal class Directory : File
         return dir;
     }
 
-    internal DirectoryEntry? GetEntryByName(string name)
+    internal DirectoryEntry? GetEntryByName(string name, bool requireUnique = false)
     {
         var searchName = name;
 
@@ -119,13 +119,22 @@ internal class Directory : File
             searchName = name[..streamSepPos];
         }
 
-        var entry = Index.FindFirst(new FileNameQuery(searchName, _context.UpperCase));
-        if (entry.Key != null)
+        using var matches = Index.FindAll(new FileNameQuery(searchName, _context.UpperCase), validate: requireUnique).GetEnumerator();
+        if (!matches.MoveNext())
         {
-            return new DirectoryEntry(this, entry.Value, entry.Key);
+            return null;
         }
 
-        return null;
+        var entry = matches.Current;
+        while (requireUnique && matches.MoveNext())
+        {
+            if (matches.Current.Value != entry.Value)
+            {
+                throw new InvalidDataException($"The directory has ambiguous entries for {name}");
+            }
+        }
+
+        return new DirectoryEntry(this, entry.Value, entry.Key);
     }
 
     internal DirectoryEntry AddEntry(File file, string name, FileNameNamespace nameNamespace)

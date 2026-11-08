@@ -68,7 +68,8 @@ public enum NtfsJournalMode
     /// Replay supported journal changes. On a writable stream, replay writes metadata and resets the journal
     /// only when <see cref="NtfsJournalInfo.CanReplayPersistently"/> is true. On a read-only stream, replay uses
     /// an in-memory overlay. A journal DiscUtils cannot replay makes opening a writable stream fail with an
-    /// <see cref="IOException"/>; a read-only stream is opened as it is.
+    /// <see cref="IOException"/>. A read-only stream is opened as it is when recovery is refused, including
+    /// when there is local hibernation evidence or the hibernation check is indeterminate.
     /// </summary>
     Replay,
 
@@ -138,7 +139,7 @@ public sealed class NtfsJournalInfo
     /// <summary>
     /// Gets whether this journal is eligible for persistent replay. Metadata undo requires compensation records
     /// for recoverable on-disk replay and is available only in memory. Resetting a log with multiple client slots
-    /// is unsupported. This does not describe stream capabilities.
+    /// is unsupported. Stream capabilities and exclusive ownership must be established by the caller.
     /// </summary>
     public bool CanReplayPersistently => Status != NtfsJournalStatus.Unsupported && TransactionsToUndo == 0 && !HasMultipleClientSlots;
 
@@ -154,10 +155,11 @@ public sealed class NtfsJournalInfo
 /// Reads and replays supported journal ($LogFile) records on an NTFS volume after an unclean shutdown.
 /// </summary>
 /// <remarks>
-/// The volume of a hibernated Windows (also after a shutdown with Fast Startup) is not shut down cleanly either,
-/// but Windows does not replay its journal: it resumes with the metadata it kept in memory. Replaying the journal
-/// of such a volume, like any other write to it, changes the volume behind Windows' back.
-/// Use an offline volume and exclusive access to its stream for analysis and replay.
+/// When a journal needs replay or reset, recovery checks the local root hibernation file before exposing an
+/// overlay or writing to the volume. Evidence of a saved Windows resume image or an indeterminate check prevents
+/// recovery. An empty or clean journal needs no recovery and is returned without this check.
+/// Use an offline volume with exclusive access. A suspended Windows installation can still own a data volume
+/// whose hibernation file is on a different volume. The local check cannot establish that the volume was released.
 /// </remarks>
 public static class NtfsJournal
 {
@@ -178,7 +180,7 @@ public static class NtfsJournal
     /// A <see cref="FileStream"/> uses <c>Flush(true)</c>. For other streams, durability and ordering after a crash
     /// depend on whether <see cref="Stream.Flush()"/> reaches all backing storage layers.
     /// Replay is not atomic. An I/O error during the writes or flushes can leave a partially updated volume.
-    /// Journals that require metadata undo cannot be written by this API.
+    /// Journals that require metadata undo or fail the local hibernation check cannot be written by this API.
     /// </remarks>
     /// <exception cref="IOException">The stream is read-only, the journal is unsupported (before writing), or an I/O error occurred.</exception>
     public static NtfsJournalInfo Replay(Stream volume)
@@ -202,11 +204,7 @@ public static class NtfsJournal
         replayed = null;
         if (info.Status == NtfsJournalStatus.NeedsReplay && clusters != null)
         {
-            var snapshot = new SnapshotStream(volume, Ownership.None);
-            snapshot.Snapshot();
-            WriteClusters(snapshot, clusters, clusterSize);
-            snapshot.Freeze();
-            replayed = snapshot;
+            replayed = CreateReplayOverlay(volume, clusters, clusterSize);
             info.ReplayedInMemory = true;
         }
 
@@ -265,7 +263,7 @@ public static class NtfsJournal
 
         if (!log.Restart.RequiresRecovery)
         {
-            info.Detail = "Windows shut the volume down cleanly";
+            info.Detail = "the journal is marked cleanly closed or has no client in use";
             return info;
         }
 
@@ -306,6 +304,14 @@ public static class NtfsJournal
                 (published.CurrentLsn != Math.Max(analysis.LastLsn, log.Restart.CurrentLsn) || clusters.Count != 0 || !info.CanReplayPersistently))
             {
                 throw new JournalException("A partial $LogFile reset disagrees with recovery from its remaining dirty page");
+            }
+
+            RequireNoLocalHibernationEvidence(volume, layout, allowMftMirror: mirrorClusterCount != 0 && clusters.ContainsKey(layout.MftCluster));
+            if (clusters.Count != 0)
+            {
+                // Pending metadata could make hiberfil.sys visible or change the clusters it names.
+                using var overlay = CreateReplayOverlay(volume, clusters, clusterSize);
+                RequireNoLocalHibernationEvidence(overlay, layout, staged: true);
             }
 
             if (write)
@@ -374,6 +380,31 @@ public static class NtfsJournal
         }
 
         return info;
+    }
+
+    private static void RequireNoLocalHibernationEvidence(Stream volume, JournalVolumeLayout layout,
+        bool allowMftMirror = false, bool staged = false)
+    {
+        var (evidence, detail) = NtfsHibernation.Probe(volume, layout, allowMftMirror);
+        var view = staged ? " in the staged replay view" : "";
+        if (evidence == NtfsHibernationEvidence.Active)
+        {
+            throw new JournalException($"{detail}{view}. Recovery is refused for hibernation or Fast Startup");
+        }
+
+        if (evidence == NtfsHibernationEvidence.Indeterminate)
+        {
+            throw new JournalException($"The local Windows hibernation state is indeterminate{view}. {detail}");
+        }
+    }
+
+    private static SnapshotStream CreateReplayOverlay(Stream volume, Dictionary<long, byte[]> clusters, int clusterSize)
+    {
+        var snapshot = new SnapshotStream(new JournalReadOnlyStream(volume), Ownership.Dispose);
+        snapshot.Snapshot();
+        WriteClusters(snapshot, clusters, clusterSize);
+        snapshot.Freeze();
+        return snapshot;
     }
 
     private static void FlushReplayWrites(Stream volume)

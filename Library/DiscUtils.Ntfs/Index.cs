@@ -199,9 +199,16 @@ internal class Index : IDisposable
         idx.WriteRootNodeToDisk();
     }
 
-    public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query)
+    public IEnumerable<KeyValuePair<byte[], byte[]>> FindAll(IComparable<byte[]> query, bool validate = false)
     {
-        foreach (var entry in FindAllIn(query, _rootNode))
+        if (validate && (!IsFileIndex || _root.AttributeType != (uint)AttributeType.FileName ||
+            _root.CollationRule != AttributeCollationRule.Filename || _root.IndexAllocationSize != _bpb.IndexBufferSize ||
+            _root.RawClustersPerIndexRecord == 0))
+        {
+            throw new InvalidDataException("The directory index root has an invalid format");
+        }
+
+        foreach (var entry in FindAllIn(query, _rootNode, validate, depth: 0))
         {
             yield return new KeyValuePair<byte[], byte[]>(entry.KeyBuffer, entry.DataBuffer);
         }
@@ -414,8 +421,13 @@ internal class Index : IDisposable
         }
     }
 
-    private IEnumerable<IndexEntry> FindAllIn(IComparable<byte[]> query, IndexNode node)
+    private IEnumerable<IndexEntry> FindAllIn(IComparable<byte[]> query, IndexNode node, bool validate, int depth)
     {
+        if (validate)
+        {
+            ValidateLookupNode(node, depth);
+        }
+
         foreach (var focus in node.Entries)
         {
             var searchChildren = true;
@@ -441,8 +453,13 @@ internal class Index : IDisposable
 
             if (searchChildren && (focus.Flags & IndexEntryFlags.Node) != 0)
             {
+                if (validate)
+                {
+                    ValidateLookupChild(focus.ChildrenVirtualCluster);
+                }
+
                 var block = GetSubBlock(focus);
-                foreach (var entry in FindAllIn(query, block.Node))
+                foreach (var entry in FindAllIn(query, block.Node, validate, depth + 1))
                 {
                     yield return entry;
                 }
@@ -457,6 +474,58 @@ internal class Index : IDisposable
             {
                 yield break;
             }
+        }
+    }
+
+    private void ValidateLookupNode(IndexNode node, int depth)
+    {
+        var header = node.Header;
+        if (depth >= 64 || header.OffsetToFirstEntry < IndexHeader.Size ||
+            header.OffsetToFirstEntry + (long)node.CalcEntriesSize() != header.TotalSizeOfEntries ||
+            header.TotalSizeOfEntries > header.AllocatedSizeOfEntries)
+        {
+            throw new InvalidDataException("The directory index has invalid node bounds or depth");
+        }
+
+        byte[] previousKey = null;
+        foreach (var entry in node.Entries)
+        {
+            if ((entry.Flags & ~(IndexEntryFlags.Node | IndexEntryFlags.End)) != 0)
+            {
+                throw new InvalidDataException("The directory index has an invalid entry flag");
+            }
+
+            if ((entry.Flags & IndexEntryFlags.End) != 0)
+            {
+                return;
+            }
+
+            var key = entry.KeyBuffer;
+            if (key.Length < 0x42 || key.Length != 0x42 + 2 * key[0x40] ||
+                (previousKey != null && _comparer.Compare(previousKey, key) > 0))
+            {
+                throw new InvalidDataException("The directory index has an invalid or out-of-order filename");
+            }
+
+            previousKey = key;
+        }
+
+        throw new InvalidDataException("The directory index node has no end entry");
+    }
+
+    private void ValidateLookupChild(long vcn)
+    {
+        if (vcn < 0 || vcn > long.MaxValue / Math.Max(_bpb.BytesPerCluster, (long)IndexBufferSize) ||
+            AllocationStream == null || _indexBitmap == null)
+        {
+            throw new InvalidDataException("The directory index has an invalid child reference");
+        }
+
+        var position = IndexBlockVcnToPosition(vcn);
+        if (position > AllocationStream.Length - IndexBufferSize || position % IndexBufferSize != 0 ||
+            !_indexBitmap.IsPresent(position / IndexBufferSize))
+        {
+            throw new InvalidDataException("The directory index child is outside the allocated index blocks");
         }
     }
 

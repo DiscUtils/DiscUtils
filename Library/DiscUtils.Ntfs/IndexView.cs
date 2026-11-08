@@ -57,9 +57,9 @@ internal class IndexView<K, D>
         set => _index[Unconvert(key)] = Unconvert(value);
     }
 
-    public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<byte[]> query)
+    public IEnumerable<KeyValuePair<K, D>> FindAll(IComparable<byte[]> query, bool validate = false)
     {
-        foreach (var entry in _index.FindAll(query))
+        foreach (var entry in _index.FindAll(query, validate))
         {
             yield return new KeyValuePair<K, D>(Convert<K>(entry.Key), Convert<D>(entry.Value));
         }
