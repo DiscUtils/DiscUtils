@@ -387,6 +387,25 @@ public sealed class Session : IDisposable
         return Send(cmd, outBuffer, inBuffer);
     }
 
+    /// <summary>
+    /// Asks the target to put every write to a LUN that it has acknowledged on stable storage (SCSI SYNCHRONIZE CACHE).
+    /// </summary>
+    /// <param name="lun">The LUN to flush.</param>
+    internal void SynchronizeCache(long lun)
+    {
+        Send(new ScsiSynchronizeCache10Command((ulong)lun), default, default);
+    }
+
+    /// <summary>
+    /// Asks the target to put every write to a LUN that it has acknowledged on stable storage (SCSI SYNCHRONIZE CACHE).
+    /// </summary>
+    /// <param name="lun">The LUN to flush.</param>
+    /// <param name="cancellationToken"></param>
+    internal async ValueTask SynchronizeCacheAsync(long lun, CancellationToken cancellationToken)
+    {
+        await SendAsync(new ScsiSynchronizeCache10Command((ulong)lun), default, default, cancellationToken).ConfigureAwait(false);
+    }
+
     internal uint NextCommandSequenceNumber()
     {
         return ++CommandSequenceNumber;

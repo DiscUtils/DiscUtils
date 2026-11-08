@@ -164,4 +164,29 @@ public class Disk : VirtualDisk
     {
         throw new NotSupportedException("Differencing disks not supported for iSCSI disks");
     }
+
+    /// <summary>
+    /// Disposes of this instance. Like an operating system that unmounts a disk, it first asks the target to put
+    /// the writes it acknowledged on stable storage.
+    /// </summary>
+    /// <param name="disposing"><c>true</c> if running inside Dispose().</param>
+    /// <remarks>
+    /// A failure of that last flush is not reported here (the session may already be gone). Call
+    /// <c>Content.Flush()</c> before disposing to find out whether the target stored the writes.
+    /// </remarks>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            try
+            {
+                _stream?.Flush();
+            }
+            catch (Exception e) when (e is IOException or ObjectDisposedException)
+            {
+            }
+        }
+
+        base.Dispose(disposing);
+    }
 }

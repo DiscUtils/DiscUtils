@@ -39,6 +39,12 @@ internal class DiskStream : SparseStream
     private long _position;
     private readonly Session _session;
 
+    // Set by a write and cleared by a flush, so a flush with nothing written costs no round trip.
+    private bool _unflushedWrites;
+
+    // The target rejected SYNCHRONIZE CACHE as an unknown command: it has no volatile cache to flush.
+    private bool _noSynchronizeCache;
+
     public DiskStream(Session session, long lun, FileAccess access)
     {
         _session = session;
@@ -71,7 +77,61 @@ internal class DiskStream : SparseStream
         set => _position = value;
     }
 
-    public override void Flush() { }
+    /// <summary>
+    /// Makes the target put the writes it acknowledged on stable storage (SCSI SYNCHRONIZE CACHE). A target may
+    /// acknowledge a write while it is still in a volatile cache; until this returns, a power loss on the target can
+    /// lose it or keep a later write without an earlier one. Does nothing if nothing was written since the last flush.
+    /// </summary>
+    public override void Flush()
+    {
+        if (!_unflushedWrites)
+        {
+            return;
+        }
+
+        if (!_noSynchronizeCache)
+        {
+            try
+            {
+                _session.SynchronizeCache(_lun);
+            }
+            catch (ScsiCommandException e) when (IsUnknownCommand(e))
+            {
+                _noSynchronizeCache = true;
+            }
+        }
+
+        _unflushedWrites = false;
+    }
+
+    /// <inheritdoc cref="Flush"/>
+    public override async Task FlushAsync(CancellationToken cancellationToken)
+    {
+        if (!_unflushedWrites)
+        {
+            return;
+        }
+
+        if (!_noSynchronizeCache)
+        {
+            try
+            {
+                await _session.SynchronizeCacheAsync(_lun, cancellationToken).ConfigureAwait(false);
+            }
+            catch (ScsiCommandException e) when (IsUnknownCommand(e))
+            {
+                _noSynchronizeCache = true;
+            }
+        }
+
+        _unflushedWrites = false;
+    }
+
+    // ILLEGAL REQUEST / INVALID COMMAND OPERATION CODE: a target without a write cache need not implement the command.
+    private static bool IsUnknownCommand(ScsiCommandException e)
+        => e.TryGetSenseData(out var sense)
+           && sense.SenseKey == ScsiSenseKey.IllegalRequest
+           && sense.AdditionalSenseCode == 0x20;
 
     public override int Read(byte[] buffer, int offset, int count)
         => Read(buffer.AsSpan(offset, count));
@@ -172,6 +232,7 @@ internal class DiskStream : SparseStream
             ? _session.FirstBurstLength
             : (_session.ActiveConnection.MaxTargetReceiveDataSegmentLength ?? _session.ActiveConnection.MaxInitiatorTransmitDataSegmentLength);
 
+        _unflushedWrites = true;
         var numWritten = 0;
 
         while (numWritten < buffer.Length)
@@ -220,6 +281,7 @@ internal class DiskStream : SparseStream
             ? _session.FirstBurstLength
             : (_session.ActiveConnection.MaxTargetReceiveDataSegmentLength ?? _session.ActiveConnection.MaxInitiatorTransmitDataSegmentLength);
 
+        _unflushedWrites = true;
         var numWritten = 0;
 
         while (numWritten < buffer.Length)
