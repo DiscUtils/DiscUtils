@@ -35,7 +35,9 @@ namespace DiscUtils.Ntfs.Journal;
 /// record or index buffer) carries an older LSN than the record; pages without an LSN (bitmaps, plain data) are
 /// replayed unconditionally, which is safe because those operations set bytes and bits to fixed values. Undo then
 /// follows each active transaction's undo-next chain backwards. Undo of different transactions is supported
-/// only for disjoint clusters. We do not write compensation records or persist changes that require undo.
+/// only for disjoint clusters, except that bitmap bit runs only need to be disjoint: setting or clearing different
+/// bits of one cluster gives the same result in any order. We do not write compensation records or persist changes
+/// that require undo.
 /// </remarks>
 internal sealed class NtfsLogReplayer
 {
@@ -376,7 +378,7 @@ internal sealed class NtfsLogReplayer
             return false;
         }
 
-        var bytes = _pages.ReadRaw(lcns, byteStart, byteCount, undoTransaction);
+        var bytes = _pages.ReadBits(lcns, byteStart, (int)(firstBit & 7), (int)bits, undoTransaction);
         var before = (byte[])bytes.Clone();
         NtfsLogActions.ChangeBits(bytes, (int)(firstBit & 7), (int)bits, op == NtfsLogOperation.SetBitsInNonresidentBitMap);
         if (before.AsSpan().SequenceEqual(bytes))

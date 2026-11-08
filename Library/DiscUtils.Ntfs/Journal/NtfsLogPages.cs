@@ -76,6 +76,7 @@ internal sealed class NtfsLogPages
     private readonly Dictionary<long, byte[]> _rawOriginal = [];
     private readonly Dictionary<long, PageKind> _clusterUse = [];
     private readonly Dictionary<long, uint> _undoOwners = [];
+    private readonly Dictionary<long, List<(int First, int Count, uint Transaction)>> _undoBitOwners = [];
 
     public NtfsLogPages(Stream volume, JournalVolumeLayout layout)
     {
@@ -88,7 +89,8 @@ internal sealed class NtfsLogPages
     /// <summary>File records, index buffers and plain clusters whose bytes the replay changes (set by <see cref="Commit"/>).</summary>
     public int ChangedPageCount { get; private set; }
 
-    public int UndoTransactionCount => _undoOwners.Values.Distinct().Count();
+    public int UndoTransactionCount =>
+        _undoOwners.Values.Concat(_undoBitOwners.Values.SelectMany(runs => runs.Select(run => run.Transaction))).Distinct().Count();
 
     /// <summary>
     /// Gets a file record or index buffer of <paramref name="length"/> bytes that starts <paramref name="start"/>
@@ -136,6 +138,35 @@ internal sealed class NtfsLogPages
     {
         var (spanLcns, startInFirst) = Span(lcns, start, length);
         Claim(spanLcns, PageKind.Raw, undoTransaction);
+        var buffer = new byte[length];
+        ReadSpan(spanLcns, startInFirst, buffer, 0, length);
+        return buffer;
+    }
+
+    /// <summary>
+    /// Reads the bytes that hold <paramref name="bits"/> bits of a bitmap, starting at bit
+    /// <paramref name="firstBitInByte"/> of the byte <paramref name="start"/> bytes into the clusters
+    /// <paramref name="lcns"/>. An undo claims only those bits, not the whole clusters: transactions that roll back
+    /// different bits of one cluster (two allocations in the same part of $Bitmap) do not conflict.
+    /// </summary>
+    public byte[] ReadBits(long[] lcns, int start, int firstBitInByte, int bits, uint undoTransaction)
+    {
+        var length = (int)((firstBitInByte + (long)bits + 7) >> 3);
+        var (spanLcns, startInFirst) = Span(lcns, start, length);
+        Claim(spanLcns, PageKind.Raw);
+        if (undoTransaction != 0)
+        {
+            var clusterBits = (long)ClusterSize * 8;
+            var first = ((long)startInFirst * 8) + firstBitInByte;
+            var end = first + bits;
+            for (var i = 0; i < spanLcns.Length; i++)
+            {
+                var from = Math.Max(first, i * clusterBits) - (i * clusterBits);
+                var to = Math.Min(end, (i + 1) * clusterBits) - (i * clusterBits);
+                ClaimBits(spanLcns[i], (int)from, (int)(to - from), undoTransaction);
+            }
+        }
+
         var buffer = new byte[length];
         ReadSpan(spanLcns, startInFirst, buffer, 0, length);
         return buffer;
@@ -264,9 +295,49 @@ internal sealed class NtfsLogPages
                     throw new JournalException($"Undo for transactions {owner:X} and {undoTransaction:X} overlaps cluster {lcn}");
                 }
 
+                if (_undoBitOwners.TryGetValue(lcn, out var runs))
+                {
+                    foreach (var run in runs)
+                    {
+                        if (run.Transaction != undoTransaction)
+                        {
+                            throw new JournalException($"Undo for transactions {run.Transaction:X} and {undoTransaction:X} overlaps cluster {lcn}");
+                        }
+                    }
+                }
+
                 _undoOwners[lcn] = undoTransaction;
             }
         }
+    }
+
+    /// <summary>
+    /// Claims bits <paramref name="first"/> to <paramref name="first"/> + <paramref name="count"/> - 1 of cluster
+    /// <paramref name="lcn"/> for the undo of one transaction.
+    /// </summary>
+    private void ClaimBits(long lcn, int first, int count, uint undoTransaction)
+    {
+        if (_undoOwners.TryGetValue(lcn, out var owner) && owner != undoTransaction)
+        {
+            throw new JournalException($"Undo for transactions {owner:X} and {undoTransaction:X} overlaps cluster {lcn}");
+        }
+
+        if (!_undoBitOwners.TryGetValue(lcn, out var runs))
+        {
+            runs = [];
+            _undoBitOwners[lcn] = runs;
+        }
+
+        foreach (var run in runs)
+        {
+            if (run.Transaction != undoTransaction && run.First < first + count && first < run.First + run.Count)
+            {
+                throw new JournalException(
+                    $"Undo for transactions {run.Transaction:X} and {undoTransaction:X} overlaps bits {Math.Max(first, run.First)}-{Math.Min(first + count, run.First + run.Count) - 1} of cluster {lcn}");
+            }
+        }
+
+        runs.Add((first, count, undoTransaction));
     }
 
     private byte[] RawCluster(long lcn)
