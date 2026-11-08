@@ -135,6 +135,15 @@ public class ConcatStream : SparseStream
         }
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        CheckDisposed();
+        for (var i = 0; i < _streams.Count; ++i)
+        {
+            _streams[i].Flush(flushToDisk);
+        }
+    }
+
     public override int Read(byte[] buffer, int offset, int count)
     {
         CheckDisposed();

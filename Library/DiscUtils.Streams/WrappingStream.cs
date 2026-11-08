@@ -77,6 +77,11 @@ public class WrappingStream : SparseStream
         _wrapped.Flush();
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        _wrapped.Flush(flushToDisk);
+    }
+
     public override int Read(byte[] buffer, int offset, int count)
     {
         return _wrapped.Read(buffer, offset, count);

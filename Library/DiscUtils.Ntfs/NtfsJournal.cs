@@ -128,7 +128,7 @@ public sealed class NtfsJournalInfo
     public IReadOnlyList<long> FileRecordsChanged { get; internal set; } = [];
 
     /// <summary>
-    /// Gets a value indicating whether replay wrote to the volume, reset the journal and completed its flush calls.
+    /// Gets a value indicating whether replay wrote to the volume stream, reset the journal and completed its flush calls.
     /// This is also true for a reset with no metadata changes (<see cref="NtfsJournalStatus.NothingToReplay"/>).
     /// </summary>
     public bool Replayed { get; internal set; }
@@ -177,8 +177,10 @@ public static class NtfsJournal
     /// Replay prepares the changes before writing. If the MFT mirror changes, it is written and flushed before
     /// the primary records. Replay flushes metadata before resetting the restart pages. It writes and flushes
     /// the alternate restart page before replacing and flushing the source page.
-    /// A <see cref="FileStream"/> uses <c>Flush(true)</c>. For other streams, durability and ordering after a crash
-    /// depend on whether <see cref="Stream.Flush()"/> reaches all backing storage layers.
+    /// Replay requests <see cref="SparseStream.Flush(bool)"/> with <c>true</c> through a non-owning sparse
+    /// stream adapter. Built-in wrappers forward the request to backing streams that support disk flushing;
+    /// other streams retain their parameterless <see cref="Stream.Flush()"/> behavior. The caller must establish
+    /// whether every storage layer honors the barrier.
     /// Replay is not atomic. An I/O error during the writes or flushes can leave a partially updated volume.
     /// Journals that require metadata undo or fail the local hibernation check cannot be written by this API.
     /// </remarks>
@@ -355,6 +357,10 @@ public static class NtfsJournal
         changedClusters = clusters;
         if (write)
         {
+            // This adapter owns no resources. Do not dispose it: a non-owning SparseWrapperStream
+            // performs an extra parameterless flush on disposal, which would change replay ordering
+            // and could hide the original exception from a failed durability barrier.
+            var flushStream = SparseStream.FromStream(volume, Ownership.None);
             bool IsMirrorCluster(KeyValuePair<long, byte[]> cluster) => mirrorClusterCount > 0 &&
                 cluster.Key >= layout.MftMirrorCluster && cluster.Key - layout.MftMirrorCluster < mirrorClusterCount;
 
@@ -362,20 +368,20 @@ public static class NtfsJournal
             {
                 // A retry can skip primary records whose LSN already advanced. Their copies must be written first.
                 WriteClusters(volume, clusters.Where(IsMirrorCluster), clusterSize);
-                FlushReplayWrites(volume);
+                flushStream.Flush(flushToDisk: true);
             }
 
             WriteClusters(volume, clusters.Where(cluster => !IsMirrorCluster(cluster)), clusterSize);
-            // Flush even when no pages changed. A previous attempt may have left visible but buffered metadata.
-            FlushReplayWrites(volume);
+            // Flush even without page changes. Metadata or a recognized alternate reset may still be buffered.
+            flushStream.Flush(flushToDisk: true);
             if (alternateRestart != null)
             {
                 storage.Write(alternateOffset, alternateRestart, 0, alternateRestart.Length);
-                FlushReplayWrites(volume);
+                flushStream.Flush(flushToDisk: true);
             }
 
             storage.Write(sourceOffset, sourceRestart, 0, sourceRestart.Length);
-            FlushReplayWrites(volume);
+            flushStream.Flush(flushToDisk: true);
             info.Replayed = true;
         }
 
@@ -407,18 +413,6 @@ public static class NtfsJournal
         return snapshot;
     }
 
-    private static void FlushReplayWrites(Stream volume)
-    {
-        if (volume is FileStream file)
-        {
-            file.Flush(flushToDisk: true);
-        }
-        else
-        {
-            volume.Flush();
-        }
-    }
-
     private static void WriteClusters(Stream stream, IEnumerable<KeyValuePair<long, byte[]>> clusters, int clusterSize)
     {
         foreach (var cluster in clusters.OrderBy(c => c.Key))
@@ -433,9 +427,12 @@ public static class NtfsJournal
     /// </summary>
     private static long AddMftMirror(Stream volume, JournalVolumeLayout layout, Dictionary<long, byte[]> clusters)
     {
-        var mirrorBytes = 4 * layout.MftRecordSize;
+        const int reservedRecords = 16;
+        var minimumMirrorBytes = 4 * layout.MftRecordSize;
         var clusterSize = layout.BytesPerCluster;
-        var mirrorClusters = (mirrorBytes + (long)clusterSize - 1) / clusterSize;
+        // A large cluster can mirror additional reserved records. Leave the remaining cluster bytes as stored.
+        var reservedMirrorBytes = Math.Max(minimumMirrorBytes, Math.Min(clusterSize, reservedRecords * layout.MftRecordSize));
+        var mirrorClusters = (reservedMirrorBytes + (long)clusterSize - 1) / clusterSize;
         var touched = clusters.Keys.Any(lcn => lcn >= layout.MftCluster && lcn - layout.MftCluster < mirrorClusters);
         if (!touched)
         {
@@ -450,13 +447,13 @@ public static class NtfsJournal
         }
 
         var mftStart = layout.MftCluster * clusterSize;
-        var bytes = new byte[mirrorBytes];
-        for (var done = 0; done < mirrorBytes;)
+        var bytes = new byte[reservedMirrorBytes];
+        for (var done = 0; done < bytes.Length;)
         {
             var position = mftStart + done;
             var lcn = position / clusterSize;
             var inCluster = (int)(position % clusterSize);
-            var chunk = Math.Min(mirrorBytes - done, clusterSize - inCluster);
+            var chunk = Math.Min(bytes.Length - done, clusterSize - inCluster);
             if (clusters.TryGetValue(lcn, out var cluster))
             {
                 Array.Copy(cluster, inCluster, bytes, done, chunk);
@@ -478,11 +475,12 @@ public static class NtfsJournal
         }
 
         var (extents, length) = LogFileStorage.ReadDataAttribute(mirrorRecord, layout, "$MFTMirr");
-        if (length < mirrorBytes || extents[0].Lcn != layout.MftMirrorCluster || extents[0].Length < mirrorClusters)
+        if (length < minimumMirrorBytes || extents[0].Lcn != layout.MftMirrorCluster || extents[0].Length < mirrorClusters)
         {
             throw new JournalException("$MFTMirr data does not match the contiguous mirror location in the boot sector");
         }
 
+        var mirrorBytes = (int)Math.Min(reservedMirrorBytes, length - length % layout.MftRecordSize);
         var mirrorStart = layout.MftMirrorCluster * clusterSize;
         for (var recordOffset = 0; recordOffset < mirrorBytes; recordOffset += mirrorRecord.Length)
         {

@@ -114,6 +114,11 @@ public class WrappingMappedStream<T> : MappedStream
         WrappedStream.Flush();
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        FlushWrappedStream(WrappedStream, flushToDisk);
+    }
+
     public override Task FlushAsync(CancellationToken cancellationToken) =>
         WrappedStream.FlushAsync(cancellationToken);
 

@@ -116,6 +116,18 @@ public sealed class ContentStream : MappedStream
         _fileStream.Flush();
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        CheckDisposed();
+
+        if (!CanWrite)
+        {
+            throw new InvalidOperationException("Attempt to flush to read-only VHDX");
+        }
+
+        _fileStream.Flush(flushToDisk);
+    }
+
     public override IEnumerable<StreamExtent> MapContent(long start, long length)
     {
         CheckDisposed();

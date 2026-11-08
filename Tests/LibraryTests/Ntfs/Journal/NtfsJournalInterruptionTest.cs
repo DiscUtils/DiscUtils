@@ -16,22 +16,28 @@ public partial class NtfsJournalEdgeCaseTest
     [Theory]
     [InlineData(1, 0, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(1, 512, false, NtfsJournalStatus.NeedsReplay)]
+    [InlineData(1, 4096, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(2, 0, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(2, 0, true, NtfsJournalStatus.NeedsReplay)]
     [InlineData(3, 0, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(3, 512, false, NtfsJournalStatus.Unsupported)]
     [InlineData(3, 4096, false, NtfsJournalStatus.NeedsReplay)]
+    [InlineData(4, 0, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(4, 512, false, NtfsJournalStatus.NeedsReplay)]
+    [InlineData(4, 4096, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(5, 0, false, NtfsJournalStatus.NeedsReplay)]
     [InlineData(5, 0, true, NtfsJournalStatus.NothingToReplay)]
+    [InlineData(6, 0, false, NtfsJournalStatus.NothingToReplay)]
     [InlineData(6, 512, false, NtfsJournalStatus.NothingToReplay)]
     [InlineData(6, 4096, false, NtfsJournalStatus.NothingToReplay)]
     [InlineData(7, 0, false, NtfsJournalStatus.NothingToReplay)]
     [InlineData(7, 0, true, NtfsJournalStatus.NothingToReplay)]
     [InlineData(8, 0, false, NtfsJournalStatus.NothingToReplay)]
     [InlineData(8, 512, false, NtfsJournalStatus.Clean)]
+    [InlineData(8, 4096, false, NtfsJournalStatus.Clean)]
     [InlineData(9, 0, false, NtfsJournalStatus.NothingToReplay)]
     [InlineData(9, 0, true, NtfsJournalStatus.Clean)]
+    [InlineData(0, 0, false, NtfsJournalStatus.Clean)] // No fault. Reopen after the final successful barrier.
     public void RedoRetryUsesThePersistedImageAtEachWriteAndBarrier(int cut, int persistedPrefix, bool completedBarrier,
         NtfsJournalStatus expected)
     {
@@ -39,10 +45,45 @@ public partial class NtfsJournalEdgeCaseTest
         var (writer, rawLcn, updateLsn, attribute) = WriteRedoInterruptionFixture(dirty);
         var mft = writer.Layout.MftCluster * 4096;
         var mirror = writer.Layout.MftMirrorCluster * 4096;
+        using var fs = new NtfsFileSystem(dirty, NtfsJournalMode.Ignore);
+        var logStart = fs.PathToClusters("$LogFile").First().Offset * 4096;
+        var writes = new[]
+        {
+            (Step: 1, Barrier: 2, Position: mirror),
+            (Step: 3, Barrier: 5, Position: mft),
+            (Step: 4, Barrier: 5, Position: rawLcn * 4096),
+            (Step: 6, Barrier: 7, Position: logStart + 4096),
+            (Step: 8, Barrier: 9, Position: logStart),
+        };
 
-        using var device = new CrashImageStream(dirty.ToArray(), cut, persistedPrefix, completedBarrier);
-        Assert.Same(device.Failure, Assert.Throws<IOException>(() => NtfsJournal.Replay(device)));
-        using var retry = JournalScenario.Copy(device.CrashImage);
+        var initial = dirty.ToArray();
+        using var device = new CrashImageStream(initial, cut, persistedPrefix, completedBarrier);
+        if (cut == 0)
+        {
+            Assert.True(NtfsJournal.Replay(device).Replayed);
+        }
+        else
+        {
+            Assert.Same(device.Failure, Assert.Throws<IOException>(() => NtfsJournal.Replay(device)));
+        }
+
+        // Each write is for a different cluster. Check the exact stable image, including untouched bytes.
+        var events = new (long Position, int Count)[9]; // Default entry denotes a flush.
+        using var completed = JournalScenario.Copy(initial);
+        Assert.True(NtfsJournal.Replay(completed).Replayed);
+        var expectedImage = (byte[])initial.Clone();
+        foreach (var (step, barrier, position) in writes)
+        {
+            events[step - 1] = (position, 4096);
+            var count = cut == 0 || barrier < cut || (barrier == cut && completedBarrier)
+                ? 4096 : step == cut ? persistedPrefix : 0;
+            Array.Copy(completed.GetBuffer(), position, expectedImage, position, count);
+        }
+
+        Assert.Equal(events.Take(cut == 0 ? events.Length : cut), device.Events);
+        var crashImage = device.CrashImage;
+        Assert.True(expectedImage.AsSpan().SequenceEqual(crashImage), $"Unexpected stable bytes at event {cut}");
+        using var retry = JournalScenario.Copy(crashImage);
         var analysis = NtfsJournal.Analyze(retry);
         Assert.True(analysis.Status == expected, $"cut {cut}: {analysis}");
 
@@ -79,6 +120,41 @@ public partial class NtfsJournalEdgeCaseTest
         Assert.Equal(bytes, retry.ToArray());
     }
 
+    [Theory]
+    [InlineData(7)]
+    [InlineData(9)]
+    public void RetryOnTheSameStreamAfterAFailedRestartBarrier(int cut)
+    {
+        using var dirty = Volume();
+        var (writer, _, _, _) = WriteRedoInterruptionFixture(dirty);
+        using var device = new CrashImageStream(dirty.ToArray(), cut);
+        Assert.Same(device.Failure, Assert.Throws<IOException>(() => NtfsJournal.Replay(device)));
+
+        using var stable = JournalScenario.Copy(device.CrashImage);
+        Assert.Equal(NtfsJournalStatus.NothingToReplay, NtfsJournal.Analyze(stable).Status);
+        var result = NtfsJournal.Replay(device);
+        if (cut == 7)
+        {
+            // The visible alternate may be buffered. The unconditional barrier runs before replacing the source.
+            Assert.True(result.Replayed);
+            using var fs = new NtfsFileSystem(dirty, NtfsJournalMode.Ignore);
+            var logStart = fs.PathToClusters("$LogFile").First().Offset * 4096;
+            Assert.Equal(new[] { (0L, 0), (logStart, 4096), (0L, 0) }, device.Events.Skip(cut));
+            using var reopened = JournalScenario.Copy(device.CrashImage);
+            var storage = LogFileStorage.Open(reopened, writer.Layout);
+            Assert.True(LfsRestartPage.TryRead(storage, 0).IsClean);
+            Assert.True(LfsRestartPage.TryRead(storage, TestJournalWriter.PageSize).IsClean);
+        }
+        else
+        {
+            // Both pages are visible, so replay is a no-op. The stable alternate already protects the journal.
+            Assert.Equal(NtfsJournalStatus.Clean, result.Status);
+            Assert.False(result.Replayed);
+            Assert.Equal(cut, device.Events.Count);
+            Assert.True(NtfsJournal.Replay(stable).Replayed);
+        }
+    }
+
     [Fact]
     public void AnotherInterruptionCanLeaveOneValidCleanRestartPage()
     {
@@ -103,18 +179,39 @@ public partial class NtfsJournalEdgeCaseTest
         Assert.Equal(NtfsJournalStatus.Clean, NtfsJournal.Replay(retry).Status);
     }
 
-    [Fact]
-    public void APartialResetWithMissingMetadataIsRefused()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AFlushThatDropsMetadataCanPublishAnUnsafeReset(bool publishBoth)
     {
         using var dirty = Volume();
         var (_, rawLcn, _, _) = WriteRedoInterruptionFixture(dirty);
-        using var device = new CrashImageStream(dirty.ToArray(), cut: 7, completedBarrier: true);
-        Assert.Same(device.Failure, Assert.Throws<IOException>(() => NtfsJournal.Replay(device)));
+        var rawPosition = rawLcn * 4096;
+        using var device = new CrashImageStream(dirty.ToArray(), cut: publishBoth ? 0 : 7, completedBarrier: true,
+            persistWrite: position => position != rawPosition);
+        if (publishBoth)
+        {
+            Assert.True(NtfsJournal.Replay(device).Replayed);
+        }
+        else
+        {
+            Assert.Same(device.Failure, Assert.Throws<IOException>(() => NtfsJournal.Replay(device)));
+        }
+
         using var retry = JournalScenario.Copy(device.CrashImage);
-        // Inject an image that an ordered metadata barrier could not have produced.
-        retry.Position = rawLcn * 4096;
-        retry.WriteByte(0);
-        AssertReplayRefused(retry, "partial $LogFile reset disagrees");
+        Assert.Equal(Read(dirty, rawPosition, 4096), Read(retry, rawPosition, 4096));
+        if (publishBoth)
+        {
+            // After publishing both resets, no dirty restart page remains to identify the lost metadata.
+            Assert.Equal(NtfsJournalStatus.Clean, NtfsJournal.Analyze(retry).Status);
+            var before = retry.ToArray();
+            Assert.False(NtfsJournal.Replay(retry).Replayed);
+            Assert.Equal(before, retry.ToArray());
+        }
+        else
+        {
+            AssertReplayRefused(retry, "partial $LogFile reset disagrees");
+        }
     }
 
     [Theory]
@@ -246,25 +343,30 @@ public partial class NtfsJournalEdgeCaseTest
         private readonly int _cut;
         private readonly int _persistedPrefix;
         private readonly bool _completedBarrier;
-        private int _events;
+        private readonly Func<int, bool>? _persistWrite;
 
-        public CrashImageStream(byte[] image, int cut, int persistedPrefix = 0, bool completedBarrier = false)
+        public CrashImageStream(byte[] image, int cut, int persistedPrefix = 0, bool completedBarrier = false,
+            Func<int, bool>? persistWrite = null)
             : base((byte[])image.Clone(), 0, image.Length, writable: true, publiclyVisible: true)
         {
             _stable = (byte[])image.Clone();
             _cut = cut;
             _persistedPrefix = persistedPrefix;
             _completedBarrier = completedBarrier;
+            _persistWrite = persistWrite;
         }
 
         public IOException Failure { get; } = new("Injected interruption");
+
+        public List<(long Position, int Count)> Events { get; } = [];
 
         public byte[] CrashImage => (byte[])_stable.Clone();
 
         public override void Write(byte[] buffer, int offset, int count)
         {
             var position = checked((int)Position);
-            if (++_events == _cut)
+            Events.Add((position, count));
+            if (Events.Count == _cut)
             {
                 Array.Copy(buffer, offset, _stable, position, Math.Min(count, _persistedPrefix));
                 throw Failure;
@@ -276,13 +378,17 @@ public partial class NtfsJournalEdgeCaseTest
 
         public override void Flush()
         {
-            var cut = ++_events == _cut;
+            Events.Add(default);
+            var cut = Events.Count == _cut;
             if (!cut || _completedBarrier)
             {
                 var live = GetBuffer();
                 foreach (var (position, count) in _pending)
                 {
-                    Array.Copy(live, position, _stable, position, count);
+                    if (_persistWrite == null || _persistWrite(position))
+                    {
+                        Array.Copy(live, position, _stable, position, count);
+                    }
                 }
 
                 _pending.Clear();

@@ -150,6 +150,19 @@ public class DynamicStream : MappedStream
     public override void Flush()
     {
         CheckDisposed();
+        if (CanWrite)
+        {
+            _fileStream.Flush();
+        }
+    }
+
+    public override void Flush(bool flushToDisk)
+    {
+        CheckDisposed();
+        if (CanWrite)
+        {
+            FlushWrappedStream(_fileStream, flushToDisk);
+        }
     }
 
     public override IEnumerable<StreamExtent> MapContent(long start, long length)

@@ -49,6 +49,33 @@ public abstract class SparseStream : CompatibilityStream
     public abstract IEnumerable<StreamExtent> Extents { get; }
 
     /// <summary>
+    /// Flushes pending changes, requesting synchronization with backing storage when supported.
+    /// </summary>
+    /// <param name="flushToDisk">Whether to request a disk flush from supporting backing streams.</param>
+    /// <remarks>
+    /// The default implementation calls <see cref="Flush()"/>. A stream without a stronger flush
+    /// contract cannot guarantee that its data has reached durable storage.
+    /// </remarks>
+    public virtual void Flush(bool flushToDisk) => Flush();
+
+    /// <summary>Forwards a flush without bypassing intervening sparse-stream wrappers.</summary>
+    protected static void FlushWrappedStream(Stream wrapped, bool flushToDisk)
+    {
+        if (wrapped is SparseStream sparse)
+        {
+            sparse.Flush(flushToDisk);
+        }
+        else if (wrapped is FileStream file)
+        {
+            file.Flush(flushToDisk);
+        }
+        else
+        {
+            wrapped.Flush();
+        }
+    }
+
+    /// <summary>
     /// Converts any stream into a sparse stream.
     /// </summary>
     /// <param name="stream">The stream to convert.</param>
@@ -483,6 +510,16 @@ public abstract class SparseStream : CompatibilityStream
             }
         }
 
+        public override void Flush(bool flushToDisk)
+        {
+            CheckDisposed();
+
+            if (CanWrite)
+            {
+                FlushWrappedStream(_wrapped, flushToDisk);
+            }
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             CheckDisposed();
@@ -681,6 +718,20 @@ public abstract class SparseStream : CompatibilityStream
             try
             {
                 content.Flush();
+            }
+            finally
+            {
+                _sync.Release();
+            }
+        }
+
+        public override void Flush(bool flushToDisk)
+        {
+            _sync.Wait();
+
+            try
+            {
+                content.Flush(flushToDisk);
             }
             finally
             {

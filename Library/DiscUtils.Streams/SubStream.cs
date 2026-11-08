@@ -109,6 +109,11 @@ public class SubStream : MappedStream
         Parent.Flush();
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        FlushWrappedStream(Parent, flushToDisk);
+    }
+
     public override int Read(byte[] buffer, int offset, int count)
     {
         if (count < 0)

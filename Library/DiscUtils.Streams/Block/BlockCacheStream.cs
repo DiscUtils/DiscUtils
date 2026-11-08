@@ -571,6 +571,16 @@ public sealed class BlockCacheStream : SparseStream
         }
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        CheckDisposed();
+
+        if (CanWrite)
+        {
+            _wrappedStream.Flush(flushToDisk);
+        }
+    }
+
     /// <summary>
     /// Moves the stream position.
     /// </summary>

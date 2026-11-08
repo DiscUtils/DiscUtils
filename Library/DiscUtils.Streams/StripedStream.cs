@@ -116,6 +116,14 @@ public class StripedStream : SparseStream
         }
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        foreach (var stream in _wrapped)
+        {
+            stream.Flush(flushToDisk);
+        }
+    }
+
     public override int Read(byte[] buffer, int offset, int count)
     {
         if (!CanRead)

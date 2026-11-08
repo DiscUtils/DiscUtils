@@ -98,6 +98,14 @@ public class MirrorStream : SparseStream
         }
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        foreach (var stream in _wrapped)
+        {
+            stream.Flush(flushToDisk);
+        }
+    }
+
     public override int Read(byte[] buffer, int offset, int count)
     {
         return _wrapped[0].Read(buffer, offset, count);

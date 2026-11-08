@@ -16,7 +16,7 @@ Tests use a live byte view and a separate persisted image. A completed barrier t
 
 Replay stages all writes, flushes mirror changes before the primary MFT, and flushes metadata before resetting either restart page. It publishes and flushes the alternate restart page before overwriting the dirty source. A recognizable clean reset paired with its dirty source is completed only if reanalysis agrees with the reset LSN and finds no pending metadata changes or undo. A torn second write can leave a single valid clean restart page and reduced redundancy. Equal-LSN copies that conflict about the need for recovery or the active checkpoint are refused unless they form a matching reset pair.
 
-This model does not establish crash atomicity. A real backend must honor the barriers and the tested sector-write assumptions. A direct `FileStream` requests disk flushes. Wrapper streams can buffer or reorder writes across storage layers. Recovery cannot detect every inconsistent image produced by a backend that persisted a clean reset ahead of metadata. [FileStream.Flush documentation](https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream.flush?view=net-10.0)
+This model does not establish crash atomicity. A real backend must honor the barriers and the tested sector-write assumptions. Recovery cannot detect every inconsistent image produced by a backend that persisted a clean reset ahead of metadata. See [persistent replay and storage durability](ntfs-journal-replay-durability.md) for the flush behavior of supported stream configurations.
 
 ## Bounded Windows VM qualification
 

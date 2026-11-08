@@ -253,6 +253,13 @@ public sealed class SnapshotStream : SparseStream
         _baseStream.Flush();
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        CheckFrozen();
+
+        FlushWrappedStream(_baseStream, flushToDisk);
+    }
+
     /// <summary>
     /// Flushes the stream.
     /// </summary>

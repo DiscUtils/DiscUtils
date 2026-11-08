@@ -239,6 +239,14 @@ public class ThreadSafeStream : SparseStream
         }
     }
 
+    public override void Flush(bool flushToDisk)
+    {
+        lock (_common)
+        {
+            Wrapped.Flush(flushToDisk);
+        }
+    }
+
     /// <summary>
     /// Reads data from the stream.
     /// </summary>
